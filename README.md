@@ -1,0 +1,1176 @@
+# Declarative Chart Library
+
+A modern Web Components-based chart library built with Lit that allows you to create charts using simple, declarative HTML.
+
+## Features
+
+- ✨ **Declarative Syntax** - Define charts with nested HTML elements
+- 📊 **Multiple Chart Types** - Bar, Line, Pie, and Funnel charts
+- 🎨 **Individual Styling** - Style each bar/point/slice independently
+- 🔄 **Automatic Updates** - Charts update when you modify child elements
+- 📦 **Lightweight** - Built on Lit (~5KB overhead)
+- 🎯 **TypeScript** - Full TypeScript support with type definitions
+- 🌐 **Standards-Based** - Uses Web Components standard
+- 🎭 **Rich Interactions** - Popups, legends, grouped bars, and more
+
+## Quick Start
+
+### Installation
+
+1. Install dependencies:
+```bash
+npm install
+```
+
+2. Start development server:
+```bash
+npm run dev
+```
+
+3. Open your browser to `http://localhost:5173`
+
+### Building for Production
+
+```bash
+npm run build
+```
+
+This creates optimized files in the `dist/` folder.
+
+## Usage
+
+### Bar Chart
+
+```html
+<dc-bar-chart width="600" height="400">
+  <dc-title>My Chart</dc-title>
+  <dc-bar value="10" fill="red" label="January"></dc-bar>
+  <dc-bar value="20" fill="blue" label="February"></dc-bar>
+  <dc-bar value="30" fill="green" label="March"></dc-bar>
+</dc-bar-chart>
+```
+
+### Line Chart
+
+```html
+<dc-line-chart width="600" height="400" stroke-colors="#9C27B0">
+  <dc-title>Temperature Trends</dc-title>
+  <dc-line label="City A">
+    <dc-point value="15" label="Mon"></dc-point>
+    <dc-point value="18" label="Tue"></dc-point>
+    <dc-point value="22" label="Wed"></dc-point>
+  </dc-line>
+  <dc-line stroke="#FF5722" label="City B">
+    <dc-point value="12" label="Mon"></dc-point>
+    <dc-point value="16" label="Tue"></dc-point>
+    <dc-point value="20" label="Wed"></dc-point>
+  </dc-line>
+</dc-line-chart>
+```
+
+In this example, City A will use the chart's `stroke-colors` (#9C27B0), while City B uses its own `stroke` (#FF5722).
+
+### Pie Chart
+
+```html
+<dc-pie-chart width="600" height="400">
+  <dc-title>Market Share</dc-title>
+  <dc-pie-slice value="45" label="Product A"></dc-pie-slice>
+  <dc-pie-slice value="30" label="Product B"></dc-pie-slice>
+  <dc-pie-slice value="25" label="Product C"></dc-pie-slice>
+</dc-pie-chart>
+```
+
+### Funnel Chart
+
+```html
+<dc-funnel-chart width="600" height="400">
+  <dc-title>Conversion Funnel</dc-title>
+  <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
+  <dc-funnel-stage value="750" label="Sign-ups"></dc-funnel-stage>
+  <dc-funnel-stage value="500" label="Active Users"></dc-funnel-stage>
+  <dc-funnel-stage value="200" label="Paid Users"></dc-funnel-stage>
+</dc-funnel-chart>
+```
+
+## Common Chart Attributes
+
+All chart components (`<dc-bar-chart>`, `<dc-line-chart>`, `<dc-pie-chart>`, `<dc-funnel-chart>`) share these common attributes:
+
+### Dimensions
+- `width` (number) - Chart width in pixels (default: 600)
+- `height` (number) - Chart height in pixels (default: 400)
+
+### Auto-Popup
+- `auto-popup` (boolean) - When present or `true`, automatically shows hover popups with label, value, and percentage on all chart elements. See [Auto-Popups](#auto-popups) for details.
+
+### Logging
+- `logging` (string) - Controls log capture level: `'false'` (default, no logging), `'error'`, `'warning'`, `'info'`, or `'true'` (same as `'info'`). See [Logging & Debugging](#logging--debugging) for details.
+
+### Padding
+
+Control the spacing between the chart edge and the chart content (axes, bars, pie, etc.):
+
+- `padding` (string) - Shorthand following CSS syntax (supports px, rem, or unitless values)
+- `padding-top` (number) - Top padding in pixels
+- `padding-right` (number) - Right padding in pixels
+- `padding-bottom` (number) - Bottom padding in pixels
+- `padding-left` (number) - Left padding in pixels
+
+**CSS-style shorthand examples:**
+```html
+<!-- Single value: all sides -->
+<dc-bar-chart padding="40">
+
+<!-- Two values: top/bottom, left/right -->
+<dc-bar-chart padding="20 80">
+
+<!-- Three values: top, left/right, bottom -->
+<dc-bar-chart padding="10 60 30">
+
+<!-- Four values: top, right, bottom, left -->
+<dc-bar-chart padding="20 40 30 50">
+
+<!-- Individual properties override shorthand -->
+<dc-funnel-chart padding="40" padding-left="100">
+
+<!-- Supports rem units -->
+<dc-pie-chart padding="2rem 40px">
+```
+
+**Priority:** Individual side properties > shorthand > auto (calculated from chrome elements, defaults to 5% when no title/legend)
+
+### Color System
+
+The library uses an SVG-aligned color system with `fill` for shape fills and `stroke` for lines/borders. Colors can be set at multiple levels with a clear priority order.
+
+#### Color Priority (highest to lowest)
+
+1. **Element-level** - `fill` or `stroke` on individual elements
+2. **Gradient** - `fill-start-color`/`fill-end-color` (or `stroke-start-color`/`stroke-end-color`) on the chart
+3. **Palette** - `fill-colors` or `stroke-colors` on the chart
+4. **Auto-generated** - Algorithmic color generation when nothing else is specified
+
+#### Element-Level Colors
+
+Set colors directly on individual elements:
+
+```html
+<!-- Bar chart with per-bar fills -->
+<dc-bar-chart width="600" height="400">
+  <dc-bar value="10" fill="red" label="Q1"></dc-bar>
+  <dc-bar value="20" fill="blue" label="Q2"></dc-bar>
+  <dc-bar value="30" fill="green" label="Q3"></dc-bar>
+</dc-bar-chart>
+
+<!-- Line chart with per-line strokes -->
+<dc-line-chart width="600" height="400">
+  <dc-line stroke="#9C27B0" label="City A">
+    <dc-point value="15" label="Mon"></dc-point>
+  </dc-line>
+  <dc-line stroke="#FF5722" label="City B">
+    <dc-point value="12" label="Mon"></dc-point>
+  </dc-line>
+</dc-line-chart>
+```
+
+#### Chart-Level Color Palettes
+
+Use `fill-colors` or `stroke-colors` to define a palette. A single color applies to all elements; multiple colors cycle through elements:
+
+```html
+<!-- Single color for all bars -->
+<dc-bar-chart fill-colors="#9C27B0">
+  <dc-bar value="10" label="Q1"></dc-bar>
+  <dc-bar value="20" label="Q2"></dc-bar>
+</dc-bar-chart>
+
+<!-- Multiple colors cycle through bars -->
+<dc-bar-chart fill-colors="#4CAF50, #2196F3, #FF9800, #9C27B0">
+  <dc-bar value="10" label="Q1"></dc-bar>  <!-- green -->
+  <dc-bar value="20" label="Q2"></dc-bar>  <!-- blue -->
+  <dc-bar value="15" label="Q3"></dc-bar>  <!-- orange -->
+  <dc-bar value="40" label="Q4"></dc-bar>  <!-- purple -->
+</dc-bar-chart>
+
+<!-- Line chart with stroke palette -->
+<dc-line-chart stroke-colors="#9C27B0, #FF5722, #009688">
+  <dc-line label="Series A">...</dc-line>  <!-- purple -->
+  <dc-line label="Series B">...</dc-line>  <!-- deep orange -->
+  <dc-line label="Series C">...</dc-line>  <!-- teal -->
+</dc-line-chart>
+```
+
+#### Gradient Colors
+
+Create smooth color gradients using start and end colors:
+
+```html
+<!-- Funnel with gradient fill -->
+<dc-funnel-chart fill-start-color="#3498db" fill-end-color="#e74c3c">
+  <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
+  <dc-funnel-stage value="600" label="Leads"></dc-funnel-stage>
+  <dc-funnel-stage value="200" label="Customers"></dc-funnel-stage>
+</dc-funnel-chart>
+
+<!-- Bar chart with gradient fill -->
+<dc-bar-chart fill-start-color="#673AB7" fill-end-color="#00BCD4">
+  <dc-bar value="10" label="Q1"></dc-bar>
+  <dc-bar value="25" label="Q2"></dc-bar>
+  <dc-bar value="15" label="Q3"></dc-bar>
+</dc-bar-chart>
+
+<!-- Line chart with stroke gradient -->
+<dc-line-chart stroke-start-color="#E91E63" stroke-end-color="#3F51B5">
+  <dc-line label="A">...</dc-line>
+  <dc-line label="B">...</dc-line>
+  <dc-line label="C">...</dc-line>
+</dc-line-chart>
+```
+
+#### Auto-Generated Colors
+
+When no colors are specified, charts automatically generate distinct colors using a golden ratio algorithm:
+
+```html
+<!-- Auto-generated colors for each slice -->
+<dc-pie-chart>
+  <dc-pie-slice value="25" label="Category A"></dc-pie-slice>
+  <dc-pie-slice value="20" label="Category B"></dc-pie-slice>
+  <dc-pie-slice value="18" label="Category C"></dc-pie-slice>
+</dc-pie-chart>
+```
+
+#### Stroke Properties
+
+Control borders/outlines with stroke attributes:
+
+```html
+<!-- Pie chart with custom border -->
+<dc-pie-chart stroke-colors="#333" stroke-width="3">
+  <dc-pie-slice value="35" fill="#4CAF50" label="A"></dc-pie-slice>
+  <dc-pie-slice value="28" fill="#2196F3" label="B"></dc-pie-slice>
+</dc-pie-chart>
+
+<!-- Funnel with shorthand stroke -->
+<dc-funnel-chart stroke="2 #333">
+  <dc-funnel-stage value="1000" label="Stage 1"></dc-funnel-stage>
+</dc-funnel-chart>
+```
+
+#### Color Attributes Summary
+
+| Level | Fill Attributes | Stroke Attributes |
+|-------|-----------------|-------------------|
+| Element | `fill` | `stroke` |
+| Chart (palette) | `fill-colors` | `stroke-colors` |
+| Chart (gradient) | `fill-start-color`, `fill-end-color` | `stroke-start-color`, `stroke-end-color` |
+| Chart (width) | - | `stroke-width` |
+| Chart (shorthand) | - | `stroke` (e.g., "2 #333") |
+
+See [`examples/colors.html`](examples/colors.html) for comprehensive color system examples.
+
+### Controlling Labels, Values, and Percentages
+
+All chart types support `show-label`, `show-value`, and `show-percent` attributes to control what text is displayed on chart elements. These attributes can be set at the chart level (applying to all elements) or on individual elements (overriding the chart-level setting).
+
+#### Attribute Values
+
+The `show-*` attributes accept several types of values:
+
+| Value | Description | Example |
+|-------|-------------|---------|
+| `true` or present | Always show | `show-value` or `show-value="true"` |
+| `false` | Never show | `show-value="false"` |
+| Percentage threshold | Show only when element's percentage >= threshold | `show-label="5%"` |
+| Value threshold | Show only when element's value >= threshold | `show-value="100"` |
+
+#### Chart-Level Defaults
+
+Different chart types have different defaults:
+
+| Chart Type | `show-label` | `show-value` | `show-percent` |
+|------------|--------------|--------------|----------------|
+| Bar Chart | true | true | false |
+| Line Chart | true | true | false |
+| Pie Chart | true | false | true |
+| Funnel Chart | true | true | false |
+
+#### Examples
+
+**Basic boolean control:**
+```html
+<!-- Hide all values -->
+<dc-bar-chart show-value="false">
+  <dc-bar value="100" label="A"></dc-bar>
+  <dc-bar value="200" label="B"></dc-bar>
+</dc-bar-chart>
+
+<!-- Show both values and percentages -->
+<dc-bar-chart show-percent>
+  <dc-bar value="100" label="A"></dc-bar>
+  <dc-bar value="200" label="B"></dc-bar>
+</dc-bar-chart>
+```
+
+**Percentage thresholds (great for decluttering small slices):**
+```html
+<!-- Only show labels on slices >= 10% of total -->
+<dc-pie-chart show-label="10%">
+  <dc-pie-slice value="60" label="Large"></dc-pie-slice>
+  <dc-pie-slice value="5" label="Small"></dc-pie-slice>  <!-- label hidden -->
+  <dc-pie-slice value="2" label="Tiny"></dc-pie-slice>   <!-- label hidden -->
+</dc-pie-chart>
+
+<!-- Different thresholds for different attributes -->
+<dc-pie-chart show-label="15%" show-percent="5%">
+  <dc-pie-slice value="60" label="Large"></dc-pie-slice>  <!-- both shown -->
+  <dc-pie-slice value="10" label="Medium"></dc-pie-slice> <!-- percent only -->
+  <dc-pie-slice value="3" label="Small"></dc-pie-slice>   <!-- neither shown -->
+</dc-pie-chart>
+```
+
+**Value thresholds:**
+```html
+<!-- Only show values on bars with value >= 100 -->
+<dc-bar-chart show-value="100">
+  <dc-bar value="250" label="High"></dc-bar>   <!-- value shown -->
+  <dc-bar value="150" label="Medium"></dc-bar> <!-- value shown -->
+  <dc-bar value="50" label="Low"></dc-bar>     <!-- value hidden -->
+</dc-bar-chart>
+```
+
+**Per-element overrides:**
+```html
+<!-- Hide values globally, but show on specific elements -->
+<dc-bar-chart show-value="false">
+  <dc-bar value="120" label="Normal"></dc-bar>
+  <dc-bar value="200" label="Important" show-value fill="#4CAF50"></dc-bar>
+  <dc-bar value="80" label="Normal"></dc-bar>
+</dc-bar-chart>
+
+<!-- Show labels globally, but hide on small slices -->
+<dc-pie-chart>
+  <dc-pie-slice value="60" label="Large"></dc-pie-slice>
+  <dc-pie-slice value="5" label="Small" show-label="false"></dc-pie-slice>
+</dc-pie-chart>
+```
+
+#### Value String Formatting
+
+When both `show-value` and `show-percent` are enabled, the display format is:
+- Both false: nothing displayed
+- `show-value` only: displays the value (e.g., "150")
+- `show-percent` only: displays the percentage (e.g., "25.0%")
+- Both true: displays "value (percent%)" (e.g., "150 (25.0%)")
+
+#### Inheritance Hierarchy
+
+Settings cascade from chart to element with explicit settings taking precedence:
+
+1. **Element-level** (highest priority): `<dc-bar show-value="false">`
+2. **Parent-level** (for nested elements): `<dc-line show-value="false">` affects child `<dc-point>` elements
+3. **Chart-level**: `<dc-bar-chart show-value="false">`
+4. **Default**: Chart-type specific defaults
+
+See [`examples/axes.html`](examples/axes.html) for comprehensive examples of all `show-*` attribute features.
+
+## Components
+
+### `<dc-bar-chart>`
+
+Renders a bar chart with support for both vertical and horizontal orientations.
+
+**Attributes:**
+- `orientation` (string) - Bar orientation: "vertical", "horizontal", "vertical-reverse", or "horizontal-reverse" (default: "vertical")
+- `show-value` (boolean|string) - Whether to display numeric values on bars (default: true). See [Controlling Labels, Values, and Percentages](#controlling-labels-values-and-percentages)
+- `show-percent` (boolean|string) - Whether to display percentages on bars (default: false)
+- `fill-colors` (string) - Color palette for bars (single color or comma-separated list). See [Color System](#color-system)
+- `fill-start-color` (string) - Start color for gradient fills
+- `fill-end-color` (string) - End color for gradient fills
+- `bar-width` (string) - Default width for bars (e.g., "50px", "2rem")
+- `gutter` (number) - Space between bars in pixels (default: 10)
+- Plus all [common chart attributes](#common-chart-attributes)
+
+**Child Elements:**
+- `<dc-title>` - Optional title
+- `<dc-axis>` - Optional axis configuration (see [Axis Configuration](#axis-configuration))
+- `<dc-bar>` - Individual bars (one or more)
+- `<dc-bar-group>` - Optional groups of bars
+- `<dc-bar-segment>` - Segments within a bar (for stacked bars)
+- `<dc-legend>` - Optional legend
+
+**Examples:**
+
+Vertical bars (default):
+```html
+<dc-bar-chart width="600" height="400">
+  <dc-title>Sales Data</dc-title>
+  <dc-bar value="10" fill="red" label="Jan"></dc-bar>
+  <dc-bar value="20" fill="blue" label="Feb"></dc-bar>
+</dc-bar-chart>
+```
+
+Horizontal bars:
+```html
+<dc-bar-chart width="600" height="400" orientation="horizontal">
+  <dc-title>Sales Data</dc-title>
+  <dc-bar value="10" fill="red" label="Jan"></dc-bar>
+  <dc-bar value="20" fill="blue" label="Feb"></dc-bar>
+</dc-bar-chart>
+```
+
+Grouped bars:
+```html
+<dc-bar-chart width="600" height="400">
+  <dc-title>Sales by Quarter</dc-title>
+  <dc-bar-group label="Q1">
+    <dc-bar value="10" label="Product A" fill="blue"></dc-bar>
+    <dc-bar value="15" label="Product B" fill="green"></dc-bar>
+  </dc-bar-group>
+  <dc-bar-group label="Q2">
+    <dc-bar value="20" label="Product A" fill="blue"></dc-bar>
+    <dc-bar value="25" label="Product B" fill="green"></dc-bar>
+  </dc-bar-group>
+</dc-bar-chart>
+```
+
+Stacked bars:
+```html
+<dc-bar-chart width="600" height="400">
+  <dc-title>Revenue by Category</dc-title>
+  <dc-bar label="Q1">
+    <dc-bar-segment value="30" fill="#4CAF50" label="Online"></dc-bar-segment>
+    <dc-bar-segment value="20" fill="#2196F3" label="In-Store"></dc-bar-segment>
+  </dc-bar>
+  <dc-bar label="Q2">
+    <dc-bar-segment value="40" fill="#4CAF50" label="Online"></dc-bar-segment>
+    <dc-bar-segment value="25" fill="#2196F3" label="In-Store"></dc-bar-segment>
+  </dc-bar>
+</dc-bar-chart>
+```
+
+### `<dc-bar>`
+
+Defines a single bar in a bar chart. Can contain `<dc-bar-segment>` children for stacked bars.
+
+**Attributes:**
+- `value` (number) - The bar's value (required unless using segments, in which case the total is calculated automatically)
+- `fill` (string) - CSS color for the bar. See [Color System](#color-system)
+- `label` (string) - Label displayed below the bar
+- `href` (string) - Optional URL to navigate to when bar is clicked
+- `target` (string) - Optional target for the link (e.g., "_blank")
+- `show-value` (boolean|string) - Whether to display the numeric value (inherits from chart if not specified)
+- `show-percent` (boolean|string) - Whether to display the percentage (inherits from chart if not specified)
+- `width` (string) - Width for this specific bar (e.g., "50px", "2rem")
+
+**Child Elements:**
+- `<dc-bar-segment>` - Optional segments for stacked bars
+- `<dc-popup>` - Optional popup content
+
+### `<dc-bar-group>`
+
+Groups multiple bars together with a shared label.
+
+**Attributes:**
+- `label` (string) - The label for this group (displayed on the axis)
+- `bar-width` (string) - Width for bars in this group
+- `gutter` (number) - Space between bars in this group
+
+**Child Elements:**
+- `<dc-bar>` - Individual bars that belong to this group
+
+### `<dc-bar-segment>`
+
+Defines a segment within a bar for creating stacked bar charts. When a `<dc-bar>` contains `<dc-bar-segment>` children, the bar displays as a stacked bar with the total value being the sum of all segment values.
+
+**Attributes:**
+- `value` (number) - The segment's value (required)
+- `fill` (string) - CSS color for the segment. See [Color System](#color-system)
+- `label` (string) - Label for this segment (used in legends and popups)
+- `show-value` (boolean|string) - Whether to display the value on the segment (inherits from parent bar if not specified)
+- `show-percent` (boolean|string) - Whether to display the percentage on the segment (inherits from parent bar if not specified)
+- `href` (string) - Optional URL to navigate to when segment is clicked
+- `target` (string) - Optional target for the link (e.g., "_blank")
+
+**Example:**
+```html
+<dc-bar-chart width="600" height="400">
+  <dc-title>Quarterly Revenue by Product</dc-title>
+  <dc-bar label="Q1">
+    <dc-bar-segment value="30" fill="#4CAF50" label="Product A"></dc-bar-segment>
+    <dc-bar-segment value="20" fill="#2196F3" label="Product B"></dc-bar-segment>
+    <dc-bar-segment value="15" fill="#FF9800" label="Product C"></dc-bar-segment>
+  </dc-bar>
+  <dc-bar label="Q2">
+    <dc-bar-segment value="35" fill="#4CAF50" label="Product A"></dc-bar-segment>
+    <dc-bar-segment value="25" fill="#2196F3" label="Product B"></dc-bar-segment>
+    <dc-bar-segment value="20" fill="#FF9800" label="Product C"></dc-bar-segment>
+  </dc-bar>
+</dc-bar-chart>
+```
+
+**Stacking Direction:**
+- Vertical bars: Segments stack bottom-to-top
+- Horizontal bars: Segments stack left-to-right
+- Vertical-reverse: Segments stack top-to-bottom
+- Horizontal-reverse: Segments stack right-to-left
+
+### `<dc-line-chart>`
+
+Renders a line chart with support for multiple lines.
+
+**Attributes:**
+- `stroke-colors` (string) - Color palette for lines (single color or comma-separated list). See [Color System](#color-system)
+- `stroke-start-color` (string) - Start color for gradient strokes
+- `stroke-end-color` (string) - End color for gradient strokes
+- `show-value` (boolean|string) - Whether to display numeric values on points (default: true). See [Controlling Labels, Values, and Percentages](#controlling-labels-values-and-percentages)
+- `show-percent` (boolean|string) - Whether to display percentages on points (default: false)
+- `point-shape` (string) - Default shape for points: "circle", "square", "triangle", "diamond", "star", "cross", "plus", or unicode character (default: "circle")
+- Plus all [common chart attributes](#common-chart-attributes)
+
+**Child Elements:**
+- `<dc-title>` - Optional title
+- `<dc-axis>` - Optional axis configuration (see [Axis Configuration](#axis-configuration))
+- `<dc-line>` - Individual lines (one or more), each containing `<dc-point>` elements
+
+### `<dc-line>`
+
+Defines a single line in a line chart. Contains multiple `<dc-point>` elements.
+
+**Attributes:**
+- `stroke` (string) - CSS color for the line. See [Color System](#color-system)
+- `label` (string) - Label for the line (for legend)
+- `show-value` (boolean|string) - Whether to display values on points in this line (inherits from chart if not specified)
+- `show-percent` (boolean|string) - Whether to display percentages on points in this line (inherits from chart if not specified)
+- `point-shape` (string) - Default shape for points on this line (inherits from chart if not specified)
+
+**Child Elements:**
+- `<dc-point>` - Individual points (one or more)
+
+### `<dc-point>`
+
+Defines a single point in a line.
+
+**Attributes:**
+- `value` (number) - The point's value (required)
+- `label` (string) - Label displayed below the point
+- `show-value` (boolean|string) - Whether to display the value for this point (inherits from line or chart if not specified)
+- `show-percent` (boolean|string) - Whether to display the percentage for this point (inherits from line or chart if not specified)
+- `shape` (string) - Shape for this point (inherits from line or chart if not specified)
+
+### `<dc-pie-chart>`
+
+Renders a pie chart with support for donut charts.
+
+**Attributes:**
+- `fill-colors` (string) - Color palette for slices (single color or comma-separated list). See [Color System](#color-system)
+- `fill-start-color` (string) - Start color for gradient fills
+- `fill-end-color` (string) - End color for gradient fills
+- `stroke-colors` (string) - Border color for slices
+- `stroke-width` (number) - Border width in pixels
+- `show-value` (boolean|string) - Whether to show values on slices (default: false). See [Controlling Labels, Values, and Percentages](#controlling-labels-values-and-percentages)
+- `show-label` (boolean|string) - Whether to show labels on slices (default: true)
+- `show-percent` (boolean|string) - Whether to show percentages on slices (default: true)
+- `inner-radius` (number) - Inner radius as percentage (0-100) for donut charts (default: 0)
+- Plus all [common chart attributes](#common-chart-attributes)
+
+**Child Elements:**
+- `<dc-title>` - Optional title
+- `<dc-pie-slice>` - Individual slices (one or more)
+- `<dc-legend>` - Optional legend
+
+**Example:**
+```html
+<dc-pie-chart width="600" height="400">
+  <dc-title>Sales by Category</dc-title>
+  <dc-pie-slice value="30" label="Product A" fill="red"></dc-pie-slice>
+  <dc-pie-slice value="45" label="Product B" fill="blue"></dc-pie-slice>
+  <dc-pie-slice value="25" label="Product C" fill="green"></dc-pie-slice>
+</dc-pie-chart>
+```
+
+Donut chart:
+```html
+<dc-pie-chart width="600" height="400" inner-radius="50">
+  <dc-title>Sales Distribution</dc-title>
+  <dc-pie-slice value="30" label="Product A"></dc-pie-slice>
+  <dc-pie-slice value="70" label="Product B"></dc-pie-slice>
+</dc-pie-chart>
+```
+
+### `<dc-pie-slice>`
+
+Defines a single slice in a pie chart.
+
+**Attributes:**
+- `value` (number) - The slice's value (required)
+- `label` (string) - Label for this slice
+- `fill` (string) - CSS color for this slice. See [Color System](#color-system)
+- `show-value` (boolean|string) - Whether to show the value on this slice (inherits from chart if not specified)
+- `show-label` (boolean|string) - Whether to show the label on this slice (inherits from chart if not specified)
+- `show-percent` (boolean|string) - Whether to show the percentage on this slice (inherits from chart if not specified)
+
+### `<dc-funnel-chart>`
+
+Renders a funnel chart with customizable stage heights, colors, and shapes.
+
+**Attributes:**
+- `fill-colors` (string) - Color palette for stages (single color or comma-separated list). See [Color System](#color-system)
+- `fill-start-color` (string) - Start color for gradient fills
+- `fill-end-color` (string) - End color for gradient fills
+- `stroke` (string) - Shorthand for stroke color and width (e.g., "2 #333" or "#333 2")
+- `stroke-colors` (string) - Stroke color for stage borders
+- `stroke-width` (number) - Stroke width for stage borders in pixels (default: 0)
+- `segment-height` (string) - Height mode: omit for equal heights, "value" for proportional scaling, "log-value" for logarithmic scaling, or fixed values like "50px"/"2rem". Can include min/max constraints (e.g., "value 50px 300px")
+- `segment-min-height` (string) - Minimum height for any segment (e.g., "50px")
+- `segment-max-height` (string) - Maximum height for any segment (e.g., "300px")
+- `chevron` (string) - Chevron depth for V-shaped segments: values like "20px", "2rem", or "10%" (percentage of segment width). Omit or use "0" for straight edges
+- `funnel-factor` (number) - Percentage controlling funnel narrowing (default: 70). Positive values narrow from top to bottom (e.g., 70 = bottom is 70% of top width). Negative values narrow from bottom to top
+- `flat-top` (boolean) - When true and chevron is set, makes the top edge of the first segment horizontal (default: false)
+- `flat-bottom` (boolean) - When true and chevron is set, makes the bottom edge of the last segment horizontal (default: false)
+- `show-value` (boolean|string) - Whether to display values on stages (default: true). See [Controlling Labels, Values, and Percentages](#controlling-labels-values-and-percentages)
+- `show-label` (boolean|string) - Whether to display labels on stages (default: true)
+- `show-percent` (boolean|string) - Whether to display percentages on stages (default: false)
+- Plus all [common chart attributes](#common-chart-attributes)
+
+**Child Elements:**
+- `<dc-title>` - Optional title
+- `<dc-funnel-stage>` - Individual stages (one or more)
+- `<dc-legend>` - Optional legend
+
+**Examples:**
+
+Basic funnel:
+```html
+<dc-funnel-chart width="600" height="400">
+  <dc-title>Sales Funnel</dc-title>
+  <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
+  <dc-funnel-stage value="500" label="Leads"></dc-funnel-stage>
+  <dc-funnel-stage value="100" label="Customers"></dc-funnel-stage>
+</dc-funnel-chart>
+```
+
+Funnel with chevron shape:
+```html
+<dc-funnel-chart width="600" height="400" chevron="20px">
+  <dc-title>Conversion Funnel</dc-title>
+  <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
+  <dc-funnel-stage value="500" label="Leads"></dc-funnel-stage>
+  <dc-funnel-stage value="100" label="Customers"></dc-funnel-stage>
+</dc-funnel-chart>
+```
+
+Funnel with custom gradient:
+```html
+<dc-funnel-chart width="600" height="400" fill-start-color="#4CAF50" fill-end-color="#F44336">
+  <dc-funnel-stage value="1000" label="Stage 1"></dc-funnel-stage>
+  <dc-funnel-stage value="500" label="Stage 2"></dc-funnel-stage>
+</dc-funnel-chart>
+```
+
+Funnel with flat top and bottom edges:
+```html
+<dc-funnel-chart width="600" height="400" chevron="25px" flat-top flat-bottom>
+  <dc-title>User Journey</dc-title>
+  <dc-funnel-stage value="15000" label="Visitors"></dc-funnel-stage>
+  <dc-funnel-stage value="8000" label="Engaged"></dc-funnel-stage>
+  <dc-funnel-stage value="3000" label="Trialing"></dc-funnel-stage>
+  <dc-funnel-stage value="1200" label="Subscribed"></dc-funnel-stage>
+</dc-funnel-chart>
+```
+
+### `<dc-funnel-stage>`
+
+Defines a single stage in a funnel chart.
+
+**Attributes:**
+- `value` (number) - The stage's value (required)
+- `label` (string) - Label for this stage
+- `fill` (string) - CSS color for this stage. See [Color System](#color-system)
+- `stroke` (string) - Shorthand for stroke color and width (e.g., "2 #333")
+- `stroke-color` (string) - Optional stroke color for this stage
+- `stroke-width` (number) - Optional stroke width for this stage
+- `show-value` (boolean|string) - Whether to show the value on this stage (inherits from chart if not specified)
+- `show-label` (boolean|string) - Whether to show the label on this stage (inherits from chart if not specified)
+- `show-percent` (boolean|string) - Whether to show the percentage on this stage (inherits from chart if not specified)
+
+### `<dc-axis>`
+
+Configures an axis on bar charts and line charts. Place inside any chart that extends AxisChart.
+
+**Attributes:**
+- `position` (string) - Axis position: "left", "right", "top", "bottom", "x", or "y" (default: "bottom"). The traditional names "x" and "y" map to physical positions (x=bottom, y=left).
+- `label-interval` (number|string) - Controls which category labels are shown: "auto" (default, auto-hide overlapping), or a number (1=all, 2=every other, etc.)
+- `label-lines` (number|string) - Staggers labels across multiple lines: 1 (default), 2, 3, etc., or "auto"
+
+**Child Elements:**
+- `<dc-title>` - Optional axis title
+
+**Examples:**
+
+Axis with custom label interval:
+```html
+<dc-bar-chart width="600" height="400">
+  <dc-axis position="bottom" label-interval="2"></dc-axis>
+  <dc-title>Monthly Data</dc-title>
+  <dc-bar value="10" label="Jan"></dc-bar>
+  <dc-bar value="20" label="Feb"></dc-bar>
+  <dc-bar value="30" label="Mar"></dc-bar>
+</dc-bar-chart>
+```
+
+Axis with title:
+```html
+<dc-bar-chart width="600" height="400">
+  <dc-axis position="left">
+    <dc-title>Revenue ($)</dc-title>
+  </dc-axis>
+  <dc-axis position="bottom">
+    <dc-title>Month</dc-title>
+  </dc-axis>
+  <dc-title>Monthly Sales</dc-title>
+  <dc-bar value="120" label="Jan"></dc-bar>
+  <dc-bar value="150" label="Feb"></dc-bar>
+</dc-bar-chart>
+```
+
+### `<dc-legend>`
+
+Adds a legend to any chart type.
+
+**Attributes:**
+- `show-value` (boolean) - Whether to show values in legend (default: true)
+- `show-percent` (boolean) - Whether to show percentages in legend (default: false)
+- `show-label` (boolean) - Whether to show labels in legend (default: true)
+- `columns` (string) - Number of columns: integer for tabular layout (default: "1"), or "*" for wrapped/inline layout
+- `position` (string) - Position: "right" (default), "top", "top-left", "top-right", "left", "bottom", "bottom-left", "bottom-right"
+
+**Child Elements:**
+- `<dc-title>` - Optional custom title for the legend
+
+**Examples:**
+
+Basic legend:
+```html
+<dc-bar-chart width="600" height="400">
+  <dc-title>Chart Title</dc-title>
+  <dc-bar value="10" label="Jan" fill="red"></dc-bar>
+  <dc-bar value="20" label="Feb" fill="blue"></dc-bar>
+  <dc-legend></dc-legend>
+</dc-bar-chart>
+```
+
+Legend with custom position and title:
+```html
+<dc-pie-chart width="600" height="400">
+  <dc-title>Sales Data</dc-title>
+  <dc-pie-slice value="30" label="Product A"></dc-pie-slice>
+  <dc-pie-slice value="70" label="Product B"></dc-pie-slice>
+  <dc-legend position="bottom">
+    <dc-title>Products</dc-title>
+  </dc-legend>
+</dc-pie-chart>
+```
+
+### `<dc-title>`
+
+Defines the chart title. Renders as an SVG `<text>` element.
+
+**Content:** Text content of the element
+
+**Styling Attributes:**
+
+Since titles render as SVG, use SVG presentation attributes for styling:
+
+| Attribute | Description | Example |
+|-----------|-------------|---------|
+| `fill` | Text color (use instead of `color`) | `fill="#1a1a1a"` |
+| `font-size` | Font size in viewBox units (unitless, not `px`) | `font-size="24"` |
+| `font-family` | Font family | `font-family="Georgia, serif"` |
+| `font-weight` | Font weight | `font-weight="600"` |
+| `font-style` | Font style | `font-style="italic"` |
+
+**Important:** Font sizes are in viewBox coordinate units, not CSS pixels. A chart with `width="600"` uses a 600-unit coordinate space, so `font-size="20"` is 20/600 = 3.3% of the chart width.
+
+**Example:**
+```html
+<!-- Styled title -->
+<dc-bar-chart width="600" height="400">
+  <dc-title fill="#1a1a1a" font-size="24" font-family="Georgia, serif" font-weight="600">
+    Sales Report 2024
+  </dc-title>
+  <dc-bar value="10" label="Q1"></dc-bar>
+</dc-bar-chart>
+```
+
+**Warning:** The library will log warnings if you accidentally use CSS conventions:
+- Using `color` instead of `fill`
+- Using CSS units like `font-size="24px"` instead of `font-size="24"`
+
+### `<dc-popup>`
+
+Displays HTML content in a popup when triggered by user interaction. Can be nested inside `<dc-bar>` or `<dc-point>` elements.
+
+**Attributes:**
+- `trigger` (string) - Event that triggers the popup: "hover" (default) or "click"
+
+**Content:** HTML content to display in the popup
+
+**Example:**
+```html
+<dc-bar value="150" fill="red" label="Q1">
+  <dc-popup trigger="hover">
+    <strong>Q1 2024</strong><br>
+    Revenue: $150k<br>
+    Growth: +12%
+  </dc-popup>
+</dc-bar>
+```
+
+**Triggers:**
+- `hover`: Popup appears when mouse enters the element, disappears when leaving
+- `click`: Popup appears on click, stays visible until clicking the same element again or elsewhere
+
+### Auto-Popups
+
+For quick tooltips without writing custom HTML, use the `auto-popup` attribute to automatically display label, value, and percentage information.
+
+**Chart-level attribute:**
+- `auto-popup` (boolean) - When present or `true`, automatically shows popups on all chart elements
+
+**Element-level attribute:**
+- `auto-popup` (boolean) - Override the chart setting for individual elements
+
+**How it works:**
+1. Set `auto-popup` on the chart to enable for all elements
+2. Elements can override with their own `auto-popup` attribute (`true` or `false`)
+3. Explicit `<dc-popup>` children always take precedence over auto-popup
+4. Auto-popups always use hover trigger (not click)
+
+**Examples:**
+
+Enable auto-popup for all slices:
+```html
+<dc-pie-chart auto-popup width="600" height="400">
+  <dc-pie-slice value="30" label="Product A"></dc-pie-slice>
+  <dc-pie-slice value="45" label="Product B"></dc-pie-slice>
+  <dc-pie-slice value="25" label="Product C"></dc-pie-slice>
+</dc-pie-chart>
+```
+
+Disable auto-popup for specific elements:
+```html
+<dc-bar-chart auto-popup width="600" height="400">
+  <dc-bar value="100" label="Q1"></dc-bar>
+  <dc-bar value="150" label="Q2"></dc-bar>
+  <dc-bar value="80" label="Q3" auto-popup="false"></dc-bar>
+</dc-bar-chart>
+```
+
+Mix auto-popup with explicit popups:
+```html
+<dc-funnel-chart auto-popup width="600" height="400">
+  <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
+  <dc-funnel-stage value="500" label="Leads">
+    <!-- Explicit popup takes precedence -->
+    <dc-popup>
+      <strong>Qualified Leads</strong><br>
+      50% conversion rate
+    </dc-popup>
+  </dc-funnel-stage>
+  <dc-funnel-stage value="100" label="Customers"></dc-funnel-stage>
+</dc-funnel-chart>
+```
+
+**Auto-popup content format:**
+- Shows label in bold
+- Shows value
+- Shows percentage of total
+- For grouped bars, also shows group name
+
+## Dynamic Updates
+
+Charts automatically update when you modify their child elements:
+
+```javascript
+// Add a bar
+const chart = document.querySelector('dc-bar-chart');
+const bar = document.createElement('dc-bar');
+bar.setAttribute('value', '25');
+bar.setAttribute('color', 'purple');
+bar.setAttribute('label', 'April');
+chart.appendChild(bar);
+
+// Update a bar
+const firstBar = chart.querySelector('dc-bar');
+firstBar.setAttribute('value', '50');
+
+// Remove a bar
+chart.removeChild(firstBar);
+```
+
+## Integration with htmx and Other Libraries
+
+All shape elements (`<dc-bar>`, `<dc-line>`, `<dc-pie-slice>`, `<dc-funnel-stage>`) support **automatic attribute passthrough**. Any attributes not explicitly defined by the library are passed through to the rendered SVG elements. This makes the library compatible with htmx, Alpine.js, and other attribute-based libraries.
+
+### How It Works
+
+The library automatically:
+1. Detects any attributes on shape elements that aren't part of the library's API
+2. Applies these attributes to the corresponding SVG elements after rendering
+3. Notifies htmx (if loaded) to process the new elements
+
+No special setup is required—just add attributes to your shape elements and they'll work automatically.
+
+### htmx Integration
+
+You can add htmx attributes directly to shape elements to enable interactive, server-driven behaviors:
+
+```html
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+<dc-funnel-chart width="600" height="500">
+  <dc-title>Conversion Funnel</dc-title>
+  <dc-funnel-stage
+    value="1000"
+    label="Visitors"
+    hx-get="/api/stage/visitors"
+    hx-target="#details"
+    hx-swap="innerHTML">
+  </dc-funnel-stage>
+  <dc-funnel-stage
+    value="750"
+    label="Sign-ups"
+    hx-get="/api/stage/signups"
+    hx-target="#details"
+    hx-swap="innerHTML">
+  </dc-funnel-stage>
+  <dc-funnel-stage
+    value="500"
+    label="Active Users"
+    hx-get="/api/stage/active"
+    hx-target="#details"
+    hx-swap="innerHTML">
+  </dc-funnel-stage>
+</dc-funnel-chart>
+
+<div id="details"></div>
+```
+
+When users click on a funnel stage, htmx will load content from the specified endpoint into the `#details` div.
+
+### Examples with Other Libraries
+
+**Bar chart with custom data attributes:**
+```html
+<dc-bar-chart width="600" height="400">
+  <dc-bar value="10" label="Q1" data-quarter="1" data-year="2024"></dc-bar>
+  <dc-bar value="20" label="Q2" data-quarter="2" data-year="2024"></dc-bar>
+</dc-bar-chart>
+```
+
+**Pie chart with Alpine.js:**
+```html
+<dc-pie-chart width="600" height="400">
+  <dc-pie-slice value="30" label="Product A" @click="showDetails('a')"></dc-pie-slice>
+  <dc-pie-slice value="45" label="Product B" @click="showDetails('b')"></dc-pie-slice>
+</dc-pie-chart>
+```
+
+**Line chart with htmx:**
+```html
+<dc-line-chart width="600" height="400">
+  <dc-line label="Sales" stroke="#2196F3"
+           hx-get="/api/sales-data"
+           hx-trigger="load"
+           hx-target="#chart-container">
+    <dc-point value="10" label="Jan"></dc-point>
+    <dc-point value="20" label="Feb"></dc-point>
+  </dc-line>
+</dc-line-chart>
+```
+
+### Complete Example
+
+See [`examples/htmx-integration.html`](examples/htmx-integration.html) for a complete working example of htmx integration with a funnel chart.
+
+## Logging & Debugging
+
+The library includes a built-in logging system to help you understand how charts calculate their internal layout. This is useful when troubleshooting layout issues or understanding why a chart renders the way it does.
+
+### Enabling Logging
+
+Add the `logging` attribute to any chart to enable log capture:
+
+```html
+<dc-bar-chart id="my-chart" logging="info" width="600" height="400">
+  <dc-bar value="10" fill="red" label="Jan"></dc-bar>
+  <dc-bar value="20" fill="blue" label="Feb"></dc-bar>
+</dc-bar-chart>
+```
+
+### Log Levels
+
+The `logging` attribute controls which messages are captured:
+
+| Value | Description |
+|-------|-------------|
+| `false` | No logging (default, best performance) |
+| `error` | Only errors |
+| `warning` | Warnings and errors |
+| `info` or `true` | All messages (info, warning, and error) |
+
+### Displaying Logs with `<dc-log-console>`
+
+Use the `<dc-log-console>` element to display log entries in a styled table:
+
+```html
+<dc-bar-chart id="my-chart" logging="info" width="600" height="400">
+  <dc-bar value="30" label="Q1"></dc-bar>
+  <dc-bar value="45" label="Q2"></dc-bar>
+</dc-bar-chart>
+
+<dc-log-console chart="#my-chart"></dc-log-console>
+```
+
+**Attributes:**
+- `chart` (string, required) - CSS selector identifying the chart(s) to monitor
+
+**Features:**
+- Automatically updates when charts re-render
+- When the selector matches multiple charts, tabs appear to switch between them
+- Shows level, path, message, and value for each log entry
+- Includes a refresh button to manually reload logs
+
+**Multiple charts example:**
+```html
+<!-- Monitor all charts with a class -->
+<dc-log-console chart=".my-charts"></dc-log-console>
+
+<!-- Monitor specific chart types -->
+<dc-log-console chart="dc-bar-chart, dc-pie-chart"></dc-log-console>
+```
+
+### Programmatic Access
+
+You can access log entries directly via JavaScript:
+
+```javascript
+const chart = document.querySelector('dc-bar-chart');
+chart.logging = 'info';  // Enable logging
+// ... wait for render ...
+const logs = chart.getLogEntries();
+console.table(logs);
+```
+
+Each log entry has this structure:
+```typescript
+interface LogEntry {
+  level: 'error' | 'warning' | 'info';
+  path: string;      // Dotted path like "padding.left" or "slices[0].angle"
+  message: string;   // Human-readable description of the calculation
+  value?: unknown;   // Optional computed value
+}
+```
+
+### What Gets Logged
+
+The logging system captures calculations including:
+
+- **Padding calculations** - How padding values are derived from attributes, legends, and axis labels
+- **Color resolution** - Which color mode was used (gradient, palette, auto) and any overrides
+- **Legend dimensions** - Calculated width, height, layout type, and column count
+- **Axis label padding** - Space allocated for Y-axis values and X-axis labels
+- **Data summaries** - Element counts, max values, totals
+- **Per-element details** - Individual bar/slice/stage positions, sizes, and percentages
+- **Chart-specific calculations** - Bar unit dimensions, funnel segment heights, chevron parsing, etc.
+
+### Example: Debugging a Layout Issue
+
+If your bar chart has unexpected spacing, enable logging to see the calculations:
+
+```html
+<dc-bar-chart id="debug-chart" logging="info" width="600" height="400" padding="40 80" gutter="20">
+  <dc-bar value="30" label="A"></dc-bar>
+  <dc-bar value="45" label="B"></dc-bar>
+  <dc-bar value="20" label="C"></dc-bar>
+</dc-bar-chart>
+
+<dc-log-console chart="#debug-chart"></dc-log-console>
+```
+
+The log console will show:
+- Padding source and values (40 top/bottom, 80 left/right)
+- Chart area dimensions (600 - 80 - 80 = 440px wide)
+- Available space, gutter allocation, and calculated bar widths
+- Each bar's calculated position and dimensions
+
+### Complete Example
+
+See [`examples/logging.html`](examples/logging.html) for working examples of the logging system with all chart types.
+
+## Project Structure
+
+```
+declarative-charts/
+├── src/
+│   ├── bar-chart.ts           # Bar chart component
+│   ├── line-chart.ts          # Line chart component
+│   ├── pie-chart.ts           # Pie chart component
+│   ├── funnel-chart.ts        # Funnel chart component
+│   ├── chart-bar.ts           # Bar element
+│   ├── chart-bar-group.ts     # Bar group element
+│   ├── chart-bar-segment.ts   # Bar segment element (for stacked bars)
+│   ├── chart-line.ts          # Line element
+│   ├── chart-point.ts         # Point element
+│   ├── chart-pie-slice.ts     # Pie slice element
+│   ├── chart-funnel-stage.ts  # Funnel stage element
+│   ├── chart-popup.ts         # Popup element
+│   ├── chart-title.ts         # Title element
+│   ├── chart-legend.ts        # Legend element
+│   ├── log-console.ts         # Log console element for debugging
+│   ├── base-chart.ts          # Abstract base for all charts
+│   ├── base-chart-element.ts  # Abstract base for data elements
+│   ├── base-shape.ts          # Abstract base for shape elements
+│   └── index.ts               # Main export
+├── index.html                 # Demo page
+├── examples/                  # Example HTML files
+├── package.json               # Project config
+├── tsconfig.json              # TypeScript config
+└── vite.config.ts             # Vite config
+```
+
+## Development
+
+### File Watching
+Run `npm run dev` and edit files in `src/`. The browser will update automatically.
+
+### Adding New Chart Types
+1. Create a new component file in `src/` (e.g., `pie-chart.ts`)
+2. Extend `LitElement` with your chart logic
+3. Export it from `src/index.ts`
+
+### TypeScript
+All components are written in TypeScript with full type definitions. VS Code will provide autocomplete and type checking.
+
+## Why This Library?
+
+Most chart libraries require complex configuration objects. This library lets you define charts declaratively in HTML, making them:
+
+- **Easier to read** - HTML structure matches visual structure
+- **Easier to generate** - Template engines can create charts naturally
+- **Easier to style** - Each element can be styled individually
+- **Framework-agnostic** - Works with React, Vue, Angular, or plain HTML
+
+## License
+
+MIT
+
+## Next Steps
+
+- Add more chart types (scatter, area, etc.)
+- Add animations and transitions
+- Add accessibility features (ARIA labels, keyboard navigation)
+- Add axis customization options
+- Publish to npm

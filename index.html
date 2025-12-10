@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Declarative Chart Library Demo</title>
+    <link rel="stylesheet" href="examples/examples.css">
+    <style>
+        /* Override max-width for index page */
+        body {
+            max-width: 1200px;
+        }
+
+        .intro {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .intro p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+
+        .grid h3 {
+            margin-top: 0;
+            color: #666;
+        }
+
+        .grid .links {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .grid .links a {
+            color: #2196F3;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+
+        .grid .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Declarative Chart Library</h1>
+
+    <div class="intro">
+        <p><strong>Create beautiful charts using simple, nested HTML elements!</strong></p>
+        <p>This library provides a declarative API for building interactive charts with SVG rendering, popup support, and clickable elements.</p>
+    </div>
+
+    <nav>
+        <div class="nav-major">
+            <a href="index.html" class="current">Home</a>
+            <a href="examples/barcharts.html">Bar Charts</a>
+            <a href="examples/linecharts.html">Line Charts</a>
+            <a href="examples/piecharts.html">Pie Charts</a>
+            <a href="examples/funnelcharts.html">Funnel Charts</a>
+        </div>
+        <div class="nav-minor">
+            <a href="examples/titles.html">Titles</a>
+            <a href="examples/legends.html">Legends</a>
+            <a href="examples/axes.html">Axes</a>
+            <a href="examples/colors.html">Colors</a>
+            <a href="examples/typography.html">Typography</a>
+            <a href="examples/borders-and-padding.html">Borders & Padding</a>
+            <a href="examples/bar-groups.html">Bar Groups</a>
+            <a href="examples/bar-width.html">Bar Width</a>
+            <a href="examples/gutter.html">Gutter</a>
+            <a href="examples/interactive.html">Interactive</a>
+            <a href="examples/popups.html">Popups</a>
+            <a href="examples/logging.html">Logging</a>
+            <a href="examples/htmx-integration.html">htmx</a>
+        </div>
+    </nav>
+
+    <div class="example">
+        <h2>Basic Chart Types</h2>
+        <p>The library supports four chart types: Bar, Line, Pie, and Funnel. Each uses declarative HTML elements to define data.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Bar Chart</h3>
+                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Monthly Sales&lt;/dc-title&gt;
+  &lt;dc-bar value="10" color="red" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" color="blue" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" color="green" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="40" color="orange" label="Apr"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="500" height="350">
+                    <dc-title>Monthly Sales</dc-title>
+                    <dc-bar value="10" fill="red" label="Jan"></dc-bar>
+                    <dc-bar value="25" fill="blue" label="Feb"></dc-bar>
+                    <dc-bar value="15" fill="green" label="Mar"></dc-bar>
+                    <dc-bar value="40" fill="orange" label="Apr"></dc-bar>
+                </dc-bar-chart>
+                <div class="links">
+                    <a href="examples/barcharts.html">More Bar Charts</a>
+                    <a href="examples/axes.html">Axes & Labels</a>
+                </div>
+            </div>
+
+            <div>
+                <h3>Line Chart</h3>
+                <pre><code>&lt;dc-line-chart width="500" height="350" stroke-colors="#9C27B0"&gt;
+  &lt;dc-title&gt;Temperature Trend&lt;/dc-title&gt;
+  &lt;dc-line label="City A"&gt;
+    &lt;dc-point value="15" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="18" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="22" label="Wed"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="25" label="Fri"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line color="#FF5722" label="City B"&gt;
+    &lt;dc-point value="12" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="19" label="Wed"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="21" label="Fri"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-line-chart&gt;</code></pre>
+                <dc-line-chart width="500" height="350" stroke-colors="#9C27B0">
+                    <dc-title>Temperature Trend</dc-title>
+                    <dc-line label="City A">
+                        <dc-point value="15" label="Mon"></dc-point>
+                        <dc-point value="18" label="Tue"></dc-point>
+                        <dc-point value="22" label="Wed"></dc-point>
+                        <dc-point value="25" label="Fri"></dc-point>
+                    </dc-line>
+                    <dc-line stroke="#FF5722" label="City B">
+                        <dc-point value="12" label="Mon"></dc-point>
+                        <dc-point value="19" label="Wed"></dc-point>
+                        <dc-point value="21" label="Fri"></dc-point>
+                    </dc-line>
+                </dc-line-chart>
+                <div class="links">
+                    <a href="examples/linecharts.html">More Line Charts</a>
+                    <a href="examples/axes.html">Axes & Labels</a>
+                </div>
+            </div>
+
+            <div>
+                <h3>Pie Chart</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Market Share&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="35" label="Product A" color="#4CAF50"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="28" label="Product B" color="#2196F3"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="22" label="Product C" color="#FF9800"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" label="Other" color="#9E9E9E"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350">
+                    <dc-title>Market Share</dc-title>
+                    <dc-pie-slice value="35" label="Product A" fill="#4CAF50"></dc-pie-slice>
+                    <dc-pie-slice value="28" label="Product B" fill="#2196F3"></dc-pie-slice>
+                    <dc-pie-slice value="22" label="Product C" fill="#FF9800"></dc-pie-slice>
+                    <dc-pie-slice value="15" label="Other" fill="#9E9E9E"></dc-pie-slice>
+                </dc-pie-chart>
+                <div class="links">
+                    <a href="examples/piecharts.html">More Pie Charts</a>
+                    <a href="examples/axes.html">Axes & Labels</a>
+                </div>
+            </div>
+
+            <div>
+                <h3>Funnel Chart</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Sales Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="500" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="200" label="Opportunities"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="75" label="Sales"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="350">
+                    <dc-title>Sales Funnel</dc-title>
+                    <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
+                    <dc-funnel-stage value="500" label="Leads"></dc-funnel-stage>
+                    <dc-funnel-stage value="200" label="Opportunities"></dc-funnel-stage>
+                    <dc-funnel-stage value="75" label="Sales"></dc-funnel-stage>
+                </dc-funnel-chart>
+                <div class="links">
+                    <a href="examples/funnelcharts.html">More Funnel Charts</a>
+                    <a href="examples/axes.html">Axes & Labels</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Use CSS Styling</h2>
+        <p>Customize charts with inline CSS styles for borders, backgrounds, shadows, and more. Use <code>fill-colors</code> to set a default color for all shapes:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Styled Bar Chart</h3>
+                <pre><code>&lt;dc-bar-chart width="500" height="350" fill-colors="#FF9800"
+              style="border: 4px solid #FF9800;
+                     background: #FFF3E0;
+                     border-radius: 12px;"&gt;
+  &lt;dc-title&gt;Quarterly Performance&lt;/dc-title&gt;
+  &lt;dc-bar value="65" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="78" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="82" label="Q3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="91" label="Q4"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="500" height="350" fill-colors="#FF9800" style="border: 4px solid #FF9800; background: #FFF3E0; border-radius: 12px;">
+                    <dc-title>Quarterly Performance</dc-title>
+                    <dc-bar value="65" label="Q1"></dc-bar>
+                    <dc-bar value="78" label="Q2"></dc-bar>
+                    <dc-bar value="82" label="Q3"></dc-bar>
+                    <dc-bar value="91" label="Q4"></dc-bar>
+                </dc-bar-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Font Inheritance</h2>
+        <p>Charts automatically inherit font styles from their parent containers. Set <code>font-family</code> on a parent element and all charts within will use that font for titles, labels, and values.</p>
+
+        <div class="grid" style="font-family: Georgia, 'Times New Roman', serif;">
+            <div>
+                <h3>Serif Container</h3>
+                <p>This grid has <code>font-family: Georgia, serif</code>. All charts inside inherit the font:</p>
+                <pre><code>&lt;div style="font-family: Georgia, 'Times New Roman', serif;"&gt;
+  &lt;dc-bar-chart width="500" height="300" fill-colors="#4CAF50"&gt;
+    &lt;dc-title&gt;Inherits Georgia Font&lt;/dc-title&gt;
+    &lt;dc-bar value="30" label="Category A"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="45" label="Category B"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="25" label="Category C"&gt;&lt;/dc-bar&gt;
+  &lt;/dc-bar-chart&gt;
+&lt;/div&gt;</code></pre>
+                <dc-bar-chart width="500" height="300" fill-colors="#4CAF50">
+                    <dc-title>Inherits Georgia Font</dc-title>
+                    <dc-bar value="30" label="Category A"></dc-bar>
+                    <dc-bar value="45" label="Category B"></dc-bar>
+                    <dc-bar value="25" label="Category C"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Same Container, Different Chart</h3>
+                <p>This pie chart is in the same serif container and also inherits the font:</p>
+                <pre><code>&lt;!-- Inside the same Georgia container --&gt;
+&lt;dc-pie-chart width="500" height="300"&gt;
+  &lt;dc-title&gt;Also Inherits Georgia&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="40" label="Alpha" color="#E91E63"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="35" label="Beta" color="#9C27B0"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="25" label="Gamma" color="#673AB7"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="300">
+                    <dc-title>Also Inherits Georgia</dc-title>
+                    <dc-pie-slice value="40" label="Alpha" fill="#E91E63"></dc-pie-slice>
+                    <dc-pie-slice value="35" label="Beta" fill="#9C27B0"></dc-pie-slice>
+                    <dc-pie-slice value="25" label="Gamma" fill="#673AB7"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+        </div>
+
+        <h3>Monospace Container</h3>
+        <p>Wrap charts in a container with <code>font-family: monospace</code> for a technical look:</p>
+        <div class="grid" style="font-family: 'Courier New', Consolas, monospace;">
+            <div>
+                <pre><code>&lt;div style="font-family: 'Courier New', Consolas, monospace;"&gt;
+  &lt;dc-line-chart width="500" height="300" stroke-colors="#00BCD4"&gt;
+    &lt;dc-title&gt;Monospace Labels&lt;/dc-title&gt;
+    &lt;dc-line&gt;
+      &lt;dc-point value="20" label="2024-01"&gt;&lt;/dc-point&gt;
+      &lt;dc-point value="35" label="2024-02"&gt;&lt;/dc-point&gt;
+      &lt;dc-point value="28" label="2024-03"&gt;&lt;/dc-point&gt;
+      &lt;dc-point value="45" label="2024-04"&gt;&lt;/dc-point&gt;
+    &lt;/dc-line&gt;
+  &lt;/dc-line-chart&gt;
+&lt;/div&gt;</code></pre>
+                <dc-line-chart width="500" height="300" stroke-colors="#00BCD4">
+                    <dc-title>Monospace Labels</dc-title>
+                    <dc-line>
+                        <dc-point value="20" label="2024-01"></dc-point>
+                        <dc-point value="35" label="2024-02"></dc-point>
+                        <dc-point value="28" label="2024-03"></dc-point>
+                        <dc-point value="45" label="2024-04"></dc-point>
+                    </dc-line>
+                </dc-line-chart>
+            </div>
+
+            <div>
+                <pre><code>&lt;!-- Inside the same monospace container --&gt;
+&lt;dc-funnel-chart width="500" height="300"&gt;
+  &lt;dc-title&gt;Technical Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="1000" label="requests"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="750" label="processed"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="500" label="completed"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="300">
+                    <dc-title>Technical Funnel</dc-title>
+                    <dc-funnel-stage value="1000" label="requests"></dc-funnel-stage>
+                    <dc-funnel-stage value="750" label="processed"></dc-funnel-stage>
+                    <dc-funnel-stage value="500" label="completed"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Responsive Charts</h2>
+        <p>Charts automatically scale to fit their container while maintaining aspect ratio. The <code>width</code> and <code>height</code> attributes define the aspect ratio and internal coordinate system, not fixed pixel dimensions.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Constrained Container (300px wide)</h3>
+                <p>This chart is placed in a 300px wide container. It scales down to fit while maintaining the 500:350 aspect ratio:</p>
+                <pre><code>&lt;div style="width: 300px; border: 2px dashed #999;"&gt;
+  &lt;dc-bar-chart width="500" height="350" fill-colors="#2196F3"&gt;
+    &lt;dc-bar value="30" label="A"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="50" label="B"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="40" label="C"&gt;&lt;/dc-bar&gt;
+  &lt;/dc-bar-chart&gt;
+&lt;/div&gt;</code></pre>
+                <div style="display: flex; gap: 20px;">
+                    <div style="width: 300px; border: 2px dashed #999; padding: 5px; background: #fafafa;">
+                        <dc-bar-chart width="500" height="350" fill-colors="#2196F3">
+                            <dc-bar value="30" label="A"></dc-bar>
+                            <dc-bar value="50" label="B"></dc-bar>
+                            <dc-bar value="40" label="C"></dc-bar>
+                        </dc-bar-chart>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3>Side-by-Side in Flexbox</h3>
+                <p>Multiple charts in a flex container automatically share the available space:</p>
+                <pre><code>&lt;div style="display: flex; gap: 20px;"&gt;
+  &lt;dc-pie-chart width="400" height="300"&gt;
+    &lt;dc-pie-slice value="40" label="Desktop" color="#4CAF50"&gt;&lt;/dc-pie-slice&gt;
+    &lt;dc-pie-slice value="35" label="Mobile" color="#2196F3"&gt;&lt;/dc-pie-slice&gt;
+    &lt;dc-pie-slice value="25" label="Tablet" color="#FF9800"&gt;&lt;/dc-pie-slice&gt;
+  &lt;/dc-pie-chart&gt;
+  &lt;dc-bar-chart width="400" height="300" fill-colors="#9C27B0"&gt;
+    &lt;dc-bar value="25" label="Q1"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="40" label="Q2"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="35" label="Q3"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="50" label="Q4"&gt;&lt;/dc-bar&gt;
+  &lt;/dc-bar-chart&gt;
+&lt;/div&gt;</code></pre>
+                <div style="display: flex; gap: 20px;">
+                    <dc-pie-chart width="400" height="300">
+                        <dc-pie-slice value="40" label="Desktop" fill="#4CAF50"></dc-pie-slice>
+                        <dc-pie-slice value="35" label="Mobile" fill="#2196F3"></dc-pie-slice>
+                        <dc-pie-slice value="25" label="Tablet" fill="#FF9800"></dc-pie-slice>
+                    </dc-pie-chart>
+                    <dc-bar-chart width="400" height="300" fill-colors="#9C27B0">
+                        <dc-bar value="25" label="Q1"></dc-bar>
+                        <dc-bar value="40" label="Q2"></dc-bar>
+                        <dc-bar value="35" label="Q3"></dc-bar>
+                        <dc-bar value="50" label="Q4"></dc-bar>
+                    </dc-bar-chart>
+                </div>
+            </div>
+        </div>
+
+        <h3>Full Width (Unconstrained)</h3>
+        <p>Without a constrained container, charts expand to fill the available width:</p>
+        <pre><code>&lt;dc-funnel-chart width="800" height="300"&gt;
+  &lt;dc-title&gt;Full Width Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="1000" label="Awareness"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="600" label="Interest"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="300" label="Decision"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="100" label="Action"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+        <dc-funnel-chart width="800" height="300">
+            <dc-title>Full Width Funnel</dc-title>
+            <dc-funnel-stage value="1000" label="Awareness"></dc-funnel-stage>
+            <dc-funnel-stage value="600" label="Interest"></dc-funnel-stage>
+            <dc-funnel-stage value="300" label="Decision"></dc-funnel-stage>
+            <dc-funnel-stage value="100" label="Action"></dc-funnel-stage>
+        </dc-funnel-chart>
+    </div>
+
+    <div class="example">
+        <h2>Download as SVG</h2>
+        <p>Charts can be downloaded as standalone SVG files using the <code>downloadSvg()</code> method. The downloaded file preserves the chart's appearance including inherited fonts.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Basic Download</h3>
+                <pre><code>&lt;dc-pie-chart id="download-demo" width="500" height="350"&gt;
+  &lt;dc-title&gt;Revenue by Region&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="45" label="North America" fill="#4CAF50"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="30" label="Europe" fill="#2196F3"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" label="Asia" fill="#FF9800"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="10" label="Other" fill="#9E9E9E"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;
+
+&lt;button onclick="document.getElementById('download-demo').downloadSvg('revenue-chart')"&gt;
+  Download SVG
+&lt;/button&gt;</code></pre>
+                <dc-pie-chart id="download-demo" width="500" height="350">
+                    <dc-title>Revenue by Region</dc-title>
+                    <dc-pie-slice value="45" label="North America" fill="#4CAF50"></dc-pie-slice>
+                    <dc-pie-slice value="30" label="Europe" fill="#2196F3"></dc-pie-slice>
+                    <dc-pie-slice value="15" label="Asia" fill="#FF9800"></dc-pie-slice>
+                    <dc-pie-slice value="10" label="Other" fill="#9E9E9E"></dc-pie-slice>
+                </dc-pie-chart>
+                <p>
+                    <button onclick="document.getElementById('download-demo').downloadSvg('revenue-chart')" style="padding: 10px 20px; font-size: 16px; cursor: pointer; background: #4CAF50; color: white; border: none; border-radius: 4px;">
+                        Download SVG
+                    </button>
+                </p>
+            </div>
+
+            <div>
+                <h3>With Custom Font</h3>
+                <p>The downloaded SVG includes the inherited font-family, so it renders correctly in image editors:</p>
+                <pre><code>&lt;div style="font-family: Georgia, serif;"&gt;
+  &lt;dc-bar-chart id="font-demo" width="500" height="350" fill-colors="#9C27B0"&gt;
+    &lt;dc-title&gt;Quarterly Results&lt;/dc-title&gt;
+    &lt;dc-bar value="85" label="Q1"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="92" label="Q2"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="78" label="Q3"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="105" label="Q4"&gt;&lt;/dc-bar&gt;
+  &lt;/dc-bar-chart&gt;
+&lt;/div&gt;
+
+&lt;button onclick="document.getElementById('font-demo').downloadSvg('quarterly-results')"&gt;
+  Download SVG
+&lt;/button&gt;</code></pre>
+                <div style="font-family: Georgia, serif;">
+                    <dc-bar-chart id="font-demo" width="500" height="350" fill-colors="#9C27B0">
+                        <dc-title>Quarterly Results</dc-title>
+                        <dc-bar value="85" label="Q1"></dc-bar>
+                        <dc-bar value="92" label="Q2"></dc-bar>
+                        <dc-bar value="78" label="Q3"></dc-bar>
+                        <dc-bar value="105" label="Q4"></dc-bar>
+                    </dc-bar-chart>
+                </div>
+                <p>
+                    <button onclick="document.getElementById('font-demo').downloadSvg('quarterly-results')" style="padding: 10px 20px; font-size: 16px; cursor: pointer; background: #9C27B0; color: white; border: none; border-radius: 4px;">
+                        Download SVG
+                    </button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/index.ts"></script>
+    <script src="examples/examples.js"></script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+import { customElement, property } from 'lit/decorators.js';
+import { BaseShape } from './base-shape.js';
+import { showConditionConverter, type ShowCondition } from './base-chart.js';
+
+/**
+ * Individual slice element for pie charts
+ *
+ * Supports attribute passthrough for integration with htmx and other libraries.
+ * Any attributes not explicitly defined (like hx-get, hx-target, data-*, etc.)
+ * will be passed through to the rendered SVG element.
+ *
+ * @element dc-pie-slice
+ *
+ * @attr {number} value - The numeric value for this slice
+ * @attr {string} label - The label for this slice (inherited from BaseChartElement)
+ * @attr {string} fill - Fill color for this slice (SVG standard, inherited from BaseChartElement)
+ * @attr {string} color - @deprecated Use fill instead. Optional color for this slice (inherited from BaseChartElement)
+ * @attr {boolean|string} show-value - Whether to show the value on this slice (inherits from chart). Can be true/false or a threshold like "5%" or "100"
+ * @attr {boolean|string} show-label - Whether to show the label on this slice (inherits from chart). Can be true/false or a threshold like "5%" or "100"
+ * @attr {boolean|string} show-percent - Whether to show the percentage on this slice (inherits from chart). Can be true/false or a threshold like "5%" or "100"
+ *
+ * @example
+ * <dc-pie-slice value="30" label="Category A"></dc-pie-slice>
+ *
+ * @example
+ * <dc-pie-slice value="45" label="Category B" fill="#FF5722"></dc-pie-slice>
+ *
+ * @example
+ * <!-- With htmx attributes -->
+ * <dc-pie-slice value="45" label="Category B" color="#FF5722"
+ *               hx-get="/api/category/b"
+ *               hx-target="#details"
+ *               hx-swap="innerHTML"></dc-pie-slice>
+ *
+ * @example
+ * <!-- Override chart defaults for this slice -->
+ * <dc-pie-slice value="45" label="Category B" show-value="false" show-percent="true"></dc-pie-slice>
+ *
+ * @example
+ * <!-- Show label only for slices >= 5% of total -->
+ * <dc-pie-slice value="45" label="Category B" show-label="5%"></dc-pie-slice>
+ */
+@customElement('dc-pie-slice')
+export class ChartPieSlice extends BaseShape {
+  @property({ type: Number })
+  value = 0;
+
+  @property({ attribute: 'show-value', converter: showConditionConverter })
+  showValue?: ShowCondition;
+
+  @property({ attribute: 'show-label', converter: showConditionConverter })
+  showLabel?: ShowCondition;
+
+  @property({ attribute: 'show-percent', converter: showConditionConverter })
+  showPercent?: ShowCondition;
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'dc-pie-slice': ChartPieSlice;
+  }
+}

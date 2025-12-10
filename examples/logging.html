@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logging & Debug Console - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+    <style>
+        dc-log-console {
+            max-width: 900px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Logging & Debug Console</h1>
+    <p>The logging system captures internal calculations during chart rendering, helping you understand how values are derived and debug layout issues.</p>
+
+    <nav>
+        <div class="nav-major">
+            <a href="../index.html">Home</a>
+            <a href="barcharts.html">Bar Charts</a>
+            <a href="linecharts.html">Line Charts</a>
+            <a href="piecharts.html">Pie Charts</a>
+            <a href="funnelcharts.html">Funnel Charts</a>
+        </div>
+        <div class="nav-minor">
+            <a href="titles.html">Titles</a>
+            <a href="legends.html">Legends</a>
+            <a href="axes.html">Axes</a>
+            <a href="colors.html">Colors</a>
+            <a href="typography.html">Typography</a>
+            <a href="borders-and-padding.html">Borders & Padding</a>
+            <a href="bar-groups.html">Bar Groups</a>
+            <a href="bar-width.html">Bar Width</a>
+            <a href="gutter.html">Gutter</a>
+            <a href="interactive.html">Interactive</a>
+            <a href="popups.html">Popups</a>
+            <a href="logging.html" class="current">Logging</a>
+            <a href="htmx-integration.html">htmx</a>
+        </div>
+    </nav>
+
+    <div class="example">
+        <h2>Basic Usage</h2>
+        <p>Add <code>logging="info"</code> to any chart to enable log capture, then use <code>&lt;dc-log-console&gt;</code> with a CSS selector to display the logs.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Bar Chart with Logging</h3>
+                <pre><code>&lt;dc-bar-chart id="bar-demo" logging="info" width="500" height="350"&gt;
+  &lt;dc-title&gt;Sales by Quarter&lt;/dc-title&gt;
+  &lt;dc-bar value="30" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="45" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" label="Q3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="50" label="Q4"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;
+
+&lt;dc-log-console chart="#bar-demo"&gt;&lt;/dc-log-console&gt;</code></pre>
+                <dc-bar-chart id="bar-demo" logging="info" width="500" height="350">
+                    <dc-title>Sales by Quarter</dc-title>
+                    <dc-bar value="30" label="Q1"></dc-bar>
+                    <dc-bar value="45" label="Q2"></dc-bar>
+                    <dc-bar value="25" label="Q3"></dc-bar>
+                    <dc-bar value="50" label="Q4"></dc-bar>
+                </dc-bar-chart>
+                <dc-log-console chart="#bar-demo"></dc-log-console>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Pie Chart Logging</h2>
+        <p>Pie charts log slice angles, positions, and color resolution.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Pie Chart with Legend</h3>
+                <pre><code>&lt;dc-pie-chart id="pie-demo" logging="info" width="500" height="350"&gt;
+  &lt;dc-title&gt;Market Share&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="45" label="Product A"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="30" label="Product B"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="25" label="Product C"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-legend position="right"&gt;&lt;/dc-legend&gt;
+&lt;/dc-pie-chart&gt;
+
+&lt;dc-log-console chart="#pie-demo"&gt;&lt;/dc-log-console&gt;</code></pre>
+                <dc-pie-chart id="pie-demo" logging="info" width="500" height="350">
+                    <dc-title>Market Share</dc-title>
+                    <dc-pie-slice value="45" label="Product A"></dc-pie-slice>
+                    <dc-pie-slice value="30" label="Product B"></dc-pie-slice>
+                    <dc-pie-slice value="25" label="Product C"></dc-pie-slice>
+                    <dc-legend position="right"></dc-legend>
+                </dc-pie-chart>
+                <dc-log-console chart="#pie-demo"></dc-log-console>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Funnel Chart Logging</h2>
+        <p>Funnel charts log stage dimensions, chevron calculations, and segment heights.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Funnel with Chevrons</h3>
+                <pre><code>&lt;dc-funnel-chart id="funnel-demo" logging="info" width="500" height="350" chevron="20px"&gt;
+  &lt;dc-title&gt;Sales Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="500" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="200" label="Opportunities"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="50" label="Customers"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;
+
+&lt;dc-log-console chart="#funnel-demo"&gt;&lt;/dc-log-console&gt;</code></pre>
+                <dc-funnel-chart id="funnel-demo" logging="info" width="500" height="350" chevron="20px">
+                    <dc-title>Sales Funnel</dc-title>
+                    <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
+                    <dc-funnel-stage value="500" label="Leads"></dc-funnel-stage>
+                    <dc-funnel-stage value="200" label="Opportunities"></dc-funnel-stage>
+                    <dc-funnel-stage value="50" label="Customers"></dc-funnel-stage>
+                </dc-funnel-chart>
+                <dc-log-console chart="#funnel-demo"></dc-log-console>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Multiple Charts</h2>
+        <p>When the selector matches multiple charts, tabs appear to switch between them.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Line Chart</h3>
+                <dc-line-chart class="multi-demo" logging="info" width="400" height="250">
+                    <dc-title>Temperature</dc-title>
+                    <dc-line label="2024">
+                        <dc-point value="10" label="Jan"></dc-point>
+                        <dc-point value="15" label="Feb"></dc-point>
+                        <dc-point value="22" label="Mar"></dc-point>
+                        <dc-point value="28" label="Apr"></dc-point>
+                    </dc-line>
+                </dc-line-chart>
+            </div>
+            <div>
+                <h3>Bar Chart</h3>
+                <dc-bar-chart class="multi-demo" logging="info" width="400" height="250">
+                    <dc-title>Revenue</dc-title>
+                    <dc-bar value="100" label="Jan"></dc-bar>
+                    <dc-bar value="150" label="Feb"></dc-bar>
+                    <dc-bar value="120" label="Mar"></dc-bar>
+                </dc-bar-chart>
+            </div>
+        </div>
+
+        <h3>Log Console with Multiple Charts</h3>
+        <pre><code>&lt;dc-log-console chart=".multi-demo"&gt;&lt;/dc-log-console&gt;</code></pre>
+        <dc-log-console chart=".multi-demo"></dc-log-console>
+    </div>
+
+    <div class="example">
+        <h2>Log Levels</h2>
+        <p>The <code>logging</code> attribute controls which messages are captured:</p>
+        <ul>
+            <li><code>logging="false"</code> - No logging (default, best performance)</li>
+            <li><code>logging="error"</code> - Only errors</li>
+            <li><code>logging="warning"</code> - Warnings and errors</li>
+            <li><code>logging="info"</code> or <code>logging="true"</code> - All messages</li>
+        </ul>
+
+        <div class="grid">
+            <div>
+                <h3>Warning-Level Logging</h3>
+                <pre><code>&lt;dc-pie-chart id="warning-demo" logging="warning" width="500" height="300"&gt;
+  &lt;dc-pie-slice value="50" label="A"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="30" label="B"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;
+
+&lt;dc-log-console chart="#warning-demo"&gt;&lt;/dc-log-console&gt;</code></pre>
+                <dc-pie-chart id="warning-demo" logging="warning" width="500" height="300">
+                    <dc-pie-slice value="50" label="A"></dc-pie-slice>
+                    <dc-pie-slice value="30" label="B"></dc-pie-slice>
+                </dc-pie-chart>
+                <dc-log-console chart="#warning-demo"></dc-log-console>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>What Gets Logged</h2>
+        <p>The logging system captures calculations including:</p>
+        <ul>
+            <li><strong>Padding calculations</strong> - How padding values are derived from attributes, legends, and axis labels</li>
+            <li><strong>Color resolution</strong> - Which color mode was used (gradient, palette, auto) and any overrides</li>
+            <li><strong>Legend dimensions</strong> - Calculated width, height, layout type, and column count</li>
+            <li><strong>Axis label padding</strong> - Space allocated for Y-axis values and X-axis labels</li>
+            <li><strong>Data summaries</strong> - Element counts, max values, totals</li>
+            <li><strong>Per-element details</strong> - Individual bar/slice/stage positions, sizes, and percentages</li>
+            <li><strong>Chart-specific calculations</strong> - Bar unit dimensions, funnel segment heights, chevron parsing, etc.</li>
+        </ul>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+</body>
+</html>

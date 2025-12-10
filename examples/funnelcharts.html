@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funnel Charts - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+</head>
+<body>
+    <h1>Funnel Chart Examples</h1>
+    <p>Visualize conversion funnels and process flows</p>
+
+    <nav>
+        <div class="nav-major">
+            <a href="../index.html">Home</a>
+            <a href="barcharts.html">Bar Charts</a>
+            <a href="linecharts.html">Line Charts</a>
+            <a href="piecharts.html">Pie Charts</a>
+            <a href="funnelcharts.html" class="current">Funnel Charts</a>
+        </div>
+        <div class="nav-minor">
+            <a href="titles.html">Titles</a>
+            <a href="legends.html">Legends</a>
+            <a href="axes.html">Axes</a>
+            <a href="colors.html">Colors</a>
+            <a href="typography.html">Typography</a>
+            <a href="borders-and-padding.html">Borders & Padding</a>
+            <a href="bar-groups.html">Bar Groups</a>
+            <a href="bar-width.html">Bar Width</a>
+            <a href="gutter.html">Gutter</a>
+            <a href="interactive.html">Interactive</a>
+            <a href="popups.html">Popups</a>
+            <a href="logging.html">Logging</a>
+            <a href="htmx-integration.html">htmx</a>
+        </div>
+    </nav>
+
+    <div class="example">
+        <h2>Basic Sales Funnel</h2>
+        <p>A funnel chart with automatic cool-to-warm color gradient:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Sales Conversion Funnel</h3>
+                <pre><code>&lt;dc-funnel-chart width="600" height="500"&gt;
+  &lt;dc-title&gt;Sales Conversion Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="10000" label="Website Visitors"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="5000" label="Product Views"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="2000" label="Add to Cart"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="1000" label="Checkout Started"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="750" label="Purchases"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="600" height="500">
+                    <dc-title>Sales Conversion Funnel</dc-title>
+                    <dc-funnel-stage value="10000" label="Website Visitors"></dc-funnel-stage>
+                    <dc-funnel-stage value="5000" label="Product Views"></dc-funnel-stage>
+                    <dc-funnel-stage value="2000" label="Add to Cart"></dc-funnel-stage>
+                    <dc-funnel-stage value="1000" label="Checkout Started"></dc-funnel-stage>
+                    <dc-funnel-stage value="750" label="Purchases"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Control of Narrowing</h2>
+        <p>Control how dramatically the funnel narrows using the funnel-factor attribute. Positive values create standard funnels (wide to narrow), negative values create inverted funnels (narrow to wide):</p>
+
+        <div class="grid">
+            <div>
+                <h3>Default Narrowing (70%)</h3>
+                <pre><code>&lt;dc-funnel-chart width="450" height="400"&gt;
+  &lt;dc-title&gt;Standard Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="5000" label="Stage 1"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="3000" label="Stage 2"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="1500" label="Stage 3"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="750" label="Stage 4"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="450" height="400">
+                    <dc-title>Standard Funnel</dc-title>
+                    <dc-funnel-stage value="5000" label="Stage 1"></dc-funnel-stage>
+                    <dc-funnel-stage value="3000" label="Stage 2"></dc-funnel-stage>
+                    <dc-funnel-stage value="1500" label="Stage 3"></dc-funnel-stage>
+                    <dc-funnel-stage value="750" label="Stage 4"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Dramatic Narrowing (40%)</h3>
+                <pre><code>&lt;dc-funnel-chart width="450" height="400" funnel-factor="40"&gt;
+  &lt;dc-title&gt;Dramatic Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="5000" label="Stage 1"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="3000" label="Stage 2"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="1500" label="Stage 3"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="750" label="Stage 4"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="450" height="400" funnel-factor="40">
+                    <dc-title>Dramatic Funnel</dc-title>
+                    <dc-funnel-stage value="5000" label="Stage 1"></dc-funnel-stage>
+                    <dc-funnel-stage value="3000" label="Stage 2"></dc-funnel-stage>
+                    <dc-funnel-stage value="1500" label="Stage 3"></dc-funnel-stage>
+                    <dc-funnel-stage value="750" label="Stage 4"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Nearly Straight (90%)</h3>
+                <pre><code>&lt;dc-funnel-chart width="450" height="400" funnel-factor="90"&gt;
+  &lt;dc-title&gt;Subtle Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="5000" label="Stage 1"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="3000" label="Stage 2"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="1500" label="Stage 3"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="750" label="Stage 4"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="450" height="400" funnel-factor="90">
+                    <dc-title>Subtle Funnel</dc-title>
+                    <dc-funnel-stage value="5000" label="Stage 1"></dc-funnel-stage>
+                    <dc-funnel-stage value="3000" label="Stage 2"></dc-funnel-stage>
+                    <dc-funnel-stage value="1500" label="Stage 3"></dc-funnel-stage>
+                    <dc-funnel-stage value="750" label="Stage 4"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Inverted Funnel (-70%)</h3>
+                <pre><code>&lt;dc-funnel-chart width="450" height="400" funnel-factor="-70"&gt;
+  &lt;dc-title&gt;Inverted Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="750" label="Stage 1"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="1500" label="Stage 2"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="3000" label="Stage 3"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="5000" label="Stage 4"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="450" height="400" funnel-factor="-70">
+                    <dc-title>Inverted Funnel</dc-title>
+                    <dc-funnel-stage value="750" label="Stage 1"></dc-funnel-stage>
+                    <dc-funnel-stage value="1500" label="Stage 2"></dc-funnel-stage>
+                    <dc-funnel-stage value="3000" label="Stage 3"></dc-funnel-stage>
+                    <dc-funnel-stage value="5000" label="Stage 4"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Custom Colors</h2>
+        <p>Customize colors using per-stage colors or automatic gradients:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Per-Stage Colors</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="400"&gt;
+  &lt;dc-title&gt;Lead Pipeline&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="5000" label="Leads" color="#4CAF50"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="2500" label="Qualified" color="#8BC34A"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="1000" label="Opportunities" color="#FFC107"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="500" label="Proposals" color="#FF9800"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="200" label="Deals" color="#FF5722"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="400">
+                    <dc-title>Lead Pipeline</dc-title>
+                    <dc-funnel-stage value="5000" label="Leads" fill="#4CAF50"></dc-funnel-stage>
+                    <dc-funnel-stage value="2500" label="Qualified" fill="#8BC34A"></dc-funnel-stage>
+                    <dc-funnel-stage value="1000" label="Opportunities" fill="#FFC107"></dc-funnel-stage>
+                    <dc-funnel-stage value="500" label="Proposals" fill="#FF9800"></dc-funnel-stage>
+                    <dc-funnel-stage value="200" label="Deals" fill="#FF5722"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Gradient (Hex Colors)</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="400"
+                 fill-start-color="#ff6b6b"
+                 fill-end-color="#4ecdc4"&gt;
+  &lt;dc-title&gt;Campaign Performance&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="15000" label="Email Sent"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="8500" label="Opened"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="3200" label="Clicked"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="1500" label="Visited"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="600" label="Converted"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="400" fill-start-color="#ff6b6b" fill-end-color="#4ecdc4">
+                    <dc-title>Campaign Performance</dc-title>
+                    <dc-funnel-stage value="15000" label="Email Sent"></dc-funnel-stage>
+                    <dc-funnel-stage value="8500" label="Opened"></dc-funnel-stage>
+                    <dc-funnel-stage value="3200" label="Clicked"></dc-funnel-stage>
+                    <dc-funnel-stage value="1500" label="Visited"></dc-funnel-stage>
+                    <dc-funnel-stage value="600" label="Converted"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Gradient (Named Colors)</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="400"
+                 fill-start-color="purple"
+                 fill-end-color="orange"&gt;
+  &lt;dc-title&gt;Content Engagement&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="25000" label="Views"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="12000" label="Read 50%"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="5000" label="Complete"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="1200" label="Subscribed"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="400" fill-start-color="purple" fill-end-color="orange">
+                    <dc-title>Content Engagement</dc-title>
+                    <dc-funnel-stage value="25000" label="Views"></dc-funnel-stage>
+                    <dc-funnel-stage value="12000" label="Read 50%"></dc-funnel-stage>
+                    <dc-funnel-stage value="5000" label="Complete"></dc-funnel-stage>
+                    <dc-funnel-stage value="1200" label="Subscribed"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Stage Heights</h2>
+        <p>Control segment heights using different modes and constraints:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Fixed Heights</h3>
+                <pre><code>&lt;dc-funnel-chart width="450" height="350" segment-height="80px"&gt;
+  &lt;dc-title&gt;Marketing Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="5000" label="Awareness"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="2000" label="Interest"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="800" label="Consider"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="300" label="Convert"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="450" height="350" segment-height="80px">
+                    <dc-title>Marketing Funnel</dc-title>
+                    <dc-funnel-stage value="5000" label="Awareness"></dc-funnel-stage>
+                    <dc-funnel-stage value="2000" label="Interest"></dc-funnel-stage>
+                    <dc-funnel-stage value="800" label="Consider"></dc-funnel-stage>
+                    <dc-funnel-stage value="300" label="Convert"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Proportional to Values</h3>
+                <pre><code>&lt;dc-funnel-chart width="450" height="400" segment-height="value"&gt;
+  &lt;dc-title&gt;Sales Conversion&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="10000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="5000" label="Views"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="2000" label="Cart"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="1000" label="Checkout"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="750" label="Purchase"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="450" height="400" segment-height="value">
+                    <dc-title>Sales Conversion</dc-title>
+                    <dc-funnel-stage value="10000" label="Visitors"></dc-funnel-stage>
+                    <dc-funnel-stage value="5000" label="Views"></dc-funnel-stage>
+                    <dc-funnel-stage value="2000" label="Cart"></dc-funnel-stage>
+                    <dc-funnel-stage value="1000" label="Checkout"></dc-funnel-stage>
+                    <dc-funnel-stage value="750" label="Purchase"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Logarithmic Scale</h3>
+                <pre><code>&lt;dc-funnel-chart width="450" height="400" segment-height="log-value"&gt;
+  &lt;dc-title&gt;User Growth&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="1000000" label="Impressions"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="100000" label="Clicks"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="10000" label="Signups"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="1000" label="Active"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="100" label="Paying"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="450" height="400" segment-height="log-value">
+                    <dc-title>User Growth</dc-title>
+                    <dc-funnel-stage value="1000000" label="Impressions"></dc-funnel-stage>
+                    <dc-funnel-stage value="100000" label="Clicks"></dc-funnel-stage>
+                    <dc-funnel-stage value="10000" label="Signups"></dc-funnel-stage>
+                    <dc-funnel-stage value="1000" label="Active"></dc-funnel-stage>
+                    <dc-funnel-stage value="100" label="Paying"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>With Constraints</h3>
+                <pre><code>&lt;dc-funnel-chart width="450" height="400"
+                 segment-height="value"
+                 segment-min-height="50px"
+                 segment-max-height="120px"&gt;
+  &lt;dc-title&gt;Constrained Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="10000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="5000" label="Views"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="2000" label="Cart"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="1000" label="Checkout"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="750" label="Purchase"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="450" height="400"
+                                 segment-height="value"
+                                 segment-min-height="50px"
+                                 segment-max-height="120px">
+                    <dc-title>Constrained Funnel</dc-title>
+                    <dc-funnel-stage value="10000" label="Visitors"></dc-funnel-stage>
+                    <dc-funnel-stage value="5000" label="Views"></dc-funnel-stage>
+                    <dc-funnel-stage value="2000" label="Cart"></dc-funnel-stage>
+                    <dc-funnel-stage value="1000" label="Checkout"></dc-funnel-stage>
+                    <dc-funnel-stage value="750" label="Purchase"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Shaped Funnels</h2>
+        <p>Create down-facing chevron shapes instead of straight edges using the chevron attribute:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Basic Chevron</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="500" chevron="25px"&gt;
+  &lt;dc-title&gt;Sales Pipeline&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="8000" label="Interested"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="3500" label="Intro Call"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="1800" label="Demo Completed"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="900" label="Proposal Sent"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="450" label="Closed Won"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="500" chevron="25px">
+                    <dc-title>Sales Pipeline</dc-title>
+                    <dc-funnel-stage value="8000" label="Interested"></dc-funnel-stage>
+                    <dc-funnel-stage value="3500" label="Intro Call"></dc-funnel-stage>
+                    <dc-funnel-stage value="1800" label="Demo Completed"></dc-funnel-stage>
+                    <dc-funnel-stage value="900" label="Proposal Sent"></dc-funnel-stage>
+                    <dc-funnel-stage value="450" label="Closed Won"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Chevron with Custom Colors</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="500" chevron="5%"
+                 fill-start-color="#1e3a8a"
+                 fill-end-color="#10b981"&gt;
+  &lt;dc-title&gt;Recruitment Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="2000" label="Applications"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="800" label="Phone Screen"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="300" label="Technical Interview"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="100" label="Final Round"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="30" label="Offers Made"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="500" chevron="5%" fill-start-color="#1e3a8a" fill-end-color="#10b981">
+                    <dc-title>Recruitment Funnel</dc-title>
+                    <dc-funnel-stage value="2000" label="Applications"></dc-funnel-stage>
+                    <dc-funnel-stage value="800" label="Phone Screen"></dc-funnel-stage>
+                    <dc-funnel-stage value="300" label="Technical Interview"></dc-funnel-stage>
+                    <dc-funnel-stage value="100" label="Final Round"></dc-funnel-stage>
+                    <dc-funnel-stage value="30" label="Offers Made"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Flat Top</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="500" chevron="25px" flat-top&gt;
+  &lt;dc-title&gt;Content Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="10000" label="Impressions"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="5000" label="Views"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="2000" label="Reads"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="500" label="Shares"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="500" chevron="25px" flat-top>
+                    <dc-title>Content Funnel</dc-title>
+                    <dc-funnel-stage value="10000" label="Impressions"></dc-funnel-stage>
+                    <dc-funnel-stage value="5000" label="Views"></dc-funnel-stage>
+                    <dc-funnel-stage value="2000" label="Reads"></dc-funnel-stage>
+                    <dc-funnel-stage value="500" label="Shares"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Flat Bottom</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="500"
+                 chevron="25px"
+                 flat-bottom
+                 fill-start-color="#ff9800"
+                 fill-end-color="#f44336"&gt;
+  &lt;dc-title&gt;Sales Pipeline&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="8000" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="4000" label="Qualified"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="1500" label="Proposals"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="600" label="Closed"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="500" chevron="25px" flat-bottom fill-start-color="#ff9800" fill-end-color="#f44336">
+                    <dc-title>Sales Pipeline</dc-title>
+                    <dc-funnel-stage value="8000" label="Leads"></dc-funnel-stage>
+                    <dc-funnel-stage value="4000" label="Qualified"></dc-funnel-stage>
+                    <dc-funnel-stage value="1500" label="Proposals"></dc-funnel-stage>
+                    <dc-funnel-stage value="600" label="Closed"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Stage Borders</h2>
+        <p>Add borders to funnel stages using stroke attributes:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Basic Borders</h3>
+                <pre><code>&lt;dc-funnel-chart width="450" height="400"
+                 stroke-colors="#333"
+                 stroke-width="2"&gt;
+  &lt;dc-title&gt;Sales Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="5000" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="3000" label="Qualified"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="1500" label="Proposals"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="750" label="Closed"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="450" height="400" stroke-colors="#333" stroke-width="2">
+                    <dc-title>Sales Funnel</dc-title>
+                    <dc-funnel-stage value="5000" label="Leads"></dc-funnel-stage>
+                    <dc-funnel-stage value="3000" label="Qualified"></dc-funnel-stage>
+                    <dc-funnel-stage value="1500" label="Proposals"></dc-funnel-stage>
+                    <dc-funnel-stage value="750" label="Closed"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Shorthand Syntax</h3>
+                <pre><code>&lt;dc-funnel-chart width="450" height="400" stroke="3 white"&gt;
+  &lt;dc-title&gt;Marketing Pipeline&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="8000" label="Awareness"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="4000" label="Interest"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="2000" label="Decision"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="1000" label="Action"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="450" height="400" stroke="3 white">
+                    <dc-title>Marketing Pipeline</dc-title>
+                    <dc-funnel-stage value="8000" label="Awareness"></dc-funnel-stage>
+                    <dc-funnel-stage value="4000" label="Interest"></dc-funnel-stage>
+                    <dc-funnel-stage value="2000" label="Decision"></dc-funnel-stage>
+                    <dc-funnel-stage value="1000" label="Action"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Borders with Chevron</h3>
+                <pre><code>&lt;dc-funnel-chart width="450" height="400"
+                 chevron="20px"
+                 stroke="2 #2196F3"
+                 fill-start-color="#64B5F6"
+                 fill-end-color="#1976D2"&gt;
+  &lt;dc-title&gt;User Journey&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="12000" label="Landing"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="7000" label="Explore"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="3500" label="Engage"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="1800" label="Convert"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="450" height="400" chevron="20px" stroke="2 #2196F3" fill-start-color="#64B5F6" fill-end-color="#1976D2">
+                    <dc-title>User Journey</dc-title>
+                    <dc-funnel-stage value="12000" label="Landing"></dc-funnel-stage>
+                    <dc-funnel-stage value="7000" label="Explore"></dc-funnel-stage>
+                    <dc-funnel-stage value="3500" label="Engage"></dc-funnel-stage>
+                    <dc-funnel-stage value="1800" label="Convert"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+</body>
+</html>

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typography - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+</head>
+<body>
+    <h1>Typography</h1>
+    <p>Style text elements using SVG presentation attributes. Use <code>fill</code> for color (not <code>color</code>) and unitless <code>font-size</code> values (not <code>px</code>).</p>
+
+    <nav>
+        <div class="nav-major">
+            <a href="../index.html">Home</a>
+            <a href="barcharts.html">Bar Charts</a>
+            <a href="linecharts.html">Line Charts</a>
+            <a href="piecharts.html">Pie Charts</a>
+            <a href="funnelcharts.html">Funnel Charts</a>
+        </div>
+        <div class="nav-minor">
+            <a href="titles.html">Titles</a>
+            <a href="legends.html">Legends</a>
+            <a href="axes.html">Axes</a>
+            <a href="colors.html">Colors</a>
+            <a href="typography.html" class="current">Typography</a>
+            <a href="borders-and-padding.html">Borders & Padding</a>
+            <a href="bar-groups.html">Bar Groups</a>
+            <a href="bar-width.html">Bar Width</a>
+            <a href="gutter.html">Gutter</a>
+            <a href="interactive.html">Interactive</a>
+            <a href="popups.html">Popups</a>
+            <a href="logging.html">Logging</a>
+            <a href="htmx-integration.html">htmx</a>
+        </div>
+    </nav>
+
+    <div class="example">
+        <h2>Title Font Size</h2>
+        <p>Use the <code>font-size</code> attribute with unitless values (viewBox units, not CSS pixels).</p>
+
+        <div class="grid">
+            <div>
+                <h3>Small (font-size="16")</h3>
+                <pre><code>&lt;dc-bar-chart width="450" height="300"&gt;
+  &lt;dc-title font-size="16"&gt;Small Title&lt;/dc-title&gt;
+  &lt;dc-bar value="10" fill="#FF6B6B" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" fill="#4ECDC4" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" fill="#45B7D1" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="450" height="300">
+                    <dc-title font-size="16">Small Title</dc-title>
+                    <dc-bar value="10" fill="#FF6B6B" label="A"></dc-bar>
+                    <dc-bar value="25" fill="#4ECDC4" label="B"></dc-bar>
+                    <dc-bar value="15" fill="#45B7D1" label="C"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Default (font-size="20")</h3>
+                <pre><code>&lt;dc-bar-chart width="450" height="300"&gt;
+  &lt;dc-title&gt;Default Title&lt;/dc-title&gt;
+  &lt;dc-bar value="10" fill="#FF6B6B" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" fill="#4ECDC4" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" fill="#45B7D1" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="450" height="300">
+                    <dc-title>Default Title</dc-title>
+                    <dc-bar value="10" fill="#FF6B6B" label="A"></dc-bar>
+                    <dc-bar value="25" fill="#4ECDC4" label="B"></dc-bar>
+                    <dc-bar value="15" fill="#45B7D1" label="C"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Large (font-size="28")</h3>
+                <pre><code>&lt;dc-bar-chart width="450" height="300"&gt;
+  &lt;dc-title font-size="28"&gt;Large Title&lt;/dc-title&gt;
+  &lt;dc-bar value="10" fill="#FF6B6B" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" fill="#4ECDC4" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" fill="#45B7D1" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="450" height="300">
+                    <dc-title font-size="28">Large Title</dc-title>
+                    <dc-bar value="10" fill="#FF6B6B" label="A"></dc-bar>
+                    <dc-bar value="25" fill="#4ECDC4" label="B"></dc-bar>
+                    <dc-bar value="15" fill="#45B7D1" label="C"></dc-bar>
+                </dc-bar-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Title Color</h2>
+        <p>Use the <code>fill</code> attribute for text color (not <code>color</code>).</p>
+
+        <div class="grid">
+            <div>
+                <h3>Pink</h3>
+                <pre><code>&lt;dc-bar-chart width="450" height="300"&gt;
+  &lt;dc-title fill="#E91E63"&gt;Pink Title&lt;/dc-title&gt;
+  &lt;dc-bar value="10" fill="#FF6B6B" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" fill="#4ECDC4" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" fill="#45B7D1" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="450" height="300">
+                    <dc-title fill="#E91E63">Pink Title</dc-title>
+                    <dc-bar value="10" fill="#FF6B6B" label="A"></dc-bar>
+                    <dc-bar value="25" fill="#4ECDC4" label="B"></dc-bar>
+                    <dc-bar value="15" fill="#45B7D1" label="C"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Blue</h3>
+                <pre><code>&lt;dc-pie-chart width="450" height="300"&gt;
+  &lt;dc-title fill="#1565C0"&gt;Blue Title&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="30" label="A"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="45" label="B"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="25" label="C"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="450" height="300">
+                    <dc-title fill="#1565C0">Blue Title</dc-title>
+                    <dc-pie-slice value="30" label="A"></dc-pie-slice>
+                    <dc-pie-slice value="45" label="B"></dc-pie-slice>
+                    <dc-pie-slice value="25" label="C"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Purple</h3>
+                <pre><code>&lt;dc-funnel-chart width="450" height="300"&gt;
+  &lt;dc-title fill="#7B1FA2"&gt;Purple Title&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="100" label="A"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="60" label="B"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="30" label="C"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="450" height="300">
+                    <dc-title fill="#7B1FA2">Purple Title</dc-title>
+                    <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
+                    <dc-funnel-stage value="60" label="B"></dc-funnel-stage>
+                    <dc-funnel-stage value="30" label="C"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Font Family</h2>
+        <p>Use the <code>font-family</code> attribute to change the typeface.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Serif</h3>
+                <pre><code>&lt;dc-bar-chart width="450" height="300"&gt;
+  &lt;dc-title font-family="Georgia, serif"&gt;Serif Title&lt;/dc-title&gt;
+  &lt;dc-bar value="10" fill="#FF6B6B" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" fill="#4ECDC4" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" fill="#45B7D1" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="450" height="300">
+                    <dc-title font-family="Georgia, serif">Serif Title</dc-title>
+                    <dc-bar value="10" fill="#FF6B6B" label="A"></dc-bar>
+                    <dc-bar value="25" fill="#4ECDC4" label="B"></dc-bar>
+                    <dc-bar value="15" fill="#45B7D1" label="C"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Monospace</h3>
+                <pre><code>&lt;dc-bar-chart width="450" height="300"&gt;
+  &lt;dc-title font-family="Consolas, monospace"&gt;Monospace Title&lt;/dc-title&gt;
+  &lt;dc-bar value="10" fill="#FF6B6B" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" fill="#4ECDC4" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" fill="#45B7D1" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="450" height="300">
+                    <dc-title font-family="Consolas, monospace">Monospace Title</dc-title>
+                    <dc-bar value="10" fill="#FF6B6B" label="A"></dc-bar>
+                    <dc-bar value="25" fill="#4ECDC4" label="B"></dc-bar>
+                    <dc-bar value="15" fill="#45B7D1" label="C"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Cursive</h3>
+                <pre><code>&lt;dc-pie-chart width="450" height="300"&gt;
+  &lt;dc-title font-family="Brush Script MT, cursive"&gt;Cursive Title&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="30" label="A"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="45" label="B"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="25" label="C"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="450" height="300">
+                    <dc-title font-family="Brush Script MT, cursive">Cursive Title</dc-title>
+                    <dc-pie-slice value="30" label="A"></dc-pie-slice>
+                    <dc-pie-slice value="45" label="B"></dc-pie-slice>
+                    <dc-pie-slice value="25" label="C"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Font Weight and Style</h2>
+        <p>Use <code>font-weight</code> and <code>font-style</code> attributes.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Light Weight (300)</h3>
+                <pre><code>&lt;dc-bar-chart width="450" height="300"&gt;
+  &lt;dc-title font-weight="300"&gt;Light Title&lt;/dc-title&gt;
+  &lt;dc-bar value="10" fill="#FF6B6B" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" fill="#4ECDC4" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" fill="#45B7D1" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="450" height="300">
+                    <dc-title font-weight="300">Light Title</dc-title>
+                    <dc-bar value="10" fill="#FF6B6B" label="A"></dc-bar>
+                    <dc-bar value="25" fill="#4ECDC4" label="B"></dc-bar>
+                    <dc-bar value="15" fill="#45B7D1" label="C"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Normal Weight</h3>
+                <pre><code>&lt;dc-bar-chart width="450" height="300"&gt;
+  &lt;dc-title font-weight="normal"&gt;Normal Title&lt;/dc-title&gt;
+  &lt;dc-bar value="10" fill="#FF6B6B" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" fill="#4ECDC4" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" fill="#45B7D1" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="450" height="300">
+                    <dc-title font-weight="normal">Normal Title</dc-title>
+                    <dc-bar value="10" fill="#FF6B6B" label="A"></dc-bar>
+                    <dc-bar value="25" fill="#4ECDC4" label="B"></dc-bar>
+                    <dc-bar value="15" fill="#45B7D1" label="C"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Italic Style</h3>
+                <pre><code>&lt;dc-line-chart width="450" height="300"&gt;
+  &lt;dc-title font-style="italic"&gt;Italic Title&lt;/dc-title&gt;
+  &lt;dc-line label="Series"&gt;
+    &lt;dc-point value="10" label="A"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="25" label="B"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="15" label="C"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-line-chart&gt;</code></pre>
+                <dc-line-chart width="450" height="300">
+                    <dc-title font-style="italic">Italic Title</dc-title>
+                    <dc-line label="Series">
+                        <dc-point value="10" label="A"></dc-point>
+                        <dc-point value="25" label="B"></dc-point>
+                        <dc-point value="15" label="C"></dc-point>
+                    </dc-line>
+                </dc-line-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Combined Styling</h2>
+        <p>Combine multiple typography attributes for fully customized titles.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Elegant Serif</h3>
+                <pre><code>&lt;dc-pie-chart width="450" height="300"&gt;
+  &lt;dc-title fill="#1565C0" font-size="24"
+            font-family="Georgia, serif"
+            font-weight="600"&gt;
+    Elegant Title
+  &lt;/dc-title&gt;
+  &lt;dc-pie-slice value="30" label="A"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="45" label="B"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="25" label="C"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="450" height="300">
+                    <dc-title fill="#1565C0" font-size="24" font-family="Georgia, serif" font-weight="600">Elegant Title</dc-title>
+                    <dc-pie-slice value="30" label="A"></dc-pie-slice>
+                    <dc-pie-slice value="45" label="B"></dc-pie-slice>
+                    <dc-pie-slice value="25" label="C"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Bold Italic</h3>
+                <pre><code>&lt;dc-funnel-chart width="450" height="300"&gt;
+  &lt;dc-title fill="#D32F2F" font-size="22"
+            font-style="italic"
+            font-weight="bold"&gt;
+    Bold Italic
+  &lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="100" label="A"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="60" label="B"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="30" label="C"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="450" height="300">
+                    <dc-title fill="#D32F2F" font-size="22" font-style="italic" font-weight="bold">Bold Italic</dc-title>
+                    <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
+                    <dc-funnel-stage value="60" label="B"></dc-funnel-stage>
+                    <dc-funnel-stage value="30" label="C"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Modern Sans</h3>
+                <pre><code>&lt;dc-bar-chart width="450" height="300"&gt;
+  &lt;dc-title fill="#37474F" font-size="18"
+            font-family="Arial, sans-serif"
+            font-weight="300"
+            letter-spacing="2"&gt;
+    MODERN TITLE
+  &lt;/dc-title&gt;
+  &lt;dc-bar value="10" fill="#FF6B6B" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" fill="#4ECDC4" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" fill="#45B7D1" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="450" height="300">
+                    <dc-title fill="#37474F" font-size="18" font-family="Arial, sans-serif" font-weight="300" letter-spacing="2">MODERN TITLE</dc-title>
+                    <dc-bar value="10" fill="#FF6B6B" label="A"></dc-bar>
+                    <dc-bar value="25" fill="#4ECDC4" label="B"></dc-bar>
+                    <dc-bar value="15" fill="#45B7D1" label="C"></dc-bar>
+                </dc-bar-chart>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+</body>
+</html>

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colors - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+</head>
+<body>
+    <h1>Colors</h1>
+    <p>Learn how to control colors in your charts using the new SVG-aligned color system</p>
+
+    <nav>
+        <div class="nav-major">
+            <a href="../index.html">Home</a>
+            <a href="barcharts.html">Bar Charts</a>
+            <a href="linecharts.html">Line Charts</a>
+            <a href="piecharts.html">Pie Charts</a>
+            <a href="funnelcharts.html">Funnel Charts</a>
+        </div>
+        <div class="nav-minor">
+            <a href="titles.html">Titles</a>
+            <a href="legends.html">Legends</a>
+            <a href="axes.html">Axes</a>
+            <a href="colors.html" class="current">Colors</a>
+            <a href="typography.html">Typography</a>
+            <a href="borders-and-padding.html">Borders & Padding</a>
+            <a href="bar-groups.html">Bar Groups</a>
+            <a href="bar-width.html">Bar Width</a>
+            <a href="gutter.html">Gutter</a>
+            <a href="interactive.html">Interactive</a>
+            <a href="popups.html">Popups</a>
+            <a href="logging.html">Logging</a>
+            <a href="htmx-integration.html">htmx</a>
+        </div>
+    </nav>
+
+    <div class="example">
+        <h2>Auto-Generated Colors</h2>
+        <p>When no colors are specified, charts automatically generate distinct colors using a golden ratio algorithm:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Pie Chart (Auto Colors)</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="400"&gt;
+  &lt;dc-title&gt;Auto-Generated Colors&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="25" label="Category A"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="20" label="Category B"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="18" label="Category C"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" label="Category D"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="12" label="Category E"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="10" label="Category F"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="400">
+                    <dc-title>Auto-Generated Colors</dc-title>
+                    <dc-pie-slice value="25" label="Category A"></dc-pie-slice>
+                    <dc-pie-slice value="20" label="Category B"></dc-pie-slice>
+                    <dc-pie-slice value="18" label="Category C"></dc-pie-slice>
+                    <dc-pie-slice value="15" label="Category D"></dc-pie-slice>
+                    <dc-pie-slice value="12" label="Category E"></dc-pie-slice>
+                    <dc-pie-slice value="10" label="Category F"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Funnel Chart (Auto Colors)</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="400"&gt;
+  &lt;dc-title&gt;Auto-Generated Colors&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="1000" label="Stage 1"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="750" label="Stage 2"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="500" label="Stage 3"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="250" label="Stage 4"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="100" label="Stage 5"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="400">
+                    <dc-title>Auto-Generated Colors</dc-title>
+                    <dc-funnel-stage value="1000" label="Stage 1"></dc-funnel-stage>
+                    <dc-funnel-stage value="750" label="Stage 2"></dc-funnel-stage>
+                    <dc-funnel-stage value="500" label="Stage 3"></dc-funnel-stage>
+                    <dc-funnel-stage value="250" label="Stage 4"></dc-funnel-stage>
+                    <dc-funnel-stage value="100" label="Stage 5"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Gradient Colors</h2>
+        <p>Create smooth color gradients using <code>fill-start-color</code> and <code>fill-end-color</code>:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Funnel with Gradient</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="400"
+                 fill-start-color="#3498db"
+                 fill-end-color="#e74c3c"&gt;
+  &lt;dc-title&gt;Blue to Red Gradient&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="600" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="200" label="Opportunities"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="80" label="Customers"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="400" fill-start-color="#3498db" fill-end-color="#e74c3c">
+                    <dc-title>Blue to Red Gradient</dc-title>
+                    <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
+                    <dc-funnel-stage value="600" label="Leads"></dc-funnel-stage>
+                    <dc-funnel-stage value="200" label="Opportunities"></dc-funnel-stage>
+                    <dc-funnel-stage value="80" label="Customers"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Pie with Gradient</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="400"
+              fill-start-color="#ff6b6b"
+              fill-end-color="#4ecdc4"&gt;
+  &lt;dc-title&gt;Red to Teal Gradient&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="35" label="A"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="28" label="B"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="22" label="C"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" label="D"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="400" fill-start-color="#ff6b6b" fill-end-color="#4ecdc4">
+                    <dc-title>Red to Teal Gradient</dc-title>
+                    <dc-pie-slice value="35" label="A"></dc-pie-slice>
+                    <dc-pie-slice value="28" label="B"></dc-pie-slice>
+                    <dc-pie-slice value="22" label="C"></dc-pie-slice>
+                    <dc-pie-slice value="15" label="D"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Bar with Gradient</h3>
+                <pre><code>&lt;dc-bar-chart width="500" height="350"
+              fill-start-color="#673AB7"
+              fill-end-color="#00BCD4"&gt;
+  &lt;dc-title&gt;Purple to Cyan Gradient&lt;/dc-title&gt;
+  &lt;dc-bar value="10" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" label="Q3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="40" label="Q4"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="30" label="Q5"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="35" label="Q6"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="500" height="350" fill-start-color="#673AB7" fill-end-color="#00BCD4">
+                    <dc-title>Purple to Cyan Gradient</dc-title>
+                    <dc-bar value="10" label="Q1"></dc-bar>
+                    <dc-bar value="25" label="Q2"></dc-bar>
+                    <dc-bar value="15" label="Q3"></dc-bar>
+                    <dc-bar value="40" label="Q4"></dc-bar>
+                    <dc-bar value="30" label="Q5"></dc-bar>
+                    <dc-bar value="35" label="Q6"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Line Stroke Gradient</h3>
+                <pre><code>&lt;dc-line-chart width="500" height="350"
+               stroke-start-color="#E91E63"
+               stroke-end-color="#3F51B5"&gt;
+  &lt;dc-title&gt;Pink to Indigo Lines&lt;/dc-title&gt;
+  &lt;dc-line label="A"&gt;
+    &lt;dc-point value="15" label="1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="22" label="2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="18" label="3"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line label="B"&gt;
+    &lt;dc-point value="10" label="1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="28" label="2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="20" label="3"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line label="C"&gt;
+    &lt;dc-point value="20" label="1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="15" label="2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="25" label="3"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-line-chart&gt;</code></pre>
+                <dc-line-chart width="500" height="350" stroke-start-color="#E91E63" stroke-end-color="#3F51B5">
+                    <dc-title>Pink to Indigo Lines</dc-title>
+                    <dc-line label="A">
+                        <dc-point value="15" label="1"></dc-point>
+                        <dc-point value="22" label="2"></dc-point>
+                        <dc-point value="18" label="3"></dc-point>
+                    </dc-line>
+                    <dc-line label="B">
+                        <dc-point value="10" label="1"></dc-point>
+                        <dc-point value="28" label="2"></dc-point>
+                        <dc-point value="20" label="3"></dc-point>
+                    </dc-line>
+                    <dc-line label="C">
+                        <dc-point value="20" label="1"></dc-point>
+                        <dc-point value="15" label="2"></dc-point>
+                        <dc-point value="25" label="3"></dc-point>
+                    </dc-line>
+                </dc-line-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Chart-Level Color Palettes</h2>
+        <p>Use <code>fill-colors</code> (bars, slices, stages) or <code>stroke-colors</code> (lines) to define color palettes. A single color applies to all elements; multiple colors cycle through elements:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Single Color (All Same)</h3>
+                <pre><code>&lt;dc-bar-chart width="500" height="350" fill-colors="#9C27B0"&gt;
+  &lt;dc-title&gt;All Purple Bars&lt;/dc-title&gt;
+  &lt;dc-bar value="10" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" label="Q3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="40" label="Q4"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="500" height="350" fill-colors="#9C27B0">
+                    <dc-title>All Purple Bars</dc-title>
+                    <dc-bar value="10" label="Q1"></dc-bar>
+                    <dc-bar value="25" label="Q2"></dc-bar>
+                    <dc-bar value="15" label="Q3"></dc-bar>
+                    <dc-bar value="40" label="Q4"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Color Palette (Cycles)</h3>
+                <pre><code>&lt;dc-bar-chart width="500" height="350"
+              fill-colors="#4CAF50, #2196F3, #FF9800, #9C27B0"&gt;
+  &lt;dc-title&gt;Four-Color Palette&lt;/dc-title&gt;
+  &lt;dc-bar value="10" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" label="Q3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="40" label="Q4"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="500" height="350" fill-colors="#4CAF50, #2196F3, #FF9800, #9C27B0">
+                    <dc-title>Four-Color Palette</dc-title>
+                    <dc-bar value="10" label="Q1"></dc-bar>
+                    <dc-bar value="25" label="Q2"></dc-bar>
+                    <dc-bar value="15" label="Q3"></dc-bar>
+                    <dc-bar value="40" label="Q4"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Pie with Color Palette</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350"
+              fill-colors="#E91E63, #00BCD4, #8BC34A, #FF5722"&gt;
+  &lt;dc-title&gt;Custom Pie Colors&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="35" label="A"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="28" label="B"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="22" label="C"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" label="D"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350" fill-colors="#E91E63, #00BCD4, #8BC34A, #FF5722">
+                    <dc-title>Custom Pie Colors</dc-title>
+                    <dc-pie-slice value="35" label="A"></dc-pie-slice>
+                    <dc-pie-slice value="28" label="B"></dc-pie-slice>
+                    <dc-pie-slice value="22" label="C"></dc-pie-slice>
+                    <dc-pie-slice value="15" label="D"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Line Chart with stroke-colors</h3>
+                <pre><code>&lt;dc-line-chart width="500" height="350"
+               stroke-colors="#9C27B0, #FF5722, #009688"&gt;
+  &lt;dc-title&gt;Three-Line Palette&lt;/dc-title&gt;
+  &lt;dc-line label="Series A"&gt;
+    &lt;dc-point value="15" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="22" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="18" label="Wed"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line label="Series B"&gt;
+    &lt;dc-point value="10" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="28" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="20" label="Wed"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line label="Series C"&gt;
+    &lt;dc-point value="20" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="15" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="25" label="Wed"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-line-chart&gt;</code></pre>
+                <dc-line-chart width="500" height="350" stroke-colors="#9C27B0, #FF5722, #009688">
+                    <dc-title>Three-Line Palette</dc-title>
+                    <dc-line label="Series A">
+                        <dc-point value="15" label="Mon"></dc-point>
+                        <dc-point value="22" label="Tue"></dc-point>
+                        <dc-point value="18" label="Wed"></dc-point>
+                    </dc-line>
+                    <dc-line label="Series B">
+                        <dc-point value="10" label="Mon"></dc-point>
+                        <dc-point value="28" label="Tue"></dc-point>
+                        <dc-point value="20" label="Wed"></dc-point>
+                    </dc-line>
+                    <dc-line label="Series C">
+                        <dc-point value="20" label="Mon"></dc-point>
+                        <dc-point value="15" label="Tue"></dc-point>
+                        <dc-point value="25" label="Wed"></dc-point>
+                    </dc-line>
+                </dc-line-chart>
+            </div>
+
+            <div>
+                <h3>Funnel with Color Palette</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="350"
+                 fill-colors="#3F51B5, #2196F3, #03A9F4, #00BCD4"&gt;
+  &lt;dc-title&gt;Blue Theme Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="600" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="200" label="Prospects"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="80" label="Customers"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="350" fill-colors="#3F51B5, #2196F3, #03A9F4, #00BCD4">
+                    <dc-title>Blue Theme Funnel</dc-title>
+                    <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
+                    <dc-funnel-stage value="600" label="Leads"></dc-funnel-stage>
+                    <dc-funnel-stage value="200" label="Prospects"></dc-funnel-stage>
+                    <dc-funnel-stage value="80" label="Customers"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Element Overrides Palette</h3>
+                <pre><code>&lt;dc-bar-chart width="500" height="350"
+              fill-colors="#4CAF50, #8BC34A, #CDDC39, #FFEB3B"&gt;
+  &lt;dc-title&gt;Green Palette, Red Override&lt;/dc-title&gt;
+  &lt;dc-bar value="10" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" fill="#F44336" label="Q3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="40" label="Q4"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="500" height="350" fill-colors="#4CAF50, #8BC34A, #CDDC39, #FFEB3B">
+                    <dc-title>Green Palette, Red Override</dc-title>
+                    <dc-bar value="10" label="Q1"></dc-bar>
+                    <dc-bar value="25" label="Q2"></dc-bar>
+                    <dc-bar value="15" fill="#F44336" label="Q3"></dc-bar>
+                    <dc-bar value="40" label="Q4"></dc-bar>
+                </dc-bar-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Element-Level Colors</h2>
+        <p>Set colors on individual data elements using the <code>fill</code> attribute (for bars, slices, stages) or <code>stroke</code> attribute (for lines):</p>
+
+        <div class="grid">
+            <div>
+                <h3>Bar Chart with fill</h3>
+                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Quarterly Sales&lt;/dc-title&gt;
+  &lt;dc-bar value="10" fill="red" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" fill="blue" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" fill="green" label="Q3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="40" fill="orange" label="Q4"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="500" height="350">
+                    <dc-title>Quarterly Sales</dc-title>
+                    <dc-bar value="10" fill="red" label="Q1"></dc-bar>
+                    <dc-bar value="25" fill="blue" label="Q2"></dc-bar>
+                    <dc-bar value="15" fill="green" label="Q3"></dc-bar>
+                    <dc-bar value="40" fill="orange" label="Q4"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Pie Chart with fill</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Market Share&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="35" fill="#4CAF50" label="Product A"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="28" fill="#2196F3" label="Product B"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="22" fill="#FF9800" label="Product C"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" fill="#9E9E9E" label="Other"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350">
+                    <dc-title>Market Share</dc-title>
+                    <dc-pie-slice value="35" fill="#4CAF50" label="Product A"></dc-pie-slice>
+                    <dc-pie-slice value="28" fill="#2196F3" label="Product B"></dc-pie-slice>
+                    <dc-pie-slice value="22" fill="#FF9800" label="Product C"></dc-pie-slice>
+                    <dc-pie-slice value="15" fill="#9E9E9E" label="Other"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Line Chart with stroke</h3>
+                <pre><code>&lt;dc-line-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Temperature Trends&lt;/dc-title&gt;
+  &lt;dc-line stroke="#9C27B0" label="City A"&gt;
+    &lt;dc-point value="15" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="18" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="22" label="Wed"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="20" label="Thu"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line stroke="#FF5722" label="City B"&gt;
+    &lt;dc-point value="12" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="20" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="18" label="Wed"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="25" label="Thu"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-line-chart&gt;</code></pre>
+                <dc-line-chart width="500" height="350">
+                    <dc-title>Temperature Trends</dc-title>
+                    <dc-line stroke="#9C27B0" label="City A">
+                        <dc-point value="15" label="Mon"></dc-point>
+                        <dc-point value="18" label="Tue"></dc-point>
+                        <dc-point value="22" label="Wed"></dc-point>
+                        <dc-point value="20" label="Thu"></dc-point>
+                    </dc-line>
+                    <dc-line stroke="#FF5722" label="City B">
+                        <dc-point value="12" label="Mon"></dc-point>
+                        <dc-point value="20" label="Tue"></dc-point>
+                        <dc-point value="18" label="Wed"></dc-point>
+                        <dc-point value="25" label="Thu"></dc-point>
+                    </dc-line>
+                </dc-line-chart>
+            </div>
+
+            <div>
+                <h3>Funnel Chart with fill</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Conversion Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="1000" fill="#2196F3" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="600" fill="#4CAF50" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="200" fill="#FF9800" label="Opportunities"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="80" fill="#F44336" label="Customers"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="350">
+                    <dc-title>Conversion Funnel</dc-title>
+                    <dc-funnel-stage value="1000" fill="#2196F3" label="Visitors"></dc-funnel-stage>
+                    <dc-funnel-stage value="600" fill="#4CAF50" label="Leads"></dc-funnel-stage>
+                    <dc-funnel-stage value="200" fill="#FF9800" label="Opportunities"></dc-funnel-stage>
+                    <dc-funnel-stage value="80" fill="#F44336" label="Customers"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Color Priority</h2>
+        <p>Colors are resolved in this priority order:</p>
+        <ol>
+            <li><strong>Element-level</strong> - <code>fill</code> or <code>stroke</code> on individual elements</li>
+            <li><strong>Gradient</strong> - <code>fill-start-color</code>/<code>fill-end-color</code> on the chart</li>
+            <li><strong>Single color</strong> - <code>fill-color</code> or <code>stroke-color</code> on the chart</li>
+            <li><strong>Auto-generated</strong> - Algorithmic color generation</li>
+        </ol>
+
+        <div class="grid">
+            <div>
+                <h3>Mixed: Gradient + Element Override</h3>
+                <pre><code>&lt;dc-bar-chart width="500" height="350"
+              fill-start-color="#1E88E5"
+              fill-end-color="#43A047"&gt;
+  &lt;dc-title&gt;Gradient with Override&lt;/dc-title&gt;
+  &lt;dc-bar value="10" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" fill="#F44336" label="C (Red Override)"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="40" label="D"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="30" label="E"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="500" height="350" fill-start-color="#1E88E5" fill-end-color="#43A047">
+                    <dc-title>Gradient with Override</dc-title>
+                    <dc-bar value="10" label="A"></dc-bar>
+                    <dc-bar value="25" label="B"></dc-bar>
+                    <dc-bar value="15" fill="#F44336" label="C (Red Override)"></dc-bar>
+                    <dc-bar value="40" label="D"></dc-bar>
+                    <dc-bar value="30" label="E"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Pie: Some Colors + Auto Fill</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Partial Colors + Auto&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="35" fill="#E91E63" label="Pink"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="28" label="Auto A"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="22" fill="#FF9800" label="Orange"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" label="Auto B"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350">
+                    <dc-title>Partial Colors + Auto</dc-title>
+                    <dc-pie-slice value="35" fill="#E91E63" label="Pink"></dc-pie-slice>
+                    <dc-pie-slice value="28" label="Auto A"></dc-pie-slice>
+                    <dc-pie-slice value="22" fill="#FF9800" label="Orange"></dc-pie-slice>
+                    <dc-pie-slice value="15" label="Auto B"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Stroke Properties</h2>
+        <p>Control stroke (border) colors and widths using <code>stroke</code> and <code>stroke-width</code>:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Pie with Custom Stroke</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350"
+              stroke-colors="#333"
+              stroke-width="3"&gt;
+  &lt;dc-title&gt;Dark Borders&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="35" fill="#4CAF50" label="A"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="28" fill="#2196F3" label="B"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="22" fill="#FF9800" label="C"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" fill="#9C27B0" label="D"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350" stroke-colors="#333" stroke-width="3">
+                    <dc-title>Dark Borders</dc-title>
+                    <dc-pie-slice value="35" fill="#4CAF50" label="A"></dc-pie-slice>
+                    <dc-pie-slice value="28" fill="#2196F3" label="B"></dc-pie-slice>
+                    <dc-pie-slice value="22" fill="#FF9800" label="C"></dc-pie-slice>
+                    <dc-pie-slice value="15" fill="#9C27B0" label="D"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Funnel with Stroke</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="350"
+                 stroke-colors="#2196F3"
+                 stroke-width="2"&gt;
+  &lt;dc-title&gt;Blue Borders&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="1000" fill="#E3F2FD" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="600" fill="#BBDEFB" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="200" fill="#90CAF9" label="Opportunities"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="80" fill="#64B5F6" label="Customers"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="350" stroke-colors="#2196F3" stroke-width="2">
+                    <dc-title>Blue Borders</dc-title>
+                    <dc-funnel-stage value="1000" fill="#E3F2FD" label="Visitors"></dc-funnel-stage>
+                    <dc-funnel-stage value="600" fill="#BBDEFB" label="Leads"></dc-funnel-stage>
+                    <dc-funnel-stage value="200" fill="#90CAF9" label="Opportunities"></dc-funnel-stage>
+                    <dc-funnel-stage value="80" fill="#64B5F6" label="Customers"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Point Colors in Line Charts</h2>
+        <p>Individual points can have their own <code>fill</code> color to override the line's <code>stroke</code> color:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Highlighted Points</h3>
+                <pre><code>&lt;dc-line-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Highlighted Data Points&lt;/dc-title&gt;
+  &lt;dc-line stroke="#2196F3" label="Sales"&gt;
+    &lt;dc-point value="15" label="Jan"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="22" label="Feb"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="18" fill="#F44336" label="Mar (Low)"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="35" fill="#4CAF50" label="Apr (High)"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="28" label="May"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-line-chart&gt;</code></pre>
+                <dc-line-chart width="500" height="350">
+                    <dc-title>Highlighted Data Points</dc-title>
+                    <dc-line stroke="#2196F3" label="Sales">
+                        <dc-point value="15" label="Jan"></dc-point>
+                        <dc-point value="22" label="Feb"></dc-point>
+                        <dc-point value="18" fill="#F44336" label="Mar (Low)"></dc-point>
+                        <dc-point value="35" fill="#4CAF50" label="Apr (High)"></dc-point>
+                        <dc-point value="28" label="May"></dc-point>
+                    </dc-line>
+                </dc-line-chart>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+</body>
+</html>

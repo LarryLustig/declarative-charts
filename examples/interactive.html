@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Examples - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+    <style>
+        .controls {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Examples</h1>
+    <p>Popups, links, and dynamic chart manipulation</p>
+
+    <nav>
+        <div class="nav-major">
+            <a href="../index.html">Home</a>
+            <a href="barcharts.html">Bar Charts</a>
+            <a href="linecharts.html">Line Charts</a>
+            <a href="piecharts.html">Pie Charts</a>
+            <a href="funnelcharts.html">Funnel Charts</a>
+        </div>
+        <div class="nav-minor">
+            <a href="titles.html">Titles</a>
+            <a href="legends.html">Legends</a>
+            <a href="axes.html">Axes</a>
+            <a href="colors.html">Colors</a>
+            <a href="typography.html">Typography</a>
+            <a href="borders-and-padding.html">Borders & Padding</a>
+            <a href="bar-groups.html">Bar Groups</a>
+            <a href="bar-width.html">Bar Width</a>
+            <a href="gutter.html">Gutter</a>
+            <a href="interactive.html" class="current">Interactive</a>
+            <a href="popups.html">Popups</a>
+            <a href="logging.html">Logging</a>
+            <a href="htmx-integration.html">htmx</a>
+        </div>
+    </nav>
+
+    <div class="example">
+        <h2>Hover Popups</h2>
+        <p>Hover over bars to see detailed information:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Bar Chart with Hover Popups</h3>
+                <pre><code>&lt;dc-bar-chart width="700" height="400"&gt;
+  &lt;dc-title&gt;Quarterly Revenue (in thousands)&lt;/dc-title&gt;
+  &lt;dc-bar value="150" color="#FF6B6B" label="Q1"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Q1 2024&lt;/strong&gt;&lt;br&gt;
+      Revenue: $150k&lt;br&gt;
+      Growth: +12%
+    &lt;/dc-popup&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-bar value="180" color="#4ECDC4" label="Q2"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Q2 2024&lt;/strong&gt;&lt;br&gt;
+      Revenue: $180k&lt;br&gt;
+      Growth: +20%
+    &lt;/dc-popup&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-bar value="165" color="#45B7D1" label="Q3"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Q3 2024&lt;/strong&gt;&lt;br&gt;
+      Revenue: $165k&lt;br&gt;
+      Growth: -8%
+    &lt;/dc-popup&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-bar value="220" color="#96CEB4" label="Q4"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Q4 2024&lt;/strong&gt;&lt;br&gt;
+      Revenue: $220k&lt;br&gt;
+      Growth: +33%
+    &lt;/dc-popup&gt;
+  &lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="700" height="400">
+                    <dc-title>Quarterly Revenue (in thousands)</dc-title>
+                    <dc-bar value="150" fill="#FF6B6B" label="Q1">
+                        <dc-popup trigger="hover">
+                            <strong>Q1 2024</strong><br>
+                            Revenue: $150k<br>
+                            Growth: +12%
+                        </dc-popup>
+                    </dc-bar>
+                    <dc-bar value="180" fill="#4ECDC4" label="Q2">
+                        <dc-popup trigger="hover">
+                            <strong>Q2 2024</strong><br>
+                            Revenue: $180k<br>
+                            Growth: +20%
+                        </dc-popup>
+                    </dc-bar>
+                    <dc-bar value="165" fill="#45B7D1" label="Q3">
+                        <dc-popup trigger="hover">
+                            <strong>Q3 2024</strong><br>
+                            Revenue: $165k<br>
+                            Growth: -8%
+                        </dc-popup>
+                    </dc-bar>
+                    <dc-bar value="220" fill="#96CEB4" label="Q4">
+                        <dc-popup trigger="hover">
+                            <strong>Q4 2024</strong><br>
+                            Revenue: $220k<br>
+                            Growth: +33%
+                        </dc-popup>
+                    </dc-bar>
+                </dc-bar-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Clickable Lines with Links</h2>
+        <p>Two ways to make lines clickable:</p>
+        <ul>
+            <li><strong>New York:</strong> Uses a popup with a link inside (click to show popup)</li>
+            <li><strong>San Francisco:</strong> Direct navigation using <code>href</code> attribute (click to navigate)</li>
+        </ul>
+
+        <div class="grid">
+            <div>
+                <h3>Line Chart with Click Actions</h3>
+                <pre><code>&lt;dc-line-chart width="700" height="400" stroke-colors="#2196F3"&gt;
+  &lt;dc-title&gt;City Temperature Comparison&lt;/dc-title&gt;
+  &lt;dc-line label="New York"&gt;
+    &lt;dc-popup trigger="click"&gt;
+      &lt;strong&gt;New York City&lt;/strong&gt;&lt;br&gt;
+      &lt;a href="https://en.wikipedia.org/wiki/New_York_City" target="_blank"&gt;
+        View on Wikipedia
+      &lt;/a&gt;
+    &lt;/dc-popup&gt;
+    &lt;dc-point value="15" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="18" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="22" label="Wed"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="20" label="Thu"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="25" label="Fri"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line color="#FF5722" label="San Francisco"
+           href="https://en.wikipedia.org/wiki/San_Francisco"
+           target="_blank"&gt;
+    &lt;dc-point value="12" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="16" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="19" label="Wed"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="23" label="Thu"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="21" label="Fri"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-line-chart&gt;</code></pre>
+                <dc-line-chart width="700" height="400" stroke-colors="#2196F3">
+                    <dc-title>City Temperature Comparison - Click a Line!</dc-title>
+                    <dc-line label="New York">
+                        <dc-popup trigger="click">
+                            <strong>New York City</strong><br>
+                            Population: 8.3 million<br>
+                            <a href="https://en.wikipedia.org/wiki/New_York_City" target="_blank" style="color: #64B5F6; text-decoration: underline;">
+                                View on Wikipedia
+                            </a>
+                        </dc-popup>
+                        <dc-point value="15" label="Mon"></dc-point>
+                        <dc-point value="18" label="Tue"></dc-point>
+                        <dc-point value="22" label="Wed"></dc-point>
+                        <dc-point value="20" label="Thu"></dc-point>
+                        <dc-point value="25" label="Fri"></dc-point>
+                    </dc-line>
+                    <dc-line stroke="#FF5722" label="San Francisco" href="https://en.wikipedia.org/wiki/San_Francisco" target="_blank">
+                        <dc-point value="12" label="Mon"></dc-point>
+                        <dc-point value="16" label="Tue"></dc-point>
+                        <dc-point value="19" label="Wed"></dc-point>
+                        <dc-point value="23" label="Thu"></dc-point>
+                        <dc-point value="21" label="Fri"></dc-point>
+                    </dc-line>
+                </dc-line-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Clickable Bars with href Attribute</h2>
+        <p>Any chart element (bars, lines, points) can be made clickable using the <code>href</code> and <code>target</code> attributes:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Bar Chart with Links</h3>
+                <pre><code>&lt;dc-bar-chart width="600" height="350"&gt;
+  &lt;dc-title&gt;Top Programming Languages - Click to Learn More&lt;/dc-title&gt;
+  &lt;dc-bar value="45" color="#f1e05a" label="JavaScript"
+          href="https://en.wikipedia.org/wiki/JavaScript"
+          target="_blank"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="38" color="#3572A5" label="Python"
+          href="https://en.wikipedia.org/wiki/Python_(programming_language)"
+          target="_blank"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="28" color="#b07219" label="Java"
+          href="https://en.wikipedia.org/wiki/Java_(programming_language)"
+          target="_blank"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="22" color="#e34c26" label="TypeScript"
+          href="https://en.wikipedia.org/wiki/TypeScript"
+          target="_blank"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="600" height="350">
+                    <dc-title>Top Programming Languages - Click to Learn More</dc-title>
+                    <dc-bar value="45" fill="#f1e05a" label="JavaScript"
+                            href="https://en.wikipedia.org/wiki/JavaScript"
+                            target="_blank"></dc-bar>
+                    <dc-bar value="38" fill="#3572A5" label="Python"
+                            href="https://en.wikipedia.org/wiki/Python_(programming_language)"
+                            target="_blank"></dc-bar>
+                    <dc-bar value="28" fill="#b07219" label="Java"
+                            href="https://en.wikipedia.org/wiki/Java_(programming_language)"
+                            target="_blank"></dc-bar>
+                    <dc-bar value="22" fill="#e34c26" label="TypeScript"
+                            href="https://en.wikipedia.org/wiki/TypeScript"
+                            target="_blank"></dc-bar>
+                </dc-bar-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Pie Chart Popups</h2>
+        <p>Hover over slices to see detailed information:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Traffic Sources</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="400"&gt;
+  &lt;dc-title&gt;Traffic Sources&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="30" color="#FF6B6B" label="Desktop"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Desktop Traffic&lt;/strong&gt;&lt;br&gt;
+      Sessions: 3,240&lt;br&gt;
+      Avg. Duration: 4m 32s
+    &lt;/dc-popup&gt;
+  &lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="45" color="#4ECDC4" label="Mobile"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Mobile Traffic&lt;/strong&gt;&lt;br&gt;
+      Sessions: 4,860&lt;br&gt;
+      Avg. Duration: 2m 15s
+    &lt;/dc-popup&gt;
+  &lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" color="#45B7D1" label="Tablet"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Tablet Traffic&lt;/strong&gt;&lt;br&gt;
+      Sessions: 1,620&lt;br&gt;
+      Avg. Duration: 3m 45s
+    &lt;/dc-popup&gt;
+  &lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="10" color="#96CEB4" label="Other"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Other Devices&lt;/strong&gt;&lt;br&gt;
+      Sessions: 1,080&lt;br&gt;
+      Avg. Duration: 1m 20s
+    &lt;/dc-popup&gt;
+  &lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="400">
+                    <dc-title>Traffic Sources</dc-title>
+                    <dc-pie-slice value="30" fill="#FF6B6B" label="Desktop">
+                        <dc-popup trigger="hover">
+                            <strong>Desktop Traffic</strong><br>
+                            Sessions: 3,240<br>
+                            Avg. Duration: 4m 32s
+                        </dc-popup>
+                    </dc-pie-slice>
+                    <dc-pie-slice value="45" fill="#4ECDC4" label="Mobile">
+                        <dc-popup trigger="hover">
+                            <strong>Mobile Traffic</strong><br>
+                            Sessions: 4,860<br>
+                            Avg. Duration: 2m 15s
+                        </dc-popup>
+                    </dc-pie-slice>
+                    <dc-pie-slice value="15" fill="#45B7D1" label="Tablet">
+                        <dc-popup trigger="hover">
+                            <strong>Tablet Traffic</strong><br>
+                            Sessions: 1,620<br>
+                            Avg. Duration: 3m 45s
+                        </dc-popup>
+                    </dc-pie-slice>
+                    <dc-pie-slice value="10" fill="#96CEB4" label="Other">
+                        <dc-popup trigger="hover">
+                            <strong>Other Devices</strong><br>
+                            Sessions: 1,080<br>
+                            Avg. Duration: 1m 20s
+                        </dc-popup>
+                    </dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Funnel Chart Popups</h2>
+        <p>Click on stages to see conversion details:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Sales Funnel with Click Popups</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="400" fill-start-color="#3498db" fill-end-color="#e74c3c"&gt;
+  &lt;dc-title&gt;Sales Funnel - Click a Stage!&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="1000" label="Visitors"&gt;
+    &lt;dc-popup trigger="click"&gt;
+      &lt;strong&gt;Website Visitors&lt;/strong&gt;&lt;br&gt;
+      Total: 1,000 unique visitors&lt;br&gt;
+      Source: Organic + Paid
+    &lt;/dc-popup&gt;
+  &lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="450" label="Leads"&gt;
+    &lt;dc-popup trigger="click"&gt;
+      &lt;strong&gt;Qualified Leads&lt;/strong&gt;&lt;br&gt;
+      Count: 450 (45% conversion)&lt;br&gt;
+      &lt;a href="#"&gt;View Lead Details&lt;/a&gt;
+    &lt;/dc-popup&gt;
+  &lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="150" label="Opportunities"&gt;
+    &lt;dc-popup trigger="click"&gt;
+      &lt;strong&gt;Sales Opportunities&lt;/strong&gt;&lt;br&gt;
+      Count: 150 (33% conversion)&lt;br&gt;
+      Avg. Deal Size: $5,200
+    &lt;/dc-popup&gt;
+  &lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="50" label="Customers"&gt;
+    &lt;dc-popup trigger="click"&gt;
+      &lt;strong&gt;New Customers&lt;/strong&gt;&lt;br&gt;
+      Count: 50 (33% close rate)&lt;br&gt;
+      Total Revenue: $260,000
+    &lt;/dc-popup&gt;
+  &lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="400" fill-start-color="#3498db" fill-end-color="#e74c3c">
+                    <dc-title>Sales Funnel - Click a Stage!</dc-title>
+                    <dc-funnel-stage value="1000" label="Visitors">
+                        <dc-popup trigger="click">
+                            <strong>Website Visitors</strong><br>
+                            Total: 1,000 unique visitors<br>
+                            Source: Organic + Paid
+                        </dc-popup>
+                    </dc-funnel-stage>
+                    <dc-funnel-stage value="450" label="Leads">
+                        <dc-popup trigger="click">
+                            <strong>Qualified Leads</strong><br>
+                            Count: 450 (45% conversion)<br>
+                            <a href="#" style="color: #64B5F6;">View Lead Details</a>
+                        </dc-popup>
+                    </dc-funnel-stage>
+                    <dc-funnel-stage value="150" label="Opportunities">
+                        <dc-popup trigger="click">
+                            <strong>Sales Opportunities</strong><br>
+                            Count: 150 (33% conversion)<br>
+                            Avg. Deal Size: $5,200
+                        </dc-popup>
+                    </dc-funnel-stage>
+                    <dc-funnel-stage value="50" label="Customers">
+                        <dc-popup trigger="click">
+                            <strong>New Customers</strong><br>
+                            Count: 50 (33% close rate)<br>
+                            Total Revenue: $260,000
+                        </dc-popup>
+                    </dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Dynamic Updates</h2>
+        <p>Charts update automatically when you modify the DOM:</p>
+
+        <div class="controls">
+            <button onclick="addBar()">Add Bar</button>
+            <button onclick="removeBar()">Remove Bar</button>
+            <button onclick="updateBar()">Update First Bar</button>
+            <button onclick="changeColors()">Randomize Colors</button>
+        </div>
+
+        <dc-bar-chart id="dynamic" width="600" height="400">
+            <dc-title>Dynamic Chart</dc-title>
+            <dc-bar value="25" fill="#FF5722" label="A"></dc-bar>
+            <dc-bar value="35" fill="#FFC107" label="B"></dc-bar>
+            <dc-bar value="45" fill="#4CAF50" label="C"></dc-bar>
+        </dc-bar-chart>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+
+    <script>
+        // Dynamic manipulation examples
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFA07A', '#98D8C8'];
+        const labels = ['D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'];
+        let labelIndex = 0;
+
+        function addBar() {
+            const chart = document.getElementById('dynamic');
+            const bar = document.createElement('dc-bar');
+            bar.setAttribute('value', Math.floor(Math.random() * 50) + 20);
+            bar.setAttribute('color', colors[Math.floor(Math.random() * colors.length)]);
+            bar.setAttribute('label', labels[labelIndex++ % labels.length]);
+            chart.appendChild(bar);
+        }
+
+        function removeBar() {
+            const chart = document.getElementById('dynamic');
+            const bars = chart.querySelectorAll('dc-bar');
+            if (bars.length > 0) {
+                chart.removeChild(bars[bars.length - 1]);
+            }
+        }
+
+        function updateBar() {
+            const chart = document.getElementById('dynamic');
+            const firstBar = chart.querySelector('dc-bar');
+            if (firstBar) {
+                firstBar.setAttribute('value', Math.floor(Math.random() * 60) + 10);
+            }
+        }
+
+        function changeColors() {
+            const chart = document.getElementById('dynamic');
+            const bars = chart.querySelectorAll('dc-bar');
+            bars.forEach(bar => {
+                bar.setAttribute('color', colors[Math.floor(Math.random() * colors.length)]);
+            });
+        }
+    </script>
+</body>
+</html>

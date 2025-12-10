@@ -1,0 +1,52 @@
+{
+  "name": "declarative-chart-library",
+  "version": "0.1.0",
+  "description": "A declarative chart library using nested Web Components",
+  "type": "module",
+  "main": "./dist/declarative-charts.umd.cjs",
+  "module": "./dist/declarative-charts.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/declarative-charts.js",
+      "require": "./dist/declarative-charts.umd.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YOUR_USERNAME/decl-charts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YOUR_USERNAME/decl-charts/issues"
+  },
+  "homepage": "https://github.com/YOUR_USERNAME/decl-charts#readme",
+  "keywords": [
+    "charts",
+    "web-components",
+    "lit",
+    "declarative",
+    "visualization",
+    "bar-chart",
+    "line-chart",
+    "data-visualization"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT",
+  "dependencies": {
+    "lit": "^3.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "vite": "^5.0.8"
+  }
+}

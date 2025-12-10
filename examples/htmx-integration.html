@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>htmx Integration - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+    <!-- Include htmx -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        .details-panel {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            min-height: 100px;
+        }
+
+        .details-panel.htmx-swapping {
+            opacity: 0.5;
+            transition: opacity 200ms ease-out;
+        }
+
+        dc-funnel-stage,
+        dc-bar,
+        dc-line,
+        dc-pie-slice {
+            cursor: pointer;
+        }
+
+        dc-funnel-stage:hover,
+        dc-bar:hover,
+        dc-pie-slice:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <h1>htmx Integration</h1>
+    <p>Click chart elements to load dynamic content with htmx</p>
+
+    <nav>
+        <div class="nav-major">
+            <a href="../index.html">Home</a>
+            <a href="barcharts.html">Bar Charts</a>
+            <a href="linecharts.html">Line Charts</a>
+            <a href="piecharts.html">Pie Charts</a>
+            <a href="funnelcharts.html">Funnel Charts</a>
+        </div>
+        <div class="nav-minor">
+            <a href="titles.html">Titles</a>
+            <a href="legends.html">Legends</a>
+            <a href="axes.html">Axes</a>
+            <a href="colors.html">Colors</a>
+            <a href="typography.html">Typography</a>
+            <a href="borders-and-padding.html">Borders & Padding</a>
+            <a href="bar-groups.html">Bar Groups</a>
+            <a href="bar-width.html">Bar Width</a>
+            <a href="gutter.html">Gutter</a>
+            <a href="interactive.html">Interactive</a>
+            <a href="popups.html">Popups</a>
+            <a href="logging.html">Logging</a>
+            <a href="htmx-integration.html" class="current">htmx</a>
+        </div>
+    </nav>
+
+    <div class="example">
+        <h2>Interactive Funnel with htmx</h2>
+        <p>Click on any funnel stage to load content from <code>loaded-content.html</code> into the panel below:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Sales Conversion Pipeline</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="400"&gt;
+  &lt;dc-title&gt;Sales Conversion Pipeline&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="10000" label="Website Visitors"
+                   hx-get="/examples/loaded-content.html"
+                   hx-target="#stage-details"
+                   hx-swap="innerHTML"&gt;
+  &lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="5000" label="Product Views"
+                   hx-get="/examples/loaded-content.html"
+                   hx-target="#stage-details"
+                   hx-swap="innerHTML"&gt;
+  &lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="2000" label="Add to Cart"
+                   hx-get="/examples/loaded-content.html"
+                   hx-target="#stage-details"
+                   hx-swap="innerHTML"&gt;
+  &lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="1000" label="Checkout"
+                   hx-get="/examples/loaded-content.html"
+                   hx-target="#stage-details"
+                   hx-swap="innerHTML"&gt;
+  &lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="750" label="Purchases"
+                   hx-get="/examples/loaded-content.html"
+                   hx-target="#stage-details"
+                   hx-swap="innerHTML"&gt;
+  &lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;
+
+&lt;div id="stage-details"&gt;
+  Click a stage to see details
+&lt;/div&gt;</code></pre>
+                <dc-funnel-chart width="500" height="400">
+                    <dc-title>Sales Conversion Pipeline</dc-title>
+                    <dc-funnel-stage value="10000" label="Website Visitors"
+                                   style="cursor: pointer;"
+                                   hx-get="/examples/loaded-content.html"
+                                   hx-target="#stage-details"
+                                   hx-swap="innerHTML">
+                    </dc-funnel-stage>
+                    <dc-funnel-stage value="5000" label="Product Views"
+                                   style="cursor: pointer;"
+                                   hx-get="/examples/loaded-content.html"
+                                   hx-target="#stage-details"
+                                   hx-swap="innerHTML">
+                    </dc-funnel-stage>
+                    <dc-funnel-stage value="2000" label="Add to Cart"
+                                   style="cursor: pointer;"
+                                   hx-get="/examples/loaded-content.html"
+                                   hx-target="#stage-details"
+                                   hx-swap="innerHTML">
+                    </dc-funnel-stage>
+                    <dc-funnel-stage value="1000" label="Checkout"
+                                   style="cursor: pointer;"
+                                   hx-get="/examples/loaded-content.html"
+                                   hx-target="#stage-details"
+                                   hx-swap="innerHTML">
+                    </dc-funnel-stage>
+                    <dc-funnel-stage value="750" label="Purchases"
+                                   style="cursor: pointer;"
+                                   hx-get="/examples/loaded-content.html"
+                                   hx-target="#stage-details"
+                                   hx-swap="innerHTML">
+                    </dc-funnel-stage>
+                </dc-funnel-chart>
+
+                <div id="stage-details" class="details-panel">
+                    <p style="color: #999; text-align: center; margin: 30px 0;">
+                        Click a stage above to load content
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Interactive Bar Chart with htmx</h2>
+        <p>Click on any bar to load content from <code>loaded-content.html</code> into the panel below:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Monthly Revenue</h3>
+                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Monthly Revenue&lt;/dc-title&gt;
+  &lt;dc-bar value="45000" label="January" color="#2196F3"
+          hx-get="/examples/loaded-content.html"
+          hx-target="#bar-details"
+          hx-swap="innerHTML"&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-bar value="52000" label="February" color="#4CAF50"
+          hx-get="/examples/loaded-content.html"
+          hx-target="#bar-details"
+          hx-swap="innerHTML"&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-bar value="48000" label="March" color="#FF9800"
+          hx-get="/examples/loaded-content.html"
+          hx-target="#bar-details"
+          hx-swap="innerHTML"&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-bar value="61000" label="April" color="#9C27B0"
+          hx-get="/examples/loaded-content.html"
+          hx-target="#bar-details"
+          hx-swap="innerHTML"&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-bar value="58000" label="May" color="#F44336"
+          hx-get="/examples/loaded-content.html"
+          hx-target="#bar-details"
+          hx-swap="innerHTML"&gt;
+  &lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="500" height="350">
+                    <dc-title>Monthly Revenue</dc-title>
+                    <dc-bar value="45000" label="January" fill="#2196F3"
+                            style="cursor: pointer;"
+                            hx-get="/examples/loaded-content.html"
+                            hx-target="#bar-details"
+                            hx-swap="innerHTML">
+                    </dc-bar>
+                    <dc-bar value="52000" label="February" fill="#4CAF50"
+                            style="cursor: pointer;"
+                            hx-get="/examples/loaded-content.html"
+                            hx-target="#bar-details"
+                            hx-swap="innerHTML">
+                    </dc-bar>
+                    <dc-bar value="48000" label="March" fill="#FF9800"
+                            style="cursor: pointer;"
+                            hx-get="/examples/loaded-content.html"
+                            hx-target="#bar-details"
+                            hx-swap="innerHTML">
+                    </dc-bar>
+                    <dc-bar value="61000" label="April" fill="#9C27B0"
+                            style="cursor: pointer;"
+                            hx-get="/examples/loaded-content.html"
+                            hx-target="#bar-details"
+                            hx-swap="innerHTML">
+                    </dc-bar>
+                    <dc-bar value="58000" label="May" fill="#F44336"
+                            style="cursor: pointer;"
+                            hx-get="/examples/loaded-content.html"
+                            hx-target="#bar-details"
+                            hx-swap="innerHTML">
+                    </dc-bar>
+                </dc-bar-chart>
+
+                <div id="bar-details" class="details-panel">
+                    <p style="color: #999; text-align: center; margin: 30px 0;">
+                        Click a bar above to load content
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Interactive Line Chart with htmx</h2>
+        <p>Click on any line to load content from <code>loaded-content.html</code> into the panel below:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Product Performance</h3>
+                <pre><code>&lt;dc-line-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Product Performance&lt;/dc-title&gt;
+  &lt;dc-line label="Product A" color="#2196F3"
+           hx-get="/examples/loaded-content.html"
+           hx-target="#line-details"
+           hx-swap="innerHTML"&gt;
+    &lt;dc-point value="15" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="22" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="28" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="32" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line label="Product B" color="#4CAF50"
+           hx-get="/examples/loaded-content.html"
+           hx-target="#line-details"
+           hx-swap="innerHTML"&gt;
+    &lt;dc-point value="12" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="18" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="25" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="30" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line label="Product C" color="#FF9800"
+           hx-get="/examples/loaded-content.html"
+           hx-target="#line-details"
+           hx-swap="innerHTML"&gt;
+    &lt;dc-point value="8" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="14" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="20" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="26" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-line-chart&gt;</code></pre>
+                <dc-line-chart width="500" height="350">
+                    <dc-title>Product Performance</dc-title>
+                    <dc-line label="Product A" stroke="#2196F3"
+                             style="cursor: pointer;"
+                             hx-get="/examples/loaded-content.html"
+                             hx-target="#line-details"
+                             hx-swap="innerHTML">
+                        <dc-point value="15" label="Q1"></dc-point>
+                        <dc-point value="22" label="Q2"></dc-point>
+                        <dc-point value="28" label="Q3"></dc-point>
+                        <dc-point value="32" label="Q4"></dc-point>
+                    </dc-line>
+                    <dc-line label="Product B" stroke="#4CAF50"
+                             style="cursor: pointer;"
+                             hx-get="/examples/loaded-content.html"
+                             hx-target="#line-details"
+                             hx-swap="innerHTML">
+                        <dc-point value="12" label="Q1"></dc-point>
+                        <dc-point value="18" label="Q2"></dc-point>
+                        <dc-point value="25" label="Q3"></dc-point>
+                        <dc-point value="30" label="Q4"></dc-point>
+                    </dc-line>
+                    <dc-line label="Product C" stroke="#FF9800"
+                             style="cursor: pointer;"
+                             hx-get="/examples/loaded-content.html"
+                             hx-target="#line-details"
+                             hx-swap="innerHTML">
+                        <dc-point value="8" label="Q1"></dc-point>
+                        <dc-point value="14" label="Q2"></dc-point>
+                        <dc-point value="20" label="Q3"></dc-point>
+                        <dc-point value="26" label="Q4"></dc-point>
+                    </dc-line>
+                </dc-line-chart>
+
+                <div id="line-details" class="details-panel">
+                    <p style="color: #999; text-align: center; margin: 30px 0;">
+                        Click a line above to load content
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Interactive Pie Chart with htmx</h2>
+        <p>Click on any slice to load content from <code>loaded-content.html</code> into the panel below:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Market Share</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Market Share&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="35" label="Product A" color="#2196F3"
+                hx-get="/examples/loaded-content.html"
+                hx-target="#pie-details"
+                hx-swap="innerHTML"&gt;
+  &lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="28" label="Product B" color="#4CAF50"
+                hx-get="/examples/loaded-content.html"
+                hx-target="#pie-details"
+                hx-swap="innerHTML"&gt;
+  &lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="22" label="Product C" color="#FF9800"
+                hx-get="/examples/loaded-content.html"
+                hx-target="#pie-details"
+                hx-swap="innerHTML"&gt;
+  &lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" label="Product D" color="#9C27B0"
+                hx-get="/examples/loaded-content.html"
+                hx-target="#pie-details"
+                hx-swap="innerHTML"&gt;
+  &lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350">
+                    <dc-title>Market Share</dc-title>
+                    <dc-pie-slice value="35" label="Product A" fill="#2196F3"
+                                  style="cursor: pointer;"
+                                  hx-get="/examples/loaded-content.html"
+                                  hx-target="#pie-details"
+                                  hx-swap="innerHTML">
+                    </dc-pie-slice>
+                    <dc-pie-slice value="28" label="Product B" fill="#4CAF50"
+                                  style="cursor: pointer;"
+                                  hx-get="/examples/loaded-content.html"
+                                  hx-target="#pie-details"
+                                  hx-swap="innerHTML">
+                    </dc-pie-slice>
+                    <dc-pie-slice value="22" label="Product C" fill="#FF9800"
+                                  style="cursor: pointer;"
+                                  hx-get="/examples/loaded-content.html"
+                                  hx-target="#pie-details"
+                                  hx-swap="innerHTML">
+                    </dc-pie-slice>
+                    <dc-pie-slice value="15" label="Product D" fill="#9C27B0"
+                                  style="cursor: pointer;"
+                                  hx-get="/examples/loaded-content.html"
+                                  hx-target="#pie-details"
+                                  hx-swap="innerHTML">
+                    </dc-pie-slice>
+                </dc-pie-chart>
+
+                <div id="pie-details" class="details-panel">
+                    <p style="color: #999; text-align: center; margin: 30px 0;">
+                        Click a slice above to load content
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+</body>
+</html>

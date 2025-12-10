@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titles - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+</head>
+<body>
+    <h1>Titles</h1>
+    <p>Control the positioning of titles in your charts</p>
+
+    <nav>
+        <div class="nav-major">
+            <a href="../index.html">Home</a>
+            <a href="barcharts.html">Bar Charts</a>
+            <a href="linecharts.html">Line Charts</a>
+            <a href="piecharts.html">Pie Charts</a>
+            <a href="funnelcharts.html">Funnel Charts</a>
+        </div>
+        <div class="nav-minor">
+            <a href="titles.html" class="current">Titles</a>
+            <a href="legends.html">Legends</a>
+            <a href="axes.html">Axes</a>
+            <a href="colors.html">Colors</a>
+            <a href="typography.html">Typography</a>
+            <a href="borders-and-padding.html">Borders & Padding</a>
+            <a href="bar-groups.html">Bar Groups</a>
+            <a href="bar-width.html">Bar Width</a>
+            <a href="gutter.html">Gutter</a>
+            <a href="interactive.html">Interactive</a>
+            <a href="popups.html">Popups</a>
+            <a href="logging.html">Logging</a>
+            <a href="htmx-integration.html">htmx</a>
+        </div>
+    </nav>
+
+    <div class="example">
+        <h2>Title Positions - Top Alignment</h2>
+        <p>Titles can be positioned at top, top-left, and top-right:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Top (Default)</h3>
+                <pre><code>&lt;dc-bar-chart width="450" height="300"&gt;
+  &lt;dc-title position="top"&gt;Top Title&lt;/dc-title&gt;
+  &lt;dc-bar value="10" color="#FF6B6B" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" color="#4ECDC4" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" color="#45B7D1" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="450" height="300">
+                    <dc-title position="top">Top Title</dc-title>
+                    <dc-bar value="10" fill="#FF6B6B" label="A"></dc-bar>
+                    <dc-bar value="25" fill="#4ECDC4" label="B"></dc-bar>
+                    <dc-bar value="15" fill="#45B7D1" label="C"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Top-Left</h3>
+                <pre><code>&lt;dc-bar-chart width="450" height="300"&gt;
+  &lt;dc-title position="top-left"&gt;Top-Left Title&lt;/dc-title&gt;
+  &lt;dc-bar value="10" color="#FF6B6B" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" color="#4ECDC4" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" color="#45B7D1" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="450" height="300">
+                    <dc-title position="top-left">Top-Left Title</dc-title>
+                    <dc-bar value="10" fill="#FF6B6B" label="A"></dc-bar>
+                    <dc-bar value="25" fill="#4ECDC4" label="B"></dc-bar>
+                    <dc-bar value="15" fill="#45B7D1" label="C"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Top-Right</h3>
+                <pre><code>&lt;dc-bar-chart width="450" height="300"&gt;
+  &lt;dc-title position="top-right"&gt;Top-Right Title&lt;/dc-title&gt;
+  &lt;dc-bar value="10" color="#FF6B6B" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" color="#4ECDC4" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" color="#45B7D1" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="450" height="300">
+                    <dc-title position="top-right">Top-Right Title</dc-title>
+                    <dc-bar value="10" fill="#FF6B6B" label="A"></dc-bar>
+                    <dc-bar value="25" fill="#4ECDC4" label="B"></dc-bar>
+                    <dc-bar value="15" fill="#45B7D1" label="C"></dc-bar>
+                </dc-bar-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Title Positions - Bottom Alignment</h2>
+        <p>Titles can also be positioned at the bottom:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Bottom</h3>
+                <pre><code>&lt;dc-bar-chart width="450" height="300"&gt;
+  &lt;dc-title position="bottom"&gt;Bottom Title&lt;/dc-title&gt;
+  &lt;dc-bar value="10" color="#FF6B6B" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" color="#4ECDC4" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" color="#45B7D1" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="450" height="300">
+                    <dc-title position="bottom">Bottom Title</dc-title>
+                    <dc-bar value="10" fill="#FF6B6B" label="A"></dc-bar>
+                    <dc-bar value="25" fill="#4ECDC4" label="B"></dc-bar>
+                    <dc-bar value="15" fill="#45B7D1" label="C"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Bottom-Left</h3>
+                <pre><code>&lt;dc-bar-chart width="450" height="300"&gt;
+  &lt;dc-title position="bottom-left"&gt;Bottom-Left Title&lt;/dc-title&gt;
+  &lt;dc-bar value="10" color="#FF6B6B" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" color="#4ECDC4" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" color="#45B7D1" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="450" height="300">
+                    <dc-title position="bottom-left">Bottom-Left Title</dc-title>
+                    <dc-bar value="10" fill="#FF6B6B" label="A"></dc-bar>
+                    <dc-bar value="25" fill="#4ECDC4" label="B"></dc-bar>
+                    <dc-bar value="15" fill="#45B7D1" label="C"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Bottom-Right</h3>
+                <pre><code>&lt;dc-bar-chart width="450" height="300"&gt;
+  &lt;dc-title position="bottom-right"&gt;Bottom-Right Title&lt;/dc-title&gt;
+  &lt;dc-bar value="10" color="#FF6B6B" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" color="#4ECDC4" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" color="#45B7D1" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="450" height="300">
+                    <dc-title position="bottom-right">Bottom-Right Title</dc-title>
+                    <dc-bar value="10" fill="#FF6B6B" label="A"></dc-bar>
+                    <dc-bar value="25" fill="#4ECDC4" label="B"></dc-bar>
+                    <dc-bar value="15" fill="#45B7D1" label="C"></dc-bar>
+                </dc-bar-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Title Positions - Left Side (Rotated)</h2>
+        <p>Titles on the left are rotated vertically:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Left</h3>
+                <pre><code>&lt;dc-bar-chart width="450" height="350"&gt;
+  &lt;dc-title position="left"&gt;Left Title&lt;/dc-title&gt;
+  &lt;dc-bar value="10" color="#FF6B6B" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" color="#4ECDC4" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" color="#45B7D1" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="450" height="350">
+                    <dc-title position="left">Left Title</dc-title>
+                    <dc-bar value="10" fill="#FF6B6B" label="A"></dc-bar>
+                    <dc-bar value="25" fill="#4ECDC4" label="B"></dc-bar>
+                    <dc-bar value="15" fill="#45B7D1" label="C"></dc-bar>
+                </dc-bar-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Title Positions - Right Side (Rotated)</h2>
+        <p>Titles on the right are rotated vertically:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Right</h3>
+                <pre><code>&lt;dc-bar-chart width="450" height="350"&gt;
+  &lt;dc-title position="right"&gt;Right Title&lt;/dc-title&gt;
+  &lt;dc-bar value="10" color="#FF6B6B" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" color="#4ECDC4" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="15" color="#45B7D1" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="450" height="350">
+                    <dc-title position="right">Right Title</dc-title>
+                    <dc-bar value="10" fill="#FF6B6B" label="A"></dc-bar>
+                    <dc-bar value="25" fill="#4ECDC4" label="B"></dc-bar>
+                    <dc-bar value="15" fill="#45B7D1" label="C"></dc-bar>
+                </dc-bar-chart>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+</body>
+</html>

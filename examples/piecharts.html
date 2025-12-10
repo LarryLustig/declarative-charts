@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pie Charts - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+</head>
+<body>
+    <h1>Pie Chart Examples</h1>
+    <p>Visualize proportions and distributions with circular charts</p>
+
+    <nav>
+        <div class="nav-major">
+            <a href="../index.html">Home</a>
+            <a href="barcharts.html">Bar Charts</a>
+            <a href="linecharts.html">Line Charts</a>
+            <a href="piecharts.html" class="current">Pie Charts</a>
+            <a href="funnelcharts.html">Funnel Charts</a>
+        </div>
+        <div class="nav-minor">
+            <a href="titles.html">Titles</a>
+            <a href="legends.html">Legends</a>
+            <a href="axes.html">Axes</a>
+            <a href="colors.html">Colors</a>
+            <a href="typography.html">Typography</a>
+            <a href="borders-and-padding.html">Borders & Padding</a>
+            <a href="bar-groups.html">Bar Groups</a>
+            <a href="bar-width.html">Bar Width</a>
+            <a href="gutter.html">Gutter</a>
+            <a href="interactive.html">Interactive</a>
+            <a href="popups.html">Popups</a>
+            <a href="logging.html">Logging</a>
+            <a href="htmx-integration.html">htmx</a>
+        </div>
+    </nav>
+
+    <div class="example">
+        <h2>Basic Pie Chart</h2>
+        <p>A simple pie chart with automatic color generation:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Sales by Category</h3>
+                <pre><code>&lt;dc-pie-chart width="600" height="400"&gt;
+  &lt;dc-title&gt;Sales by Product Category&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="30" label="Electronics"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="45" label="Clothing"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="25" label="Food"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" label="Books"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="600" height="400">
+                    <dc-title>Sales by Product Category</dc-title>
+                    <dc-pie-slice value="30" label="Electronics"></dc-pie-slice>
+                    <dc-pie-slice value="45" label="Clothing"></dc-pie-slice>
+                    <dc-pie-slice value="25" label="Food"></dc-pie-slice>
+                    <dc-pie-slice value="15" label="Books"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Custom Colors</h2>
+        <p>Specify custom colors for each slice:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Market Share</h3>
+                <pre><code>&lt;dc-pie-chart width="600" height="400"&gt;
+  &lt;dc-title&gt;Market Share&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="35" label="Company A" color="#4CAF50"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="28" label="Company B" color="#2196F3"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="22" label="Company C" color="#FF9800"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" label="Others" color="#9E9E9E"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="600" height="400">
+                    <dc-title>Market Share</dc-title>
+                    <dc-pie-slice value="35" label="Company A" fill="#4CAF50"></dc-pie-slice>
+                    <dc-pie-slice value="28" label="Company B" fill="#2196F3"></dc-pie-slice>
+                    <dc-pie-slice value="22" label="Company C" fill="#FF9800"></dc-pie-slice>
+                    <dc-pie-slice value="15" label="Others" fill="#9E9E9E"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Donut Charts</h2>
+        <p>Use inner-radius to create a donut chart (0-100 percentage):</p>
+
+        <div class="grid">
+            <div>
+                <h3>Budget Allocation</h3>
+                <pre><code>&lt;dc-pie-chart width="600" height="400" inner-radius="50"&gt;
+  &lt;dc-title&gt;Budget Allocation&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="40" label="Development"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="25" label="Marketing"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="20" label="Operations"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" label="Research"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="600" height="400" inner-radius="50">
+                    <dc-title>Budget Allocation</dc-title>
+                    <dc-pie-slice value="40" label="Development"></dc-pie-slice>
+                    <dc-pie-slice value="25" label="Marketing"></dc-pie-slice>
+                    <dc-pie-slice value="20" label="Operations"></dc-pie-slice>
+                    <dc-pie-slice value="15" label="Research"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Large Inner Radius</h3>
+                <pre><code>&lt;dc-pie-chart width="600" height="400" inner-radius="65"&gt;
+  &lt;dc-title&gt;Traffic Sources&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="45" label="Organic Search" color="#4CAF50"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="25" label="Direct" color="#2196F3"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" label="Social Media" color="#FF5722"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="10" label="Referral" color="#FFC107"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="5" label="Email" color="#9C27B0"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="600" height="400" inner-radius="65">
+                    <dc-title>Traffic Sources</dc-title>
+                    <dc-pie-slice value="45" label="Organic Search" fill="#4CAF50"></dc-pie-slice>
+                    <dc-pie-slice value="25" label="Direct" fill="#2196F3"></dc-pie-slice>
+                    <dc-pie-slice value="15" label="Social Media" fill="#FF5722"></dc-pie-slice>
+                    <dc-pie-slice value="10" label="Referral" fill="#FFC107"></dc-pie-slice>
+                    <dc-pie-slice value="5" label="Email" fill="#9C27B0"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Labels and Values Display</h2>
+        <p>Control what information is shown on the chart:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Labels Only (No Values)</h3>
+                <pre><code>&lt;dc-pie-chart width="600" height="400" show-value="false"&gt;
+  &lt;dc-title&gt;Customer Satisfaction&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="50" label="Very Satisfied"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="30" label="Satisfied"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" label="Neutral"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="5" label="Unsatisfied"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="600" height="400" show-value="false">
+                    <dc-title>Customer Satisfaction</dc-title>
+                    <dc-pie-slice value="50" label="Very Satisfied"></dc-pie-slice>
+                    <dc-pie-slice value="30" label="Satisfied"></dc-pie-slice>
+                    <dc-pie-slice value="15" label="Neutral"></dc-pie-slice>
+                    <dc-pie-slice value="5" label="Unsatisfied"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Values Only (No Labels)</h3>
+                <pre><code>&lt;dc-pie-chart width="600" height="400" show-labels="false"&gt;
+  &lt;dc-title&gt;Revenue Distribution&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="120" label="Q1"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="150" label="Q2"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="180" label="Q3"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="200" label="Q4"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="600" height="400" show-labels="false">
+                    <dc-title>Revenue Distribution</dc-title>
+                    <dc-pie-slice value="120" label="Q1"></dc-pie-slice>
+                    <dc-pie-slice value="150" label="Q2"></dc-pie-slice>
+                    <dc-pie-slice value="180" label="Q3"></dc-pie-slice>
+                    <dc-pie-slice value="200" label="Q4"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Default Slice Color</h2>
+        <p>Use slice-color to set a default color for all slices:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Single Color Theme</h3>
+                <pre><code>&lt;dc-pie-chart width="600" height="400" fill-colors="#9C27B0"&gt;
+  &lt;dc-title&gt;Task Breakdown&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="20" label="Planning"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="35" label="Development"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="25" label="Testing"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="20" label="Deployment"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="600" height="400" fill-colors="#9C27B0">
+                    <dc-title>Task Breakdown</dc-title>
+                    <dc-pie-slice value="20" label="Planning"></dc-pie-slice>
+                    <dc-pie-slice value="35" label="Development"></dc-pie-slice>
+                    <dc-pie-slice value="25" label="Testing"></dc-pie-slice>
+                    <dc-pie-slice value="20" label="Deployment"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+</body>
+</html>

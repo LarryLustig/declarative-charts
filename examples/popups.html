@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Popup Examples - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+</head>
+<body>
+    <h1>Popup Examples</h1>
+    <p>Auto-popups and custom popups for chart interactivity</p>
+
+    <nav>
+        <div class="nav-major">
+            <a href="../index.html">Home</a>
+            <a href="barcharts.html">Bar Charts</a>
+            <a href="linecharts.html">Line Charts</a>
+            <a href="piecharts.html">Pie Charts</a>
+            <a href="funnelcharts.html">Funnel Charts</a>
+        </div>
+        <div class="nav-minor">
+            <a href="titles.html">Titles</a>
+            <a href="legends.html">Legends</a>
+            <a href="axes.html">Axes</a>
+            <a href="colors.html">Colors</a>
+            <a href="typography.html">Typography</a>
+            <a href="borders-and-padding.html">Borders & Padding</a>
+            <a href="bar-groups.html">Bar Groups</a>
+            <a href="bar-width.html">Bar Width</a>
+            <a href="gutter.html">Gutter</a>
+            <a href="interactive.html">Interactive</a>
+            <a href="popups.html" class="current">Popups</a>
+            <a href="logging.html">Logging</a>
+            <a href="htmx-integration.html">htmx</a>
+        </div>
+    </nav>
+
+    <div class="example">
+        <h2>Auto-Popup on Entire Chart</h2>
+        <p>Add the <code>auto-popup</code> attribute to a chart to automatically show popups with label, value, and percentage on hover. No custom HTML needed!</p>
+
+        <div class="grid">
+            <div>
+                <h3>Bar Chart with Auto-Popup</h3>
+                <pre><code>&lt;dc-bar-chart auto-popup width="500" height="350"&gt;
+  &lt;dc-title&gt;Quarterly Sales&lt;/dc-title&gt;
+  &lt;dc-bar value="120" fill="#4CAF50" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" fill="#2196F3" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" fill="#FF9800" label="Q3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="220" fill="#9C27B0" label="Q4"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart auto-popup width="500" height="350">
+                    <dc-title>Quarterly Sales</dc-title>
+                    <dc-bar value="120" fill="#4CAF50" label="Q1"></dc-bar>
+                    <dc-bar value="180" fill="#2196F3" label="Q2"></dc-bar>
+                    <dc-bar value="150" fill="#FF9800" label="Q3"></dc-bar>
+                    <dc-bar value="220" fill="#9C27B0" label="Q4"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Stacked Bar Chart with Auto-Popup</h3>
+                <pre><code>&lt;dc-bar-chart auto-popup width="500" height="350"&gt;
+  &lt;dc-title&gt;Revenue by Product&lt;/dc-title&gt;
+  &lt;dc-bar label="Q1"&gt;
+    &lt;dc-bar-segment value="50" label="Product A"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="30" label="Product B"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="20" label="Product C"&gt;&lt;/dc-bar-segment&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-bar label="Q2"&gt;
+    &lt;dc-bar-segment value="60" label="Product A"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="40" label="Product B"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="25" label="Product C"&gt;&lt;/dc-bar-segment&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-bar label="Q3"&gt;
+    &lt;dc-bar-segment value="70" label="Product A"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="35" label="Product B"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="30" label="Product C"&gt;&lt;/dc-bar-segment&gt;
+  &lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart auto-popup width="500" height="350">
+                    <dc-title>Revenue by Product</dc-title>
+                    <dc-bar label="Q1">
+                        <dc-bar-segment value="50" label="Product A"></dc-bar-segment>
+                        <dc-bar-segment value="30" label="Product B"></dc-bar-segment>
+                        <dc-bar-segment value="20" label="Product C"></dc-bar-segment>
+                    </dc-bar>
+                    <dc-bar label="Q2">
+                        <dc-bar-segment value="60" label="Product A"></dc-bar-segment>
+                        <dc-bar-segment value="40" label="Product B"></dc-bar-segment>
+                        <dc-bar-segment value="25" label="Product C"></dc-bar-segment>
+                    </dc-bar>
+                    <dc-bar label="Q3">
+                        <dc-bar-segment value="70" label="Product A"></dc-bar-segment>
+                        <dc-bar-segment value="35" label="Product B"></dc-bar-segment>
+                        <dc-bar-segment value="30" label="Product C"></dc-bar-segment>
+                    </dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Pie Chart with Auto-Popup</h3>
+                <pre><code>&lt;dc-pie-chart auto-popup width="500" height="350"&gt;
+  &lt;dc-title&gt;Market Share&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="45" label="Product A"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="30" label="Product B"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" label="Product C"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="10" label="Other"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart auto-popup width="500" height="350">
+                    <dc-title>Market Share</dc-title>
+                    <dc-pie-slice value="45" label="Product A"></dc-pie-slice>
+                    <dc-pie-slice value="30" label="Product B"></dc-pie-slice>
+                    <dc-pie-slice value="15" label="Product C"></dc-pie-slice>
+                    <dc-pie-slice value="10" label="Other"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Funnel Chart with Auto-Popup</h3>
+                <pre><code>&lt;dc-funnel-chart auto-popup width="500" height="350" fill-start-color="#3498db" fill-end-color="#e74c3c"&gt;
+  &lt;dc-title&gt;Conversion Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="600" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="200" label="Opportunities"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="80" label="Customers"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart auto-popup width="500" height="350" fill-start-color="#3498db" fill-end-color="#e74c3c">
+                    <dc-title>Conversion Funnel</dc-title>
+                    <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
+                    <dc-funnel-stage value="600" label="Leads"></dc-funnel-stage>
+                    <dc-funnel-stage value="200" label="Opportunities"></dc-funnel-stage>
+                    <dc-funnel-stage value="80" label="Customers"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Line Chart with Auto-Popup</h3>
+                <pre><code>&lt;dc-line-chart auto-popup width="500" height="350" stroke-colors="#E91E63, #9C27B0"&gt;
+  &lt;dc-title&gt;Weekly Trends&lt;/dc-title&gt;
+  &lt;dc-line label="Sales"&gt;
+    &lt;dc-point value="25" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="40" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="35" label="Wed"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="55" label="Thu"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="45" label="Fri"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line label="Orders"&gt;
+    &lt;dc-point value="15" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="30" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="25" label="Wed"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="40" label="Thu"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="35" label="Fri"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-line-chart&gt;</code></pre>
+                <dc-line-chart auto-popup width="500" height="350" stroke-colors="#E91E63, #9C27B0">
+                    <dc-title>Weekly Trends</dc-title>
+                    <dc-line label="Sales">
+                        <dc-point value="25" label="Mon"></dc-point>
+                        <dc-point value="40" label="Tue"></dc-point>
+                        <dc-point value="35" label="Wed"></dc-point>
+                        <dc-point value="55" label="Thu"></dc-point>
+                        <dc-point value="45" label="Fri"></dc-point>
+                    </dc-line>
+                    <dc-line label="Orders">
+                        <dc-point value="15" label="Mon"></dc-point>
+                        <dc-point value="30" label="Tue"></dc-point>
+                        <dc-point value="25" label="Wed"></dc-point>
+                        <dc-point value="40" label="Thu"></dc-point>
+                        <dc-point value="35" label="Fri"></dc-point>
+                    </dc-line>
+                </dc-line-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Auto-Popup with Element Suppression</h2>
+        <p>Enable <code>auto-popup</code> on the chart, then disable it on specific elements with <code>auto-popup="false"</code>:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Suppress Popup on Specific Bars</h3>
+                <pre><code>&lt;dc-bar-chart auto-popup width="500" height="350"&gt;
+  &lt;dc-title&gt;Sales by Region&lt;/dc-title&gt;
+  &lt;dc-bar value="85" fill="#4CAF50" label="North"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="120" fill="#2196F3" label="South"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="45" fill="#FF9800" label="East" auto-popup="false"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="95" fill="#9C27B0" label="West"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart auto-popup width="500" height="350">
+                    <dc-title>Sales by Region (East suppressed)</dc-title>
+                    <dc-bar value="85" fill="#4CAF50" label="North"></dc-bar>
+                    <dc-bar value="120" fill="#2196F3" label="South"></dc-bar>
+                    <dc-bar value="45" fill="#FF9800" label="East" auto-popup="false"></dc-bar>
+                    <dc-bar value="95" fill="#9C27B0" label="West"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Popup Only on Small Slices (labels hidden)</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350" show-label="8%"&gt;
+  &lt;dc-title&gt;Browser Market Share&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="65" label="Chrome"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="18" label="Safari"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="4" label="Firefox" auto-popup&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="3" label="Edge" auto-popup&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="10" label="Other"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350" show-label="8%">
+                    <dc-title>Browser Share (hover small slices)</dc-title>
+                    <dc-pie-slice value="65" label="Chrome"></dc-pie-slice>
+                    <dc-pie-slice value="18" label="Safari"></dc-pie-slice>
+                    <dc-pie-slice value="4" label="Firefox" auto-popup></dc-pie-slice>
+                    <dc-pie-slice value="3" label="Edge" auto-popup></dc-pie-slice>
+                    <dc-pie-slice value="10" label="Other"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Suppress Popup on Specific Funnel Stages</h3>
+                <pre><code>&lt;dc-funnel-chart auto-popup width="500" height="350" chevron="15px"&gt;
+  &lt;dc-title&gt;User Journey&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="5000" label="Page Views"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="2000" label="Signups" auto-popup="false"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="800" label="Active Users"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="200" label="Paid Users"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart auto-popup width="500" height="350" chevron="15px">
+                    <dc-title>User Journey (Signups suppressed)</dc-title>
+                    <dc-funnel-stage value="5000" label="Page Views"></dc-funnel-stage>
+                    <dc-funnel-stage value="2000" label="Signups" auto-popup="false"></dc-funnel-stage>
+                    <dc-funnel-stage value="800" label="Active Users"></dc-funnel-stage>
+                    <dc-funnel-stage value="200" label="Paid Users"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Selective Auto-Popup (Opt-In)</h2>
+        <p>Leave <code>auto-popup</code> off the chart (default), and enable it only on specific elements:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Auto-Popup on Selected Bars Only</h3>
+                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Monthly Revenue&lt;/dc-title&gt;
+  &lt;dc-bar value="80" fill="#78909C" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="95" fill="#78909C" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" fill="#4CAF50" label="Mar" auto-popup&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="85" fill="#78909C" label="Apr"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="200" fill="#4CAF50" label="May" auto-popup&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" fill="#78909C" label="Jun"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="500" height="350">
+                    <dc-title>Monthly Revenue (highlights have popups)</dc-title>
+                    <dc-bar value="80" fill="#78909C" label="Jan"></dc-bar>
+                    <dc-bar value="95" fill="#78909C" label="Feb"></dc-bar>
+                    <dc-bar value="150" fill="#4CAF50" label="Mar" auto-popup></dc-bar>
+                    <dc-bar value="85" fill="#78909C" label="Apr"></dc-bar>
+                    <dc-bar value="200" fill="#4CAF50" label="May" auto-popup></dc-bar>
+                    <dc-bar value="90" fill="#78909C" label="Jun"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Auto-Popup on Large Slices Only</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Revenue by Category&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="45" label="Enterprise" auto-popup&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="30" label="SMB" auto-popup&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="10" label="Startup"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="8" label="Education"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="7" label="Other"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350">
+                    <dc-title>Revenue by Category (major segments)</dc-title>
+                    <dc-pie-slice value="45" label="Enterprise" auto-popup></dc-pie-slice>
+                    <dc-pie-slice value="30" label="SMB" auto-popup></dc-pie-slice>
+                    <dc-pie-slice value="10" label="Startup"></dc-pie-slice>
+                    <dc-pie-slice value="8" label="Education"></dc-pie-slice>
+                    <dc-pie-slice value="7" label="Other"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Auto-Popup on Key Funnel Stages</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="350" fill-start-color="#673AB7" fill-end-color="#00BCD4"&gt;
+  &lt;dc-title&gt;Hiring Pipeline&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="500" label="Applications"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="150" label="Screened" auto-popup&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="50" label="Interviewed"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="10" label="Hired" auto-popup&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="350" fill-start-color="#673AB7" fill-end-color="#00BCD4">
+                    <dc-title>Hiring Pipeline (key stages)</dc-title>
+                    <dc-funnel-stage value="500" label="Applications"></dc-funnel-stage>
+                    <dc-funnel-stage value="150" label="Screened" auto-popup></dc-funnel-stage>
+                    <dc-funnel-stage value="50" label="Interviewed"></dc-funnel-stage>
+                    <dc-funnel-stage value="10" label="Hired" auto-popup></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Custom Popups with &lt;dc-popup&gt;</h2>
+        <p>For complete control over popup content, use the <code>&lt;dc-popup&gt;</code> element. Custom popups take precedence over auto-popup.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Custom Hover Popups</h3>
+                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Quarterly Revenue&lt;/dc-title&gt;
+  &lt;dc-bar value="150" fill="#FF6B6B" label="Q1"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Q1 2024&lt;/strong&gt;&lt;br&gt;
+      Revenue: $150k&lt;br&gt;
+      Growth: +12%
+    &lt;/dc-popup&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-bar value="180" fill="#4ECDC4" label="Q2"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Q2 2024&lt;/strong&gt;&lt;br&gt;
+      Revenue: $180k&lt;br&gt;
+      Growth: +20%
+    &lt;/dc-popup&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-bar value="165" fill="#45B7D1" label="Q3"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Q3 2024&lt;/strong&gt;&lt;br&gt;
+      Revenue: $165k&lt;br&gt;
+      Growth: -8%
+    &lt;/dc-popup&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-bar value="220" fill="#96CEB4" label="Q4"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Q4 2024&lt;/strong&gt;&lt;br&gt;
+      Revenue: $220k&lt;br&gt;
+      Growth: +33%
+    &lt;/dc-popup&gt;
+  &lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart width="500" height="350">
+                    <dc-title>Quarterly Revenue</dc-title>
+                    <dc-bar value="150" fill="#FF6B6B" label="Q1">
+                        <dc-popup trigger="hover">
+                            <strong>Q1 2024</strong><br>
+                            Revenue: $150k<br>
+                            Growth: +12%
+                        </dc-popup>
+                    </dc-bar>
+                    <dc-bar value="180" fill="#4ECDC4" label="Q2">
+                        <dc-popup trigger="hover">
+                            <strong>Q2 2024</strong><br>
+                            Revenue: $180k<br>
+                            Growth: +20%
+                        </dc-popup>
+                    </dc-bar>
+                    <dc-bar value="165" fill="#45B7D1" label="Q3">
+                        <dc-popup trigger="hover">
+                            <strong>Q3 2024</strong><br>
+                            Revenue: $165k<br>
+                            Growth: -8%
+                        </dc-popup>
+                    </dc-bar>
+                    <dc-bar value="220" fill="#96CEB4" label="Q4">
+                        <dc-popup trigger="hover">
+                            <strong>Q4 2024</strong><br>
+                            Revenue: $220k<br>
+                            Growth: +33%
+                        </dc-popup>
+                    </dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Custom Click Popups with Links</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="350" fill-start-color="#3498db" fill-end-color="#e74c3c"&gt;
+  &lt;dc-title&gt;Sales Funnel - Click a Stage!&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="1000" label="Visitors"&gt;
+    &lt;dc-popup trigger="click"&gt;
+      &lt;strong&gt;Website Visitors&lt;/strong&gt;&lt;br&gt;
+      Total: 1,000 unique visitors&lt;br&gt;
+      Source: Organic + Paid
+    &lt;/dc-popup&gt;
+  &lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="450" label="Leads"&gt;
+    &lt;dc-popup trigger="click"&gt;
+      &lt;strong&gt;Qualified Leads&lt;/strong&gt;&lt;br&gt;
+      Count: 450 (45% conversion)&lt;br&gt;
+      &lt;a href="#"&gt;View Lead Details&lt;/a&gt;
+    &lt;/dc-popup&gt;
+  &lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="150" label="Opportunities"&gt;
+    &lt;dc-popup trigger="click"&gt;
+      &lt;strong&gt;Sales Opportunities&lt;/strong&gt;&lt;br&gt;
+      Count: 150 (33% conversion)&lt;br&gt;
+      Avg. Deal Size: $5,200
+    &lt;/dc-popup&gt;
+  &lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="50" label="Customers"&gt;
+    &lt;dc-popup trigger="click"&gt;
+      &lt;strong&gt;New Customers&lt;/strong&gt;&lt;br&gt;
+      Count: 50 (33% close rate)&lt;br&gt;
+      Total Revenue: $260,000
+    &lt;/dc-popup&gt;
+  &lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="350" fill-start-color="#3498db" fill-end-color="#e74c3c">
+                    <dc-title>Sales Funnel - Click a Stage!</dc-title>
+                    <dc-funnel-stage value="1000" label="Visitors">
+                        <dc-popup trigger="click">
+                            <strong>Website Visitors</strong><br>
+                            Total: 1,000 unique visitors<br>
+                            Source: Organic + Paid
+                        </dc-popup>
+                    </dc-funnel-stage>
+                    <dc-funnel-stage value="450" label="Leads">
+                        <dc-popup trigger="click">
+                            <strong>Qualified Leads</strong><br>
+                            Count: 450 (45% conversion)<br>
+                            <a href="#" style="color: #64B5F6;">View Lead Details</a>
+                        </dc-popup>
+                    </dc-funnel-stage>
+                    <dc-funnel-stage value="150" label="Opportunities">
+                        <dc-popup trigger="click">
+                            <strong>Sales Opportunities</strong><br>
+                            Count: 150 (33% conversion)<br>
+                            Avg. Deal Size: $5,200
+                        </dc-popup>
+                    </dc-funnel-stage>
+                    <dc-funnel-stage value="50" label="Customers">
+                        <dc-popup trigger="click">
+                            <strong>New Customers</strong><br>
+                            Count: 50 (33% close rate)<br>
+                            Total Revenue: $260,000
+                        </dc-popup>
+                    </dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Mixing Auto-Popup with Custom Popups</h2>
+        <p>When <code>auto-popup</code> is enabled on a chart, elements with a <code>&lt;dc-popup&gt;</code> child will use the custom popup instead. This lets you use auto-popup for most elements while providing detailed custom popups for specific ones.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Auto-Popup with Custom Override</h3>
+                <pre><code>&lt;dc-bar-chart auto-popup width="500" height="350"&gt;
+  &lt;dc-title&gt;Team Performance&lt;/dc-title&gt;
+  &lt;dc-bar value="85" fill="#4CAF50" label="Alice"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="92" fill="#2196F3" label="Bob"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Top Performer!&lt;/strong&gt;&lt;br&gt;
+      Score: 92/100&lt;br&gt;
+      Completed: 45 tasks&lt;br&gt;
+      &lt;em&gt;Employee of the Month&lt;/em&gt;
+    &lt;/dc-popup&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-bar value="78" fill="#FF9800" label="Carol"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="88" fill="#9C27B0" label="Dave"&gt;&lt;/dc-bar&gt;
+&lt;/dc-bar-chart&gt;</code></pre>
+                <dc-bar-chart auto-popup width="500" height="350">
+                    <dc-title>Team Performance</dc-title>
+                    <dc-bar value="85" fill="#4CAF50" label="Alice"></dc-bar>
+                    <dc-bar value="92" fill="#2196F3" label="Bob">
+                        <dc-popup trigger="hover">
+                            <strong>Top Performer!</strong><br>
+                            Score: 92/100<br>
+                            Completed: 45 tasks<br>
+                            <em>Employee of the Month</em>
+                        </dc-popup>
+                    </dc-bar>
+                    <dc-bar value="78" fill="#FF9800" label="Carol"></dc-bar>
+                    <dc-bar value="88" fill="#9C27B0" label="Dave"></dc-bar>
+                </dc-bar-chart>
+            </div>
+
+            <div>
+                <h3>Pie Chart with Mixed Popups</h3>
+                <pre><code>&lt;dc-pie-chart auto-popup width="500" height="350"&gt;
+  &lt;dc-title&gt;Budget Allocation&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="40" label="Engineering"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Engineering Department&lt;/strong&gt;&lt;br&gt;
+      Budget: $4.0M&lt;br&gt;
+      Headcount: 125&lt;br&gt;
+      Projects: 8 active
+    &lt;/dc-popup&gt;
+  &lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="25" label="Marketing"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="20" label="Sales"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="10" label="Support"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="5" label="Admin"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart auto-popup width="500" height="350">
+                    <dc-title>Budget Allocation</dc-title>
+                    <dc-pie-slice value="40" label="Engineering">
+                        <dc-popup trigger="hover">
+                            <strong>Engineering Department</strong><br>
+                            Budget: $4.0M<br>
+                            Headcount: 125<br>
+                            Projects: 8 active
+                        </dc-popup>
+                    </dc-pie-slice>
+                    <dc-pie-slice value="25" label="Marketing"></dc-pie-slice>
+                    <dc-pie-slice value="20" label="Sales"></dc-pie-slice>
+                    <dc-pie-slice value="10" label="Support"></dc-pie-slice>
+                    <dc-pie-slice value="5" label="Admin"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Funnel with Selective Custom Popups</h3>
+                <pre><code>&lt;dc-funnel-chart auto-popup width="500" height="350" chevron="20px" flat-top flat-bottom&gt;
+  &lt;dc-title&gt;E-commerce Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="10000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="3000" label="Add to Cart"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Shopping Cart&lt;/strong&gt;&lt;br&gt;
+      Items Added: 3,000&lt;br&gt;
+      Avg. Cart Value: $85&lt;br&gt;
+      &lt;em&gt;30% conversion rate&lt;/em&gt;
+    &lt;/dc-popup&gt;
+  &lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="1500" label="Checkout"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="1000" label="Purchase"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Completed Orders&lt;/strong&gt;&lt;br&gt;
+      Orders: 1,000&lt;br&gt;
+      Revenue: $95,000&lt;br&gt;
+      &lt;em&gt;10% overall conversion&lt;/em&gt;
+    &lt;/dc-popup&gt;
+  &lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart auto-popup width="500" height="350" chevron="20px" flat-top flat-bottom>
+                    <dc-title>E-commerce Funnel</dc-title>
+                    <dc-funnel-stage value="10000" label="Visitors"></dc-funnel-stage>
+                    <dc-funnel-stage value="3000" label="Add to Cart">
+                        <dc-popup trigger="hover">
+                            <strong>Shopping Cart</strong><br>
+                            Items Added: 3,000<br>
+                            Avg. Cart Value: $85<br>
+                            <em>30% conversion rate</em>
+                        </dc-popup>
+                    </dc-funnel-stage>
+                    <dc-funnel-stage value="1500" label="Checkout"></dc-funnel-stage>
+                    <dc-funnel-stage value="1000" label="Purchase">
+                        <dc-popup trigger="hover">
+                            <strong>Completed Orders</strong><br>
+                            Orders: 1,000<br>
+                            Revenue: $95,000<br>
+                            <em>10% overall conversion</em>
+                        </dc-popup>
+                    </dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+</body>
+</html>
