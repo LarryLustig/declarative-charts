@@ -1351,17 +1351,28 @@ export abstract class BaseChart extends LitElement {
   /**
    * Render the title as SVG text element with appropriate transforms.
    * Positions title within the padding area, accounting for stacking with legend if present.
+   *
+   * Uses ChartTitle.generateSvg() to get the SVG at 0,0, then positions it
+   * using <g transform="translate(...)"> and rotation for left/right positions.
    */
   protected renderTitle(): SVGTemplateResult {
-    const titleInfo = this.getTitleInfo();
-    if (!titleInfo) return svg``;
+    // Get the title element directly
+    const titleEl = this.querySelector(':scope > dc-title') as ChartTitle | null;
+    if (!titleEl || !titleEl.text) return svg``;
 
-    const titleDims = this.getTitleDimensions();
-    if (!titleDims) return svg``;
+    // Log any style warnings
+    const warnings = titleEl.getStyleWarnings();
+    for (const warning of warnings) {
+      this.log('warning', 'title.style', warning.message);
+    }
 
-    const position = titleInfo.position;
+    const position = titleEl.position;
     const side = this.getTitleSide(position);
     const paddingContent = this.getPaddingAreaContent();
+
+    // Get dimensions for stacking calculations
+    const titleDims = titleEl.getDimensions();
+    if (titleDims.width === 0 && titleDims.height === 0) return svg``;
 
     // Calculate separator: half the title height
     const separator = titleDims.height / 2;
@@ -1381,97 +1392,87 @@ export abstract class BaseChart extends LitElement {
       }
     }
 
-    // Get effective font size (from attribute or default)
-    const fontSize = this.getTitleFontSize(titleInfo.svgStyles);
+    // Determine text-anchor based on position
+    let textAnchor: 'start' | 'middle' | 'end' = 'middle';
+    if (position === 'top-left' || position === 'bottom-left') {
+      textAnchor = 'start';
+    } else if (position === 'top-right' || position === 'bottom-right') {
+      textAnchor = 'end';
+    }
 
+    // Generate the SVG at 0,0
+    const result = titleEl.generateSvg(textAnchor);
+
+    // Base margin from edge
+    const edgeMargin = 10;
+
+    // Calculate position based on title position
     let x = 0;
     let y = 0;
-    let textAnchor: 'start' | 'middle' | 'end' = 'middle';
-    let transform = '';
-
-    // Base margin from edge (consistent with old design)
-    const edgeMargin = 10;
-    // Text baseline offset (title is positioned by baseline, not top)
-    const baselineOffset = fontSize * 0.8;
 
     switch (position) {
       case 'top':
-        x = this.width / 2;
-        y = edgeMargin + offsetFromEdge + baselineOffset;
-        textAnchor = 'middle';
+        // Center horizontally, offset from top
+        x = (this.width - result.width) / 2;
+        y = edgeMargin + offsetFromEdge;
         break;
       case 'top-left':
         x = 20;
-        y = edgeMargin + offsetFromEdge + baselineOffset;
-        textAnchor = 'start';
+        y = edgeMargin + offsetFromEdge;
         break;
       case 'top-right':
-        x = this.width - 20;
-        y = edgeMargin + offsetFromEdge + baselineOffset;
-        textAnchor = 'end';
+        x = this.width - 20 - result.width;
+        y = edgeMargin + offsetFromEdge;
         break;
 
       case 'bottom':
-        x = this.width / 2;
-        // For bottom, measure from bottom edge upward
-        y = this.height - edgeMargin - offsetFromEdge - (titleDims.height - baselineOffset);
-        textAnchor = 'middle';
+        x = (this.width - result.width) / 2;
+        y = this.height - edgeMargin - offsetFromEdge - result.height;
         break;
       case 'bottom-left':
         x = 20;
-        y = this.height - edgeMargin - offsetFromEdge - (titleDims.height - baselineOffset);
-        textAnchor = 'start';
+        y = this.height - edgeMargin - offsetFromEdge - result.height;
         break;
       case 'bottom-right':
-        x = this.width - 20;
-        y = this.height - edgeMargin - offsetFromEdge - (titleDims.height - baselineOffset);
-        textAnchor = 'end';
+        x = this.width - 20 - result.width;
+        y = this.height - edgeMargin - offsetFromEdge - result.height;
         break;
 
-      case 'left':
-        // For left side, offset is horizontal from left edge
-        x = edgeMargin + offsetFromEdge + fontSize / 2;
-        y = this.height / 2;
-        textAnchor = 'middle';
-        transform = `rotate(-90, ${x}, ${y})`;
-        break;
+      case 'left': {
+        // For left side: position at left edge, centered vertically, then rotate -90
+        // Use fontSize/2 offset from edge (matching original behavior)
+        const fontSize = titleEl.getFontSize();
+        const centerX = edgeMargin + offsetFromEdge + fontSize / 2;
+        const centerY = this.height / 2;
+        // Translate to center point, rotate, then offset by half the text dimensions
+        return svg`
+          <g transform="translate(${centerX}, ${centerY}) rotate(-90)">
+            <g transform="translate(${-result.width / 2}, ${-result.height / 2})">
+              ${result.svg}
+            </g>
+          </g>
+        `;
+      }
 
-      case 'right':
-        // For right side, measure from right edge
-        x = this.width - edgeMargin - offsetFromEdge - fontSize / 2;
-        y = this.height / 2;
-        textAnchor = 'middle';
-        transform = `rotate(90, ${x}, ${y})`;
-        break;
+      case 'right': {
+        // For right side: position at right edge, centered vertically, then rotate 90
+        const fontSize = titleEl.getFontSize();
+        const centerX = this.width - edgeMargin - offsetFromEdge - fontSize / 2;
+        const centerY = this.height / 2;
+        return svg`
+          <g transform="translate(${centerX}, ${centerY}) rotate(90)">
+            <g transform="translate(${-result.width / 2}, ${-result.height / 2})">
+              ${result.svg}
+            </g>
+          </g>
+        `;
+      }
     }
 
-    // Build SVG attributes: use custom styles if provided, otherwise defaults
-    const svgStyles = titleInfo.svgStyles;
-    const fill = svgStyles['fill'] || '#333';
-    const fontFamily = svgStyles['font-family'] || undefined;
-    const fontWeight = svgStyles['font-weight'] || 'bold';
-    const fontStyle = svgStyles['font-style'] || undefined;
-    const textDecoration = svgStyles['text-decoration'] || undefined;
-    const letterSpacing = svgStyles['letter-spacing'] || undefined;
-    const opacity = svgStyles['opacity'] || undefined;
-
     return svg`
-      <text
-        x="${x}"
-        y="${y}"
-        text-anchor="${textAnchor}"
-        font-size="${fontSize}"
-        font-weight="${fontWeight}"
-        fill="${fill}"
-        font-family="${fontFamily || ''}"
-        font-style="${fontStyle || ''}"
-        text-decoration="${textDecoration || ''}"
-        letter-spacing="${letterSpacing || ''}"
-        opacity="${opacity || ''}"
-        transform="${transform}"
-      >
-        ${titleInfo.text}
-      </text>
+      <g transform="translate(${x}, ${y})">
+        ${result.svg}
+      </g>
     `;
   }
 
@@ -1513,72 +1514,52 @@ export abstract class BaseChart extends LitElement {
     return titleEl?.text || '';
   }
 
-  protected getTitleInfo(): { text: string; position: string; svgStyles: Record<string, string> } | null {
-    // Use :scope > to only match direct children, not dc-title nested inside dc-legend
-    const titleEl = this.querySelector(':scope > dc-title') as ChartTitle | null;
-    if (!titleEl || !titleEl.text) return null;
-
-    // Check for common mistakes and log warnings
-    const warnings = titleEl.getStyleWarnings();
-    for (const warning of warnings) {
-      this.log('warning', 'title.style', warning.message);
-    }
-
-    return {
-      text: titleEl.text,
-      position: titleEl.position,
-      svgStyles: titleEl.getSvgStyleAttributes()
-    };
-  }
-
-  /**
-   * Default title font size used for rendering and dimension calculations.
-   * Can be overridden by setting font-size attribute on dc-title.
-   */
-  protected readonly TITLE_FONT_SIZE = 20;
-
-  /**
-   * Get the effective font size for the title, considering custom attributes.
-   * @param svgStyles SVG style attributes from the title element
-   * @returns Font size in viewBox units
-   */
-  protected getTitleFontSize(svgStyles: Record<string, string>): number {
-    if (svgStyles['font-size']) {
-      const parsed = parseFloat(svgStyles['font-size']);
-      if (!isNaN(parsed)) {
-        return parsed;
-      }
-    }
-    return this.TITLE_FONT_SIZE;
-  }
-
   /**
    * Calculate the dimensions of the chart title.
    * Used by auto-padding calculations to reserve space for the title.
    *
+   * For left/right positioned titles, the text is rotated 90 degrees, so
+   * width and height are swapped (text width becomes vertical extent).
+   *
    * @returns Object with width, height, and position, or null if no title
    */
   protected getTitleDimensions(): { width: number; height: number; position: string } | null {
-    const titleInfo = this.getTitleInfo();
-    if (!titleInfo) return null;
+    const titleEl = this.querySelector(':scope > dc-title') as ChartTitle | null;
+    if (!titleEl || !titleEl.text) return null;
 
-    const fontSize = this.getTitleFontSize(titleInfo.svgStyles);
-    const textWidth = this.measureText(titleInfo.text, fontSize);
-    const textHeight = fontSize * 1.2; // Line height approximation
+    const dims = titleEl.getDimensions();
+    if (dims.width === 0 && dims.height === 0) return null;
+
+    const position = titleEl.position;
+    const isRotated = position === 'left' || position === 'right';
 
     // Include edge margin (space from border to title)
     // The trailing margin (space from title to next element or chart content) is added
     // by the padding calculation as a separator or trailing margin
     const edgeMargin = 10;
-    const totalHeight = textHeight + edgeMargin;
-    const totalWidth = textWidth + edgeMargin;
 
-    this.log('info', 'title.dimensions', `"${titleInfo.text}" at ${titleInfo.position}: fontSize=${fontSize}, textHeight=${textHeight.toFixed(1)} + edgeMargin=${edgeMargin} = ${totalHeight.toFixed(1)}`, { width: totalWidth, height: totalHeight, position: titleInfo.position });
+    // For rotated titles, swap width and height since text is rotated 90 degrees
+    // The "width" in padding terms is how much horizontal space it needs (for left/right, that's the text height)
+    // The "height" in padding terms is how much vertical space it needs (for left/right, that's the text width)
+    let totalWidth: number;
+    let totalHeight: number;
+
+    if (isRotated) {
+      // Text height becomes horizontal extent (padding width)
+      // Text width becomes vertical extent (padding height)
+      totalWidth = dims.height + edgeMargin;
+      totalHeight = dims.width;
+    } else {
+      totalWidth = dims.width + edgeMargin;
+      totalHeight = dims.height + edgeMargin;
+    }
+
+    this.log('info', 'title.dimensions', `"${titleEl.text}" at ${position}: fontSize=${titleEl.getFontSize()}, ${isRotated ? 'rotated' : 'horizontal'}, width=${totalWidth.toFixed(1)}, height=${totalHeight.toFixed(1)}`, { width: totalWidth, height: totalHeight, position });
 
     return {
       width: totalWidth,
       height: totalHeight,
-      position: titleInfo.position
+      position
     };
   }
 

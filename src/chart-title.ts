@@ -1,4 +1,5 @@
 import { customElement, property } from 'lit/decorators.js';
+import { svg, SVGTemplateResult } from 'lit';
 import { BaseChartElement } from './base-chart-element.js';
 
 /**
@@ -143,6 +144,141 @@ export class ChartTitle extends BaseChartElement {
     }
 
     return warnings;
+  }
+
+  // ============================================================================
+  // SVG Generation
+  // ============================================================================
+
+  /** Default font size used when none is specified */
+  static readonly DEFAULT_FONT_SIZE = 20;
+
+  /**
+   * Get the effective font size for this title.
+   * @returns Font size in viewBox units
+   */
+  getFontSize(): number {
+    const svgStyles = this.getSvgStyleAttributes();
+    if (svgStyles['font-size']) {
+      const parsed = parseFloat(svgStyles['font-size']);
+      if (!isNaN(parsed)) {
+        return parsed;
+      }
+    }
+    return ChartTitle.DEFAULT_FONT_SIZE;
+  }
+
+  /**
+   * Measure text width using Canvas API.
+   * @param text Text to measure
+   * @param fontSize Font size in pixels
+   * @param fontFamily Optional font family
+   * @returns Width in pixels
+   */
+  private measureText(text: string, fontSize: number, fontFamily?: string): number {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      // Fallback estimation
+      return text.length * fontSize * 0.6;
+    }
+    ctx.font = `${fontSize}px ${fontFamily || 'sans-serif'}`;
+    return ctx.measureText(text).width;
+  }
+
+  /**
+   * Get the dimensions of this title element.
+   * Returns the space the title will occupy (width and height).
+   *
+   * @returns Object with width and height in viewBox units
+   */
+  getDimensions(): { width: number; height: number } {
+    const text = this.text;
+    if (!text) {
+      return { width: 0, height: 0 };
+    }
+
+    const fontSize = this.getFontSize();
+    const svgStyles = this.getSvgStyleAttributes();
+    const fontFamily = svgStyles['font-family'];
+
+    const textWidth = this.measureText(text, fontSize, fontFamily);
+    const textHeight = fontSize * 1.2; // Line height approximation
+
+    return {
+      width: textWidth,
+      height: textHeight
+    };
+  }
+
+  /**
+   * Generate SVG for this title, rendered at origin (0,0).
+   *
+   * The title is rendered as a simple horizontal text element at (0, baseline).
+   * The caller (BaseChart) is responsible for:
+   * - Positioning the title using <g transform="translate(x, y)">
+   * - Rotating for left/right positions using transform="rotate(...)"
+   * - Determining text-anchor based on position variant (left, center, right)
+   *
+   * @param textAnchor How to anchor the text: 'start', 'middle', or 'end'
+   * @returns Object with width, height, and SVG template
+   */
+  generateSvg(textAnchor: 'start' | 'middle' | 'end' = 'middle'): {
+    width: number;
+    height: number;
+    svg: SVGTemplateResult;
+  } {
+    const text = this.text;
+    if (!text) {
+      return { width: 0, height: 0, svg: svg`` };
+    }
+
+    const fontSize = this.getFontSize();
+    const svgStyles = this.getSvgStyleAttributes();
+    const dimensions = this.getDimensions();
+
+    // Extract styles with defaults
+    const fill = svgStyles['fill'] || '#333';
+    const fontFamily = svgStyles['font-family'] || '';
+    const fontWeight = svgStyles['font-weight'] || 'bold';
+    const fontStyle = svgStyles['font-style'] || '';
+    const textDecoration = svgStyles['text-decoration'] || '';
+    const letterSpacing = svgStyles['letter-spacing'] || '';
+    const opacity = svgStyles['opacity'] || '';
+
+    // Calculate x position based on text-anchor
+    // For 'start': x = 0 (text extends to the right)
+    // For 'middle': x = width/2 (text centered)
+    // For 'end': x = width (text extends to the left)
+    let x = 0;
+    if (textAnchor === 'middle') {
+      x = dimensions.width / 2;
+    } else if (textAnchor === 'end') {
+      x = dimensions.width;
+    }
+
+    // Y position: baseline is at fontSize * 0.8 (approximate)
+    const y = fontSize * 0.8;
+
+    return {
+      width: dimensions.width,
+      height: dimensions.height,
+      svg: svg`
+        <text
+          x="${x}"
+          y="${y}"
+          text-anchor="${textAnchor}"
+          font-size="${fontSize}"
+          font-weight="${fontWeight}"
+          fill="${fill}"
+          font-family="${fontFamily}"
+          font-style="${fontStyle}"
+          text-decoration="${textDecoration}"
+          letter-spacing="${letterSpacing}"
+          opacity="${opacity}"
+        >${text}</text>
+      `
+    };
   }
 }
 
