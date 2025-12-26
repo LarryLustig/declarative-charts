@@ -4,7 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a declarative chart library built with Lit (Web Components) and TypeScript. It allows users to create charts using declarative HTML syntax instead of configuration objects. The library currently supports Bar Charts, Line Charts, Pie Charts, and Funnel Charts.
+This is a declarative chart library built with Lit (Web Components) and TypeScript. It allows users to create charts using declarative HTML syntax instead of configuration objects. The library currently supports:
+
+- **Axis-based charts** (use `<dc-chart>`): Bar, Line, Bubble
+- **Non-axis charts** (use their own elements): Pie (`<dc-pie-chart>`), Funnel (`<dc-funnel-chart>`)
+
+See the [HTML Element Naming Convention](#️-critical-html-element-naming-convention) section for details on why this distinction matters.
 
 ## Design Principles
 
@@ -99,10 +104,37 @@ The library uses a two-tier architecture:
    - `BaseChartElement` (src/base-chart-element.ts): Abstract base for data container elements like `<dc-bar>`, `<dc-point>`, etc. These elements don't render visually—they just hold data that parent charts read.
 
 2. **Chart Components** (extend AxisChart or BaseChart):
-   - `BarChart` (src/bar-chart.ts): Extends `AxisChart`. Supports vertical/horizontal orientations, reverse orientations, grouped bars, custom bar widths, and gutter spacing
-   - `LineChart` (src/line-chart.ts): Extends `AxisChart`. Multi-line support with color inheritance
-   - `PieChart` (src/pie-chart.ts): Supports donut charts via `inner-radius`
-   - `FunnelChart` (src/funnel-chart.ts): Complex stage rendering with chevron shapes, gradients, and proportional/logarithmic heights
+
+   **AxisChart descendants** → Use unified `<dc-chart>` element:
+   - `Chart` (src/chart.ts): Unified chart component that extends `AxisChart`. Automatically detects chart type based on child elements present (`<dc-bar>`, `<dc-line>`, `<dc-bubble>`). Supports:
+     - Bar charts: vertical/horizontal orientations, reverse orientations, grouped bars, stacked bars, custom bar widths, gutter spacing
+     - Line charts: multi-line support, curve fitting (`linear`, `smooth`, `monotone`, `step`), custom point shapes
+     - Bubble charts: scatter-style bubbles with size dimension
+
+   **BaseChart descendants** → Use chart-specific element names:
+   - `PieChart` (src/pie-chart.ts): Uses `<dc-pie-chart>`. Supports donut charts via `inner-radius`
+   - `FunnelChart` (src/funnel-chart.ts): Uses `<dc-funnel-chart>`. Complex stage rendering with chevron shapes, gradients, and proportional/logarithmic heights
+
+### ⚠️ CRITICAL: HTML Element Naming Convention
+
+**This is a common source of confusion. Pay careful attention:**
+
+| Chart Type | Base Class | HTML Element | Why |
+|------------|------------|--------------|-----|
+| Bar Chart | `AxisChart` | `<dc-chart>` | Shares axis rendering with other axis charts |
+| Line Chart | `AxisChart` | `<dc-chart>` | Shares axis rendering with other axis charts |
+| Bubble Chart | `AxisChart` | `<dc-chart>` | Shares axis rendering with other axis charts |
+| Pie Chart | `BaseChart` | `<dc-pie-chart>` | No axes, unique radial rendering |
+| Funnel Chart | `BaseChart` | `<dc-funnel-chart>` | No axes, unique stage rendering |
+
+**The key insight:** All `AxisChart` descendants share the same `<dc-chart>` element because they share common axis rendering logic. The chart type is determined by which data elements are present inside:
+- `<dc-bar>` elements → renders as bar chart
+- `<dc-line>` elements → renders as line chart
+- `<dc-bubble>` elements → renders as bubble chart
+
+**Non-axis charts use their own element names** because they have fundamentally different rendering (no X/Y axes, no grid lines, no shared scaling logic).
+
+**NEVER change `<dc-pie-chart>` to `<dc-chart>` or vice versa.** They are different components with different rendering pipelines.
 
 3. **Data Elements** (extend BaseChartElement):
    - `ChartBar` (src/chart-bar.ts): Bar data for bar charts
@@ -113,9 +145,10 @@ The library uses a two-tier architecture:
    - `ChartFunnelStage` (src/chart-funnel-stage.ts): Stage data for funnel charts
 
 4. **Utility Components**:
-   - `ChartTitle` (src/chart-title.ts): Title with position support (top, bottom, left, right, corners)
-   - `ChartLegend` (src/chart-legend.ts): Legend with multiple layouts and positions
+   - `ChartTitle` (src/chart-title.ts): Title with position support (top, bottom, left, right, corners). Generates its own SVG via `generateSvg()` method.
+   - `ChartLegend` (src/chart-legend.ts): Legend with multiple layouts (tabular columns, wrapped inline) and positions. Generates its own SVG via `generateSvg()` method.
    - `ChartPopup` (src/chart-popup.ts): HTML content popups (hover/click triggers)
+   - `ChartAxis` (src/chart-axis.ts): Axis configuration (label intervals, label lines, axis titles). Configuration only - SVG generation stays in AxisChart.
 
 ### Key Patterns
 
@@ -145,109 +178,59 @@ This order ensures axes are always visible even when data elements touch or over
 - **Explicit popups**: Using `<dc-popup>` child elements with custom HTML content
 - **Auto popups**: Using the `auto-popup` attribute for automatic label/value/percentage popups
 
-**Auto-Popup System**: Charts and shapes support automatic popup generation via the `auto-popup` attribute:
+**Auto-Popup System**: Charts support automatic popup generation via `auto-popup` attribute. Chart-level setting enables popups for all shapes; element-level overrides chart setting. Explicit `<dc-popup>` children take precedence. Auto-popups use hover trigger.
 
-1. **Chart-level setting**: Set `auto-popup` on any chart to enable automatic popups for all shapes
-2. **Element-level override**: Set `auto-popup` on individual shapes to override the chart setting
-3. **Precedence**: Explicit `<dc-popup>` child elements always take precedence over auto-popup
-4. **Inheritance**: Shapes with `auto-popup` undefined inherit from their parent (line → chart)
-5. **Trigger**: Auto-popups always use hover trigger (not click)
+**Implementation**: Add `shouldShowAutoPopup(elementAutoPopup?)` helper that checks element setting then falls back to `this.autoPopup`. Generate popup content with label/value/percentage. Update mouse handlers to show auto-popup when no explicit popup exists.
 
-**Implementation pattern for auto-popup in new charts:**
-```typescript
-// 1. Add autoPopup to data extraction interface
-interface ShapeData {
-  // ... other properties
-  popup?: { content: string; trigger: string };
-  autoPopup?: boolean;
-}
+**Attribute Passthrough Pattern**: Shape elements pass through arbitrary attributes (`hx-get`, `data-*`, etc.) to rendered SVG for htmx/Alpine.js integration.
 
-// 2. Add helper method to check if auto-popup should show
-private shouldShowAutoPopup(elementAutoPopup?: boolean): boolean {
-  if (elementAutoPopup !== undefined) return elementAutoPopup;
-  return this.autoPopup;  // Inherited from BaseChart
-}
+**Implementation**: Shape classes extend `BaseShape` (provides `getPassthroughAttributes(knownAttrs)`). Charts capture passthrough attrs during data extraction, add `data-shape-index` to SVG elements, call `this.applyPassthroughAttributes(shapes)` in `updated()`. BaseChart auto-notifies htmx after rendering.
 
-// 3. Add method to generate default popup content
-private generateShapePopupContent(shape: { label: string; value: number }, total: number): string {
-  const percentage = total > 0 ? ((shape.value / total) * 100).toFixed(1) : '0.0';
-  return `<strong>${shape.label}</strong><br>Value: ${shape.value}<br>${percentage}%`;
-}
+**Chrome Element SVG Generation Pattern**: Chrome elements (title, legend) generate their own SVG at origin (0,0) via `generateSvg()` returning `{ width, height, svg }`. BaseChart positions them using `<g transform="translate(x, y)">`. Each element also has `getDimensions()` for layout calculations.
 
-// 4. Update cursor style in rendering
-const hasPopup = shape.popup || this.shouldShowAutoPopup(shape.autoPopup);
-// Use hasPopup to determine cursor: pointer vs default
+**Why**: Encapsulates SVG details in chrome elements; BaseChart only calculates positions. Testable, reusable.
 
-// 5. Update mouse handlers
-private handleShapeMouseEnter(e: MouseEvent, index: number) {
-  const shape = this.getShapes()[index];
-  // Explicit popup takes precedence
-  if (shape.popup?.trigger === 'hover') {
-    this.showPopup(shape.popup.content, e.clientX, e.clientY);
-  } else if (!shape.popup && this.shouldShowAutoPopup(shape.autoPopup)) {
-    const content = this.generateShapePopupContent(shape, this.getTotal());
-    this.showPopup(content, e.clientX, e.clientY);
-  }
-}
+**Exception - Axes**: `ChartAxis` remains configuration-only. Axis SVG generation stays in `AxisChart` because axes are tightly coupled to chart data (scales, grid lines, value labels depend on data range).
 
-private handleShapeMouseLeave(index: number) {
-  const shape = this.getShapes()[index];
-  const isHoverPopup = shape.popup?.trigger === 'hover' ||
-    (!shape.popup && this.shouldShowAutoPopup(shape.autoPopup));
-  if (isHoverPopup && this.clickedIndex !== index) {
-    this.hidePopup();
-  }
-}
+**Logging System**: Set `logging` attribute (`'false'`, `'error'`, `'warning'`, `'info'`, `'true'`) to capture render calculations. Use `this.log(level, path, message, value?)` in chart methods. Retrieve via `getLogEntries()`. Entries cleared each render cycle.
+
+**Accessibility System**: Charts automatically generate ARIA attributes for screen reader support. The SVG element receives `role="img"`, `aria-label` (chart type and title), and `aria-describedby` pointing to a `<desc>` element with auto-generated insights. See [Accessibility for New Chart Types](#accessibility-for-new-chart-types) for implementation details.
+
+**Palette System**: Define reusable color schemes with `<dc-palette>` containing `<dc-color>` elements. Charts reference palettes via the `palette` attribute. Colors are resolved by matching element labels and/or values against palette definitions. Priority: element fill/stroke > palette value range match > palette label match > chart-level colors > auto. Use `<dc-swatch>` to display palette colors outside charts.
+
+**Hidden Attribute**: Data elements support the standard HTML `hidden` attribute to dynamically show/hide chart elements. This follows web standards and enables interactive filtering.
+
+**Supported elements:**
+- `<dc-line hidden>` - Hides a line in line charts
+- `<dc-bar hidden>` - Hides individual bars
+- `<dc-bar-group hidden>` - Hides an entire bar group (all bars inside)
+- `<dc-bubble hidden>` - Hides bubbles in bubble charts
+
+**Usage:**
+```html
+<dc-chart id="my-chart">
+  <dc-line label="Series A" stroke="#2196F3">...</dc-line>
+  <dc-line label="Series B" stroke="#4CAF50" hidden>...</dc-line>
+</dc-chart>
 ```
 
-**Attribute Passthrough Pattern**: Shape elements support passing through arbitrary attributes (like `hx-get`, `data-*`, `@click`, etc.) to rendered SVG elements for integration with htmx, Alpine.js, and other libraries. This pattern involves:
+**JavaScript toggle:**
+```javascript
+// Toggle visibility (one-liner)
+document.querySelector('dc-line[label="Series B"]').toggleAttribute('hidden');
 
-1. **BaseShape class** (src/base-shape.ts): Abstract base class that shape elements extend (instead of BaseChartElement directly). Provides `getPassthroughAttributes(knownAttrs)` method.
+// IMPORTANT: Must trigger chart re-render after toggling
+document.querySelector('#my-chart').requestUpdate();
+```
 
-2. **Shape elements**: Each shape class (dc-bar, dc-pie-slice, dc-funnel-stage, etc.) extends `BaseShape` instead of `BaseChartElement`.
+**Why `requestUpdate()` is required:** Lit doesn't automatically detect attribute changes on child elements. The `hidden` attribute is checked during data extraction, so the chart must be told to re-render.
 
-3. **Chart data extraction**: When charts extract data from child elements, they capture passthrough attributes:
-   ```typescript
-   // In the chart's data extraction method (e.g., getStages(), getBars())
-   const knownAttrs = new Set(['value', 'label', 'color', /* other known attrs */]);
+**Behavior notes:**
+- Hidden elements are excluded from `getMaxValue()` calculations, so axes may rescale
+- Hidden elements don't appear in legends (legend items come from visible data)
+- For bar groups: hiding the group hides all bars inside; individual bars can also be hidden within a visible group
 
-   return elements.map(el => ({
-     value: el.value,
-     label: el.label,
-     // ... other properties
-     passthroughAttrs: Object.keys(el.getPassthroughAttributes(knownAttrs)).length > 0
-       ? el.getPassthroughAttributes(knownAttrs)
-       : undefined
-   }));
-   ```
-
-4. **SVG element marking**: When rendering SVG shapes, add `data-shape-index="${index}"` attribute to each shape element so they can be located later.
-
-5. **Attribute application**: Call `this.applyPassthroughAttributes(shapes)` in the chart's `updated()` lifecycle method to apply passthrough attributes to rendered SVG elements. This method is provided by BaseChart.
-
-6. **htmx notification**: BaseChart automatically notifies htmx (if loaded) to process new elements after rendering.
-
-**Logging System**: Charts support a built-in logging system for debugging and introspection:
-
-1. **Activation**: Set the `logging` attribute on any chart to enable logging. Values: `'false'` (default), `'error'`, `'warning'`, `'info'`, or `'true'` (same as `'info'`).
-
-2. **BaseChart provides**:
-   - `logging` property (attribute: `logging`) - controls which log levels are captured
-   - `log(level, path, message, value?)` - protected method for charts to emit log entries
-   - `getLogEntries()` - public method to retrieve log entries from the last render
-   - Log entries are automatically cleared at the start of each render cycle
-
-3. **Log entry structure**:
-   ```typescript
-   interface LogEntry {
-     level: 'error' | 'warning' | 'info';
-     path: string;      // Dotted path like "padding.left" or "slices[0].angle"
-     message: string;   // Human-readable description of the calculation
-     value?: unknown;   // Optional computed value
-   }
-   ```
-
-4. **Chart-specific logging**: Each chart calls `this.log()` in its calculation methods to record significant events and calculations.
+**Interactive example:** See `examples/linecharts.html` "Per-Line Curve Fitting" section for a working checkbox toggle demo.
 
 ## Development Workflow
 
@@ -267,38 +250,13 @@ private handleShapeMouseLeave(index: number) {
 6. Query child elements to extract data
 7. **Add logging calls** for significant calculations (see Logging System section below)
 8. **Implement auto-popup support**: Add `shouldShowAutoPopup()`, `generateShapePopupContent()` methods and update mouse handlers (see Auto-Popup System section above)
-9. Export from `src/index.ts`
-10. **Add to index.html Basic Chart Types section** (see below)
-11. Create detailed example file in `examples/` (e.g., `examples/scattercharts.html`)
+9. **Implement `getLegendItems()`** - See [Legend Items for New Chart Types](#legend-items-for-new-chart-types) below
+10. **Implement accessibility** - Add `getInsights()` method for auto-generated descriptions (see [Accessibility for New Chart Types](#accessibility-for-new-chart-types))
+11. Export from `src/index.ts`
+12. **Add to index.html Basic Chart Types section** (see below)
+13. Create detailed example file in `examples/` (e.g., `examples/scattercharts.html`)
 
-**Adding to index.html Basic Chart Types:**
-
-The home page (`index.html`) has a "Basic Chart Types" section that showcases all chart types in a responsive grid. When adding a new chart type, add a new grid cell following this pattern:
-
-```html
-<div>
-    <h3>Scatter Chart</h3>
-    <pre><code>&lt;dc-scatter-chart width="500" height="350"&gt;
-  &lt;dc-title&gt;Example Title&lt;/dc-title&gt;
-  &lt;dc-scatter-point x="10" y="20" label="A"&gt;&lt;/dc-scatter-point&gt;
-  &lt;dc-scatter-point x="30" y="40" label="B"&gt;&lt;/dc-scatter-point&gt;
-&lt;/dc-scatter-chart&gt;</code></pre>
-    <dc-scatter-chart width="500" height="350">
-        <dc-title>Example Title</dc-title>
-        <dc-scatter-point x="10" y="20" label="A"></dc-scatter-point>
-        <dc-scatter-point x="30" y="40" label="B"></dc-scatter-point>
-    </dc-scatter-chart>
-    <div class="links">
-        <a href="examples/scattercharts.html">More Scatter Charts</a>
-        <a href="examples/axes.html">Axes & Labels</a>
-    </div>
-</div>
-```
-
-Also update:
-- The nav section with a link to the new detailed examples page
-- The Project Overview section in this file to list the new chart type
-- The CSS selector list (`dc-bar-chart, dc-line-chart, ...`) to include the new chart element
+**Adding to index.html**: Add a grid cell to "Basic Chart Types" section with `<h3>` title, `<pre><code>` example, rendered chart, and links div. Also update nav section and CSS selector list.
 
 ### Adding a New Data Element
 
@@ -312,6 +270,61 @@ Also update:
 - Capture passthrough attributes when extracting data from child elements
 - Add `data-shape-index="${index}"` to rendered SVG elements
 - Call `this.applyPassthroughAttributes(shapes)` in the `updated()` lifecycle method
+
+### Legend Items for New Chart Types
+
+When implementing `getLegendItems()` for a new chart type, consider two key aspects:
+
+**1. Valued vs Dimensionless Items**
+
+The legend system distinguishes between two types of items:
+
+- **`ValuedLegendItem`**: For chart elements that represent discrete quantities (bars, pie slices, funnel stages, bubbles). These display value and optional percentage in the legend.
+  ```typescript
+  { label: 'Sales', color: '#4CAF50', value: 150, shape: 'square' }
+  ```
+
+- **`DimensionlessLegendItem`**: For chart elements that represent trends, relationships, or connections rather than quantities (lines, reference lines, annotations). These only show label and color indicator—no value or percentage.
+  ```typescript
+  { label: 'Trend', color: '#FF5722', dimensionless: true, shape: 'line' }
+  ```
+
+**Rule**: If your new chart type visualizes trends rather than discrete values (like line charts do), use `DimensionlessLegendItem`. The `dimensionless: true` property suppresses value/percent display in legends.
+
+**2. Legend Indicator Shapes**
+
+Each `AxisChart` descendant should use a distinctive shape for its legend indicators that matches the visual representation of the data:
+
+| Chart Type | Shape | Rationale |
+|------------|-------|-----------|
+| Bar Chart | `'square'` | Bars are rectangular |
+| Line Chart | `'line'` | Lines are linear strokes |
+| Bubble Chart | `'circle'` | Bubbles are circular |
+
+When adding a new `AxisChart` descendant, choose an appropriate shape from `LegendShape` (`'square'` | `'line'` | `'circle'`) or request a new shape be added to `ChartSwatch.renderShape()` if needed.
+
+**Example implementation:**
+```typescript
+// For a hypothetical area chart (shows filled areas - use square)
+protected override getLegendItems(): ValuedLegendItem[] {
+  return this.getAreas().map(area => ({
+    label: area.label,
+    color: area.fill,
+    value: area.total,
+    shape: 'square'  // Areas are filled regions, similar to bars
+  }));
+}
+
+// For a hypothetical sparkline chart (shows trends - dimensionless)
+protected override getLegendItems(): DimensionlessLegendItem[] {
+  return this.getSparklines().map(line => ({
+    label: line.label,
+    color: line.stroke,
+    dimensionless: true,
+    shape: 'line'  // Sparklines are lines showing trends
+  }));
+}
+```
 
 ### Modifying Chart Rendering
 
@@ -337,17 +350,17 @@ All charts inherit a flexible padding system from `BaseChart`. Padding values fo
 **Supported formats:**
 ```html
 <!-- Pixel values (CSS convention: unitless = pixels) -->
-<dc-bar-chart padding="60">                 <!-- 60px on all sides -->
-<dc-bar-chart padding="40 60">              <!-- 40px top/bottom, 60px left/right -->
-<dc-bar-chart padding="60px">               <!-- Explicit px suffix (same as "60") -->
-<dc-bar-chart padding-left="80">            <!-- Individual side in pixels -->
+<dc-chart padding="60">                 <!-- 60px on all sides -->
+<dc-chart padding="40 60">              <!-- 40px top/bottom, 60px left/right -->
+<dc-chart padding="60px">               <!-- Explicit px suffix (same as "60") -->
+<dc-chart padding-left="80">            <!-- Individual side in pixels -->
 
 <!-- Percentage values (recommended for responsive layouts) -->
-<dc-bar-chart padding="12%">                <!-- 12% of chart dimensions -->
-<dc-bar-chart padding="10% 15%">            <!-- 10% top/bottom, 15% left/right -->
+<dc-chart padding="12%">                <!-- 12% of chart dimensions -->
+<dc-chart padding="10% 15%">            <!-- 10% top/bottom, 15% left/right -->
 
 <!-- Mixed values -->
-<dc-bar-chart padding="12%" padding-right="80">  <!-- Percentage with px override -->
+<dc-chart padding="12%" padding-right="80">  <!-- Percentage with px override -->
 ```
 
 **Pixel conversion:** Pixel values are converted to percentages based on chart dimensions. For example, `padding="60"` on a `width="500" height="350"` chart becomes 12% horizontally (60/500) and 17.1% vertically (60/350).
@@ -382,13 +395,13 @@ Axis-based charts (bar charts, line charts) support the `<dc-axis>` element for 
 
 **Syntax:**
 ```html
-<dc-bar-chart>
+<dc-chart>
   <dc-axis position="bottom" label-interval="2"></dc-axis>
   <dc-axis position="left">
     <dc-title>Revenue ($)</dc-title>
   </dc-axis>
   <dc-bar value="30" label="A"></dc-bar>
-</dc-bar-chart>
+</dc-chart>
 ```
 
 **Position attribute:**
@@ -420,22 +433,22 @@ For axis-based charts with many data points, category axis labels can overlap. T
 **Examples:**
 ```html
 <!-- Auto-hide overlapping labels (default behavior, no dc-axis needed) -->
-<dc-bar-chart>
+<dc-chart>
 
 <!-- Show all labels, but stagger across 2 lines -->
-<dc-bar-chart>
+<dc-chart>
   <dc-axis position="bottom" label-interval="1" label-lines="2"></dc-axis>
-</dc-bar-chart>
+</dc-chart>
 
 <!-- Show every 3rd label -->
-<dc-bar-chart>
+<dc-chart>
   <dc-axis position="bottom" label-interval="3"></dc-axis>
-</dc-bar-chart>
+</dc-chart>
 
 <!-- Auto-calculate both interval and lines -->
-<dc-bar-chart>
+<dc-chart>
   <dc-axis position="bottom" label-interval="auto" label-lines="auto"></dc-axis>
-</dc-bar-chart>
+</dc-chart>
 ```
 
 **How `label-interval="auto"` works:**
@@ -484,29 +497,7 @@ Chrome elements are non-data visual components that appear in the padding area a
    - If chrome elements exist on a side: `padding = sum(chromeDimensions) + separators + trailingMargin (if title is last) + axisLabelPadding`
    - If no chrome elements: `padding = max(defaultPadding, axisLabelPadding)` where defaultPadding = 5%
 
-**Padding area breakdown with stacked elements:**
-```
-For title AND legend both at "bottom" position (in that DOM order):
-┌─────────────────────────────────────────┐
-│              Chart Content              │
-│                                         │
-├─────────────────────────────────────────┤ ← this.height - padding.bottom (chart edge)
-│         X-Axis Labels (25px)            │ ← axisLabelPadding.bottom
-├─────────────────────────────────────────┤ ← chrome area start
-│              Title (~34px)              │ ← first chrome element (text + edge margin)
-│           separator (~12px)             │ ← half title text height
-│              Legend (~90px)             │ ← second chrome element (includes internal padding)
-└─────────────────────────────────────────┘ ← this.height
-
-For title only (no legend):
-┌─────────────────────────────────────────┐
-│              Chart Content              │
-│                                         │
-├─────────────────────────────────────────┤ ← this.height - padding.bottom (chart edge)
-│       trailing margin (10px)            │ ← symmetric spacing to chart content
-│              Title (~34px)              │ ← title (text + edge margin from border)
-└─────────────────────────────────────────┘ ← this.height
-```
+**Padding area stacking**: From chart edge outward: axis labels → chrome elements (in DOM order with ~12px separators) → chart border. Title adds trailing margin when it's the last element.
 
 **Key types and methods:**
 
@@ -592,79 +583,117 @@ const valueWidth = this.measureText(item.displayValue, 12);
 
 ### Logging System
 
-All charts inherit logging support from `BaseChart`. The logging system captures what "actually happened" during the last render cycle, making it easy to debug layout issues and understand calculations.
-
-**How it works:**
-- `BaseChart` provides `logging` property (attribute: `logging`) with values: `'false'`, `'error'`, `'warning'`, `'info'`, `'true'`
-- `BaseChart` provides `log(level, path, message, value?)` protected method for emitting log entries
-- `BaseChart` provides `getLogEntries()` public method to retrieve logs after render
-- Log entries are automatically cleared at the start of each render cycle
-
-**Adding logging to a new chart type:**
+Use `this.log(level, path, message, value?)` to record calculations. Log message should explain HOW the value was calculated, not just the final result.
 
 ```typescript
-// In your chart's calculation method (e.g., calculateLayout())
+this.log('info', 'layout.radius', `min(${chartWidth}, ${chartHeight}) / 2 = ${radius}`, radius);
+this.log('info', `slices[${index}]`, `"${label}": value=${value}, ${pct}%`, { label, value });
+```
 
-private calculateLayout() {
-  const padding = this.getChartPadding();
-  const chartWidth = this.width - padding.left - padding.right;
-  const chartHeight = this.height - padding.top - padding.bottom;
+**What to log**: Data counts, max/min values, chart dimensions, per-element positions, configuration affecting layout.
 
-  const points = this.getPoints();
-  const maxX = Math.max(...points.map(p => p.x));
-  const maxY = Math.max(...points.map(p => p.y));
+### Accessibility for New Chart Types
 
-  // Log layout calculations
-  this.log('info', 'data.pointCount', `Number of data points`, points.length);
-  this.log('info', 'data.maxX', `Maximum X value`, maxX);
-  this.log('info', 'data.maxY', `Maximum Y value`, maxY);
-  this.log('info', 'layout.chartArea', `chartWidth=${chartWidth.toFixed(1)}, chartHeight=${chartHeight.toFixed(1)}`, { width: chartWidth, height: chartHeight });
+Charts automatically generate ARIA attributes for screen reader accessibility. When creating a new chart type, implement the `getInsights()` method to provide meaningful auto-generated descriptions.
 
-  // Log per-element calculations
-  points.forEach((point, index) => {
-    const screenX = padding.left + (point.x / maxX) * chartWidth;
-    const screenY = this.height - padding.bottom - (point.y / maxY) * chartHeight;
-    this.log('info', `points[${index}]`, `"${point.label}": x=${screenX.toFixed(1)}, y=${screenY.toFixed(1)}`, { label: point.label, x: screenX, y: screenY });
-  });
+**How the accessibility system works:**
 
-  // ... return calculated data
+1. **BaseChart provides the infrastructure:**
+   - `ariaLabel` property - manual override for the SVG's `aria-label`
+   - `ariaDescription` property - manual override for the description
+   - `ariaInsights` property - controls insight level: `'auto'` (default), `'basic'`, or `'none'`
+   - `generateAccessibilityDescription()` - builds the full description from chart type + title + insights
+   - `getAriaLabel()` - returns manual label or auto-generated "Chart type: Title"
+
+2. **Each chart type implements `getInsights()`:**
+   ```typescript
+   protected getInsights(): string {
+     // Analyze your chart's data and return a meaningful description
+     // Return empty string if no insights available
+   }
+   ```
+
+3. **The SVG receives ARIA attributes automatically:**
+   ```html
+   <svg role="img" aria-label="Bar chart: Sales Data" aria-describedby="desc-123">
+     <desc id="desc-123">4 bars, values from 25 to 50. Q4 highest at 50; Q3 lowest at 25</desc>
+     <!-- chart content -->
+   </svg>
+   ```
+
+**Implementing `getInsights()` for a new chart type:**
+
+```typescript
+// Example for a hypothetical gauge chart
+protected getInsights(): string {
+  if (this.ariaInsights === 'none') return '';
+
+  const value = this.getValue();
+  const min = this.getMin();
+  const max = this.getMax();
+  const percentage = ((value - min) / (max - min)) * 100;
+
+  // Basic mode: just the data summary
+  const basic = `Value ${value} (${percentage.toFixed(0)}% of range ${min}-${max})`;
+
+  if (this.ariaInsights === 'basic') return basic;
+
+  // Auto mode: add meaningful analysis
+  const zone = this.getCurrentZone(); // e.g., "danger", "warning", "safe"
+  return `${basic}. Currently in ${zone} zone.`;
 }
 ```
 
-**What to log:**
-- Data counts (number of bars, points, slices, etc.)
-- Max/min values used for scaling
-- Chart area dimensions
-- Scale factors and ranges
-- Per-element calculated positions (x, y coordinates)
-- Configuration values that affect layout
-- Any intermediate calculations that would help debug layout issues
+**Use the insight analysis utilities:**
 
-**IMPORTANT - When implementing new calculations:**
-
-When adding new calculations to the library (e.g., layout algorithms, spacing calculations, dimension computations), **always add logging calls** that explain HOW the value was calculated, not just the final value. The `message` parameter should describe the calculation in human-readable form.
-
-**Log message format pattern:**
+The `src/accessibility/insights.ts` module provides reusable analysis functions:
 
 ```typescript
-// For derived values, show the calculation in the message:
-this.log('info', 'layout.radius', `min(chartWidth(${chartWidth.toFixed(1)}), chartHeight(${chartHeight.toFixed(1)})) / 2 = ${radius.toFixed(1)}`, radius);
-
-// For per-element data, include key properties:
-this.log('info', `slices[${index}]`, `"${slice.label}": value=${slice.value}, ${percentage.toFixed(1)}%`, { label, value, percentage });
-
-// For mode/source information:
-this.log('info', 'padding.left', `auto → legend on left → ${legendWidth.toFixed(1)} (legend) + 10 (margin) = ${finalValue.toFixed(1)}`, finalValue);
+import {
+  analyzeLines,      // For line/trend charts
+  analyzeBars,       // For bar/comparison charts
+  analyzePie,        // For pie/distribution charts
+  analyzeFunnel,     // For funnel/conversion charts
+  analyzeBubbles     // For bubble/scatter charts
+} from './accessibility/index.js';
 ```
 
-**Example: accessing logs programmatically:**
-```javascript
-const chart = document.querySelector('dc-pie-chart');
-chart.logging = 'info';  // Enable logging
-// ... wait for render ...
-const logs = chart.getLogEntries();
-console.table(logs);
+**Example insight outputs by chart type:**
+
+| Chart Type | Example Insight |
+|------------|-----------------|
+| Bar | "4 bars, values from 38 to 95. Q4 highest at 95; Q3 lowest at 38" |
+| Line | "1 line with 5 points. ACME Corp: strong upward trend, highest at May (165)" |
+| Pie | "4 slices totaling 100. dominated by Leader at 55%" |
+| Funnel | "4 stages from 1000 to 50. 5.0% overall conversion; biggest drop from Opportunities to Customers (33% retained)" |
+
+**User-facing attributes:**
+
+Users can control accessibility via these attributes:
+
+```html
+<!-- Default: auto-generated label and insights -->
+<dc-chart>...</dc-chart>
+
+<!-- Manual label override -->
+<dc-chart aria-label="Q3 2024 Revenue by Region">...</dc-chart>
+
+<!-- Manual description override -->
+<dc-chart aria-description="Revenue increased 15% overall, with Western region leading growth.">...</dc-chart>
+
+<!-- Disable insights (basic data summary only) -->
+<dc-chart aria-insights="basic">...</dc-chart>
+
+<!-- Disable description entirely -->
+<dc-chart aria-insights="none">...</dc-chart>
 ```
+
+**Testing accessibility:**
+
+See `examples/accessibility.html` for:
+- Auto-generated insights for all chart types
+- Manual override examples
+- Screen reader testing guide (NVDA, VoiceOver, browser DevTools)
 
 ## TypeScript Configuration
 
@@ -678,15 +707,25 @@ console.table(logs);
 
 ```
 src/
-├── base-chart.ts           # Abstract base for all charts (includes logging support)
-├── axis-chart.ts           # Abstract base for axis-based charts (bar, line) - extends BaseChart
+├── base-chart.ts           # Abstract base for all charts (includes logging, accessibility)
+├── axis-chart.ts           # Abstract base for axis-based charts - extends BaseChart
 ├── base-chart-element.ts   # Abstract base for data elements (no passthrough)
 ├── base-shape.ts           # Abstract base for shape elements (with passthrough support)
-├── bar-chart.ts            # Bar chart implementation (extends AxisChart)
-├── line-chart.ts           # Line chart implementation (extends AxisChart)
-├── pie-chart.ts            # Pie chart implementation (extends BaseChart)
-├── funnel-chart.ts         # Funnel chart implementation (extends BaseChart)
+│
+│   # Axis-based charts (all use <dc-chart> element)
+├── chart.ts                # Unified <dc-chart> element - renders bars, lines, or bubbles based on children
+│
+│   # Non-axis charts (each has its own element name)
+├── pie-chart.ts            # <dc-pie-chart> - Pie chart implementation (extends BaseChart)
+├── funnel-chart.ts         # <dc-funnel-chart> - Funnel chart implementation (extends BaseChart)
+│
+├── accessibility/          # Accessibility utilities
+│   ├── insights.ts         # Statistical analysis for auto-generated descriptions
+│   └── index.ts            # Accessibility module exports
 ├── chart-axis.ts           # Axis configuration element (dc-axis)
+├── chart-palette.ts        # Palette container element (dc-palette)
+├── chart-color.ts          # Color definition element (dc-color)
+├── chart-swatch.ts         # Color swatch element (dc-swatch)
 ├── chart-*.ts              # Data element components (extend BaseShape or BaseChartElement)
 └── index.ts                # Main entry point (exports all components)
 
@@ -703,9 +742,11 @@ examples/
 ├── borders-and-padding.html # Borders and padding examples
 ├── titles.html             # Title positioning examples
 ├── legends.html            # Legend layout examples
+├── palettes.html           # Palette and swatch examples
 ├── axes.html               # Axis configuration and label display examples
 ├── interactive.html        # Popup and interactivity examples
 ├── htmx-integration.html   # htmx integration examples
+├── accessibility.html      # Accessibility features and screen reader testing guide
 └── loaded-content.html     # Content fragment for htmx demos
 
 test-charts/
@@ -729,263 +770,31 @@ The `index.html` and `examples/*.html` files contain comprehensive examples. Whe
 
 Example pages use shared CSS and JavaScript files to ensure consistent styling and behavior:
 
-- **`examples/examples.css`**: Common styles for all example pages including:
-  - Page layout and typography
-  - Navigation bar styling
-  - `.example` section containers
-  - `.grid` responsive grid layout (`grid-template-columns: repeat(auto-fit, minmax(500px, 1fr))`)
-  - `<pre><code>` code block styling
-  - Collapsible code block styles (`.code-wrapper`, `.code-toggle`, `.collapsed`)
-
-- **`examples/examples.js`**: JavaScript for collapsible code blocks that:
-  - Automatically wraps multi-line `<pre>` elements in `.code-wrapper` containers
-  - Adds "show/hide" toggle buttons
-  - Starts code blocks collapsed (showing first line only)
-  - Expands to full source when clicked
+- **`examples/examples.css`**: Shared styles (nav, `.example` containers, `.grid` layout, code blocks)
+- **`examples/examples.js`**: Auto-collapsible code blocks (start collapsed, show/hide toggle)
 
 ### Example File Structure
 
-All example files in `examples/` follow this template:
+All example files follow a consistent structure. See any existing example file (e.g., `examples/barcharts.html`) as a template.
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page Title - Declarative Chart Library</title>
-    <link rel="stylesheet" href="examples.css">
-    <!-- Page-specific styles (if needed) -->
-    <style>
-        .custom-class { /* ... */ }
-    </style>
-</head>
-<body>
-    <h1>Page Title</h1>
-    <p>Description of examples on this page</p>
-
-    <nav>
-        <div class="nav-major">
-            <a href="../index.html">Home</a>
-            <a href="barcharts.html">Bar Charts</a>
-            <a href="linecharts.html">Line Charts</a>
-            <a href="piecharts.html">Pie Charts</a>
-            <a href="funnelcharts.html">Funnel Charts</a>
-        </div>
-        <div class="nav-minor">
-            <a href="titles.html">Titles</a>
-            <a href="legends.html">Legends</a>
-            <a href="axes.html">Axes</a>
-            <a href="colors.html">Colors</a>
-            <a href="typography.html">Typography</a>
-            <a href="borders-and-padding.html">Borders & Padding</a>
-            <a href="bar-groups.html">Bar Groups</a>
-            <a href="bar-width.html">Bar Width</a>
-            <a href="gutter.html">Gutter</a>
-            <a href="interactive.html">Interactive</a>
-            <a href="popups.html">Popups</a>
-            <a href="logging.html">Logging</a>
-            <a href="htmx-integration.html">htmx</a>
-        </div>
-    </nav>
-
-    <!-- Sections for each category of examples -->
-    <div class="example">
-        <h2>Section Title</h2>
-        <p>Description of this section...</p>
-
-        <div class="grid">
-            <!-- Individual examples in grid cells -->
-        </div>
-    </div>
-
-    <script type="module" src="../src/index.ts"></script>
-    <script src="examples.js"></script>
-</body>
-</html>
-```
-
-**Navigation Structure:**
-
-The navigation uses a two-tier structure to visually distinguish chart types from feature documentation:
-
-1. **Major links (`.nav-major`)**: Chart type pages displayed as blue badge/buttons
-   - Home (links to `../index.html`)
-   - Bar Charts, Line Charts, Pie Charts, Funnel Charts
-
-2. **Minor links (`.nav-minor`)**: Feature documentation displayed as regular text links
-   - Titles, Legends, Axes, Colors, Typography
-   - Borders & Padding, Bar Groups, Bar Width, Gutter
-   - Interactive, Popups, Logging, htmx
-
-**Navigation Rules:**
-- **ALWAYS use both `.nav-major` and `.nav-minor` divs** - never use flat links
-- **Chart type order is fixed**: Home, Bar Charts, Line Charts, Pie Charts, Funnel Charts
-- **Feature link order is fixed**: Follow the order shown in the template above
-- **Mark the current page** with `class="current"` on the appropriate link
-- **All pages must have identical navigation** - `index.html` AND all `examples/*.html` files must have the same links in the same order
-- The only difference: `index.html` uses `examples/` prefix for links (e.g., `examples/barcharts.html`), while example pages use relative links (e.g., `barcharts.html`)
-- When adding a new chart type, add it to `.nav-major` on `index.html` AND ALL example pages
-- When adding a new feature page, add it to `.nav-minor` on `index.html` AND ALL example pages
-
-**Section Structure:**
-- Each logical group of examples goes in a `<div class="example">` container
-- Section has an `<h2>` title and `<p>` description
-- Related examples are placed in a `<div class="grid">` using CSS grid
-- Grid uses `grid-template-columns: repeat(auto-fit, minmax(500px, 1fr))` for responsive layout
-
-**Individual Example Structure:**
-```html
-<div class="grid">
-    <div>
-        <h3>Example Title</h3>
-        <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
-  &lt;dc-title&gt;Chart Title&lt;/dc-title&gt;
-  &lt;dc-bar value="30" color="#4CAF50" label="A"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="45" color="#8BC34A" label="B"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="25" color="#CDDC39" label="C"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-        <dc-bar-chart width="500" height="350">
-            <dc-title>Chart Title</dc-title>
-            <dc-bar value="30" color="#4CAF50" label="A"></dc-bar>
-            <dc-bar value="45" color="#8BC34A" label="B"></dc-bar>
-            <dc-bar value="25" color="#CDDC39" label="C"></dc-bar>
-        </dc-bar-chart>
-    </div>
-    <!-- More examples... -->
-</div>
-```
-
-**Key Conventions:**
-- **ALWAYS use shared files**: Include `<link rel="stylesheet" href="examples.css">` in the head and `<script src="examples.js"></script>` before closing `</body>`. Page-specific styles should be added in a separate `<style>` block.
-- **ALWAYS use `.grid` layout**: Every section with examples MUST have its examples inside a `<div class="grid">`. Never place charts directly in a `.example` div without the grid wrapper. This ensures consistent responsive layout across all example pages.
-- **ALWAYS show full source code**: Code blocks must show the complete chart markup including all data elements. Do NOT abbreviate with `...` - users should be able to copy the code directly. The collapsible code feature handles long code blocks.
-- Each example has: `<h3>` title, `<pre><code>` block with HTML-escaped code, then the actual rendered chart
-- Code blocks use HTML entities (`&lt;`, `&gt;`) for angle brackets
-- Charts in examples typically use `width="500" height="350"` to fit grid cells (the grid has `minmax(500px, 1fr)`)
-- Group related examples (e.g., all orientations, all variations of a feature) in the same section
-- Separate distinct features into different sections (e.g., "Basic Bar Charts", "Grouped Bar Charts", "Stacked Bar Charts")
-
-**Collapsible Code Blocks:**
-
-The shared `examples.js` file automatically makes code blocks collapsible. Code blocks with multiple lines:
-- Start collapsed, showing only the first line
-- Display a "▼ show" button in the top-right corner
-- Expand to show full source when clicked, changing button to "▲ hide"
-
-No additional configuration is needed - just include `examples.js` and the behavior is automatic.
+**Key rules:**
+- Include `examples.css` and `examples.js` in all example pages
+- Use two-tier nav: `.nav-major` (chart types) + `.nav-minor` (features)
+- All pages must have identical navigation; mark current page with `class="current"`
+- Wrap examples in `<div class="example">` with `<div class="grid">` inside
+- Each example: `<h3>` title, `<pre><code>` with full source (HTML-escaped), then rendered chart
+- Charts use `width="500" height="350"` to fit grid cells
+- Show complete code (no `...` abbreviations) - collapsible code handles length
 
 ## Test Charts Matrix
 
-The `test-charts/` folder contains visual test matrices for verifying legend and title positioning across all chart types. Each test page generates thousands of chart variations to ensure correct rendering in all position combinations.
+The `test-charts/` folder contains visual test matrices for verifying legend/title positioning. Each page generates chart variations for all position combinations.
 
-### Chart ID Format
+**Chart ID format**: `{chartType}-L{legendPos}-T{titlePos}-LT{legendTitlePos}-V{showValue}-P{showPercent}`
 
-Each chart in the test matrices has a unique ID following this format:
+Position abbreviations: `r`=right, `l`=left, `t`=top, `b`=bottom, `tl`=top-left, `tr`=top-right, `bl`=bottom-left, `br`=bottom-right, `n`=none. Boolean: `1`=true, `0`=false.
 
-```
-{chartType}-L{legendPos}-T{titlePos}-LT{legendTitlePos}-V{showValue}-P{showPercent}
-```
+**Finding a chart**: Use browser search (Ctrl+F) for the chart ID. Chart type prefixes map to files: `pie`→pie.html, `bar-v`→bar-vertical.html, `bar-h`→bar-horizontal.html, `bar-s`→bar-stacked.html, `line`→line.html, `funnel`→funnel.html.
 
-**Components:**
-- `{chartType}`: Chart type prefix (e.g., `pie`, `bar-v`, `bar-h`, `bar-s`, `line`, `funnel`)
-- `L{legendPos}`: Legend position
-- `T{titlePos}`: Chart title position
-- `LT{legendTitlePos}`: Legend title position
-- `V{showValue}`: Show value in legend (1=true, 0=false)
-- `P{showPercent}`: Show percent in legend (1=true, 0=false)
-
-**Position Abbreviations:**
-
-| Abbreviation | Position |
-|--------------|----------|
-| `r` | right |
-| `l` | left |
-| `t` | top |
-| `b` | bottom |
-| `tl` | top-left |
-| `tr` | top-right |
-| `bl` | bottom-left |
-| `br` | bottom-right |
-| `n` | none |
-
-**Boolean Abbreviations:**
-| Abbreviation | Value |
-|--------------|-------|
-| `1` | true |
-| `0` | false |
-
-**Examples:**
-- `pie-Lbl-Tbr-LTt-V1-P0` = Pie chart with legend at bottom-left, chart title at bottom-right, legend title at top, show-value=true, show-percent=false
-- `bar-v-Lr-Tn-LTn-V0-P0` = Vertical bar chart with legend at right, no chart title, no legend title, show-value=false, show-percent=false
-- `bar-s-Lt-Ttl-LTb-V1-P1` = Stacked bar chart with legend at top, chart title at top-left, legend title at bottom, show-value=true, show-percent=true
-
-### Finding a Chart by ID
-
-When you encounter a chart ID (e.g., from a bug report like "chart `pie-Lbl-Tbr-LTt-V1-P0` has overlap issues"):
-
-1. **Identify the chart type** from the prefix:
-   - `pie` → `test-charts/pie.html`
-   - `bar-v` → `test-charts/bar-vertical.html`
-   - `bar-vr` → `test-charts/bar-vertical-reverse.html`
-   - `bar-h` → `test-charts/bar-horizontal.html`
-   - `bar-hr` → `test-charts/bar-horizontal-reverse.html`
-   - `bar-s` → `test-charts/bar-stacked.html`
-   - `line` → `test-charts/line.html`
-   - `funnel` → `test-charts/funnel.html`
-
-2. **Navigate to the legend section**: Charts are organized by legend position first (8 sections: right, left, top, top-left, top-right, bottom, bottom-left, bottom-right)
-
-3. **Find the title subsection**: Within each legend section, charts are grouped by chart title position (9 options: none, top, top-left, top-right, bottom, bottom-left, bottom-right, left, right)
-
-4. **Locate the legend title subsection**: Within each title subsection, charts are grouped by legend title position (9 options)
-
-5. **Find the show-value/show-percent combination**: Within each legend title subsection, there are 4 charts for each combination of show-value and show-percent
-
-6. **Use browser search**: Press Ctrl+F (or Cmd+F) and search for the exact chart ID (e.g., `pie-Lbl-Tbr-LTt-V1-P0`). Each chart displays its ID next to its heading.
-
-### Maintaining Test Charts
-
-When adding a new chart type to the library:
-
-1. **Create a new test matrix file** in `test-charts/` following the naming convention (e.g., `scatter.html`)
-
-2. **Use the same structure** as existing test files:
-   - Link to `test-matrix.css` for consistent styling
-   - Generate all combinations: 8 legend positions × 9 title positions × 9 legend title positions × 2 show-value × 2 show-percent = 2,592 charts
-   - Use appropriate chart ID prefix
-
-3. **Update `test-charts/index.html`**:
-   - Add a new card for the chart type
-   - Update the total chart count if displayed
-
-4. **Test the matrix** by running `npm run dev` and navigating to the test page to verify all charts render correctly
-
-### Test Matrix File Template
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{Chart Type} - Test Matrix</title>
-    <link rel="stylesheet" href="test-matrix.css">
-</head>
-<body>
-    <h1>{Chart Type} - Legend & Title Test Matrix</h1>
-    <p class="back-link"><a href="index.html">&larr; Back to Index</a></p>
-    <p>8 legend positions &times; 9 chart title positions &times; 9 legend title positions = 648 charts</p>
-    <p><strong>Chart ID format:</strong> <code>{prefix}-L{legend}-T{title}-LT{legendTitle}</code></p>
-
-    <div id="chart-container"></div>
-
-    <script type="module" src="../src/index.ts"></script>
-    <script>
-        // JavaScript to generate all chart combinations
-        // See existing test files for implementation pattern
-    </script>
-</body>
-</html>
-```
+**Adding test matrix for new chart**: Copy existing test file structure, use `test-matrix.css`, generate all combinations, update `test-charts/index.html`.
 

@@ -12,6 +12,7 @@ A modern Web Components-based chart library built with Lit that allows you to cr
 - 🎯 **TypeScript** - Full TypeScript support with type definitions
 - 🌐 **Standards-Based** - Uses Web Components standard
 - 🎭 **Rich Interactions** - Popups, legends, grouped bars, and more
+- ♿ **Accessible** - Auto-generated ARIA labels and intelligent descriptions for screen readers
 
 ## Quick Start
 
@@ -42,18 +43,18 @@ This creates optimized files in the `dist/` folder.
 ### Bar Chart
 
 ```html
-<dc-bar-chart width="600" height="400">
+<dc-chart width="600" height="400">
   <dc-title>My Chart</dc-title>
   <dc-bar value="10" fill="red" label="January"></dc-bar>
   <dc-bar value="20" fill="blue" label="February"></dc-bar>
   <dc-bar value="30" fill="green" label="March"></dc-bar>
-</dc-bar-chart>
+</dc-chart>
 ```
 
 ### Line Chart
 
 ```html
-<dc-line-chart width="600" height="400" stroke-colors="#9C27B0">
+<dc-chart width="600" height="400" stroke-colors="#9C27B0">
   <dc-title>Temperature Trends</dc-title>
   <dc-line label="City A">
     <dc-point value="15" label="Mon"></dc-point>
@@ -65,7 +66,7 @@ This creates optimized files in the `dist/` folder.
     <dc-point value="16" label="Tue"></dc-point>
     <dc-point value="20" label="Wed"></dc-point>
   </dc-line>
-</dc-line-chart>
+</dc-chart>
 ```
 
 In this example, City A will use the chart's `stroke-colors` (#9C27B0), while City B uses its own `stroke` (#FF5722).
@@ -95,7 +96,7 @@ In this example, City A will use the chart's `stroke-colors` (#9C27B0), while Ci
 
 ## Common Chart Attributes
 
-All chart components (`<dc-bar-chart>`, `<dc-line-chart>`, `<dc-pie-chart>`, `<dc-funnel-chart>`) share these common attributes:
+All chart components (`<dc-chart>`, `<dc-pie-chart>`, `<dc-funnel-chart>`) share these common attributes:
 
 ### Dimensions
 - `width` (number) - Chart width in pixels (default: 600)
@@ -120,22 +121,22 @@ Control the spacing between the chart edge and the chart content (axes, bars, pi
 **CSS-style shorthand examples:**
 ```html
 <!-- Single value: all sides -->
-<dc-bar-chart padding="40">
+<dc-chart padding="40">
 
 <!-- Two values: top/bottom, left/right -->
-<dc-bar-chart padding="20 80">
+<dc-chart padding="20 80">
 
 <!-- Three values: top, left/right, bottom -->
-<dc-bar-chart padding="10 60 30">
+<dc-chart padding="10 60 30">
 
 <!-- Four values: top, right, bottom, left -->
-<dc-bar-chart padding="20 40 30 50">
+<dc-chart padding="20 40 30 50">
 
 <!-- Individual properties override shorthand -->
-<dc-funnel-chart padding="40" padding-left="100">
+<dc-chart padding="40" padding-left="100">
 
 <!-- Supports rem units -->
-<dc-pie-chart padding="2rem 40px">
+<dc-chart padding="2rem 40px">
 ```
 
 **Priority:** Individual side properties > shorthand > auto (calculated from chrome elements, defaults to 5% when no title/legend)
@@ -157,21 +158,21 @@ Set colors directly on individual elements:
 
 ```html
 <!-- Bar chart with per-bar fills -->
-<dc-bar-chart width="600" height="400">
+<dc-chart width="600" height="400">
   <dc-bar value="10" fill="red" label="Q1"></dc-bar>
   <dc-bar value="20" fill="blue" label="Q2"></dc-bar>
   <dc-bar value="30" fill="green" label="Q3"></dc-bar>
-</dc-bar-chart>
+</dc-chart>
 
 <!-- Line chart with per-line strokes -->
-<dc-line-chart width="600" height="400">
+<dc-chart width="600" height="400">
   <dc-line stroke="#9C27B0" label="City A">
     <dc-point value="15" label="Mon"></dc-point>
   </dc-line>
   <dc-line stroke="#FF5722" label="City B">
     <dc-point value="12" label="Mon"></dc-point>
   </dc-line>
-</dc-line-chart>
+</dc-chart>
 ```
 
 #### Chart-Level Color Palettes
@@ -180,25 +181,25 @@ Use `fill-colors` or `stroke-colors` to define a palette. A single color applies
 
 ```html
 <!-- Single color for all bars -->
-<dc-bar-chart fill-colors="#9C27B0">
+<dc-chart fill-colors="#9C27B0">
   <dc-bar value="10" label="Q1"></dc-bar>
   <dc-bar value="20" label="Q2"></dc-bar>
-</dc-bar-chart>
+</dc-chart>
 
 <!-- Multiple colors cycle through bars -->
-<dc-bar-chart fill-colors="#4CAF50, #2196F3, #FF9800, #9C27B0">
+<dc-chart fill-colors="#4CAF50, #2196F3, #FF9800, #9C27B0">
   <dc-bar value="10" label="Q1"></dc-bar>  <!-- green -->
   <dc-bar value="20" label="Q2"></dc-bar>  <!-- blue -->
   <dc-bar value="15" label="Q3"></dc-bar>  <!-- orange -->
   <dc-bar value="40" label="Q4"></dc-bar>  <!-- purple -->
-</dc-bar-chart>
+</dc-chart>
 
 <!-- Line chart with stroke palette -->
-<dc-line-chart stroke-colors="#9C27B0, #FF5722, #009688">
+<dc-chart stroke-colors="#9C27B0, #FF5722, #009688">
   <dc-line label="Series A">...</dc-line>  <!-- purple -->
   <dc-line label="Series B">...</dc-line>  <!-- deep orange -->
   <dc-line label="Series C">...</dc-line>  <!-- teal -->
-</dc-line-chart>
+</dc-chart>
 ```
 
 #### Gradient Colors
@@ -214,18 +215,18 @@ Create smooth color gradients using start and end colors:
 </dc-funnel-chart>
 
 <!-- Bar chart with gradient fill -->
-<dc-bar-chart fill-start-color="#673AB7" fill-end-color="#00BCD4">
+<dc-chart fill-start-color="#673AB7" fill-end-color="#00BCD4">
   <dc-bar value="10" label="Q1"></dc-bar>
   <dc-bar value="25" label="Q2"></dc-bar>
   <dc-bar value="15" label="Q3"></dc-bar>
-</dc-bar-chart>
+</dc-chart>
 
 <!-- Line chart with stroke gradient -->
-<dc-line-chart stroke-start-color="#E91E63" stroke-end-color="#3F51B5">
+<dc-chart stroke-start-color="#E91E63" stroke-end-color="#3F51B5">
   <dc-line label="A">...</dc-line>
   <dc-line label="B">...</dc-line>
   <dc-line label="C">...</dc-line>
-</dc-line-chart>
+</dc-chart>
 ```
 
 #### Auto-Generated Colors
@@ -301,16 +302,16 @@ Different chart types have different defaults:
 **Basic boolean control:**
 ```html
 <!-- Hide all values -->
-<dc-bar-chart show-value="false">
+<dc-chart show-value="false">
   <dc-bar value="100" label="A"></dc-bar>
   <dc-bar value="200" label="B"></dc-bar>
-</dc-bar-chart>
+</dc-chart>
 
 <!-- Show both values and percentages -->
-<dc-bar-chart show-percent>
+<dc-chart show-percent>
   <dc-bar value="100" label="A"></dc-bar>
   <dc-bar value="200" label="B"></dc-bar>
-</dc-bar-chart>
+</dc-chart>
 ```
 
 **Percentage thresholds (great for decluttering small slices):**
@@ -333,21 +334,21 @@ Different chart types have different defaults:
 **Value thresholds:**
 ```html
 <!-- Only show values on bars with value >= 100 -->
-<dc-bar-chart show-value="100">
+<dc-chart show-value="100">
   <dc-bar value="250" label="High"></dc-bar>   <!-- value shown -->
   <dc-bar value="150" label="Medium"></dc-bar> <!-- value shown -->
   <dc-bar value="50" label="Low"></dc-bar>     <!-- value hidden -->
-</dc-bar-chart>
+</dc-chart>
 ```
 
 **Per-element overrides:**
 ```html
 <!-- Hide values globally, but show on specific elements -->
-<dc-bar-chart show-value="false">
+<dc-chart show-value="false">
   <dc-bar value="120" label="Normal"></dc-bar>
   <dc-bar value="200" label="Important" show-value fill="#4CAF50"></dc-bar>
   <dc-bar value="80" label="Normal"></dc-bar>
-</dc-bar-chart>
+</dc-chart>
 
 <!-- Show labels globally, but hide on small slices -->
 <dc-pie-chart>
@@ -370,14 +371,14 @@ Settings cascade from chart to element with explicit settings taking precedence:
 
 1. **Element-level** (highest priority): `<dc-bar show-value="false">`
 2. **Parent-level** (for nested elements): `<dc-line show-value="false">` affects child `<dc-point>` elements
-3. **Chart-level**: `<dc-bar-chart show-value="false">`
+3. **Chart-level**: `<dc-chart show-value="false">`
 4. **Default**: Chart-type specific defaults
 
 See [`examples/axes.html`](examples/axes.html) for comprehensive examples of all `show-*` attribute features.
 
 ## Components
 
-### `<dc-bar-chart>`
+### `<dc-chart>`
 
 Renders a bar chart with support for both vertical and horizontal orientations.
 
@@ -404,25 +405,25 @@ Renders a bar chart with support for both vertical and horizontal orientations.
 
 Vertical bars (default):
 ```html
-<dc-bar-chart width="600" height="400">
+<dc-chart width="600" height="400">
   <dc-title>Sales Data</dc-title>
   <dc-bar value="10" fill="red" label="Jan"></dc-bar>
   <dc-bar value="20" fill="blue" label="Feb"></dc-bar>
-</dc-bar-chart>
+</dc-chart>
 ```
 
 Horizontal bars:
 ```html
-<dc-bar-chart width="600" height="400" orientation="horizontal">
+<dc-chart width="600" height="400" orientation="horizontal">
   <dc-title>Sales Data</dc-title>
   <dc-bar value="10" fill="red" label="Jan"></dc-bar>
   <dc-bar value="20" fill="blue" label="Feb"></dc-bar>
-</dc-bar-chart>
+</dc-chart>
 ```
 
 Grouped bars:
 ```html
-<dc-bar-chart width="600" height="400">
+<dc-chart width="600" height="400">
   <dc-title>Sales by Quarter</dc-title>
   <dc-bar-group label="Q1">
     <dc-bar value="10" label="Product A" fill="blue"></dc-bar>
@@ -432,12 +433,12 @@ Grouped bars:
     <dc-bar value="20" label="Product A" fill="blue"></dc-bar>
     <dc-bar value="25" label="Product B" fill="green"></dc-bar>
   </dc-bar-group>
-</dc-bar-chart>
+</dc-chart>
 ```
 
 Stacked bars:
 ```html
-<dc-bar-chart width="600" height="400">
+<dc-chart width="600" height="400">
   <dc-title>Revenue by Category</dc-title>
   <dc-bar label="Q1">
     <dc-bar-segment value="30" fill="#4CAF50" label="Online"></dc-bar-segment>
@@ -447,7 +448,7 @@ Stacked bars:
     <dc-bar-segment value="40" fill="#4CAF50" label="Online"></dc-bar-segment>
     <dc-bar-segment value="25" fill="#2196F3" label="In-Store"></dc-bar-segment>
   </dc-bar>
-</dc-bar-chart>
+</dc-chart>
 ```
 
 ### `<dc-bar>`
@@ -495,7 +496,7 @@ Defines a segment within a bar for creating stacked bar charts. When a `<dc-bar>
 
 **Example:**
 ```html
-<dc-bar-chart width="600" height="400">
+<dc-chart width="600" height="400">
   <dc-title>Quarterly Revenue by Product</dc-title>
   <dc-bar label="Q1">
     <dc-bar-segment value="30" fill="#4CAF50" label="Product A"></dc-bar-segment>
@@ -507,7 +508,7 @@ Defines a segment within a bar for creating stacked bar charts. When a `<dc-bar>
     <dc-bar-segment value="25" fill="#2196F3" label="Product B"></dc-bar-segment>
     <dc-bar-segment value="20" fill="#FF9800" label="Product C"></dc-bar-segment>
   </dc-bar>
-</dc-bar-chart>
+</dc-chart>
 ```
 
 **Stacking Direction:**
@@ -516,7 +517,7 @@ Defines a segment within a bar for creating stacked bar charts. When a `<dc-bar>
 - Vertical-reverse: Segments stack top-to-bottom
 - Horizontal-reverse: Segments stack right-to-left
 
-### `<dc-line-chart>`
+### `<dc-chart>`
 
 Renders a line chart with support for multiple lines.
 
@@ -711,18 +712,18 @@ Configures an axis on bar charts and line charts. Place inside any chart that ex
 
 Axis with custom label interval:
 ```html
-<dc-bar-chart width="600" height="400">
+<dc-chart width="600" height="400">
   <dc-axis position="bottom" label-interval="2"></dc-axis>
   <dc-title>Monthly Data</dc-title>
   <dc-bar value="10" label="Jan"></dc-bar>
   <dc-bar value="20" label="Feb"></dc-bar>
   <dc-bar value="30" label="Mar"></dc-bar>
-</dc-bar-chart>
+</dc-chart>
 ```
 
 Axis with title:
 ```html
-<dc-bar-chart width="600" height="400">
+<dc-chart width="600" height="400">
   <dc-axis position="left">
     <dc-title>Revenue ($)</dc-title>
   </dc-axis>
@@ -732,7 +733,7 @@ Axis with title:
   <dc-title>Monthly Sales</dc-title>
   <dc-bar value="120" label="Jan"></dc-bar>
   <dc-bar value="150" label="Feb"></dc-bar>
-</dc-bar-chart>
+</dc-chart>
 ```
 
 ### `<dc-legend>`
@@ -753,12 +754,12 @@ Adds a legend to any chart type.
 
 Basic legend:
 ```html
-<dc-bar-chart width="600" height="400">
+<dc-chart width="600" height="400">
   <dc-title>Chart Title</dc-title>
   <dc-bar value="10" label="Jan" fill="red"></dc-bar>
   <dc-bar value="20" label="Feb" fill="blue"></dc-bar>
   <dc-legend></dc-legend>
-</dc-bar-chart>
+</dc-chart>
 ```
 
 Legend with custom position and title:
@@ -796,12 +797,12 @@ Since titles render as SVG, use SVG presentation attributes for styling:
 **Example:**
 ```html
 <!-- Styled title -->
-<dc-bar-chart width="600" height="400">
+<dc-chart width="600" height="400">
   <dc-title fill="#1a1a1a" font-size="24" font-family="Georgia, serif" font-weight="600">
     Sales Report 2024
   </dc-title>
   <dc-bar value="10" label="Q1"></dc-bar>
-</dc-bar-chart>
+</dc-chart>
 ```
 
 **Warning:** The library will log warnings if you accidentally use CSS conventions:
@@ -861,11 +862,11 @@ Enable auto-popup for all slices:
 
 Disable auto-popup for specific elements:
 ```html
-<dc-bar-chart auto-popup width="600" height="400">
+<dc-chart auto-popup width="600" height="400">
   <dc-bar value="100" label="Q1"></dc-bar>
   <dc-bar value="150" label="Q2"></dc-bar>
   <dc-bar value="80" label="Q3" auto-popup="false"></dc-bar>
-</dc-bar-chart>
+</dc-chart>
 ```
 
 Mix auto-popup with explicit popups:
@@ -891,11 +892,56 @@ Mix auto-popup with explicit popups:
 
 ## Dynamic Updates
 
-Charts automatically update when you modify their child elements:
+Charts automatically update when you modify their child elements.
+
+### Hiding and Showing Elements
+
+Use the standard HTML `hidden` attribute to dynamically show or hide chart elements. Supported on `<dc-line>`, `<dc-bar>`, `<dc-bar-group>`, and `<dc-bubble>`.
+
+```html
+<dc-chart id="my-chart" width="600" height="400">
+  <dc-line stroke="#2196F3" label="Series A">...</dc-line>
+  <dc-line stroke="#FF5722" label="Series B" hidden>...</dc-line>
+</dc-chart>
+```
+
+Toggle visibility with JavaScript:
+
+```javascript
+// Toggle a line's visibility
+const line = document.querySelector('#my-chart dc-line[label="Series B"]');
+line.toggleAttribute('hidden');
+document.querySelector('#my-chart').requestUpdate();
+```
+
+**Important:** After toggling the `hidden` attribute, call `requestUpdate()` on the chart to trigger a re-render.
+
+**Interactive example with checkboxes:**
+```html
+<dc-chart id="chart" width="600" height="400">
+  <dc-line stroke="#2196F3" label="Sales">...</dc-line>
+  <dc-line stroke="#4CAF50" label="Revenue">...</dc-line>
+</dc-chart>
+
+<label>
+  <input type="checkbox" checked onchange="
+    document.querySelector('#chart dc-line[label=Sales]').toggleAttribute('hidden');
+    document.querySelector('#chart').requestUpdate();
+  "> Sales
+</label>
+<label>
+  <input type="checkbox" checked onchange="
+    document.querySelector('#chart dc-line[label=Revenue]').toggleAttribute('hidden');
+    document.querySelector('#chart').requestUpdate();
+  "> Revenue
+</label>
+```
+
+### Modifying Elements
 
 ```javascript
 // Add a bar
-const chart = document.querySelector('dc-bar-chart');
+const chart = document.querySelector('dc-chart');
 const bar = document.createElement('dc-bar');
 bar.setAttribute('value', '25');
 bar.setAttribute('color', 'purple');
@@ -964,10 +1010,10 @@ When users click on a funnel stage, htmx will load content from the specified en
 
 **Bar chart with custom data attributes:**
 ```html
-<dc-bar-chart width="600" height="400">
+<dc-chart width="600" height="400">
   <dc-bar value="10" label="Q1" data-quarter="1" data-year="2024"></dc-bar>
   <dc-bar value="20" label="Q2" data-quarter="2" data-year="2024"></dc-bar>
-</dc-bar-chart>
+</dc-chart>
 ```
 
 **Pie chart with Alpine.js:**
@@ -980,7 +1026,7 @@ When users click on a funnel stage, htmx will load content from the specified en
 
 **Line chart with htmx:**
 ```html
-<dc-line-chart width="600" height="400">
+<dc-chart width="600" height="400">
   <dc-line label="Sales" stroke="#2196F3"
            hx-get="/api/sales-data"
            hx-trigger="load"
@@ -988,7 +1034,7 @@ When users click on a funnel stage, htmx will load content from the specified en
     <dc-point value="10" label="Jan"></dc-point>
     <dc-point value="20" label="Feb"></dc-point>
   </dc-line>
-</dc-line-chart>
+</dc-chart>
 ```
 
 ### Complete Example
@@ -1004,10 +1050,10 @@ The library includes a built-in logging system to help you understand how charts
 Add the `logging` attribute to any chart to enable log capture:
 
 ```html
-<dc-bar-chart id="my-chart" logging="info" width="600" height="400">
+<dc-chart id="my-chart" logging="info" width="600" height="400">
   <dc-bar value="10" fill="red" label="Jan"></dc-bar>
   <dc-bar value="20" fill="blue" label="Feb"></dc-bar>
-</dc-bar-chart>
+</dc-chart>
 ```
 
 ### Log Levels
@@ -1026,10 +1072,10 @@ The `logging` attribute controls which messages are captured:
 Use the `<dc-log-console>` element to display log entries in a styled table:
 
 ```html
-<dc-bar-chart id="my-chart" logging="info" width="600" height="400">
+<dc-chart id="my-chart" logging="info" width="600" height="400">
   <dc-bar value="30" label="Q1"></dc-bar>
   <dc-bar value="45" label="Q2"></dc-bar>
-</dc-bar-chart>
+</dc-chart>
 
 <dc-log-console chart="#my-chart"></dc-log-console>
 ```
@@ -1049,7 +1095,7 @@ Use the `<dc-log-console>` element to display log entries in a styled table:
 <dc-log-console chart=".my-charts"></dc-log-console>
 
 <!-- Monitor specific chart types -->
-<dc-log-console chart="dc-bar-chart, dc-pie-chart"></dc-log-console>
+<dc-log-console chart="dc-chart"></dc-log-console>
 ```
 
 ### Programmatic Access
@@ -1057,7 +1103,7 @@ Use the `<dc-log-console>` element to display log entries in a styled table:
 You can access log entries directly via JavaScript:
 
 ```javascript
-const chart = document.querySelector('dc-bar-chart');
+const chart = document.querySelector('dc-chart');
 chart.logging = 'info';  // Enable logging
 // ... wait for render ...
 const logs = chart.getLogEntries();
@@ -1091,11 +1137,11 @@ The logging system captures calculations including:
 If your bar chart has unexpected spacing, enable logging to see the calculations:
 
 ```html
-<dc-bar-chart id="debug-chart" logging="info" width="600" height="400" padding="40 80" gutter="20">
+<dc-chart id="debug-chart" logging="info" width="600" height="400" padding="40 80" gutter="20">
   <dc-bar value="30" label="A"></dc-bar>
   <dc-bar value="45" label="B"></dc-bar>
   <dc-bar value="20" label="C"></dc-bar>
-</dc-bar-chart>
+</dc-chart>
 
 <dc-log-console chart="#debug-chart"></dc-log-console>
 ```
@@ -1110,15 +1156,101 @@ The log console will show:
 
 See [`examples/logging.html`](examples/logging.html) for working examples of the logging system with all chart types.
 
+## Accessibility
+
+Charts are automatically accessible to screen readers with ARIA attributes and intelligent auto-generated descriptions.
+
+### Automatic ARIA Attributes
+
+Every chart automatically includes:
+- `role="img"` on the SVG element
+- `aria-label` with chart type and title (e.g., "Bar chart: Sales Data")
+- `aria-describedby` pointing to a `<desc>` element with detailed description
+
+No configuration is needed—charts are accessible out of the box.
+
+### Auto-Generated Insights
+
+The library analyzes your chart data and generates meaningful descriptions that go beyond simple statistics:
+
+| Chart Type | Example Description |
+|------------|---------------------|
+| Bar Chart | "4 bars, values from 38 to 95. Q4 highest at 95; Q3 lowest at 38" |
+| Line Chart | "1 line with 5 points. Revenue: strong upward trend, highest at May (165)" |
+| Pie Chart | "4 slices totaling 100. dominated by Leader at 55%" |
+| Funnel Chart | "4 stages from 1000 to 50. 5.0% overall conversion; biggest drop from Leads to Opportunities (40% retained)" |
+
+### Manual Overrides
+
+For charts where you want to provide custom descriptions:
+
+```html
+<!-- Custom aria-label -->
+<dc-chart aria-label="Q3 2024 revenue comparison across all regions">
+  ...
+</dc-chart>
+
+<!-- Custom description with business context -->
+<dc-chart aria-description="Revenue increased 15% overall. Western region led growth while Eastern region declined slightly.">
+  ...
+</dc-chart>
+```
+
+### Controlling Auto-Insights
+
+Use the `aria-insights` attribute to control the level of auto-generated descriptions:
+
+```html
+<!-- Full insights with trend analysis (default) -->
+<dc-chart aria-insights="auto">
+
+<!-- Basic data summary only (no trend analysis) -->
+<dc-chart aria-insights="basic">
+
+<!-- No description generated -->
+<dc-chart aria-insights="none">
+```
+
+**When to use each level:**
+- `auto` (default): Best for most charts. Provides meaningful context for screen reader users.
+- `basic`: Use when auto-insights might be misleading or when you provide a manual `aria-description`.
+- `none`: Use only when you provide a complete manual description or when the chart is purely decorative.
+
+### Testing with Screen Readers
+
+To test accessibility:
+
+**Windows (NVDA):**
+1. Download NVDA from nvaccess.org
+2. Navigate to a chart with Tab or arrow keys
+3. NVDA announces the chart's label and description
+
+**Mac (VoiceOver):**
+1. Press Cmd+F5 to enable VoiceOver
+2. Navigate with VoiceOver cursor (Ctrl+Option+arrows)
+3. VoiceOver reads the chart's accessible content
+
+**Browser DevTools:**
+1. Inspect the chart's SVG element
+2. Check the Accessibility tab in DevTools
+3. Verify `role`, `aria-label`, and `aria-describedby` are present
+
+### Complete Example
+
+See [`examples/accessibility.html`](examples/accessibility.html) for comprehensive accessibility examples and a screen reader testing guide.
+
 ## Project Structure
 
 ```
 declarative-charts/
 ├── src/
-│   ├── bar-chart.ts           # Bar chart component
-│   ├── line-chart.ts          # Line chart component
+│   ├── chart.ts               # Unified axis chart component (bar, line, bubble)
 │   ├── pie-chart.ts           # Pie chart component
 │   ├── funnel-chart.ts        # Funnel chart component
+│   ├── axis-chart.ts          # Abstract base for axis-based charts
+│   ├── accessibility/         # Accessibility utilities
+│   │   ├── insights.ts        # Auto-generated description analysis
+│   │   └── index.ts           # Accessibility exports
 │   ├── chart-bar.ts           # Bar element
 │   ├── chart-bar-group.ts     # Bar group element
 │   ├── chart-bar-segment.ts   # Bar segment element (for stacked bars)
@@ -1171,6 +1303,7 @@ MIT
 
 - Add more chart types (scatter, area, etc.)
 - Add animations and transitions
-- Add accessibility features (ARIA labels, keyboard navigation)
-- Add axis customization options
+- Add keyboard navigation for interactive elements
+- Add axis customization options (min/max values, tick intervals)
+- Add number formatting (currency, percentages, abbreviations)
 - Publish to npm
