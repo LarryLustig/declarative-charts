@@ -1,8 +1,10 @@
 import { customElement, property } from 'lit/decorators.js';
 import { svg, SVGTemplateResult } from 'lit';
 import { BaseChart, showConditionConverter, type ShowCondition } from './base-chart.js';
+import type { LegendItem } from './chart-legend.js';
 import type { ChartPieSlice } from './chart-pie-slice.js';
 import type { ChartPopup } from './chart-popup.js';
+import { analyzePie, type SliceData as InsightSliceData } from './accessibility/index.js';
 
 /**
  * Pie chart component that renders slices as circular segments
@@ -50,14 +52,6 @@ export class PieChart extends BaseChart {
   innerRadius = 0;
 
   private clickedSliceIndex = -1;
-
-  /**
-   * Get the effective fill colors palette.
-   * Returns fill-colors if set, otherwise falls back to slice-color for backwards compatibility.
-   */
-  private getEffectiveFillColors(): string | undefined {
-    return this.fillColors || this.sliceColor;
-  }
 
   private getSlices(): Array<{
     value: number;
@@ -163,14 +157,14 @@ export class PieChart extends BaseChart {
     this.log('info', 'layout.radius', `min(chartWidth(${chartWidth.toFixed(1)}), chartHeight(${chartHeight.toFixed(1)})) / 2 = ${radius.toFixed(1)}`, radius);
     this.log('info', 'layout.innerRadius', `${this.innerRadius}% of radius(${radius.toFixed(1)}) = ${innerRadiusPixels.toFixed(1)}`, innerRadiusPixels);
 
-    // Resolve fill colors
-    const elementFills = sliceData.map(s => s.fill);
-    const fillColors = this.resolveColors(sliceData.length, {
-      elementColors: elementFills,
-      startColor: this.fillStartColor,
-      endColor: this.fillEndColor,
-      palette: this.getEffectiveFillColors()
-    });
+    // Resolve fill colors with palette support
+    // Pass sliceColor as default for backwards compatibility
+    const elements = sliceData.map(s => ({
+      fill: s.fill,
+      label: s.label,
+      value: s.value
+    }));
+    const fillColors = this.resolveFillColorsWithPalette(elements, this.sliceColor);
 
     // Resolve stroke colors
     const elementStrokes = sliceData.map(s => s.stroke);
@@ -455,24 +449,65 @@ export class PieChart extends BaseChart {
    * a circular dependency (getChartPadding -> getLegendItems -> calculateSliceLayout -> getChartPadding).
    * Instead, we get the data directly from getSlices() and resolve colors independently.
    */
-  protected override getLegendItems(): Array<{ label: string; color: string; value: number }> {
+  protected override getLegendItems(): LegendItem[] {
     const sliceData = this.getSlices();
     if (sliceData.length === 0) return [];
 
-    // Resolve colors without calling calculateSliceLayout
-    const elementFills = sliceData.map(s => s.fill);
-    const fillColors = this.resolveColors(sliceData.length, {
-      elementColors: elementFills,
-      startColor: this.fillStartColor,
-      endColor: this.fillEndColor,
-      palette: this.getEffectiveFillColors()
-    });
+    // Resolve colors with palette support without calling calculateSliceLayout
+    // Pass sliceColor as default for backwards compatibility
+    const elements = sliceData.map(s => ({
+      fill: s.fill,
+      label: s.label,
+      value: s.value
+    }));
+    const fillColors = this.resolveFillColorsWithPalette(elements, this.sliceColor);
 
     return sliceData.map((slice, index) => ({
       label: slice.label,
       color: fillColors[index],
-      value: slice.value
+      value: slice.value,
+      shape: 'square' as const  // Pie slices use squares in legend
     }));
+  }
+
+  // ============================================================================
+  // Accessibility Methods
+  // ============================================================================
+
+  /**
+   * Returns the chart type name for accessibility descriptions.
+   */
+  protected override getChartTypeName(): string {
+    return this.innerRadius > 0 ? 'donut chart' : 'pie chart';
+  }
+
+  /**
+   * Returns a basic data summary for accessibility descriptions.
+   */
+  protected override getDataSummary(): string {
+    const slices = this.getSlices();
+    if (slices.length === 0) return '';
+
+    const total = slices.reduce((sum, s) => sum + s.value, 0);
+    return `${slices.length} slices totaling ${total}`;
+  }
+
+  /**
+   * Returns auto-generated insights about the pie chart data.
+   */
+  protected override getInsights(): string {
+    if (this.ariaInsights === 'none') return '';
+
+    const slices = this.getSlices();
+    if (slices.length === 0) return '';
+
+    // Convert to insight format
+    const insightSlices: InsightSliceData[] = slices.map(s => ({
+      label: s.label,
+      value: s.value
+    }));
+
+    return analyzePie(insightSlices);
   }
 }
 
@@ -481,3 +516,4 @@ declare global {
     'dc-pie-chart': PieChart;
   }
 }
+

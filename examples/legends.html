@@ -23,6 +23,7 @@
             <a href="legends.html" class="current">Legends</a>
             <a href="axes.html">Axes</a>
             <a href="colors.html">Colors</a>
+            <a href="palettes.html">Palettes</a>
             <a href="typography.html">Typography</a>
             <a href="borders-and-padding.html">Borders & Padding</a>
             <a href="bar-groups.html">Bar Groups</a>
@@ -32,6 +33,7 @@
             <a href="popups.html">Popups</a>
             <a href="logging.html">Logging</a>
             <a href="htmx-integration.html">htmx</a>
+            <a href="accessibility.html">Accessibility</a>
         </div>
     </nav>
 
@@ -42,38 +44,38 @@
         <div class="grid">
             <div>
                 <h3>Right (Default)</h3>
-                <pre><code>&lt;dc-bar-chart width="600" height="350"&gt;
+                <pre><code>&lt;dc-chart width="600" height="350"&gt;
   &lt;dc-title&gt;Monthly Sales&lt;/dc-title&gt;
   &lt;dc-bar value="10" color="red" label="Jan"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="25" color="blue" label="Feb"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="15" color="green" label="Mar"&gt;&lt;/dc-bar&gt;
   &lt;dc-legend position="right"&gt;&lt;/dc-legend&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="600" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="600" height="350">
                     <dc-title>Monthly Sales</dc-title>
                     <dc-bar value="10" fill="red" label="Jan"></dc-bar>
                     <dc-bar value="25" fill="blue" label="Feb"></dc-bar>
                     <dc-bar value="15" fill="green" label="Mar"></dc-bar>
                     <dc-legend position="right"></dc-legend>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>Left</h3>
-                <pre><code>&lt;dc-bar-chart width="600" height="350"&gt;
+                <pre><code>&lt;dc-chart width="600" height="350"&gt;
   &lt;dc-title&gt;Monthly Sales&lt;/dc-title&gt;
   &lt;dc-bar value="10" color="red" label="Jan"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="25" color="blue" label="Feb"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="15" color="green" label="Mar"&gt;&lt;/dc-bar&gt;
   &lt;dc-legend position="left"&gt;&lt;/dc-legend&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="600" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="600" height="350">
                     <dc-title>Monthly Sales</dc-title>
                     <dc-bar value="10" fill="red" label="Jan"></dc-bar>
                     <dc-bar value="25" fill="blue" label="Feb"></dc-bar>
                     <dc-bar value="15" fill="green" label="Mar"></dc-bar>
                     <dc-legend position="left"></dc-legend>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
         </div>
@@ -83,35 +85,35 @@
             <div style="flex: 1; min-width: 300px;">
                 <h4>Top-Left</h4>
                 <pre><code>&lt;dc-legend position="top-left"&gt;&lt;/dc-legend&gt;</code></pre>
-                <dc-bar-chart width="400" height="300">
+                <dc-chart width="400" height="300">
                     <dc-title position="bottom">Monthly Sales</dc-title>
                     <dc-bar value="10" fill="red" label="Jan"></dc-bar>
                     <dc-bar value="25" fill="blue" label="Feb"></dc-bar>
                     <dc-bar value="15" fill="green" label="Mar"></dc-bar>
                     <dc-legend position="top-left"></dc-legend>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
             <div style="flex: 1; min-width: 300px;">
                 <h4>Top</h4>
                 <pre><code>&lt;dc-legend position="top"&gt;&lt;/dc-legend&gt;</code></pre>
-                <dc-bar-chart width="400" height="300">
+                <dc-chart width="400" height="300">
                     <dc-title position="bottom">Monthly Sales</dc-title>
                     <dc-bar value="10" fill="red" label="Jan"></dc-bar>
                     <dc-bar value="25" fill="blue" label="Feb"></dc-bar>
                     <dc-bar value="15" fill="green" label="Mar"></dc-bar>
                     <dc-legend position="top"></dc-legend>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
             <div style="flex: 1; min-width: 300px;">
                 <h4>Top-Right</h4>
                 <pre><code>&lt;dc-legend position="top-right"&gt;&lt;/dc-legend&gt;</code></pre>
-                <dc-bar-chart width="400" height="300">
+                <dc-chart width="400" height="300">
                     <dc-title position="bottom">Monthly Sales</dc-title>
                     <dc-bar value="10" fill="red" label="Jan"></dc-bar>
                     <dc-bar value="25" fill="blue" label="Feb"></dc-bar>
                     <dc-bar value="15" fill="green" label="Mar"></dc-bar>
                     <dc-legend position="top-right"></dc-legend>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
         </div>
 
@@ -120,35 +122,35 @@
             <div style="flex: 1; min-width: 300px;">
                 <h4>Bottom-Left</h4>
                 <pre><code>&lt;dc-legend position="bottom-left"&gt;&lt;/dc-legend&gt;</code></pre>
-                <dc-bar-chart width="400" height="300">
+                <dc-chart width="400" height="300">
                     <dc-title>Monthly Sales</dc-title>
                     <dc-bar value="10" fill="red" label="Jan"></dc-bar>
                     <dc-bar value="25" fill="blue" label="Feb"></dc-bar>
                     <dc-bar value="15" fill="green" label="Mar"></dc-bar>
                     <dc-legend position="bottom-left"></dc-legend>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
             <div style="flex: 1; min-width: 300px;">
                 <h4>Bottom</h4>
                 <pre><code>&lt;dc-legend position="bottom"&gt;&lt;/dc-legend&gt;</code></pre>
-                <dc-bar-chart width="400" height="300">
+                <dc-chart width="400" height="300">
                     <dc-title>Monthly Sales</dc-title>
                     <dc-bar value="10" fill="red" label="Jan"></dc-bar>
                     <dc-bar value="25" fill="blue" label="Feb"></dc-bar>
                     <dc-bar value="15" fill="green" label="Mar"></dc-bar>
                     <dc-legend position="bottom"></dc-legend>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
             <div style="flex: 1; min-width: 300px;">
                 <h4>Bottom-Right</h4>
                 <pre><code>&lt;dc-legend position="bottom-right"&gt;&lt;/dc-legend&gt;</code></pre>
-                <dc-bar-chart width="400" height="300">
+                <dc-chart width="400" height="300">
                     <dc-title>Monthly Sales</dc-title>
                     <dc-bar value="10" fill="red" label="Jan"></dc-bar>
                     <dc-bar value="25" fill="blue" label="Feb"></dc-bar>
                     <dc-bar value="15" fill="green" label="Mar"></dc-bar>
                     <dc-legend position="bottom-right"></dc-legend>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
         </div>
 
@@ -234,7 +236,7 @@
 
             <div>
                 <h3>Three Columns</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-title&gt;Monthly Performance&lt;/dc-title&gt;
   &lt;dc-bar value="45" label="Jan" color="#E91E63"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="52" label="Feb" color="#9C27B0"&gt;&lt;/dc-bar&gt;
@@ -243,8 +245,8 @@
   &lt;dc-bar value="55" label="May" color="#00BCD4"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="48" label="Jun" color="#4CAF50"&gt;&lt;/dc-bar&gt;
   &lt;dc-legend columns="3" position="bottom"&gt;&lt;/dc-legend&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
                     <dc-title>Monthly Performance</dc-title>
                     <dc-bar value="45" label="Jan" fill="#E91E63"></dc-bar>
                     <dc-bar value="52" label="Feb" fill="#9C27B0"></dc-bar>
@@ -253,7 +255,7 @@
                     <dc-bar value="55" label="May" fill="#00BCD4"></dc-bar>
                     <dc-bar value="48" label="Jun" fill="#4CAF50"></dc-bar>
                     <dc-legend columns="3" position="bottom"></dc-legend>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
         </div>
     </div>
@@ -287,22 +289,22 @@
 
             <div>
                 <h3>Wrapped Legend at Top</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="400"&gt;
+                <pre><code>&lt;dc-chart width="500" height="400"&gt;
   &lt;dc-title position="bottom"&gt;Team Scores&lt;/dc-title&gt;
   &lt;dc-bar value="85" label="Alpha" color="#E91E63"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="92" label="Beta" color="#9C27B0"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="78" label="Gamma" color="#3F51B5"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="88" label="Delta" color="#2196F3"&gt;&lt;/dc-bar&gt;
   &lt;dc-legend columns="*" position="top"&gt;&lt;/dc-legend&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="400">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="400">
                     <dc-title position="bottom">Team Scores</dc-title>
                     <dc-bar value="85" label="Alpha" fill="#E91E63"></dc-bar>
                     <dc-bar value="92" label="Beta" fill="#9C27B0"></dc-bar>
                     <dc-bar value="78" label="Gamma" fill="#3F51B5"></dc-bar>
                     <dc-bar value="88" label="Delta" fill="#2196F3"></dc-bar>
                     <dc-legend columns="*" position="top"></dc-legend>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
         </div>
     </div>
@@ -314,74 +316,74 @@
         <div class="grid">
             <div>
                 <h3>Label Only</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-title&gt;Label Only&lt;/dc-title&gt;
   &lt;dc-bar value="45" label="Product A" color="#2196F3"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="30" label="Product B" color="#4CAF50"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="25" label="Product C" color="#FF9800"&gt;&lt;/dc-bar&gt;
   &lt;dc-legend show-value="false" show-percent="false"&gt;&lt;/dc-legend&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
                     <dc-title>Label Only</dc-title>
                     <dc-bar value="45" label="Product A" fill="#2196F3"></dc-bar>
                     <dc-bar value="30" label="Product B" fill="#4CAF50"></dc-bar>
                     <dc-bar value="25" label="Product C" fill="#FF9800"></dc-bar>
                     <dc-legend show-value="false" show-percent="false"></dc-legend>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>Label + Value</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-title&gt;Label + Value&lt;/dc-title&gt;
   &lt;dc-bar value="45" label="Product A" color="#2196F3"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="30" label="Product B" color="#4CAF50"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="25" label="Product C" color="#FF9800"&gt;&lt;/dc-bar&gt;
   &lt;dc-legend show-value="true" show-percent="false"&gt;&lt;/dc-legend&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
                     <dc-title>Label + Value</dc-title>
                     <dc-bar value="45" label="Product A" fill="#2196F3"></dc-bar>
                     <dc-bar value="30" label="Product B" fill="#4CAF50"></dc-bar>
                     <dc-bar value="25" label="Product C" fill="#FF9800"></dc-bar>
                     <dc-legend show-value="true" show-percent="false"></dc-legend>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>Label + Percent</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-title&gt;Label + Percent&lt;/dc-title&gt;
   &lt;dc-bar value="45" label="Product A" color="#2196F3"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="30" label="Product B" color="#4CAF50"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="25" label="Product C" color="#FF9800"&gt;&lt;/dc-bar&gt;
   &lt;dc-legend show-value="false" show-percent="true"&gt;&lt;/dc-legend&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
                     <dc-title>Label + Percent</dc-title>
                     <dc-bar value="45" label="Product A" fill="#2196F3"></dc-bar>
                     <dc-bar value="30" label="Product B" fill="#4CAF50"></dc-bar>
                     <dc-bar value="25" label="Product C" fill="#FF9800"></dc-bar>
                     <dc-legend show-value="false" show-percent="true"></dc-legend>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>Label + Value + Percent</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-title&gt;Label + Value + Percent&lt;/dc-title&gt;
   &lt;dc-bar value="45" label="Product A" color="#2196F3"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="30" label="Product B" color="#4CAF50"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="25" label="Product C" color="#FF9800"&gt;&lt;/dc-bar&gt;
   &lt;dc-legend show-value="true" show-percent="true"&gt;&lt;/dc-legend&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
                     <dc-title>Label + Value + Percent</dc-title>
                     <dc-bar value="45" label="Product A" fill="#2196F3"></dc-bar>
                     <dc-bar value="30" label="Product B" fill="#4CAF50"></dc-bar>
                     <dc-bar value="25" label="Product C" fill="#FF9800"></dc-bar>
                     <dc-legend show-value="true" show-percent="true"></dc-legend>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
         </div>
     </div>

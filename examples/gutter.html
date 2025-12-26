@@ -23,6 +23,7 @@
             <a href="legends.html">Legends</a>
             <a href="axes.html">Axes</a>
             <a href="colors.html">Colors</a>
+            <a href="palettes.html">Palettes</a>
             <a href="typography.html">Typography</a>
             <a href="borders-and-padding.html">Borders & Padding</a>
             <a href="bar-groups.html">Bar Groups</a>
@@ -32,6 +33,7 @@
             <a href="popups.html">Popups</a>
             <a href="logging.html">Logging</a>
             <a href="htmx-integration.html">htmx</a>
+            <a href="accessibility.html">Accessibility</a>
         </div>
     </nav>
 
@@ -42,56 +44,56 @@
         <div class="grid">
             <div>
                 <h3>Default Gutter (10px)</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-title&gt;Default Spacing&lt;/dc-title&gt;
   &lt;dc-bar value="30" label="Q1" color="#E91E63"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="50" label="Q2" color="#2196F3"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="40" label="Q3" color="#4CAF50"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="35" label="Q4" color="#FF9800"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
                     <dc-title>Default Spacing</dc-title>
                     <dc-bar value="30" label="Q1" fill="#E91E63"></dc-bar>
                     <dc-bar value="50" label="Q2" fill="#2196F3"></dc-bar>
                     <dc-bar value="40" label="Q3" fill="#4CAF50"></dc-bar>
                     <dc-bar value="35" label="Q4" fill="#FF9800"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>No Gutter (0px)</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350" gutter="0"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" gutter="0"&gt;
   &lt;dc-title&gt;No Spacing&lt;/dc-title&gt;
   &lt;dc-bar value="30" label="Q1" color="#E91E63"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="50" label="Q2" color="#2196F3"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="40" label="Q3" color="#4CAF50"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="35" label="Q4" color="#FF9800"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" gutter="0">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" gutter="0">
                     <dc-title>No Spacing</dc-title>
                     <dc-bar value="30" label="Q1" fill="#E91E63"></dc-bar>
                     <dc-bar value="50" label="Q2" fill="#2196F3"></dc-bar>
                     <dc-bar value="40" label="Q3" fill="#4CAF50"></dc-bar>
                     <dc-bar value="35" label="Q4" fill="#FF9800"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>Large Gutter (30px)</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350" gutter="30"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" gutter="30"&gt;
   &lt;dc-title&gt;Large Spacing&lt;/dc-title&gt;
   &lt;dc-bar value="30" label="Q1" color="#E91E63"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="50" label="Q2" color="#2196F3"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="40" label="Q3" color="#4CAF50"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="35" label="Q4" color="#FF9800"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" gutter="30">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" gutter="30">
                     <dc-title>Large Spacing</dc-title>
                     <dc-bar value="30" label="Q1" fill="#E91E63"></dc-bar>
                     <dc-bar value="50" label="Q2" fill="#2196F3"></dc-bar>
                     <dc-bar value="40" label="Q3" fill="#4CAF50"></dc-bar>
                     <dc-bar value="35" label="Q4" fill="#FF9800"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
         </div>
     </div>
@@ -103,7 +105,7 @@
         <div class="grid">
             <div>
                 <h3>Default Group Spacing</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-title&gt;Default Group Spacing&lt;/dc-title&gt;
   &lt;dc-bar-group label="Q1"&gt;
     &lt;dc-bar value="45" label="Product A" color="#2196F3"&gt;&lt;/dc-bar&gt;
@@ -120,8 +122,8 @@
     &lt;dc-bar value="50" label="Product B" color="#4CAF50"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="55" label="Product C" color="#FF9800"&gt;&lt;/dc-bar&gt;
   &lt;/dc-bar-group&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
                     <dc-title>Default Group Spacing</dc-title>
                     <dc-bar-group label="Q1">
                         <dc-bar value="45" label="Product A" fill="#2196F3"></dc-bar>
@@ -138,12 +140,12 @@
                         <dc-bar value="50" label="Product B" fill="#4CAF50"></dc-bar>
                         <dc-bar value="55" label="Product C" fill="#FF9800"></dc-bar>
                     </dc-bar-group>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>No Gutter with Groups</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350" gutter="0"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" gutter="0"&gt;
   &lt;dc-title&gt;No Group Spacing&lt;/dc-title&gt;
   &lt;dc-bar-group label="Q1"&gt;
     &lt;dc-bar value="45" label="Product A" color="#2196F3"&gt;&lt;/dc-bar&gt;
@@ -160,8 +162,8 @@
     &lt;dc-bar value="50" label="Product B" color="#4CAF50"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="55" label="Product C" color="#FF9800"&gt;&lt;/dc-bar&gt;
   &lt;/dc-bar-group&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" gutter="0">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" gutter="0">
                     <dc-title>No Group Spacing</dc-title>
                     <dc-bar-group label="Q1">
                         <dc-bar value="45" label="Product A" fill="#2196F3"></dc-bar>
@@ -178,12 +180,12 @@
                         <dc-bar value="50" label="Product B" fill="#4CAF50"></dc-bar>
                         <dc-bar value="55" label="Product C" fill="#FF9800"></dc-bar>
                     </dc-bar-group>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>Large Gutter with Groups</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350" gutter="40"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" gutter="40"&gt;
   &lt;dc-title&gt;Large Group Spacing&lt;/dc-title&gt;
   &lt;dc-bar-group label="Q1"&gt;
     &lt;dc-bar value="45" label="Product A" color="#2196F3"&gt;&lt;/dc-bar&gt;
@@ -200,8 +202,8 @@
     &lt;dc-bar value="50" label="Product B" color="#4CAF50"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="55" label="Product C" color="#FF9800"&gt;&lt;/dc-bar&gt;
   &lt;/dc-bar-group&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" gutter="40">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" gutter="40">
                     <dc-title>Large Group Spacing</dc-title>
                     <dc-bar-group label="Q1">
                         <dc-bar value="45" label="Product A" fill="#2196F3"></dc-bar>
@@ -218,7 +220,7 @@
                         <dc-bar value="50" label="Product B" fill="#4CAF50"></dc-bar>
                         <dc-bar value="55" label="Product C" fill="#FF9800"></dc-bar>
                     </dc-bar-group>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
         </div>
     </div>
@@ -230,7 +232,7 @@
         <div class="grid">
             <div>
                 <h3>Mixed Group Spacing</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350" gutter="10"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" gutter="10"&gt;
   &lt;dc-title&gt;Mixed Group Spacing&lt;/dc-title&gt;
   &lt;!-- Uses chart default (10px) --&gt;
   &lt;dc-bar-group label="Default"&gt;
@@ -247,8 +249,8 @@
     &lt;dc-bar value="62" label="A" color="#FF9800"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="50" label="B" color="#795548"&gt;&lt;/dc-bar&gt;
   &lt;/dc-bar-group&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" gutter="10">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" gutter="10">
                     <dc-title>Mixed Group Spacing</dc-title>
                     <dc-bar-group label="Default">
                         <dc-bar value="45" label="A" fill="#2196F3"></dc-bar>
@@ -262,12 +264,12 @@
                         <dc-bar value="62" label="A" fill="#FF9800"></dc-bar>
                         <dc-bar value="50" label="B" fill="#795548"></dc-bar>
                     </dc-bar-group>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>Mixed Groups and Individual Bars</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350" gutter="20"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" gutter="20"&gt;
   &lt;dc-title&gt;Mixed Elements with Spacing&lt;/dc-title&gt;
   &lt;dc-bar value="30" label="Solo 1" color="#E91E63"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar-group label="Group A" gutter="10"&gt;
@@ -279,8 +281,8 @@
     &lt;dc-bar value="45" label="B1" color="#4CAF50"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="55" label="B2" color="#4CAF50"&gt;&lt;/dc-bar&gt;
   &lt;/dc-bar-group&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" gutter="20">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" gutter="20">
                     <dc-title>Mixed Elements with Spacing</dc-title>
                     <dc-bar value="30" label="Solo 1" fill="#E91E63"></dc-bar>
                     <dc-bar-group label="Group A" gutter="10">
@@ -292,7 +294,7 @@
                         <dc-bar value="45" label="B1" fill="#4CAF50"></dc-bar>
                         <dc-bar value="55" label="B2" fill="#4CAF50"></dc-bar>
                     </dc-bar-group>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
         </div>
     </div>
@@ -304,7 +306,7 @@
         <div class="grid">
             <div>
                 <h3>Horizontal with Spacing</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="400" orientation="horizontal" gutter="20"&gt;
+                <pre><code>&lt;dc-chart width="500" height="400" orientation="horizontal" gutter="20"&gt;
   &lt;dc-title&gt;Horizontal with Spacing&lt;/dc-title&gt;
   &lt;dc-bar-group label="Region A"&gt;
     &lt;dc-bar value="65" label="Electronics" color="#2196F3"&gt;&lt;/dc-bar&gt;
@@ -316,8 +318,8 @@
     &lt;dc-bar value="62" label="Clothing" color="#4CAF50"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="45" label="Food" color="#FF9800"&gt;&lt;/dc-bar&gt;
   &lt;/dc-bar-group&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="400" orientation="horizontal" gutter="20">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="400" orientation="horizontal" gutter="20">
                     <dc-title>Horizontal with Spacing</dc-title>
                     <dc-bar-group label="Region A">
                         <dc-bar value="65" label="Electronics" fill="#2196F3"></dc-bar>
@@ -329,7 +331,7 @@
                         <dc-bar value="62" label="Clothing" fill="#4CAF50"></dc-bar>
                         <dc-bar value="45" label="Food" fill="#FF9800"></dc-bar>
                     </dc-bar-group>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
         </div>
     </div>

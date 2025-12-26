@@ -53,6 +53,7 @@
             <a href="legends.html">Legends</a>
             <a href="axes.html">Axes</a>
             <a href="colors.html">Colors</a>
+            <a href="palettes.html">Palettes</a>
             <a href="typography.html">Typography</a>
             <a href="borders-and-padding.html">Borders & Padding</a>
             <a href="bar-groups.html">Bar Groups</a>
@@ -62,6 +63,7 @@
             <a href="popups.html">Popups</a>
             <a href="logging.html">Logging</a>
             <a href="htmx-integration.html" class="current">htmx</a>
+            <a href="accessibility.html">Accessibility</a>
         </div>
     </nav>
 
@@ -154,7 +156,7 @@
         <div class="grid">
             <div>
                 <h3>Monthly Revenue</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-title&gt;Monthly Revenue&lt;/dc-title&gt;
   &lt;dc-bar value="45000" label="January" color="#2196F3"
           hx-get="/examples/loaded-content.html"
@@ -181,8 +183,8 @@
           hx-target="#bar-details"
           hx-swap="innerHTML"&gt;
   &lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
                     <dc-title>Monthly Revenue</dc-title>
                     <dc-bar value="45000" label="January" fill="#2196F3"
                             style="cursor: pointer;"
@@ -214,7 +216,7 @@
                             hx-target="#bar-details"
                             hx-swap="innerHTML">
                     </dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
 
                 <div id="bar-details" class="details-panel">
                     <p style="color: #999; text-align: center; margin: 30px 0;">
@@ -232,7 +234,7 @@
         <div class="grid">
             <div>
                 <h3>Product Performance</h3>
-                <pre><code>&lt;dc-line-chart width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-title&gt;Product Performance&lt;/dc-title&gt;
   &lt;dc-line label="Product A" color="#2196F3"
            hx-get="/examples/loaded-content.html"
@@ -261,8 +263,8 @@
     &lt;dc-point value="20" label="Q3"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="26" label="Q4"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
-&lt;/dc-line-chart&gt;</code></pre>
-                <dc-line-chart width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
                     <dc-title>Product Performance</dc-title>
                     <dc-line label="Product A" stroke="#2196F3"
                              style="cursor: pointer;"
@@ -294,7 +296,7 @@
                         <dc-point value="20" label="Q3"></dc-point>
                         <dc-point value="26" label="Q4"></dc-point>
                     </dc-line>
-                </dc-line-chart>
+                </dc-chart>
 
                 <div id="line-details" class="details-panel">
                     <p style="color: #999; text-align: center; margin: 30px 0;">

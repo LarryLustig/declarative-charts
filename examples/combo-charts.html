@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combo Charts - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+</head>
+<body>
+    <h1>Combo Charts</h1>
+    <p>Combine bars and lines in a single chart for powerful data visualization</p>
+
+    <nav>
+        <div class="nav-major">
+            <a href="../index.html">Home</a>
+            <a href="barcharts.html">Bar Charts</a>
+            <a href="linecharts.html">Line Charts</a>
+            <a href="piecharts.html">Pie Charts</a>
+            <a href="funnelcharts.html">Funnel Charts</a>
+        </div>
+        <div class="nav-minor">
+            <a href="titles.html">Titles</a>
+            <a href="legends.html">Legends</a>
+            <a href="axes.html">Axes</a>
+            <a href="colors.html">Colors</a>
+            <a href="palettes.html">Palettes</a>
+            <a href="typography.html">Typography</a>
+            <a href="borders-and-padding.html">Borders & Padding</a>
+            <a href="bar-groups.html">Bar Groups</a>
+            <a href="bar-width.html">Bar Width</a>
+            <a href="gutter.html">Gutter</a>
+            <a href="interactive.html">Interactive</a>
+            <a href="popups.html">Popups</a>
+            <a href="logging.html">Logging</a>
+            <a href="htmx-integration.html">htmx</a>
+            <a href="combo-charts.html" class="current">Combo Charts</a>
+            <a href="accessibility.html">Accessibility</a>
+        </div>
+    </nav>
+
+    <div class="example">
+        <h2>Basic Combo Charts</h2>
+        <p>Combine bars showing actual values with a line showing trends or targets.</p>
+        <p><strong>Color conventions in these examples:</strong> When all bars represent the same data series (e.g., monthly revenue), they share a single color. When bars show performance against a target, colors indicate status: <span style="color:#4CAF50">green</span> = above target, <span style="color:#FF9800">orange</span> = near target, <span style="color:#F44336">red</span> = below target.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Bars with Trend Line</h3>
+                <pre><code>&lt;dc-chart width="600" height="400"&gt;
+  &lt;dc-title&gt;Monthly Revenue with Trend&lt;/dc-title&gt;
+  &lt;dc-bar value="45" fill="#4CAF50" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="52" fill="#4CAF50" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="48" fill="#4CAF50" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="61" fill="#4CAF50" label="Apr"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="55" fill="#4CAF50" label="May"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="67" fill="#4CAF50" label="Jun"&gt;&lt;/dc-bar&gt;
+  &lt;dc-line stroke="#FF5722" label="Trend" show-value="false"&gt;
+    &lt;dc-point value="47" label="Jan"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="50" label="Feb"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="53" label="Mar"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="56" label="Apr"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="59" label="May"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="62" label="Jun"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-legend position="top"&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="600" height="400">
+                    <dc-title>Monthly Revenue with Trend</dc-title>
+                    <dc-bar value="45" fill="#4CAF50" label="Jan"></dc-bar>
+                    <dc-bar value="52" fill="#4CAF50" label="Feb"></dc-bar>
+                    <dc-bar value="48" fill="#4CAF50" label="Mar"></dc-bar>
+                    <dc-bar value="61" fill="#4CAF50" label="Apr"></dc-bar>
+                    <dc-bar value="55" fill="#4CAF50" label="May"></dc-bar>
+                    <dc-bar value="67" fill="#4CAF50" label="Jun"></dc-bar>
+                    <dc-line stroke="#FF5722" label="Trend" show-value="false">
+                        <dc-point value="47" label="Jan"></dc-point>
+                        <dc-point value="50" label="Feb"></dc-point>
+                        <dc-point value="53" label="Mar"></dc-point>
+                        <dc-point value="56" label="Apr"></dc-point>
+                        <dc-point value="59" label="May"></dc-point>
+                        <dc-point value="62" label="Jun"></dc-point>
+                    </dc-line>
+                    <dc-legend position="top"></dc-legend>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Actual vs Target</h3>
+                <pre><code>&lt;dc-chart width="600" height="400"&gt;
+  &lt;dc-title&gt;Quarterly Sales vs Target&lt;/dc-title&gt;
+  &lt;dc-bar value="85" fill="#2196F3" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="92" fill="#2196F3" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="78" fill="#F44336" label="Q3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="105" fill="#4CAF50" label="Q4"&gt;&lt;/dc-bar&gt;
+  &lt;dc-line stroke="#FF9800" label="Target" show-value="false"&gt;
+    &lt;dc-point value="80" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="85" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="90" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="95" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-legend position="top-right"&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="600" height="400">
+                    <dc-title>Quarterly Sales vs Target</dc-title>
+                    <dc-bar value="85" fill="#2196F3" label="Q1"></dc-bar>
+                    <dc-bar value="92" fill="#2196F3" label="Q2"></dc-bar>
+                    <dc-bar value="78" fill="#F44336" label="Q3"></dc-bar>
+                    <dc-bar value="105" fill="#4CAF50" label="Q4"></dc-bar>
+                    <dc-line stroke="#FF9800" label="Target" show-value="false">
+                        <dc-point value="80" label="Q1"></dc-point>
+                        <dc-point value="85" label="Q2"></dc-point>
+                        <dc-point value="90" label="Q3"></dc-point>
+                        <dc-point value="95" label="Q4"></dc-point>
+                    </dc-line>
+                    <dc-legend position="top-right"></dc-legend>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Grouped and Stacked Combos</h2>
+        <p>Combine grouped or stacked bars with lines for more complex data visualization. In these examples, colors are consistent by category (e.g., North region is always blue, Product A is always blue).</p>
+
+        <div class="grid">
+            <div>
+                <h3>Grouped Bars with Lines</h3>
+                <pre><code>&lt;dc-chart width="700" height="450"&gt;
+  &lt;dc-title&gt;Sales by Region with Growth Trend&lt;/dc-title&gt;
+  &lt;dc-bar-group label="Q1"&gt;
+    &lt;dc-bar value="40" fill="#2196F3" label="North"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="35" fill="#4CAF50" label="South"&gt;&lt;/dc-bar&gt;
+  &lt;/dc-bar-group&gt;
+  &lt;dc-bar-group label="Q2"&gt;
+    &lt;dc-bar value="48" fill="#2196F3" label="North"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="42" fill="#4CAF50" label="South"&gt;&lt;/dc-bar&gt;
+  &lt;/dc-bar-group&gt;
+  &lt;dc-bar-group label="Q3"&gt;
+    &lt;dc-bar value="55" fill="#2196F3" label="North"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="50" fill="#4CAF50" label="South"&gt;&lt;/dc-bar&gt;
+  &lt;/dc-bar-group&gt;
+  &lt;dc-bar-group label="Q4"&gt;
+    &lt;dc-bar value="62" fill="#2196F3" label="North"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="58" fill="#4CAF50" label="South"&gt;&lt;/dc-bar&gt;
+  &lt;/dc-bar-group&gt;
+  &lt;dc-line stroke="#E91E63" label="North Growth" show-value="false"&gt;
+    &lt;dc-point value="40" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="48" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="55" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="62" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line stroke="#9C27B0" label="South Growth" show-value="false"&gt;
+    &lt;dc-point value="35" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="42" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="50" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="58" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-legend position="right"&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="700" height="450">
+                    <dc-title>Sales by Region with Growth Trend</dc-title>
+                    <dc-bar-group label="Q1">
+                        <dc-bar value="40" fill="#2196F3" label="North"></dc-bar>
+                        <dc-bar value="35" fill="#4CAF50" label="South"></dc-bar>
+                    </dc-bar-group>
+                    <dc-bar-group label="Q2">
+                        <dc-bar value="48" fill="#2196F3" label="North"></dc-bar>
+                        <dc-bar value="42" fill="#4CAF50" label="South"></dc-bar>
+                    </dc-bar-group>
+                    <dc-bar-group label="Q3">
+                        <dc-bar value="55" fill="#2196F3" label="North"></dc-bar>
+                        <dc-bar value="50" fill="#4CAF50" label="South"></dc-bar>
+                    </dc-bar-group>
+                    <dc-bar-group label="Q4">
+                        <dc-bar value="62" fill="#2196F3" label="North"></dc-bar>
+                        <dc-bar value="58" fill="#4CAF50" label="South"></dc-bar>
+                    </dc-bar-group>
+                    <dc-line stroke="#E91E63" label="North Growth" show-value="false">
+                        <dc-point value="40" label="Q1"></dc-point>
+                        <dc-point value="48" label="Q2"></dc-point>
+                        <dc-point value="55" label="Q3"></dc-point>
+                        <dc-point value="62" label="Q4"></dc-point>
+                    </dc-line>
+                    <dc-line stroke="#9C27B0" label="South Growth" show-value="false">
+                        <dc-point value="35" label="Q1"></dc-point>
+                        <dc-point value="42" label="Q2"></dc-point>
+                        <dc-point value="50" label="Q3"></dc-point>
+                        <dc-point value="58" label="Q4"></dc-point>
+                    </dc-line>
+                    <dc-legend position="right"></dc-legend>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Stacked Bars with Line</h3>
+                <pre><code>&lt;dc-chart width="600" height="400"&gt;
+  &lt;dc-title&gt;Revenue by Category with Total&lt;/dc-title&gt;
+  &lt;dc-bar label="Jan"&gt;
+    &lt;dc-bar-segment value="20" fill="#2196F3" label="Product A"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="15" fill="#4CAF50" label="Product B"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="10" fill="#FF9800" label="Product C"&gt;&lt;/dc-bar-segment&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-bar label="Feb"&gt;
+    &lt;dc-bar-segment value="25" fill="#2196F3" label="Product A"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="18" fill="#4CAF50" label="Product B"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="12" fill="#FF9800" label="Product C"&gt;&lt;/dc-bar-segment&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-bar label="Mar"&gt;
+    &lt;dc-bar-segment value="30" fill="#2196F3" label="Product A"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="22" fill="#4CAF50" label="Product B"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="15" fill="#FF9800" label="Product C"&gt;&lt;/dc-bar-segment&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-bar label="Apr"&gt;
+    &lt;dc-bar-segment value="28" fill="#2196F3" label="Product A"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="25" fill="#4CAF50" label="Product B"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="18" fill="#FF9800" label="Product C"&gt;&lt;/dc-bar-segment&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-line stroke="#E91E63" label="Total" show-value="false"&gt;
+    &lt;dc-point value="45" label="Jan"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="55" label="Feb"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="67" label="Mar"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="71" label="Apr"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-legend position="top"&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="600" height="400">
+                    <dc-title>Revenue by Category with Total</dc-title>
+                    <dc-bar label="Jan">
+                        <dc-bar-segment value="20" fill="#2196F3" label="Product A"></dc-bar-segment>
+                        <dc-bar-segment value="15" fill="#4CAF50" label="Product B"></dc-bar-segment>
+                        <dc-bar-segment value="10" fill="#FF9800" label="Product C"></dc-bar-segment>
+                    </dc-bar>
+                    <dc-bar label="Feb">
+                        <dc-bar-segment value="25" fill="#2196F3" label="Product A"></dc-bar-segment>
+                        <dc-bar-segment value="18" fill="#4CAF50" label="Product B"></dc-bar-segment>
+                        <dc-bar-segment value="12" fill="#FF9800" label="Product C"></dc-bar-segment>
+                    </dc-bar>
+                    <dc-bar label="Mar">
+                        <dc-bar-segment value="30" fill="#2196F3" label="Product A"></dc-bar-segment>
+                        <dc-bar-segment value="22" fill="#4CAF50" label="Product B"></dc-bar-segment>
+                        <dc-bar-segment value="15" fill="#FF9800" label="Product C"></dc-bar-segment>
+                    </dc-bar>
+                    <dc-bar label="Apr">
+                        <dc-bar-segment value="28" fill="#2196F3" label="Product A"></dc-bar-segment>
+                        <dc-bar-segment value="25" fill="#4CAF50" label="Product B"></dc-bar-segment>
+                        <dc-bar-segment value="18" fill="#FF9800" label="Product C"></dc-bar-segment>
+                    </dc-bar>
+                    <dc-line stroke="#E91E63" label="Total" show-value="false">
+                        <dc-point value="45" label="Jan"></dc-point>
+                        <dc-point value="55" label="Feb"></dc-point>
+                        <dc-point value="67" label="Mar"></dc-point>
+                        <dc-point value="71" label="Apr"></dc-point>
+                    </dc-line>
+                    <dc-legend position="top"></dc-legend>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Multiple Lines with Bars</h2>
+        <p>Multiple trend lines overlaid on bar data for richer analysis:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Sales with Moving Averages</h3>
+                <pre><code>&lt;dc-chart width="700" height="400"&gt;
+  &lt;dc-title&gt;Daily Sales with Moving Averages&lt;/dc-title&gt;
+  &lt;dc-bar value="100" fill="#90CAF9" label="Mon"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="120" fill="#90CAF9" label="Tue"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="95" fill="#90CAF9" label="Wed"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="140" fill="#90CAF9" label="Thu"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="110" fill="#90CAF9" label="Fri"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="85" fill="#90CAF9" label="Sat"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="75" fill="#90CAF9" label="Sun"&gt;&lt;/dc-bar&gt;
+  &lt;dc-line stroke="#1565C0" label="3-Day Avg" show-value="false"&gt;
+    &lt;dc-point value="100" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="105" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="105" label="Wed"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="118" label="Thu"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="115" label="Fri"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="112" label="Sat"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="90" label="Sun"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line stroke="#E91E63" label="7-Day Avg" show-value="false"&gt;
+    &lt;dc-point value="105" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="105" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="105" label="Wed"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="105" label="Thu"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="105" label="Fri"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="105" label="Sat"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="105" label="Sun"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-legend position="top-right"&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="700" height="400">
+                    <dc-title>Daily Sales with Moving Averages</dc-title>
+                    <dc-bar value="100" fill="#90CAF9" label="Mon"></dc-bar>
+                    <dc-bar value="120" fill="#90CAF9" label="Tue"></dc-bar>
+                    <dc-bar value="95" fill="#90CAF9" label="Wed"></dc-bar>
+                    <dc-bar value="140" fill="#90CAF9" label="Thu"></dc-bar>
+                    <dc-bar value="110" fill="#90CAF9" label="Fri"></dc-bar>
+                    <dc-bar value="85" fill="#90CAF9" label="Sat"></dc-bar>
+                    <dc-bar value="75" fill="#90CAF9" label="Sun"></dc-bar>
+                    <dc-line stroke="#1565C0" label="3-Day Avg" show-value="false">
+                        <dc-point value="100" label="Mon"></dc-point>
+                        <dc-point value="105" label="Tue"></dc-point>
+                        <dc-point value="105" label="Wed"></dc-point>
+                        <dc-point value="118" label="Thu"></dc-point>
+                        <dc-point value="115" label="Fri"></dc-point>
+                        <dc-point value="112" label="Sat"></dc-point>
+                        <dc-point value="90" label="Sun"></dc-point>
+                    </dc-line>
+                    <dc-line stroke="#E91E63" label="7-Day Avg" show-value="false">
+                        <dc-point value="105" label="Mon"></dc-point>
+                        <dc-point value="105" label="Tue"></dc-point>
+                        <dc-point value="105" label="Wed"></dc-point>
+                        <dc-point value="105" label="Thu"></dc-point>
+                        <dc-point value="105" label="Fri"></dc-point>
+                        <dc-point value="105" label="Sat"></dc-point>
+                        <dc-point value="105" label="Sun"></dc-point>
+                    </dc-line>
+                    <dc-legend position="top-right"></dc-legend>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Horizontal Combo Chart</h2>
+        <p>Combo charts work with horizontal orientation too. This example uses performance-based coloring: bars are colored based on whether they meet the benchmark (80).</p>
+
+        <div class="grid">
+            <div>
+                <h3>Department Performance vs Benchmark</h3>
+                <pre><code>&lt;dc-chart width="600" height="400" orientation="horizontal"&gt;
+  &lt;dc-title&gt;Department Scores vs Benchmark&lt;/dc-title&gt;
+  &lt;dc-bar value="85" fill="#4CAF50" label="Engineering"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="78" fill="#FF9800" label="Marketing"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="92" fill="#4CAF50" label="Sales"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="88" fill="#4CAF50" label="Support"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="72" fill="#F44336" label="Operations"&gt;&lt;/dc-bar&gt;
+  &lt;dc-line stroke="#9C27B0" label="Benchmark" show-value="false"&gt;
+    &lt;dc-point value="80" label="Engineering"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="80" label="Marketing"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="80" label="Sales"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="80" label="Support"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="80" label="Operations"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-legend position="bottom"&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="600" height="400" orientation="horizontal">
+                    <dc-title>Department Scores vs Benchmark</dc-title>
+                    <dc-bar value="85" fill="#4CAF50" label="Engineering"></dc-bar>
+                    <dc-bar value="78" fill="#FF9800" label="Marketing"></dc-bar>
+                    <dc-bar value="92" fill="#4CAF50" label="Sales"></dc-bar>
+                    <dc-bar value="88" fill="#4CAF50" label="Support"></dc-bar>
+                    <dc-bar value="72" fill="#F44336" label="Operations"></dc-bar>
+                    <dc-line stroke="#9C27B0" label="Benchmark" show-value="false">
+                        <dc-point value="80" label="Engineering"></dc-point>
+                        <dc-point value="80" label="Marketing"></dc-point>
+                        <dc-point value="80" label="Sales"></dc-point>
+                        <dc-point value="80" label="Support"></dc-point>
+                        <dc-point value="80" label="Operations"></dc-point>
+                    </dc-line>
+                    <dc-legend position="bottom"></dc-legend>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+</body>
+</html>

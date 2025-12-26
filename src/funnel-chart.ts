@@ -1,8 +1,10 @@
 import { customElement, property } from 'lit/decorators.js';
 import { svg, SVGTemplateResult } from 'lit';
 import { BaseChart, type ShowCondition } from './base-chart.js';
+import type { LegendItem } from './chart-legend.js';
 import type { ChartFunnelStage } from './chart-funnel-stage.js';
 import type { ChartPopup } from './chart-popup.js';
+import { analyzeFunnel, type StageData as InsightStageData } from './accessibility/index.js';
 
 /**
  * Funnel chart component that renders stages as narrowing trapezoids
@@ -389,8 +391,30 @@ export class FunnelChart extends BaseChart {
     // Calculate total for percentage calculations
     const total = stagesData.reduce((sum, stage) => sum + stage.value, 0);
 
-    // Resolve fill colors using the new color system
-    const elementFills = stagesData.map(s => s.fill);
+    // Resolve fill colors using the new color system with palette support
+    // First, check palette for each stage (palette takes priority over gradient/default colors)
+    const elements = stagesData.map(s => ({
+      fill: s.fill,
+      label: s.label,
+      value: s.value
+    }));
+
+    // Check palette for colors
+    const paletteColors = elements.map(el => {
+      if (el.fill) return undefined; // Element has explicit fill, skip palette
+      const result = this.lookupPaletteColor(el.label, el.value);
+      return result.fill;
+    });
+
+    // Combine element fills with palette fills
+    const effectiveFills = elements.map((el, i) => el.fill || paletteColors[i]);
+
+    // Log palette usage
+    const paletteMatchCount = paletteColors.filter(c => c !== undefined).length;
+    if (this.paletteId && paletteMatchCount > 0) {
+      this.log('info', 'colors.palette', `Palette "${this.paletteId}" matched ${paletteMatchCount} stage(s)`, paletteMatchCount);
+    }
+
     const effectiveStartColor = this.getEffectiveFillStartColor();
     const effectiveEndColor = this.getEffectiveFillEndColor();
 
@@ -398,15 +422,17 @@ export class FunnelChart extends BaseChart {
     if (effectiveStartColor && effectiveEndColor) {
       const gradientColors = this.generateGradientColors(effectiveStartColor, effectiveEndColor, stagesData.length);
       fillColors = gradientColors || this.generateCoolToWarmColors(stagesData.length);
-      fillColors = fillColors.map((color, i) => elementFills[i] || color);
+      // Apply element/palette overrides on top of gradient
+      fillColors = fillColors.map((color, i) => effectiveFills[i] || color);
     } else if (this.fillColors) {
       fillColors = this.resolveColors(stagesData.length, {
-        elementColors: elementFills,
+        elementColors: effectiveFills,
         palette: this.fillColors
       });
     } else {
       fillColors = this.generateCoolToWarmColors(stagesData.length);
-      fillColors = fillColors.map((color, i) => elementFills[i] || color);
+      // Apply element/palette overrides on top of default cool-to-warm colors
+      fillColors = fillColors.map((color, i) => effectiveFills[i] || color);
     }
 
     // Resolve stroke colors (default to #e0e0e0)
@@ -784,12 +810,27 @@ export class FunnelChart extends BaseChart {
    * a circular dependency (getChartPadding -> getLegendItems -> calculateStageLayout -> getChartPadding).
    * Instead, we get the data directly from getStages() and resolve colors independently.
    */
-  protected override getLegendItems(): Array<{ label: string; color: string; value: number }> {
+  protected override getLegendItems(): LegendItem[] {
     const stagesData = this.getStages();
     if (stagesData.length === 0) return [];
 
-    // Resolve colors without calling calculateStageLayout
-    const elementFills = stagesData.map(s => s.fill);
+    // Resolve colors with palette support without calling calculateStageLayout
+    const elements = stagesData.map(s => ({
+      fill: s.fill,
+      label: s.label,
+      value: s.value
+    }));
+
+    // Check palette for colors
+    const paletteColors = elements.map(el => {
+      if (el.fill) return undefined;
+      const result = this.lookupPaletteColor(el.label, el.value);
+      return result.fill;
+    });
+
+    // Combine element fills with palette fills
+    const effectiveFills = elements.map((el, i) => el.fill || paletteColors[i]);
+
     const effectiveStartColor = this.getEffectiveFillStartColor();
     const effectiveEndColor = this.getEffectiveFillEndColor();
 
@@ -797,22 +838,64 @@ export class FunnelChart extends BaseChart {
     if (effectiveStartColor && effectiveEndColor) {
       const gradientColors = this.generateGradientColors(effectiveStartColor, effectiveEndColor, stagesData.length);
       fillColors = gradientColors || this.generateCoolToWarmColors(stagesData.length);
-      fillColors = fillColors.map((color, i) => elementFills[i] || color);
+      fillColors = fillColors.map((color, i) => effectiveFills[i] || color);
     } else if (this.fillColors) {
       fillColors = this.resolveColors(stagesData.length, {
-        elementColors: elementFills,
+        elementColors: effectiveFills,
         palette: this.fillColors
       });
     } else {
       fillColors = this.generateCoolToWarmColors(stagesData.length);
-      fillColors = fillColors.map((color, i) => elementFills[i] || color);
+      fillColors = fillColors.map((color, i) => effectiveFills[i] || color);
     }
 
     return stagesData.map((stage, index) => ({
       label: stage.label,
       color: fillColors[index],
-      value: stage.value
+      value: stage.value,
+      shape: 'square' as const  // Funnel stages use squares in legend
     }));
+  }
+
+  // ============================================================================
+  // Accessibility Methods
+  // ============================================================================
+
+  /**
+   * Returns the chart type name for accessibility descriptions.
+   */
+  protected override getChartTypeName(): string {
+    return 'funnel chart';
+  }
+
+  /**
+   * Returns a basic data summary for accessibility descriptions.
+   */
+  protected override getDataSummary(): string {
+    const stages = this.getStages();
+    if (stages.length === 0) return '';
+
+    const first = stages[0].value;
+    const last = stages[stages.length - 1].value;
+    return `${stages.length} stages from ${first} to ${last}`;
+  }
+
+  /**
+   * Returns auto-generated insights about the funnel chart data.
+   */
+  protected override getInsights(): string {
+    if (this.ariaInsights === 'none') return '';
+
+    const stages = this.getStages();
+    if (stages.length === 0) return '';
+
+    // Convert to insight format
+    const insightStages: InsightStageData[] = stages.map(s => ({
+      label: s.label,
+      value: s.value
+    }));
+
+    return analyzeFunnel(insightStages);
   }
 
 }
@@ -822,3 +905,4 @@ declare global {
     'dc-funnel-chart': FunnelChart;
   }
 }
+

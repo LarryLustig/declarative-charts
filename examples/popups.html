@@ -23,6 +23,7 @@
             <a href="legends.html">Legends</a>
             <a href="axes.html">Axes</a>
             <a href="colors.html">Colors</a>
+            <a href="palettes.html">Palettes</a>
             <a href="typography.html">Typography</a>
             <a href="borders-and-padding.html">Borders & Padding</a>
             <a href="bar-groups.html">Bar Groups</a>
@@ -32,6 +33,7 @@
             <a href="popups.html" class="current">Popups</a>
             <a href="logging.html">Logging</a>
             <a href="htmx-integration.html">htmx</a>
+            <a href="accessibility.html">Accessibility</a>
         </div>
     </nav>
 
@@ -42,25 +44,25 @@
         <div class="grid">
             <div>
                 <h3>Bar Chart with Auto-Popup</h3>
-                <pre><code>&lt;dc-bar-chart auto-popup width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart auto-popup width="500" height="350"&gt;
   &lt;dc-title&gt;Quarterly Sales&lt;/dc-title&gt;
   &lt;dc-bar value="120" fill="#4CAF50" label="Q1"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="180" fill="#2196F3" label="Q2"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="150" fill="#FF9800" label="Q3"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="220" fill="#9C27B0" label="Q4"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart auto-popup width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart auto-popup width="500" height="350">
                     <dc-title>Quarterly Sales</dc-title>
                     <dc-bar value="120" fill="#4CAF50" label="Q1"></dc-bar>
                     <dc-bar value="180" fill="#2196F3" label="Q2"></dc-bar>
                     <dc-bar value="150" fill="#FF9800" label="Q3"></dc-bar>
                     <dc-bar value="220" fill="#9C27B0" label="Q4"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>Stacked Bar Chart with Auto-Popup</h3>
-                <pre><code>&lt;dc-bar-chart auto-popup width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart auto-popup width="500" height="350"&gt;
   &lt;dc-title&gt;Revenue by Product&lt;/dc-title&gt;
   &lt;dc-bar label="Q1"&gt;
     &lt;dc-bar-segment value="50" label="Product A"&gt;&lt;/dc-bar-segment&gt;
@@ -77,8 +79,8 @@
     &lt;dc-bar-segment value="35" label="Product B"&gt;&lt;/dc-bar-segment&gt;
     &lt;dc-bar-segment value="30" label="Product C"&gt;&lt;/dc-bar-segment&gt;
   &lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart auto-popup width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart auto-popup width="500" height="350">
                     <dc-title>Revenue by Product</dc-title>
                     <dc-bar label="Q1">
                         <dc-bar-segment value="50" label="Product A"></dc-bar-segment>
@@ -95,7 +97,7 @@
                         <dc-bar-segment value="35" label="Product B"></dc-bar-segment>
                         <dc-bar-segment value="30" label="Product C"></dc-bar-segment>
                     </dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
@@ -136,7 +138,7 @@
 
             <div>
                 <h3>Line Chart with Auto-Popup</h3>
-                <pre><code>&lt;dc-line-chart auto-popup width="500" height="350" stroke-colors="#E91E63, #9C27B0"&gt;
+                <pre><code>&lt;dc-chart auto-popup width="500" height="350" stroke-colors="#E91E63, #9C27B0"&gt;
   &lt;dc-title&gt;Weekly Trends&lt;/dc-title&gt;
   &lt;dc-line label="Sales"&gt;
     &lt;dc-point value="25" label="Mon"&gt;&lt;/dc-point&gt;
@@ -152,8 +154,8 @@
     &lt;dc-point value="40" label="Thu"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="35" label="Fri"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
-&lt;/dc-line-chart&gt;</code></pre>
-                <dc-line-chart auto-popup width="500" height="350" stroke-colors="#E91E63, #9C27B0">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart auto-popup width="500" height="350" stroke-colors="#E91E63, #9C27B0">
                     <dc-title>Weekly Trends</dc-title>
                     <dc-line label="Sales">
                         <dc-point value="25" label="Mon"></dc-point>
@@ -169,7 +171,7 @@
                         <dc-point value="40" label="Thu"></dc-point>
                         <dc-point value="35" label="Fri"></dc-point>
                     </dc-line>
-                </dc-line-chart>
+                </dc-chart>
             </div>
         </div>
     </div>
@@ -181,20 +183,20 @@
         <div class="grid">
             <div>
                 <h3>Suppress Popup on Specific Bars</h3>
-                <pre><code>&lt;dc-bar-chart auto-popup width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart auto-popup width="500" height="350"&gt;
   &lt;dc-title&gt;Sales by Region&lt;/dc-title&gt;
   &lt;dc-bar value="85" fill="#4CAF50" label="North"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="120" fill="#2196F3" label="South"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="45" fill="#FF9800" label="East" auto-popup="false"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="95" fill="#9C27B0" label="West"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart auto-popup width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart auto-popup width="500" height="350">
                     <dc-title>Sales by Region (East suppressed)</dc-title>
                     <dc-bar value="85" fill="#4CAF50" label="North"></dc-bar>
                     <dc-bar value="120" fill="#2196F3" label="South"></dc-bar>
                     <dc-bar value="45" fill="#FF9800" label="East" auto-popup="false"></dc-bar>
                     <dc-bar value="95" fill="#9C27B0" label="West"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
@@ -244,7 +246,7 @@
         <div class="grid">
             <div>
                 <h3>Auto-Popup on Selected Bars Only</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-title&gt;Monthly Revenue&lt;/dc-title&gt;
   &lt;dc-bar value="80" fill="#78909C" label="Jan"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="95" fill="#78909C" label="Feb"&gt;&lt;/dc-bar&gt;
@@ -252,8 +254,8 @@
   &lt;dc-bar value="85" fill="#78909C" label="Apr"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="200" fill="#4CAF50" label="May" auto-popup&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="90" fill="#78909C" label="Jun"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
                     <dc-title>Monthly Revenue (highlights have popups)</dc-title>
                     <dc-bar value="80" fill="#78909C" label="Jan"></dc-bar>
                     <dc-bar value="95" fill="#78909C" label="Feb"></dc-bar>
@@ -261,7 +263,7 @@
                     <dc-bar value="85" fill="#78909C" label="Apr"></dc-bar>
                     <dc-bar value="200" fill="#4CAF50" label="May" auto-popup></dc-bar>
                     <dc-bar value="90" fill="#78909C" label="Jun"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
@@ -311,7 +313,7 @@
         <div class="grid">
             <div>
                 <h3>Custom Hover Popups</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-title&gt;Quarterly Revenue&lt;/dc-title&gt;
   &lt;dc-bar value="150" fill="#FF6B6B" label="Q1"&gt;
     &lt;dc-popup trigger="hover"&gt;
@@ -341,8 +343,8 @@
       Growth: +33%
     &lt;/dc-popup&gt;
   &lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
                     <dc-title>Quarterly Revenue</dc-title>
                     <dc-bar value="150" fill="#FF6B6B" label="Q1">
                         <dc-popup trigger="hover">
@@ -372,7 +374,7 @@
                             Growth: +33%
                         </dc-popup>
                     </dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
@@ -450,7 +452,7 @@
         <div class="grid">
             <div>
                 <h3>Auto-Popup with Custom Override</h3>
-                <pre><code>&lt;dc-bar-chart auto-popup width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart auto-popup width="500" height="350"&gt;
   &lt;dc-title&gt;Team Performance&lt;/dc-title&gt;
   &lt;dc-bar value="85" fill="#4CAF50" label="Alice"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="92" fill="#2196F3" label="Bob"&gt;
@@ -463,8 +465,8 @@
   &lt;/dc-bar&gt;
   &lt;dc-bar value="78" fill="#FF9800" label="Carol"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="88" fill="#9C27B0" label="Dave"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart auto-popup width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart auto-popup width="500" height="350">
                     <dc-title>Team Performance</dc-title>
                     <dc-bar value="85" fill="#4CAF50" label="Alice"></dc-bar>
                     <dc-bar value="92" fill="#2196F3" label="Bob">
@@ -477,7 +479,7 @@
                     </dc-bar>
                     <dc-bar value="78" fill="#FF9800" label="Carol"></dc-bar>
                     <dc-bar value="88" fill="#9C27B0" label="Dave"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>

@@ -1,7 +1,8 @@
 import { LitElement, css, html, svg, SVGTemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import type { ChartTitle } from './chart-title.js';
-import type { ChartLegend } from './chart-legend.js';
+import type { ChartLegend, LegendItem } from './chart-legend.js';
+import type { ChartPalette, PaletteColorResult } from './chart-palette.js';
 
 /**
  * Color mode for resolving chart element colors.
@@ -311,6 +312,23 @@ export abstract class BaseChart extends LitElement {
   @property({ type: Number, attribute: 'stroke-width' })
   strokeWidth?: number;
 
+  /**
+   * ID of a <dc-palette> element to use for color lookups.
+   * When specified, chart elements will have their colors resolved by matching
+   * their label and/or value against the palette's color definitions.
+   *
+   * Priority order for color resolution:
+   * 1. Element's own fill/stroke attributes (explicit override)
+   * 2. Palette match by value range (if palette is specified)
+   * 3. Palette match by label (if palette is specified)
+   * 4. Chart-level color settings (fill-colors, gradient, etc.)
+   * 5. Auto-generated colors
+   *
+   * @attr palette
+   */
+  @property({ type: String, attribute: 'palette' })
+  paletteId?: string;
+
   // ============================================================================
   // End Color System Properties
   // ============================================================================
@@ -332,6 +350,57 @@ export abstract class BaseChart extends LitElement {
 
   // ============================================================================
   // End Auto Popup Properties
+  // ============================================================================
+
+  // ============================================================================
+  // Accessibility Properties
+  // ============================================================================
+
+  /**
+   * Custom accessible label for the chart.
+   * When provided, overrides the auto-generated label.
+   * Used as the aria-label on the SVG element.
+   *
+   * @attr aria-label
+   */
+  @property({ type: String, attribute: 'aria-label' })
+  override ariaLabel: string | null = null;
+
+  /**
+   * Custom accessible description for the chart.
+   * When provided, overrides the auto-generated description including insights.
+   * Used in the SVG's <desc> element.
+   *
+   * @attr aria-description
+   */
+  @property({ type: String, attribute: 'aria-description' })
+  override ariaDescription: string | null = null;
+
+  /**
+   * Controls the level of auto-generated insights in accessibility descriptions.
+   * - 'auto' (default): Full statistical analysis with meaningful descriptions
+   * - 'basic': Just raw statistics (e.g., "4 bars, values 68-91")
+   * - 'none': No auto-generated description (only use explicit aria-description)
+   *
+   * @attr aria-insights
+   */
+  @property({ type: String, attribute: 'aria-insights' })
+  ariaInsights: 'auto' | 'basic' | 'none' = 'auto';
+
+  /**
+   * Counter for generating unique IDs for accessibility elements.
+   * Shared across all chart instances.
+   */
+  private static accessibilityIdCounter = 0;
+
+  /**
+   * Unique ID for this chart's description element.
+   * Generated once per instance.
+   */
+  private readonly descriptionId = `dc-desc-${++BaseChart.accessibilityIdCounter}`;
+
+  // ============================================================================
+  // End Accessibility Properties
   // ============================================================================
 
   /**
@@ -446,53 +515,6 @@ export abstract class BaseChart extends LitElement {
   }
 
   /**
-   * Parse a CSS value that may include percentages
-   * Supports: plain numbers, px, rem, em (assumes 16px = 1rem/em), and % (of reference value)
-   * @param value The CSS value string to parse
-   * @param referenceValue The reference value for percentage calculations
-   * @returns The calculated pixel value, or undefined if parsing fails
-   */
-  protected parseCSSValueWithPercent(value: string, referenceValue: number): number | undefined {
-    const trimmed = value.trim();
-    if (trimmed === '') return undefined;
-
-    // Check for percentage
-    if (trimmed.endsWith('%')) {
-      const percent = parseFloat(trimmed);
-      if (!isNaN(percent)) {
-        return (percent / 100) * referenceValue;
-      }
-      return undefined;
-    }
-
-    // Check for rem
-    if (trimmed.endsWith('rem')) {
-      const rem = parseFloat(trimmed);
-      if (!isNaN(rem)) {
-        return rem * 16;
-      }
-      return undefined;
-    }
-
-    // Check for em
-    if (trimmed.endsWith('em')) {
-      const em = parseFloat(trimmed);
-      if (!isNaN(em)) {
-        return em * 16;
-      }
-      return undefined;
-    }
-
-    // Otherwise, parse as pixels (with or without 'px' suffix)
-    const numeric = parseFloat(trimmed);
-    if (!isNaN(numeric)) {
-      return numeric;
-    }
-
-    return undefined;
-  }
-
-  /**
    * Canvas context used for text measurement (cached for performance)
    */
   private _measureCanvas: CanvasRenderingContext2D | null = null;
@@ -584,6 +606,27 @@ export abstract class BaseChart extends LitElement {
   // ============================================================================
   // Color System Utilities
   // ============================================================================
+
+  /**
+   * Get the palette element referenced by the paletteId attribute.
+   * @returns The ChartPalette element, or null if not found
+   */
+  protected getPalette(): ChartPalette | null {
+    if (!this.paletteId) return null;
+    return document.getElementById(this.paletteId) as ChartPalette | null;
+  }
+
+  /**
+   * Look up colors from the palette for a given label and/or value.
+   * @param label The element's label (optional)
+   * @param value The element's numeric value (optional)
+   * @returns Object with fill and/or stroke colors, or empty object if no match
+   */
+  protected lookupPaletteColor(label?: string, value?: number): PaletteColorResult {
+    const palette = this.getPalette();
+    if (!palette) return {};
+    return palette.lookup(label, value);
+  }
 
   /**
    * Parse a CSS color string to RGB values.
@@ -945,6 +988,86 @@ export abstract class BaseChart extends LitElement {
     });
   }
 
+  /**
+   * Resolve fill colors for chart elements with palette support.
+   *
+   * Priority order:
+   * 1. Element's own fill attribute (explicit override)
+   * 2. Palette match by value range (if palette is specified)
+   * 3. Palette match by label (if palette is specified)
+   * 4. Chart-level color settings (fill-colors, gradient, etc.)
+   * 5. Auto-generated colors
+   *
+   * @param elements Array of element metadata for color resolution
+   * @param defaultColor Optional default color if nothing else is specified
+   * @returns Array of resolved fill colors
+   */
+  protected resolveFillColorsWithPalette(
+    elements: Array<{ fill?: string; label?: string; value?: number }>,
+    defaultColor?: string
+  ): string[] {
+    const count = elements.length;
+    if (count === 0) return [];
+
+    // First, check palette for each element
+    const paletteColors: (string | undefined)[] = elements.map(el => {
+      // Skip palette lookup if element has explicit fill
+      if (el.fill) return undefined;
+
+      const result = this.lookupPaletteColor(el.label, el.value);
+      return result.fill;
+    });
+
+    // Combine element fills with palette fills (element > palette)
+    const effectiveFills = elements.map((el, i) => el.fill || paletteColors[i]);
+
+    // Log palette usage
+    const paletteMatchCount = paletteColors.filter(c => c !== undefined).length;
+    if (this.paletteId && paletteMatchCount > 0) {
+      this.log('info', 'colors.palette', `Palette "${this.paletteId}" matched ${paletteMatchCount} element(s)`, paletteMatchCount);
+    }
+
+    // Fall back to standard color resolution for elements without palette match
+    return this.resolveFillColors(count, effectiveFills, defaultColor);
+  }
+
+  /**
+   * Resolve stroke colors for chart elements with palette support.
+   *
+   * Priority order:
+   * 1. Element's own stroke attribute (explicit override)
+   * 2. Palette match by value range (if palette is specified)
+   * 3. Palette match by label (if palette is specified)
+   * 4. Chart-level color settings (stroke-colors, gradient, etc.)
+   * 5. Auto-generated or default colors
+   *
+   * @param elements Array of element metadata for color resolution
+   * @param defaultColor Optional default color if nothing else is specified
+   * @returns Array of resolved stroke colors
+   */
+  protected resolveStrokeColorsWithPalette(
+    elements: Array<{ stroke?: string; label?: string; value?: number }>,
+    defaultColor?: string
+  ): string[] {
+    const count = elements.length;
+    if (count === 0) return [];
+
+    // First, check palette for each element
+    const paletteColors: (string | undefined)[] = elements.map(el => {
+      // Skip palette lookup if element has explicit stroke
+      if (el.stroke) return undefined;
+
+      const result = this.lookupPaletteColor(el.label, el.value);
+      return result.stroke;
+    });
+
+    // Combine element strokes with palette strokes (element > palette)
+    const effectiveStrokes = elements.map((el, i) => el.stroke || paletteColors[i]);
+
+    // Fall back to standard color resolution for elements without palette match
+    return this.resolveStrokeColors(count, effectiveStrokes, defaultColor);
+  }
+
   // ============================================================================
   // End Color System Utilities
   // ============================================================================
@@ -1004,7 +1127,7 @@ export abstract class BaseChart extends LitElement {
    * Used by getLegendDimensions() when calculating auto padding.
    * @returns Array of legend items or empty array if not applicable
    */
-  protected getLegendItems(): Array<{ label: string; color: string; value: number }> {
+  protected getLegendItems(): LegendItem[] {
     return [];
   }
 
@@ -1063,65 +1186,6 @@ export abstract class BaseChart extends LitElement {
 
     // Default is auto
     return true;
-  }
-
-  /**
-   * Calculate the optimal number of columns for a legend with columns="auto".
-   * For top/bottom legends: calculates how many columns fit in chart width
-   * For left/right legends: if padding is explicit, calculates columns that fit; if auto, returns 1
-   *
-   * @param items Legend items with display values already computed
-   * @param position Legend position
-   * @param columnWidth Width of a single column in the tabular layout
-   * @param columnGap Gap between columns
-   * @returns The calculated number of columns
-   */
-  protected calculateAutoColumns(
-    items: Array<{ label: string; color: string; value: number; displayValue: string | null }>,
-    position: string,
-    columnWidth: number,
-    columnGap: number
-  ): number {
-    const numItems = items.length;
-    if (numItems === 0) return 1;
-
-    const isHorizontalPosition = position.startsWith('top') || position.startsWith('bottom');
-
-    if (isHorizontalPosition) {
-      // Top/bottom legends: calculate how many columns fit in chart width
-      // Available width = chart width - some margin for background padding (40px total)
-      const availableWidth = this.width - 40;
-
-      // Calculate max columns that fit: columns * columnWidth + (columns-1) * columnGap <= availableWidth
-      // columns * (columnWidth + columnGap) - columnGap <= availableWidth
-      // columns <= (availableWidth + columnGap) / (columnWidth + columnGap)
-      const maxColumnsByWidth = Math.floor((availableWidth + columnGap) / (columnWidth + columnGap));
-
-      // Don't use more columns than items
-      return Math.max(1, Math.min(maxColumnsByWidth, numItems));
-    } else {
-      // Left/right legends: check if padding is explicit or auto
-      const side = position === 'left' ? 'left' : 'right';
-      const isAuto = this.isPaddingAuto(side);
-
-      if (isAuto) {
-        // Can't calculate columns when padding is auto (circular dependency) - use 1
-        return 1;
-      }
-
-      // Padding is explicit - calculate how many columns fit
-      const padding = this.getChartPadding();
-      const availablePadding = side === 'left' ? padding.left : padding.right;
-
-      // Available width = padding - some margin for background (40px total, so 20px per side inside legend)
-      const availableWidth = availablePadding - 40;
-      if (availableWidth <= columnWidth) {
-        return 1;
-      }
-
-      const maxColumnsByWidth = Math.floor((availableWidth + columnGap) / (columnWidth + columnGap));
-      return Math.max(1, Math.min(maxColumnsByWidth, numItems));
-    }
   }
 
   /**
@@ -1258,13 +1322,14 @@ export abstract class BaseChart extends LitElement {
           }
         }
 
-        // Add trailing margin after the last element, but only if it's a title
-        // (legend dimensions already include internal padding/margin)
-        const lastItem = contentOnSide[contentOnSide.length - 1];
-        if (lastItem.type === 'title') {
-          const trailingMargin = 10;
+        // Add trailing margin between chrome elements and chart content when needed.
+        // Axis labels naturally provide a buffer, but if there are no axis labels
+        // (or very few), we need to add margin to prevent chrome from touching chart content.
+        const minBuffer = 10;
+        if (axisExtra < minBuffer) {
+          const trailingMargin = minBuffer - axisExtra;
           totalContentSize += trailingMargin;
-          contentDetails.push(`trailingMargin(${trailingMargin})`);
+          contentDetails.push(`trailingMargin(${trailingMargin.toFixed(1)})`);
         }
 
         // Final padding = content + axis labels
@@ -1486,12 +1551,20 @@ export abstract class BaseChart extends LitElement {
     // Clear log entries at the start of each render cycle
     this.clearLog();
 
+    // Generate accessibility content
+    const ariaLabelValue = this.getAriaLabel();
+    const descriptionContent = this.generateAccessibilityDescription();
+
     return html`
       <svg
         viewBox="0 0 ${this.width} ${this.height}"
         preserveAspectRatio="xMidYMid meet"
         xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        aria-label="${ariaLabelValue}"
+        aria-describedby="${descriptionContent ? this.descriptionId : ''}"
       >
+        ${descriptionContent ? svg`<desc id="${this.descriptionId}">${descriptionContent}</desc>` : ''}
         ${this.renderTitle()}
         ${this.renderChart()}
       </svg>
@@ -1672,16 +1745,17 @@ export abstract class BaseChart extends LitElement {
    * @returns Object with width, height, and position, or null if no legend
    */
   protected getLegendDimensions(
-    items?: Array<{ label: string; color: string; value: number }>
+    items?: LegendItem[]
   ): { width: number; height: number; position: string } | null {
     const legend = this.getLegend();
     if (!legend) return null;
+
+    const position = legend.position || 'right';
 
     // If no items provided, we can't calculate dimensions
     // This is a limitation - subclasses should provide items when calling
     if (!items || items.length === 0) {
       // Return conservative estimates based on position
-      const position = legend.position || 'right';
       if (position === 'right' || position === 'left') {
         this.log('info', 'legend.dimensions', `No items, using estimates for ${position} position`, { width: 150, height: 100, position });
         return { width: 150, height: 100, position };
@@ -1692,156 +1766,23 @@ export abstract class BaseChart extends LitElement {
       }
     }
 
-    const position = legend.position || 'right';
-    const columns = legend.columns || '1';
-    const showLabel = legend.hasAttribute('show-label') ? legend.showLabel : true;
-    const showValue = legend.hasAttribute('show-value') ? legend.showValue : this.showValue;
-    const showPercent = legend.hasAttribute('show-percent') ? legend.showPercent : this.showPercent;
-    const titleInfo = legend.getTitleInfo();
-
-    // Determine if position is horizontal (top/bottom) or vertical (left/right)
-    const isHorizontalPosition = position.startsWith('top') || position.startsWith('bottom');
-
-    // Calculate total for percentage computation
-    const total = items.reduce((sum, item) => sum + item.value, 0);
-
-    // Pre-compute display strings for each item
-    const itemsWithDisplay = items.map(item => {
-      const percent = total > 0 ? (item.value / total) * 100 : 0;
-      let displayValue: string | null = null;
-
-      if (showValue || showPercent) {
-        if (showValue && showPercent) {
-          displayValue = `${item.value} (${percent.toFixed(1)}%)`;
-        } else if (showValue) {
-          displayValue = `${item.value}`;
-        } else {
-          displayValue = `${percent.toFixed(1)}%`;
-        }
-      }
-
-      return { ...item, displayValue };
-    });
-
-    // Layout constants
-    const colorBoxWidth = 18;
-    const colorBoxGap = 7;
-    const labelValueGap = 10;
-    const itemPadding = 5;
-    const fontSize = 13;
-    const itemHeight = 25;
-    const columnGap = 15;
-
-    // Calculate text widths using actual font metrics
-    const labelWidth = showLabel
-      ? Math.max(...itemsWithDisplay.map(item => this.measureText(item.label || '', fontSize)))
-      : 0;
-    const displayValueWidth = Math.max(
-      ...itemsWithDisplay.map(item => this.measureText(item.displayValue || '', fontSize - 1))
-    );
-
-    let legendWidth: number;
-    let legendHeight: number;
-    let layoutType: string;
-    let numColumns: number;
-
-    // Calculate columnWidth first (needed for both explicit columns and auto calculation)
-    const columnWidth = colorBoxWidth + colorBoxGap + labelWidth +
-      (showLabel && displayValueWidth > 0 ? labelValueGap : 0) +
-      displayValueWidth + itemPadding;
-
-    // Calculate title contributions for positioned titles
-    const titleFontSize = 14;
-    const titleHeight = 25; // Height for title row
-
-    // For left/right titles: rotated text needs space for font height, not text width
-    let titleWidthContribution = 0;
-    if (titleInfo && (titleInfo.position === 'left' || titleInfo.position === 'right')) {
-      titleWidthContribution = titleFontSize + 10; // font height + small gap
-    }
-
-    // For top/bottom titles: need vertical space for the title
-    let titleHeightContribution = 0;
-    if (titleInfo && (titleInfo.position === 'top' || titleInfo.position === 'bottom' ||
-        titleInfo.position?.startsWith('top') || titleInfo.position?.startsWith('bottom'))) {
-      titleHeightContribution = titleHeight;
-    }
-
-    if (columns === '*') {
-      // Wrapped layout
-      layoutType = 'wrapped';
-      numColumns = 0; // Not applicable for wrapped
-      const lineHeight = 20;
-      const wrappedColorBoxWidth = 12;
-      const wrappedColorBoxGap = 4;
-      const wrappedItemGap = 12;
-      const wrappedFontSize = 12;
-
-      // Calculate maxWidth for wrapping
-      let maxWidth: number;
-      if (legend.maxWidth) {
-        const parsedMaxWidth = this.parseCSSValueWithPercent(legend.maxWidth, this.width);
-        maxWidth = parsedMaxWidth ?? this.width * 0.8;
-      } else if (isHorizontalPosition) {
-        maxWidth = this.width * 0.8;
-      } else {
-        maxWidth = this.width * 0.25;
-      }
-
-      // Simulate wrapping to calculate height
-      let currentX = 0;
-      let currentY = 0;
-
-      for (const item of itemsWithDisplay) {
-        let text = '';
-        if (showLabel) text += item.label;
-        if (item.displayValue) {
-          text += showLabel ? ` (${item.displayValue})` : item.displayValue;
-        }
-
-        const textWidth = this.measureText(text, wrappedFontSize);
-        const itemWidth = wrappedColorBoxWidth + wrappedColorBoxGap + textWidth + wrappedItemGap;
-
-        if (currentX + itemWidth > maxWidth && currentX > 0) {
-          currentX = 0;
-          currentY += lineHeight;
-        }
-        currentX += itemWidth;
-      }
-
-      legendWidth = maxWidth + titleWidthContribution + 20; // Add title width (if left/right) + margin
-      legendHeight = currentY + lineHeight + titleHeightContribution + 20 + 20; // content + title height (if top/bottom) + padding + margin
-    } else {
-      // Tabular layout - resolve column count (may be 'auto' or explicit number)
-      layoutType = 'tabular';
-      if (columns === 'auto') {
-        numColumns = this.calculateAutoColumns(itemsWithDisplay, position, columnWidth, columnGap);
-      } else {
-        numColumns = Math.max(1, parseInt(columns, 10) || 1);
-      }
-
-      legendWidth = numColumns * columnWidth + (numColumns - 1) * columnGap + titleWidthContribution + 20 + 20; // content + title width (if left/right) + padding + margin
-      const rowCount = Math.ceil(items.length / numColumns);
-      legendHeight = rowCount * itemHeight + titleHeightContribution + 20 + 20; // content + title height (if top/bottom) + padding + margin
-    }
+    // Delegate to ChartLegend.getDimensions()
+    // Convert ShowCondition to boolean (threshold conditions count as "show")
+    const showValue = this.showValue !== false;
+    const showPercent = this.showPercent !== false;
+    const dims = legend.getDimensions(items, this.width, showValue, showPercent);
 
     this.log('info', 'legend.position', `Legend position`, position);
-    this.log('info', 'legend.layout', `Layout: ${layoutType}${numColumns > 0 ? `, ${numColumns} column(s)` : ''}`, { layout: layoutType, columns: numColumns });
-    this.log('info', 'legend.dimensions', `width=${legendWidth.toFixed(1)}, height=${legendHeight.toFixed(1)}`, { width: legendWidth, height: legendHeight });
-    if (titleInfo) {
-      this.log('info', 'legend.title', `Title "${titleInfo.text}" at ${titleInfo.position}`, titleInfo);
-    }
+    this.log('info', 'legend.dimensions', `width=${dims.width.toFixed(1)}, height=${dims.height.toFixed(1)}`, { width: dims.width, height: dims.height });
 
-    return { width: legendWidth, height: legendHeight, position };
+    return { width: dims.width, height: dims.height, position };
   }
 
   /**
-   * Render a legend for the chart using absolute SVG coordinates
-   * @param items Array of legend items with label, color, and value
+   * Render a legend for the chart using ChartLegend.generateSvg()
+   * @param items Array of legend items with label, color, value, and optional shape
    */
-  protected renderLegend(
-    items: Array<{ label: string; color: string; value: number }>
-  ): SVGTemplateResult {
+  protected renderLegend(items: LegendItem[]): SVGTemplateResult {
     const legend = this.getLegend();
     if (!legend) return svg``;
 
@@ -1851,76 +1792,53 @@ export abstract class BaseChart extends LitElement {
       this.log('warning', 'legend.style', warning.message);
     }
 
-    const titleInfo = legend.getTitleInfo(); // null if no <dc-title> inside legend
+    // Generate the legend SVG at 0,0
+    // Convert ShowCondition to boolean (threshold conditions count as "show")
+    const showValue = this.showValue !== false;
+    const showPercent = this.showPercent !== false;
+    const result = legend.generateSvg(items, this.width, showValue, showPercent);
 
-    // Calculate title width contribution early - needed for positioning calculations
-    // For rotated text (left/right titles), we need space for the font height, not text width
-    const titleFontSizeEarly = 14;
-    const titleHeightEarly = 25;
-    const titlePosition = titleInfo?.position || 'top';
-    // Only right-positioned titles affect the width positioning calculation
-    // Left-positioned titles expand the background to the left, not affecting the content start position
-    const titleWidthForPositioning = (titleInfo && titlePosition === 'right') ? titleFontSizeEarly + 10 : 0;
-    // Full title width contribution (for both left and right) - used in dimension calculations
-    const isTitleVertical = titlePosition === 'left' || titlePosition === 'right';
-    const titleWidthContribution = (titleInfo && isTitleVertical) ? titleFontSizeEarly + 10 : 0;
-    // Title height contribution for top/bottom titles - affects legend total height in positioning
-    const isTitleHorizontal = titlePosition === 'top' || titlePosition === 'bottom' ||
-        titlePosition?.startsWith('top') || titlePosition?.startsWith('bottom');
-    const titleHeightForPositioning = (titleInfo && isTitleHorizontal) ? titleHeightEarly : 0;
-    // Only TOP-positioned titles need to offset the content start position
-    const isTitleAtTop = titlePosition === 'top' || titlePosition?.startsWith('top');
-    const titleHeightForContentOffset = (titleInfo && isTitleAtTop) ? titleHeightEarly : 0;
+    if (result.width === 0 || result.height === 0) {
+      return svg``;
+    }
 
-    // Inherit show-label from legend if explicitly set, otherwise default to true
-    const showLabel = legend.hasAttribute('show-label') ? legend.showLabel : true;
-    // Inherit show-value and show-percent from chart if not explicitly set on legend
-    const showValue = legend.hasAttribute('show-value') ? legend.showValue : this.showValue;
-    const showPercent = legend.hasAttribute('show-percent') ? legend.showPercent : this.showPercent;
-    const columns = legend.columns || '1';
+    // Calculate position for the legend
     const position = legend.position || 'right';
+    const { x, y } = this.calculateLegendPosition(position, result.width, result.height);
 
-    // Determine if position is horizontal (top/bottom) or vertical (left/right)
-    const isHorizontalPosition = position.startsWith('top') || position.startsWith('bottom');
+    // Return the legend SVG wrapped in a positioned group
+    return svg`
+      <g transform="translate(${x}, ${y})">
+        ${result.svg}
+      </g>
+    `;
+  }
 
-    // Calculate total for percentage computation
-    const total = items.reduce((sum, item) => sum + item.value, 0);
-
-    // Pre-compute display strings for each item using formatValueString logic
-    const itemsWithDisplay = items.map(item => {
-      const percent = total > 0 ? (item.value / total) * 100 : 0;
-      let displayValue: string | null = null;
-
-      if (showValue || showPercent) {
-        if (showValue && showPercent) {
-          displayValue = `${item.value} (${percent.toFixed(1)}%)`;
-        } else if (showValue) {
-          displayValue = `${item.value}`;
-        } else {
-          displayValue = `${percent.toFixed(1)}%`;
-        }
-      }
-
-      return { ...item, displayValue };
-    });
-
-    // x and y will be set to absolute SVG coordinates (where legend content starts)
-    // Legends are now positioned within the chart's padding area (not in expanded SVG space)
-    let x = 0;
-    let y = 0;
-
+  /**
+   * Calculate the position (x, y) for the legend based on its position attribute.
+   * This handles all the complex positioning logic including:
+   * - Padding area constraints
+   * - Axis label padding
+   * - Stacking with other chrome elements (title)
+   * - Horizontal alignment (left, center, right) for top/bottom positions
+   * - Vertical centering for left/right positions
+   */
+  private calculateLegendPosition(
+    position: string,
+    legendWidth: number,
+    legendHeight: number
+  ): { x: number; y: number } {
     // Get padding - this already accounts for legend dimensions on the appropriate side
     const padding = this.getChartPadding();
 
     // Get axis label padding to know how much space is reserved for axis labels
-    // The legend should be positioned AFTER the axis labels, not overlapping them
     const axisLabelPadding = this.getAxisLabelPadding();
 
     // Get padding area content to determine legend's position in the stack
     const paddingContent = this.getPaddingAreaContent();
     const legendSide = this.getLegendSide(position);
 
-    // Calculate title dimensions for separator calculation
+    // Calculate separator based on chart title height
     const chartTitleDims = this.getTitleDimensions();
     const stackSeparator = chartTitleDims ? chartTitleDims.height / 2 : 10;
 
@@ -1939,586 +1857,64 @@ export abstract class BaseChart extends LitElement {
       }
     }
 
-    // For right/left legends, calculate y position (centered vertically in chart area)
-    if (position === 'right' || position === 'left') {
-      const chartHeight = this.height - padding.top - padding.bottom;
-      const legendHeight = items.length * 25 + 60;
-      // Center legend vertically within the chart content area
-      y = padding.top + (chartHeight - legendHeight) / 2 + 20;
-    }
-
-    // Layout constants for tabular legend
-    const itemHeight = 25;
-    const colorBoxWidth = 18;
-    const colorBoxGap = 7; // Gap after color box
-    const labelValueGap = 10; // Gap between label and value
-    const itemPadding = 5; // Padding at end of item
-    const fontSize = 13; // Font size used in tabular legend
-    const columnGap = 15; // Gap between columns
-
-    // Find the maximum label width and display value width using actual font metrics
-    const labelWidth = showLabel
-      ? Math.max(...itemsWithDisplay.map(item => this.measureText(item.label || '', fontSize)))
-      : 0;
-    const displayValueWidth = Math.max(
-      ...itemsWithDisplay.map(item => this.measureText(item.displayValue || '', fontSize - 1))
-    );
-    const columnWidth = colorBoxWidth + colorBoxGap + labelWidth +
-      (showLabel && displayValueWidth > 0 ? labelValueGap : 0) +
-      displayValueWidth + itemPadding;
-
-    // Calculate number of columns - handle 'auto', '*', or explicit number
-    let numColumns: number;
-    if (columns === '*') {
-      numColumns = 1; // Wrapped layout doesn't use column count the same way
-    } else if (columns === 'auto') {
-      numColumns = this.calculateAutoColumns(itemsWithDisplay, position, columnWidth, columnGap);
-    } else {
-      numColumns = Math.max(1, parseInt(columns, 10) || 1);
-    }
-
-    const calculatedTabularWidth = numColumns * columnWidth + (numColumns - 1) * columnGap;
-
-    // Calculate maxWidth for legend
-    // Priority: explicit max-width attribute > position-based default
-    let maxWidth: number;
-    if (legend.maxWidth) {
-      // Parse the explicit max-width value (supports px, rem, em, %)
-      const parsedMaxWidth = this.parseCSSValueWithPercent(legend.maxWidth, this.width);
-      maxWidth = parsedMaxWidth ?? this.width * 0.8; // Fallback to 80% if parsing fails
-    } else {
-      // Calculate default based on position and column layout
-      if (isHorizontalPosition) {
-        // Top/bottom positions: 80% of chart width
-        maxWidth = this.width * 0.8;
-      } else {
-        // Left/right positions
-        if (columns === '*') {
-          // Wrapped layout: 25% of chart width
-          maxWidth = this.width * 0.25;
-        } else {
-          // Tabular layout: use calculated content width
-          maxWidth = calculatedTabularWidth;
-        }
-      }
-    }
-
-    // Chart content area (where the chart itself draws, excluding padding)
+    // Chart content area
     const chartContentLeft = padding.left;
     const chartContentWidth = this.width - padding.left - padding.right;
+    const chartContentHeight = this.height - padding.top - padding.bottom;
 
-    // columns="*" means wrapped layout
-    if (columns === '*') {
-      // For right/left positioned wrapped legends, position in the padding area
-      if (position === 'right' || position === 'left') {
-        const actualBackgroundWidth = maxWidth + titleWidthForPositioning + 20;
+    let x = 0;
+    let y = 0;
 
-        if (position === 'right') {
-          // Legend goes in the right padding area
-          // The legend area starts AFTER the axis labels (if any on right) and any stacked elements
-          const axisSpace = axisLabelPadding.right;
-          const legendAreaStart = this.width - padding.right + axisSpace + stackOffsetFromEdge;
-          const legendAreaWidth = padding.right - axisSpace - stackOffsetFromEdge;
-          x = legendAreaStart + (legendAreaWidth - actualBackgroundWidth) * 0.8 + 10;
-        } else {
-          // Legend goes in the left padding area
-          // The legend area ends BEFORE the axis labels (not at the chart content edge)
-          // Stack offset pushes legend inward from the edge
-          const axisSpace = axisLabelPadding.left;
-          const legendAreaWidth = padding.left - axisSpace - stackOffsetFromEdge;
-          x = stackOffsetFromEdge + (legendAreaWidth - actualBackgroundWidth) * 0.2 + 10;
-        }
-      }
-
-      // For top/bottom positioned wrapped legends, position in the padding area
-      if (position.startsWith('top') || position.startsWith('bottom')) {
-        // Set x position based on horizontal alignment (left, center, right)
-        if (position === 'top-right' || position === 'bottom-right') {
-          x = chartContentLeft + chartContentWidth - maxWidth;
-        } else if (position === 'top' || position === 'bottom') {
-          x = chartContentLeft + (chartContentWidth - maxWidth) / 2;
-        } else {
-          // top-left or bottom-left
-          x = chartContentLeft;
-        }
-
-        // Set y position in padding area, accounting for stacked elements
-        if (position.startsWith('top')) {
-          // Legend in the top padding area
-          // Stack offset pushes legend down from the top edge
-          const axisSpace = axisLabelPadding.top;
-          const legendAreaHeight = padding.top - axisSpace - stackOffsetFromEdge;
-          y = stackOffsetFromEdge + legendAreaHeight * 0.2 + 10;
-        } else {
-          // Legend in the bottom padding area
-          // Stack offset reduces available space from the bottom edge
-          const axisSpace = axisLabelPadding.bottom;
-          const legendAreaStart = this.height - padding.bottom + axisSpace;
-          const legendAreaHeight = padding.bottom - axisSpace - stackOffsetFromEdge;
-          // Apply chart-specific offset for bottom legends
-          y = legendAreaStart + legendAreaHeight * 0.2 + 10 + this.getBottomLegendOffset();
-        }
-      }
-
-      return this.renderWrappedLegend(itemsWithDisplay, x, y, titleInfo, showLabel, maxWidth);
-    }
-
-    // Use calculated tabular width for actual rendering
-    const totalWidth = calculatedTabularWidth;
-    const rowCount = Math.ceil(itemsWithDisplay.length / numColumns);
-
-    // Handle x positioning for right/left legends
-    // Legends are positioned in the padding area (not expanded SVG space)
+    // Position based on legend position
     if (position === 'right' || position === 'left') {
-      const actualBackgroundWidth = totalWidth + titleWidthForPositioning + 20;
+      // Vertical centering in chart area
+      y = padding.top + (chartContentHeight - legendHeight) / 2;
 
       if (position === 'right') {
         // Legend goes in the right padding area
-        // The legend area starts AFTER the axis labels (if any on right) and any stacked elements
+        // The legend area starts right after axis labels, not offset by stack
+        // Stack offset reduces the available width but doesn't change the start position
         const axisSpace = axisLabelPadding.right;
-        const legendAreaStart = this.width - padding.right + axisSpace + stackOffsetFromEdge;
+        const legendAreaStart = this.width - padding.right + axisSpace;
         const legendAreaWidth = padding.right - axisSpace - stackOffsetFromEdge;
-        const backgroundX = legendAreaStart + (legendAreaWidth - actualBackgroundWidth) * 0.8;
-        x = backgroundX + 10;
+        // Position with 80% of extra space toward the outer edge
+        x = legendAreaStart + (legendAreaWidth - legendWidth) * 0.8;
       } else {
         // Legend goes in the left padding area
-        // The legend area ends BEFORE the axis labels (not at the chart content edge)
-        // Stack offset pushes legend inward from the edge
         const axisSpace = axisLabelPadding.left;
         const legendAreaWidth = padding.left - axisSpace - stackOffsetFromEdge;
-        const backgroundX = stackOffsetFromEdge + (legendAreaWidth - actualBackgroundWidth) * 0.2;
-        x = backgroundX + 10;
+        // Position with 20% of extra space toward the outer edge (80% toward content)
+        x = stackOffsetFromEdge + (legendAreaWidth - legendWidth) * 0.2;
       }
-    }
-
-    // Handle x and y positioning for top/bottom legends
-    // Legends are positioned in the padding area (not expanded SVG space)
-    if (position.startsWith('top') || position.startsWith('bottom')) {
-      // Set x position based on horizontal alignment (left, center, right)
-      // Use totalWidth (actual tabular width) for accurate positioning
+    } else if (position.startsWith('top') || position.startsWith('bottom')) {
+      // Horizontal alignment
       if (position === 'top-right' || position === 'bottom-right') {
-        x = chartContentLeft + chartContentWidth - totalWidth;
+        x = chartContentLeft + chartContentWidth - legendWidth;
       } else if (position === 'top' || position === 'bottom') {
-        x = chartContentLeft + (chartContentWidth - totalWidth) / 2;
+        x = chartContentLeft + (chartContentWidth - legendWidth) / 2;
       } else {
         // top-left or bottom-left
         x = chartContentLeft;
       }
 
-      // Calculate actual background dimensions for positioning
-      // Background height = content + title (if horizontal) + padding
-      const contentHeightForCalc = rowCount * itemHeight;
-      const bgHeightForCalc = contentHeightForCalc + titleHeightForPositioning + 20;
-
-      // Position so that 80% of extra space is toward the outer edge (top of chart for top legends,
-      // bottom of chart for bottom legends), accounting for stacked elements
+      // Vertical positioning
       if (position.startsWith('top')) {
         // Legend in the top padding area
-        // Stack offset pushes legend down from the top edge
         const axisSpace = axisLabelPadding.top;
         const legendAreaHeight = padding.top - axisSpace - stackOffsetFromEdge;
-        const extraSpace = legendAreaHeight - bgHeightForCalc;
-        // 20% margin at outer edge (top of chart), 80% at inner edge (toward content)
-        const bgY = stackOffsetFromEdge + extraSpace * 0.2;
-        // Content starts after background padding (10px) + title height (if at top)
-        y = bgY + 10 + titleHeightForContentOffset;
+        // Position with 20% of extra space toward the outer edge
+        y = stackOffsetFromEdge + (legendAreaHeight - legendHeight) * 0.2;
       } else {
         // Legend in the bottom padding area
-        // Stack offset reduces available space from the bottom edge
         const axisSpace = axisLabelPadding.bottom;
         const legendAreaStart = this.height - padding.bottom + axisSpace;
         const legendAreaHeight = padding.bottom - axisSpace - stackOffsetFromEdge;
-        const extraSpace = legendAreaHeight - bgHeightForCalc;
-        // 80% margin at outer edge (bottom of chart), 20% at inner edge (toward content)
-        const bgY = legendAreaStart + extraSpace * 0.2;
-        // Content starts after background padding (10px) + title height (if at top)
-        // Apply chart-specific offset for bottom legends
-        y = bgY + 10 + titleHeightForContentOffset + this.getBottomLegendOffset();
+        // Position with 20% of extra space toward the inner edge
+        y = legendAreaStart + (legendAreaHeight - legendHeight) * 0.2 + this.getBottomLegendOffset();
       }
     }
 
-    // Calculate title-related dimensions
-    const hasTitle = titleInfo !== null;
-    const titleFontSize = titleFontSizeEarly;
-    const titleHeight = 25;
-
-    // titleWidthReserved is the same as titleWidthContribution (calculated early for positioning)
-    const titleWidthReserved = titleWidthContribution;
-
-    // Adjust content area based on title position
-    let contentX = x;
-    let contentY = y;
-    const contentWidth = totalWidth;
-    const contentHeight = rowCount * itemHeight;
-
-    // Calculate background dimensions
-    let bgX = x - 10;
-    let bgY = y - 10;
-    let bgWidth = totalWidth + 20;
-    let bgHeight = contentHeight + 20;
-
-    // Adjust for title
-    if (hasTitle) {
-      if (titlePosition === 'top' || titlePosition.startsWith('top')) {
-        bgY = y - titleHeight - 10;
-        bgHeight = contentHeight + titleHeight + 20;
-      } else if (titlePosition === 'bottom' || titlePosition.startsWith('bottom')) {
-        bgHeight = contentHeight + titleHeight + 20;
-      } else if (titlePosition === 'left') {
-        bgX = x - titleWidthReserved - 10;
-        bgWidth = totalWidth + titleWidthReserved + 20;
-        contentX = x;
-      } else if (titlePosition === 'right') {
-        bgWidth = totalWidth + titleWidthReserved + 20;
-      }
-    }
-
-    // Render title based on position
-    const renderTabularTitle = () => {
-      if (!hasTitle) return svg``;
-
-      const titleText = titleInfo!.text;
-      let titleX: number;
-      let titleY: number;
-      let textAnchor = 'middle';
-      let transform = '';
-
-      switch (titlePosition) {
-        case 'top':
-          titleX = contentX + contentWidth / 2;
-          titleY = contentY - 15;
-          break;
-        case 'top-left':
-          titleX = contentX;
-          titleY = contentY - 15;
-          textAnchor = 'start';
-          break;
-        case 'top-right':
-          titleX = contentX + contentWidth;
-          titleY = contentY - 15;
-          textAnchor = 'end';
-          break;
-        case 'bottom':
-          titleX = contentX + contentWidth / 2;
-          titleY = contentY + contentHeight + titleHeight - 5;
-          break;
-        case 'bottom-left':
-          titleX = contentX;
-          titleY = contentY + contentHeight + titleHeight - 5;
-          textAnchor = 'start';
-          break;
-        case 'bottom-right':
-          titleX = contentX + contentWidth;
-          titleY = contentY + contentHeight + titleHeight - 5;
-          textAnchor = 'end';
-          break;
-        case 'left':
-          titleX = bgX + titleFontSize + 10;
-          titleY = contentY + contentHeight / 2;
-          textAnchor = 'middle';
-          transform = `rotate(-90, ${titleX}, ${titleY})`;
-          break;
-        case 'right':
-          titleX = bgX + bgWidth - titleFontSize;
-          titleY = contentY + contentHeight / 2;
-          textAnchor = 'middle';
-          transform = `rotate(90, ${titleX}, ${titleY})`;
-          break;
-        default:
-          titleX = contentX + contentWidth / 2;
-          titleY = contentY - 15;
-      }
-
-      return svg`
-        <text
-          x="${titleX}"
-          y="${titleY}"
-          text-anchor="${textAnchor}"
-          font-size="${titleFontSize}"
-          font-weight="bold"
-          fill="#333"
-          transform="${transform}"
-        >
-          ${titleText}
-        </text>
-      `;
-    };
-
-    return svg`
-      <!-- Legend background -->
-      <rect
-        x="${bgX}"
-        y="${bgY}"
-        width="${bgWidth}"
-        height="${bgHeight}"
-        fill="white"
-        stroke="#ddd"
-        stroke-width="1"
-        rx="4"
-      />
-
-      ${renderTabularTitle()}
-
-      <!-- Legend items -->
-      ${itemsWithDisplay.map((item, index) => {
-        const col = index % numColumns;
-        const row = Math.floor(index / numColumns);
-        const itemX = contentX + col * (columnWidth + columnGap);
-        const itemY = contentY + row * itemHeight;
-        const labelX = itemX + colorBoxWidth + colorBoxGap;
-        const valueX = labelX + labelWidth + (showLabel ? labelValueGap : 0);
-        return svg`
-          <!-- Color box -->
-          <rect
-            x="${itemX}"
-            y="${itemY}"
-            width="18"
-            height="18"
-            fill="${item.color}"
-            stroke="white"
-            stroke-width="1"
-          />
-
-          ${showLabel ? svg`
-            <!-- Label -->
-            <text
-              x="${labelX}"
-              y="${itemY + 13}"
-              font-size="13"
-              fill="#333"
-            >
-              ${item.label}
-            </text>
-          ` : ''}
-
-          ${item.displayValue ? svg`
-            <!-- Value/Percent -->
-            <text
-              x="${valueX}"
-              y="${itemY + 13}"
-              font-size="12"
-              fill="#666"
-            >
-              ${item.displayValue}
-            </text>
-          ` : ''}
-        `;
-      })}
-    `;
-  }
-
-  private renderWrappedLegend(
-    items: Array<{ label: string; color: string; value: number; displayValue: string | null }>,
-    x: number,
-    y: number,
-    titleInfo: { text: string; position: string } | null,
-    showLabel: boolean,
-    maxWidth: number
-  ): SVGTemplateResult {
-    const lineHeight = 20;
-    const startX = x;
-
-    // Layout constants
-    const colorBoxWidth = 12;
-    const colorBoxGap = 4;  // Gap after color box
-    const itemGap = 12;     // Gap between items
-    const fontSize = 12;    // Font size used in legend text
-    const titleFontSize = 14;
-    const titleHeight = 20; // Height for title
-
-    // Calculate title dimensions if present
-    const hasTitle = titleInfo !== null;
-    const titlePosition = titleInfo?.position || 'top';
-    const isTitleVertical = titlePosition === 'left' || titlePosition === 'right';
-
-    // For left/right title positions, we need to reserve horizontal space
-    // For rotated text, we only need space for the font height, not text width
-    let titleWidthReserved = 0;
-    if (hasTitle && isTitleVertical) {
-      titleWidthReserved = titleFontSize + 10; // font height + small gap
-    }
-
-    // Adjust starting positions based on title position
-    let contentStartX = x;
-    let contentStartY = y;
-    let effectiveMaxWidth = maxWidth;
-
-    if (hasTitle) {
-      if (titlePosition === 'left') {
-        contentStartX = x + titleWidthReserved;
-        effectiveMaxWidth = maxWidth - titleWidthReserved;
-      } else if (titlePosition === 'right') {
-        effectiveMaxWidth = maxWidth - titleWidthReserved;
-      } else if (titlePosition === 'top' || titlePosition.startsWith('top')) {
-        // Title above items - adjust y
-        contentStartY = y; // Items start at y, title will be above
-      } else if (titlePosition === 'bottom' || titlePosition.startsWith('bottom')) {
-        // Title below items - no adjustment needed for content start
-      }
-    }
-
-    // Build positioned items with wrapping
-    let currentX = contentStartX;
-    let currentY = contentStartY;
-
-    const positionedItems = items.map(item => {
-      let text = '';
-      if (showLabel) text += item.label;
-      if (item.displayValue) {
-        text += showLabel ? ` (${item.displayValue})` : item.displayValue;
-      }
-
-      // Use exact text measurement
-      const textWidth = this.measureText(text, fontSize);
-      const itemWidth = colorBoxWidth + colorBoxGap + textWidth + itemGap;
-
-      // Check if we need to wrap
-      if (currentX + itemWidth > contentStartX + effectiveMaxWidth && currentX > contentStartX) {
-        currentX = contentStartX;
-        currentY += lineHeight;
-      }
-
-      const itemX = currentX;
-      const itemY = currentY;
-
-      currentX += itemWidth;
-
-      return { ...item, x: itemX, y: itemY, text };
-    });
-
-    // Calculate content height
-    const contentHeight = currentY - contentStartY + lineHeight;
-
-    // Calculate total background dimensions
-    let bgX = startX - 10;
-    let bgY = y - 10;
-    let bgWidth = maxWidth + 20;
-    let bgHeight = contentHeight + 20;
-
-    // Adjust background for title
-    if (hasTitle) {
-      if (titlePosition === 'top' || titlePosition.startsWith('top')) {
-        bgY = y - 10 - titleHeight - 5;
-        bgHeight = contentHeight + titleHeight + 25;
-      } else if (titlePosition === 'bottom' || titlePosition.startsWith('bottom')) {
-        bgHeight = contentHeight + titleHeight + 25;
-      } else if (titlePosition === 'left') {
-        bgX = startX - titleWidthReserved - 10;
-        bgWidth = maxWidth + titleWidthReserved + 20;
-      } else if (titlePosition === 'right') {
-        bgWidth = maxWidth + titleWidthReserved + 20;
-      }
-    }
-
-    // Render title based on position
-    const renderTitle = () => {
-      if (!hasTitle) return svg``;
-
-      const titleText = titleInfo!.text;
-      let titleX: number;
-      let titleY: number;
-      let textAnchor = 'middle';
-      let transform = '';
-
-      switch (titlePosition) {
-        case 'top':
-          titleX = startX + maxWidth / 2;
-          titleY = y - 15;
-          break;
-        case 'top-left':
-          titleX = startX;
-          titleY = y - 15;
-          textAnchor = 'start';
-          break;
-        case 'top-right':
-          titleX = startX + maxWidth;
-          titleY = y - 15;
-          textAnchor = 'end';
-          break;
-        case 'bottom':
-          titleX = startX + maxWidth / 2;
-          titleY = contentStartY + contentHeight + titleHeight;
-          break;
-        case 'bottom-left':
-          titleX = startX;
-          titleY = contentStartY + contentHeight + titleHeight;
-          textAnchor = 'start';
-          break;
-        case 'bottom-right':
-          titleX = startX + maxWidth;
-          titleY = contentStartY + contentHeight + titleHeight;
-          textAnchor = 'end';
-          break;
-        case 'left':
-          titleX = bgX + titleFontSize + 10;
-          titleY = contentStartY + contentHeight / 2;
-          textAnchor = 'middle';
-          transform = `rotate(-90, ${titleX}, ${titleY})`;
-          break;
-        case 'right':
-          titleX = bgX + bgWidth - titleFontSize;
-          titleY = contentStartY + contentHeight / 2;
-          textAnchor = 'middle';
-          transform = `rotate(90, ${titleX}, ${titleY})`;
-          break;
-        default:
-          titleX = startX + maxWidth / 2;
-          titleY = y - 15;
-      }
-
-      return svg`
-        <text
-          x="${titleX}"
-          y="${titleY}"
-          text-anchor="${textAnchor}"
-          font-size="${titleFontSize}"
-          font-weight="bold"
-          fill="#333"
-          transform="${transform}"
-        >
-          ${titleText}
-        </text>
-      `;
-    };
-
-    return svg`
-      <!-- Legend background -->
-      <rect
-        x="${bgX}"
-        y="${bgY}"
-        width="${bgWidth}"
-        height="${bgHeight}"
-        fill="white"
-        stroke="#ddd"
-        stroke-width="1"
-        rx="4"
-      />
-
-      ${renderTitle()}
-
-      <!-- Wrapped legend items -->
-      ${positionedItems.map(item => svg`
-        <!-- Color indicator -->
-        <circle
-          cx="${item.x + 6}"
-          cy="${item.y + 6}"
-          r="6"
-          fill="${item.color}"
-          stroke="white"
-          stroke-width="1"
-        />
-
-        <!-- Item text -->
-        <text
-          x="${item.x + colorBoxWidth + colorBoxGap}"
-          y="${item.y + 10}"
-          font-size="${fontSize}"
-          fill="#333"
-        >
-          ${item.text}
-        </text>
-      `)}
-    `;
+    return { x, y };
   }
 
   /**
@@ -2550,6 +1946,101 @@ export abstract class BaseChart extends LitElement {
     }
   }
 
+  // ============================================================================
+  // Accessibility Methods
+  // ============================================================================
+
+  /**
+   * Get the chart type name for accessibility descriptions.
+   * Override in subclasses to provide specific chart type names.
+   *
+   * @returns Human-readable chart type name (e.g., "bar chart", "pie chart")
+   */
+  protected getChartTypeName(): string {
+    return 'chart';
+  }
+
+  /**
+   * Get basic data summary for accessibility descriptions.
+   * Override in subclasses to provide chart-specific summaries.
+   *
+   * @returns Basic summary string (e.g., "4 bars, values from 10 to 50")
+   */
+  protected getDataSummary(): string {
+    return '';
+  }
+
+  /**
+   * Get auto-generated insights about the chart data.
+   * Override in subclasses to provide chart-specific insights.
+   *
+   * @returns Insights string describing trends, comparisons, or patterns
+   */
+  protected getInsights(): string {
+    return '';
+  }
+
+  /**
+   * Get the aria-label for the chart SVG.
+   * Uses custom ariaLabel if provided, otherwise generates from title and chart type.
+   *
+   * @returns The aria-label string
+   */
+  protected getAriaLabel(): string {
+    if (this.ariaLabel) {
+      return this.ariaLabel;
+    }
+
+    const title = this.getTitle();
+    const chartType = this.getChartTypeName();
+
+    if (title) {
+      return `${chartType}: ${title}`;
+    }
+
+    return chartType;
+  }
+
+  /**
+   * Generate the full accessibility description for the chart.
+   * Uses custom ariaDescription if provided, otherwise auto-generates.
+   *
+   * @returns The description string for the SVG <desc> element
+   */
+  protected generateAccessibilityDescription(): string {
+    // Use custom description if provided
+    if (this.ariaDescription) {
+      return this.ariaDescription;
+    }
+
+    // If insights are disabled, return empty
+    if (this.ariaInsights === 'none') {
+      return '';
+    }
+
+    const parts: string[] = [];
+
+    // Add basic data summary
+    const summary = this.getDataSummary();
+    if (summary) {
+      parts.push(summary);
+    }
+
+    // Add insights if enabled
+    if (this.ariaInsights === 'auto') {
+      const insights = this.getInsights();
+      if (insights) {
+        parts.push(insights);
+      }
+    }
+
+    return parts.join('. ');
+  }
+
+  // ============================================================================
+  // End Accessibility Methods
+  // ============================================================================
+
   protected abstract renderChart(): SVGTemplateResult;
 
   // ============================================================================
@@ -2569,7 +2060,7 @@ export abstract class BaseChart extends LitElement {
    * @example
    * ```javascript
    * // Basic usage
-   * const chart = document.querySelector('dc-bar-chart');
+   * const chart = document.querySelector('dc-chart');
    * chart.downloadSvg();
    *
    * // With custom filename
@@ -2577,7 +2068,7 @@ export abstract class BaseChart extends LitElement {
    *
    * // Wire up to a button
    * document.querySelector('#download-btn').addEventListener('click', () => {
-   *   document.querySelector('dc-pie-chart').downloadSvg('market-share');
+   *   document.querySelector('dc-chart').downloadSvg('market-share');
    * });
    * ```
    */

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessibility - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+    <style>
+        .testing-guide {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .testing-guide h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .testing-guide h4 {
+            color: #6c757d;
+            margin-bottom: 8px;
+        }
+        .testing-guide ol, .testing-guide ul {
+            margin: 0 0 16px 0;
+            padding-left: 24px;
+        }
+        .testing-guide li {
+            margin-bottom: 4px;
+        }
+        .testing-guide code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        .aria-output {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 12px 16px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            margin-top: 8px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .aria-output .label {
+            color: #66d9ef;
+        }
+        .aria-output .value {
+            color: #a6e22e;
+        }
+    </style>
+</head>
+<body>
+    <h1>Accessibility</h1>
+    <p>ARIA labels and auto-generated insights for screen reader users</p>
+
+    <nav>
+        <div class="nav-major">
+            <a href="../index.html">Home</a>
+            <a href="barcharts.html">Bar Charts</a>
+            <a href="linecharts.html">Line Charts</a>
+            <a href="piecharts.html">Pie Charts</a>
+            <a href="funnelcharts.html">Funnel Charts</a>
+        </div>
+        <div class="nav-minor">
+            <a href="titles.html">Titles</a>
+            <a href="legends.html">Legends</a>
+            <a href="axes.html">Axes</a>
+            <a href="colors.html">Colors</a>
+            <a href="palettes.html">Palettes</a>
+            <a href="typography.html">Typography</a>
+            <a href="borders-and-padding.html">Borders & Padding</a>
+            <a href="bar-groups.html">Bar Groups</a>
+            <a href="bar-width.html">Bar Width</a>
+            <a href="gutter.html">Gutter</a>
+            <a href="interactive.html">Interactive</a>
+            <a href="popups.html">Popups</a>
+            <a href="logging.html">Logging</a>
+            <a href="htmx-integration.html">htmx</a>
+            <a href="accessibility.html" class="current">Accessibility</a>
+        </div>
+    </nav>
+
+    <div class="example">
+        <h2>Auto-Generated Insights</h2>
+        <p>Charts automatically generate ARIA labels and descriptions with meaningful insights about the data. Screen readers announce the chart type, data summary, and analysis of trends or distributions.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Bar Chart with Auto-Insights</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Quarterly Sales&lt;/dc-title&gt;
+  &lt;dc-bar value="45" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="72" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="38" label="Q3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="95" label="Q4"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart id="bar-demo" width="500" height="350">
+                    <dc-title>Quarterly Sales</dc-title>
+                    <dc-bar value="45" label="Q1"></dc-bar>
+                    <dc-bar value="72" label="Q2"></dc-bar>
+                    <dc-bar value="38" label="Q3"></dc-bar>
+                    <dc-bar value="95" label="Q4"></dc-bar>
+                </dc-chart>
+                <div class="aria-output">
+                    <span class="label">aria-label:</span> <span class="value" id="bar-aria-label"></span>
+                    <br><span class="label">description:</span> <span class="value" id="bar-desc"></span>
+                </div>
+            </div>
+
+            <div>
+                <h3>Line Chart with Trend Analysis</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Stock Price&lt;/dc-title&gt;
+  &lt;dc-line label="ACME Corp" stroke="#2196F3"&gt;
+    &lt;dc-point value="100" label="Jan"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="115" label="Feb"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="108" label="Mar"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="142" label="Apr"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="165" label="May"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart id="line-demo" width="500" height="350">
+                    <dc-title>Stock Price</dc-title>
+                    <dc-line label="ACME Corp" stroke="#2196F3">
+                        <dc-point value="100" label="Jan"></dc-point>
+                        <dc-point value="115" label="Feb"></dc-point>
+                        <dc-point value="108" label="Mar"></dc-point>
+                        <dc-point value="142" label="Apr"></dc-point>
+                        <dc-point value="165" label="May"></dc-point>
+                    </dc-line>
+                </dc-chart>
+                <div class="aria-output">
+                    <span class="label">aria-label:</span> <span class="value" id="line-aria-label"></span>
+                    <br><span class="label">description:</span> <span class="value" id="line-desc"></span>
+                </div>
+            </div>
+
+            <div>
+                <h3>Pie Chart with Distribution Analysis</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Market Share&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="55" label="Leader"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="25" label="Challenger"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="12" label="Follower"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="8" label="Niche"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart id="pie-demo" width="500" height="350">
+                    <dc-title>Market Share</dc-title>
+                    <dc-pie-slice value="55" label="Leader"></dc-pie-slice>
+                    <dc-pie-slice value="25" label="Challenger"></dc-pie-slice>
+                    <dc-pie-slice value="12" label="Follower"></dc-pie-slice>
+                    <dc-pie-slice value="8" label="Niche"></dc-pie-slice>
+                </dc-pie-chart>
+                <div class="aria-output">
+                    <span class="label">aria-label:</span> <span class="value" id="pie-aria-label"></span>
+                    <br><span class="label">description:</span> <span class="value" id="pie-desc"></span>
+                </div>
+            </div>
+
+            <div>
+                <h3>Funnel Chart with Conversion Analysis</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Sales Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="400" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="150" label="Opportunities"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="50" label="Customers"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart id="funnel-demo" width="500" height="350">
+                    <dc-title>Sales Funnel</dc-title>
+                    <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
+                    <dc-funnel-stage value="400" label="Leads"></dc-funnel-stage>
+                    <dc-funnel-stage value="150" label="Opportunities"></dc-funnel-stage>
+                    <dc-funnel-stage value="50" label="Customers"></dc-funnel-stage>
+                </dc-funnel-chart>
+                <div class="aria-output">
+                    <span class="label">aria-label:</span> <span class="value" id="funnel-aria-label"></span>
+                    <br><span class="label">description:</span> <span class="value" id="funnel-desc"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Manual ARIA Overrides</h2>
+        <p>You can override the auto-generated accessibility text with custom content using <code>aria-label</code> and <code>aria-description</code> attributes.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Custom aria-label</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"
+  aria-label="Revenue growth chart showing 65% increase"&gt;
+  &lt;dc-title&gt;Revenue Growth&lt;/dc-title&gt;
+  &lt;dc-bar value="100" label="2022"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="165" label="2023"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart id="custom-label" width="500" height="350"
+                    aria-label="Revenue growth chart showing 65% increase">
+                    <dc-title>Revenue Growth</dc-title>
+                    <dc-bar value="100" label="2022"></dc-bar>
+                    <dc-bar value="165" label="2023"></dc-bar>
+                </dc-chart>
+                <div class="aria-output">
+                    <span class="label">aria-label:</span> <span class="value" id="custom-label-aria"></span>
+                </div>
+            </div>
+
+            <div>
+                <h3>Custom aria-description</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"
+  aria-description="This chart shows our company exceeded
+  the industry average growth rate of 12% by achieving
+  65% year-over-year revenue increase."&gt;
+  &lt;dc-title&gt;Revenue Growth&lt;/dc-title&gt;
+  &lt;dc-bar value="100" label="2022"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="165" label="2023"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart id="custom-desc" width="500" height="350"
+                    aria-description="This chart shows our company exceeded the industry average growth rate of 12% by achieving 65% year-over-year revenue increase.">
+                    <dc-title>Revenue Growth</dc-title>
+                    <dc-bar value="100" label="2022"></dc-bar>
+                    <dc-bar value="165" label="2023"></dc-bar>
+                </dc-chart>
+                <div class="aria-output">
+                    <span class="label">description:</span> <span class="value" id="custom-desc-aria"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Disabling Auto-Insights</h2>
+        <p>Use <code>aria-insights="none"</code> to disable auto-generated insights, or <code>aria-insights="basic"</code> for minimal descriptions without trend analysis.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Insights Disabled</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" aria-insights="none"&gt;
+  &lt;dc-title&gt;Simple Chart&lt;/dc-title&gt;
+  &lt;dc-bar value="30" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="50" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="40" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart id="no-insights" width="500" height="350" aria-insights="none">
+                    <dc-title>Simple Chart</dc-title>
+                    <dc-bar value="30" label="A"></dc-bar>
+                    <dc-bar value="50" label="B"></dc-bar>
+                    <dc-bar value="40" label="C"></dc-bar>
+                </dc-chart>
+                <div class="aria-output">
+                    <span class="label">aria-label:</span> <span class="value" id="no-insights-aria"></span>
+                    <br><span class="label">description:</span> <span class="value" id="no-insights-desc"></span>
+                </div>
+            </div>
+
+            <div>
+                <h3>Basic Insights Only</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" aria-insights="basic"&gt;
+  &lt;dc-title&gt;Basic Chart&lt;/dc-title&gt;
+  &lt;dc-bar value="30" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="50" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="40" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart id="basic-insights" width="500" height="350" aria-insights="basic">
+                    <dc-title>Basic Chart</dc-title>
+                    <dc-bar value="30" label="A"></dc-bar>
+                    <dc-bar value="50" label="B"></dc-bar>
+                    <dc-bar value="40" label="C"></dc-bar>
+                </dc-chart>
+                <div class="aria-output">
+                    <span class="label">aria-label:</span> <span class="value" id="basic-insights-aria"></span>
+                    <br><span class="label">description:</span> <span class="value" id="basic-insights-desc"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Screen Reader Testing Guide</h2>
+
+        <div class="testing-guide">
+            <h3>Testing with NVDA (Windows)</h3>
+            <ol>
+                <li>Download and install NVDA from <a href="https://www.nvaccess.org/download/" target="_blank">nvaccess.org</a></li>
+                <li>Press <code>Insert + Q</code> to start NVDA</li>
+                <li>Navigate to a chart using <code>Tab</code> or arrow keys</li>
+                <li>NVDA will announce: the aria-label (chart type and title), then the description (data summary and insights)</li>
+                <li>Press <code>Insert + Q</code> twice quickly to exit NVDA</li>
+            </ol>
+
+            <h4>Expected Announcements</h4>
+            <ul>
+                <li><strong>Bar charts:</strong> "bar chart, [title], graphic. [N] bars, values from [min] to [max]. [highest] highest at [value]; [lowest] lowest at [value]"</li>
+                <li><strong>Line charts:</strong> "line chart, [title], graphic. [N] lines with [M] points. [trend description], peaked at [label]"</li>
+                <li><strong>Pie charts:</strong> "pie chart, [title], graphic. [N] slices totaling [sum]. dominated by [label] at [percent]%"</li>
+                <li><strong>Funnel charts:</strong> "funnel chart, [title], graphic. [N] stages from [first] to [last]. [conversion]% overall conversion"</li>
+            </ul>
+        </div>
+
+        <div class="testing-guide">
+            <h3>Testing with VoiceOver (Mac)</h3>
+            <ol>
+                <li>Press <code>Cmd + F5</code> to enable VoiceOver</li>
+                <li>Use <code>Ctrl + Option + Right Arrow</code> to navigate through elements</li>
+                <li>When you reach a chart, VoiceOver will announce the aria-label</li>
+                <li>Press <code>Ctrl + Option + Shift + Down Arrow</code> to interact with the chart group</li>
+                <li>Press <code>Cmd + F5</code> again to disable VoiceOver</li>
+            </ol>
+
+            <h4>VoiceOver Rotor</h4>
+            <p>Charts appear as "graphics" in the VoiceOver Rotor. Press <code>Ctrl + Option + U</code> to open the Rotor, then use arrow keys to find "Graphics" and navigate to charts.</p>
+        </div>
+
+        <div class="testing-guide">
+            <h3>Testing with Browser DevTools</h3>
+            <ol>
+                <li>Right-click on a chart and select "Inspect"</li>
+                <li>Look at the <code>&lt;svg&gt;</code> element's attributes:
+                    <ul>
+                        <li><code>role="img"</code> - identifies as an image</li>
+                        <li><code>aria-label="..."</code> - the accessible name</li>
+                        <li><code>aria-describedby="dc-desc-N"</code> - references the description</li>
+                    </ul>
+                </li>
+                <li>Find the <code>&lt;desc id="dc-desc-N"&gt;</code> element inside the SVG - this contains the full description</li>
+            </ol>
+
+            <h4>Chrome Accessibility Tab</h4>
+            <p>In Chrome DevTools, select the Elements tab, then open the Accessibility pane (in the right sidebar). This shows the computed accessible name and description for the selected element.</p>
+        </div>
+
+        <div class="testing-guide">
+            <h3>Common Issues and Solutions</h3>
+            <ul>
+                <li><strong>No announcement:</strong> Ensure the SVG has <code>role="img"</code>. Without it, screen readers may skip the element.</li>
+                <li><strong>Missing description:</strong> Check that <code>aria-describedby</code> references a valid <code>&lt;desc&gt;</code> element ID.</li>
+                <li><strong>Too verbose:</strong> Use <code>aria-insights="basic"</code> or <code>aria-insights="none"</code> to reduce verbosity.</li>
+                <li><strong>Wrong content:</strong> Use <code>aria-label</code> and <code>aria-description</code> attributes to override auto-generated content.</li>
+            </ul>
+        </div>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+    <script>
+        // Display ARIA attributes after charts render
+        setTimeout(() => {
+            const charts = [
+                { id: 'bar-demo', labelId: 'bar-aria-label', descId: 'bar-desc' },
+                { id: 'line-demo', labelId: 'line-aria-label', descId: 'line-desc' },
+                { id: 'pie-demo', labelId: 'pie-aria-label', descId: 'pie-desc' },
+                { id: 'funnel-demo', labelId: 'funnel-aria-label', descId: 'funnel-desc' },
+                { id: 'custom-label', labelId: 'custom-label-aria', descId: null },
+                { id: 'custom-desc', labelId: null, descId: 'custom-desc-aria' },
+                { id: 'no-insights', labelId: 'no-insights-aria', descId: 'no-insights-desc' },
+                { id: 'basic-insights', labelId: 'basic-insights-aria', descId: 'basic-insights-desc' }
+            ];
+
+            charts.forEach(({ id, labelId, descId }) => {
+                const chart = document.getElementById(id);
+                if (!chart || !chart.shadowRoot) return;
+
+                const svg = chart.shadowRoot.querySelector('svg');
+                if (!svg) return;
+
+                if (labelId) {
+                    const labelEl = document.getElementById(labelId);
+                    if (labelEl) {
+                        labelEl.textContent = svg.getAttribute('aria-label') || '(none)';
+                    }
+                }
+
+                if (descId) {
+                    const descEl = document.getElementById(descId);
+                    if (descEl) {
+                        const descRefId = svg.getAttribute('aria-describedby');
+                        const desc = descRefId ? svg.querySelector(`#${descRefId}`) : null;
+                        descEl.textContent = desc ? desc.textContent : '(none)';
+                    }
+                }
+            });
+        }, 500);
+    </script>
+</body>
+</html>

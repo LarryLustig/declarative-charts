@@ -8,7 +8,7 @@
 </head>
 <body>
     <h1>Colors</h1>
-    <p>Learn how to control colors in your charts using the new SVG-aligned color system</p>
+    <p>Learn how to control colors in your charts using the SVG-aligned color system. This page covers inline color options; for reusable named palettes, see <a href="palettes.html">Palettes</a>.</p>
 
     <nav>
         <div class="nav-major">
@@ -23,6 +23,7 @@
             <a href="legends.html">Legends</a>
             <a href="axes.html">Axes</a>
             <a href="colors.html" class="current">Colors</a>
+            <a href="palettes.html">Palettes</a>
             <a href="typography.html">Typography</a>
             <a href="borders-and-padding.html">Borders & Padding</a>
             <a href="bar-groups.html">Bar Groups</a>
@@ -32,6 +33,7 @@
             <a href="popups.html">Popups</a>
             <a href="logging.html">Logging</a>
             <a href="htmx-integration.html">htmx</a>
+            <a href="accessibility.html">Accessibility</a>
         </div>
     </nav>
 
@@ -131,7 +133,7 @@
 
             <div>
                 <h3>Bar with Gradient</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"
+                <pre><code>&lt;dc-chart width="500" height="350"
               fill-start-color="#673AB7"
               fill-end-color="#00BCD4"&gt;
   &lt;dc-title&gt;Purple to Cyan Gradient&lt;/dc-title&gt;
@@ -141,8 +143,8 @@
   &lt;dc-bar value="40" label="Q4"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="30" label="Q5"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="35" label="Q6"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" fill-start-color="#673AB7" fill-end-color="#00BCD4">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" fill-start-color="#673AB7" fill-end-color="#00BCD4">
                     <dc-title>Purple to Cyan Gradient</dc-title>
                     <dc-bar value="10" label="Q1"></dc-bar>
                     <dc-bar value="25" label="Q2"></dc-bar>
@@ -150,12 +152,12 @@
                     <dc-bar value="40" label="Q4"></dc-bar>
                     <dc-bar value="30" label="Q5"></dc-bar>
                     <dc-bar value="35" label="Q6"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>Line Stroke Gradient</h3>
-                <pre><code>&lt;dc-line-chart width="500" height="350"
+                <pre><code>&lt;dc-chart width="500" height="350"
                stroke-start-color="#E91E63"
                stroke-end-color="#3F51B5"&gt;
   &lt;dc-title&gt;Pink to Indigo Lines&lt;/dc-title&gt;
@@ -174,8 +176,8 @@
     &lt;dc-point value="15" label="2"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="25" label="3"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
-&lt;/dc-line-chart&gt;</code></pre>
-                <dc-line-chart width="500" height="350" stroke-start-color="#E91E63" stroke-end-color="#3F51B5">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" stroke-start-color="#E91E63" stroke-end-color="#3F51B5">
                     <dc-title>Pink to Indigo Lines</dc-title>
                     <dc-line label="A">
                         <dc-point value="15" label="1"></dc-point>
@@ -192,7 +194,7 @@
                         <dc-point value="15" label="2"></dc-point>
                         <dc-point value="25" label="3"></dc-point>
                     </dc-line>
-                </dc-line-chart>
+                </dc-chart>
             </div>
         </div>
     </div>
@@ -204,39 +206,39 @@
         <div class="grid">
             <div>
                 <h3>Single Color (All Same)</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350" fill-colors="#9C27B0"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" fill-colors="#9C27B0"&gt;
   &lt;dc-title&gt;All Purple Bars&lt;/dc-title&gt;
   &lt;dc-bar value="10" label="Q1"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="25" label="Q2"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="15" label="Q3"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="40" label="Q4"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" fill-colors="#9C27B0">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" fill-colors="#9C27B0">
                     <dc-title>All Purple Bars</dc-title>
                     <dc-bar value="10" label="Q1"></dc-bar>
                     <dc-bar value="25" label="Q2"></dc-bar>
                     <dc-bar value="15" label="Q3"></dc-bar>
                     <dc-bar value="40" label="Q4"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>Color Palette (Cycles)</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"
+                <pre><code>&lt;dc-chart width="500" height="350"
               fill-colors="#4CAF50, #2196F3, #FF9800, #9C27B0"&gt;
   &lt;dc-title&gt;Four-Color Palette&lt;/dc-title&gt;
   &lt;dc-bar value="10" label="Q1"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="25" label="Q2"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="15" label="Q3"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="40" label="Q4"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" fill-colors="#4CAF50, #2196F3, #FF9800, #9C27B0">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" fill-colors="#4CAF50, #2196F3, #FF9800, #9C27B0">
                     <dc-title>Four-Color Palette</dc-title>
                     <dc-bar value="10" label="Q1"></dc-bar>
                     <dc-bar value="25" label="Q2"></dc-bar>
                     <dc-bar value="15" label="Q3"></dc-bar>
                     <dc-bar value="40" label="Q4"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
@@ -260,7 +262,7 @@
 
             <div>
                 <h3>Line Chart with stroke-colors</h3>
-                <pre><code>&lt;dc-line-chart width="500" height="350"
+                <pre><code>&lt;dc-chart width="500" height="350"
                stroke-colors="#9C27B0, #FF5722, #009688"&gt;
   &lt;dc-title&gt;Three-Line Palette&lt;/dc-title&gt;
   &lt;dc-line label="Series A"&gt;
@@ -278,8 +280,8 @@
     &lt;dc-point value="15" label="Tue"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="25" label="Wed"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
-&lt;/dc-line-chart&gt;</code></pre>
-                <dc-line-chart width="500" height="350" stroke-colors="#9C27B0, #FF5722, #009688">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" stroke-colors="#9C27B0, #FF5722, #009688">
                     <dc-title>Three-Line Palette</dc-title>
                     <dc-line label="Series A">
                         <dc-point value="15" label="Mon"></dc-point>
@@ -296,7 +298,7 @@
                         <dc-point value="15" label="Tue"></dc-point>
                         <dc-point value="25" label="Wed"></dc-point>
                     </dc-line>
-                </dc-line-chart>
+                </dc-chart>
             </div>
 
             <div>
@@ -320,21 +322,21 @@
 
             <div>
                 <h3>Element Overrides Palette</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"
+                <pre><code>&lt;dc-chart width="500" height="350"
               fill-colors="#4CAF50, #8BC34A, #CDDC39, #FFEB3B"&gt;
   &lt;dc-title&gt;Green Palette, Red Override&lt;/dc-title&gt;
   &lt;dc-bar value="10" label="Q1"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="25" label="Q2"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="15" fill="#F44336" label="Q3"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="40" label="Q4"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" fill-colors="#4CAF50, #8BC34A, #CDDC39, #FFEB3B">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" fill-colors="#4CAF50, #8BC34A, #CDDC39, #FFEB3B">
                     <dc-title>Green Palette, Red Override</dc-title>
                     <dc-bar value="10" label="Q1"></dc-bar>
                     <dc-bar value="25" label="Q2"></dc-bar>
                     <dc-bar value="15" fill="#F44336" label="Q3"></dc-bar>
                     <dc-bar value="40" label="Q4"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
         </div>
     </div>
@@ -346,20 +348,20 @@
         <div class="grid">
             <div>
                 <h3>Bar Chart with fill</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-title&gt;Quarterly Sales&lt;/dc-title&gt;
   &lt;dc-bar value="10" fill="red" label="Q1"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="25" fill="blue" label="Q2"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="15" fill="green" label="Q3"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="40" fill="orange" label="Q4"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
                     <dc-title>Quarterly Sales</dc-title>
                     <dc-bar value="10" fill="red" label="Q1"></dc-bar>
                     <dc-bar value="25" fill="blue" label="Q2"></dc-bar>
                     <dc-bar value="15" fill="green" label="Q3"></dc-bar>
                     <dc-bar value="40" fill="orange" label="Q4"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
@@ -382,7 +384,7 @@
 
             <div>
                 <h3>Line Chart with stroke</h3>
-                <pre><code>&lt;dc-line-chart width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-title&gt;Temperature Trends&lt;/dc-title&gt;
   &lt;dc-line stroke="#9C27B0" label="City A"&gt;
     &lt;dc-point value="15" label="Mon"&gt;&lt;/dc-point&gt;
@@ -396,8 +398,8 @@
     &lt;dc-point value="18" label="Wed"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="25" label="Thu"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
-&lt;/dc-line-chart&gt;</code></pre>
-                <dc-line-chart width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
                     <dc-title>Temperature Trends</dc-title>
                     <dc-line stroke="#9C27B0" label="City A">
                         <dc-point value="15" label="Mon"></dc-point>
@@ -411,7 +413,7 @@
                         <dc-point value="18" label="Wed"></dc-point>
                         <dc-point value="25" label="Thu"></dc-point>
                     </dc-line>
-                </dc-line-chart>
+                </dc-chart>
             </div>
 
             <div>
@@ -439,15 +441,17 @@
         <p>Colors are resolved in this priority order:</p>
         <ol>
             <li><strong>Element-level</strong> - <code>fill</code> or <code>stroke</code> on individual elements</li>
-            <li><strong>Gradient</strong> - <code>fill-start-color</code>/<code>fill-end-color</code> on the chart</li>
-            <li><strong>Single color</strong> - <code>fill-color</code> or <code>stroke-color</code> on the chart</li>
+            <li><strong>Palette value match</strong> - <code>min-value</code>/<code>max-value</code> from a <a href="palettes.html">palette</a></li>
+            <li><strong>Palette label match</strong> - <code>label</code> match from a <a href="palettes.html">palette</a></li>
+            <li><strong>Chart-level colors</strong> - <code>fill-colors</code>, gradients, etc.</li>
             <li><strong>Auto-generated</strong> - Algorithmic color generation</li>
         </ol>
+        <p>For reusable color definitions that can be shared across charts and used outside charts (e.g., in tables or prose), see <a href="palettes.html">Palettes</a>.</p>
 
         <div class="grid">
             <div>
                 <h3>Mixed: Gradient + Element Override</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"
+                <pre><code>&lt;dc-chart width="500" height="350"
               fill-start-color="#1E88E5"
               fill-end-color="#43A047"&gt;
   &lt;dc-title&gt;Gradient with Override&lt;/dc-title&gt;
@@ -456,15 +460,15 @@
   &lt;dc-bar value="15" fill="#F44336" label="C (Red Override)"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="40" label="D"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="30" label="E"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" fill-start-color="#1E88E5" fill-end-color="#43A047">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" fill-start-color="#1E88E5" fill-end-color="#43A047">
                     <dc-title>Gradient with Override</dc-title>
                     <dc-bar value="10" label="A"></dc-bar>
                     <dc-bar value="25" label="B"></dc-bar>
                     <dc-bar value="15" fill="#F44336" label="C (Red Override)"></dc-bar>
                     <dc-bar value="40" label="D"></dc-bar>
                     <dc-bar value="30" label="E"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
@@ -541,7 +545,7 @@
         <div class="grid">
             <div>
                 <h3>Highlighted Points</h3>
-                <pre><code>&lt;dc-line-chart width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-title&gt;Highlighted Data Points&lt;/dc-title&gt;
   &lt;dc-line stroke="#2196F3" label="Sales"&gt;
     &lt;dc-point value="15" label="Jan"&gt;&lt;/dc-point&gt;
@@ -550,8 +554,8 @@
     &lt;dc-point value="35" fill="#4CAF50" label="Apr (High)"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="28" label="May"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
-&lt;/dc-line-chart&gt;</code></pre>
-                <dc-line-chart width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
                     <dc-title>Highlighted Data Points</dc-title>
                     <dc-line stroke="#2196F3" label="Sales">
                         <dc-point value="15" label="Jan"></dc-point>
@@ -560,7 +564,7 @@
                         <dc-point value="35" fill="#4CAF50" label="Apr (High)"></dc-point>
                         <dc-point value="28" label="May"></dc-point>
                     </dc-line>
-                </dc-line-chart>
+                </dc-chart>
             </div>
         </div>
     </div>

@@ -36,6 +36,7 @@
             <a href="legends.html">Legends</a>
             <a href="axes.html" class="current">Axes</a>
             <a href="colors.html">Colors</a>
+            <a href="palettes.html">Palettes</a>
             <a href="typography.html">Typography</a>
             <a href="borders-and-padding.html">Borders & Padding</a>
             <a href="bar-groups.html">Bar Groups</a>
@@ -45,6 +46,7 @@
             <a href="popups.html">Popups</a>
             <a href="logging.html">Logging</a>
             <a href="htmx-integration.html">htmx</a>
+            <a href="accessibility.html">Accessibility</a>
         </div>
     </nav>
 
@@ -236,39 +238,39 @@
         <div class="grid">
             <div>
                 <h3>Show All Values</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-title&gt;All Values Shown&lt;/dc-title&gt;
   &lt;dc-bar value="250" label="High"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="150" label="Medium"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="80" label="Low"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="30" label="Tiny"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
                     <dc-title>All Values Shown</dc-title>
                     <dc-bar value="250" label="High"></dc-bar>
                     <dc-bar value="150" label="Medium"></dc-bar>
                     <dc-bar value="80" label="Low"></dc-bar>
                     <dc-bar value="30" label="Tiny"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>Values >= 100 Only</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"
+                <pre><code>&lt;dc-chart width="500" height="350"
     show-value="100"&gt;
   &lt;dc-title&gt;Values >= 100&lt;/dc-title&gt;
   &lt;dc-bar value="250" label="High"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="150" label="Medium"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="80" label="Low"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="30" label="Tiny"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" show-value="100">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" show-value="100">
                     <dc-title>Values >= 100</dc-title>
                     <dc-bar value="250" label="High"></dc-bar>
                     <dc-bar value="150" label="Medium"></dc-bar>
                     <dc-bar value="80" label="Low"></dc-bar>
                     <dc-bar value="30" label="Tiny"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
         </div>
     </div>
@@ -280,39 +282,39 @@
         <div class="grid">
             <div>
                 <h3>Values and Percentages</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350" show-percent&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" show-percent&gt;
   &lt;dc-title&gt;Sales with Percentages&lt;/dc-title&gt;
   &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" show-percent>
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" show-percent>
                     <dc-title>Sales with Percentages</dc-title>
                     <dc-bar value="120" label="Jan"></dc-bar>
                     <dc-bar value="150" label="Feb"></dc-bar>
                     <dc-bar value="180" label="Mar"></dc-bar>
                     <dc-bar value="90" label="Apr"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>Percentages Only</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"
+                <pre><code>&lt;dc-chart width="500" height="350"
     show-value="false" show-percent&gt;
   &lt;dc-title&gt;Percentage Only&lt;/dc-title&gt;
   &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" show-value="false" show-percent>
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" show-value="false" show-percent>
                     <dc-title>Percentage Only</dc-title>
                     <dc-bar value="120" label="Jan"></dc-bar>
                     <dc-bar value="150" label="Feb"></dc-bar>
                     <dc-bar value="180" label="Mar"></dc-bar>
                     <dc-bar value="90" label="Apr"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
         </div>
     </div>
@@ -368,7 +370,7 @@
         <div class="grid">
             <div>
                 <h3>All Values</h3>
-                <pre><code>&lt;dc-line-chart width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-title&gt;Temperature&lt;/dc-title&gt;
   &lt;dc-line label="City A"&gt;
     &lt;dc-point value="15" label="Mon"&gt;&lt;/dc-point&gt;
@@ -377,8 +379,8 @@
     &lt;dc-point value="19" label="Thu"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="16" label="Fri"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
-&lt;/dc-line-chart&gt;</code></pre>
-                <dc-line-chart width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
                     <dc-title>Temperature</dc-title>
                     <dc-line label="City A">
                         <dc-point value="15" label="Mon"></dc-point>
@@ -387,12 +389,12 @@
                         <dc-point value="19" label="Thu"></dc-point>
                         <dc-point value="16" label="Fri"></dc-point>
                     </dc-line>
-                </dc-line-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>Values >= 20 Only</h3>
-                <pre><code>&lt;dc-line-chart width="500" height="350"
+                <pre><code>&lt;dc-chart width="500" height="350"
     show-value="20"&gt;
   &lt;dc-title&gt;Temperature (High Only)&lt;/dc-title&gt;
   &lt;dc-line label="City A"&gt;
@@ -402,8 +404,8 @@
     &lt;dc-point value="19" label="Thu"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="16" label="Fri"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
-&lt;/dc-line-chart&gt;</code></pre>
-                <dc-line-chart width="500" height="350" show-value="20">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" show-value="20">
                     <dc-title>Temperature (High Only)</dc-title>
                     <dc-line label="City A">
                         <dc-point value="15" label="Mon"></dc-point>
@@ -412,7 +414,7 @@
                         <dc-point value="19" label="Thu"></dc-point>
                         <dc-point value="16" label="Fri"></dc-point>
                     </dc-line>
-                </dc-line-chart>
+                </dc-chart>
             </div>
         </div>
     </div>
@@ -442,7 +444,7 @@
 
             <div>
                 <h3>Highlight Key Bars</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"
+                <pre><code>&lt;dc-chart width="500" height="350"
     show-value="false"&gt;
   &lt;dc-title&gt;Highlighted Bars&lt;/dc-title&gt;
   &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
@@ -451,14 +453,14 @@
   &lt;dc-bar value="90" label="Mar"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="200" label="Apr" show-value
       color="#4CAF50"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" show-value="false">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" show-value="false">
                     <dc-title>Highlighted Bars</dc-title>
                     <dc-bar value="120" label="Jan"></dc-bar>
                     <dc-bar value="180" label="Feb" show-value fill="#4CAF50"></dc-bar>
                     <dc-bar value="90" label="Mar"></dc-bar>
                     <dc-bar value="200" label="Apr" show-value fill="#4CAF50"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
         </div>
     </div>
@@ -603,7 +605,7 @@
         <div class="grid">
             <div>
                 <h3>Default (Auto-hide)</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350" show-value="false"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" show-value="false"&gt;
   &lt;dc-title&gt;Many Bars - Auto-hide Labels&lt;/dc-title&gt;
   &lt;dc-bar value="10" label="January"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="15" label="February"&gt;&lt;/dc-bar&gt;
@@ -617,8 +619,8 @@
   &lt;dc-bar value="19" label="October"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="14" label="November"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="12" label="December"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" show-value="false">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" show-value="false">
                     <dc-title>Many Bars - Auto-hide Labels</dc-title>
                     <dc-bar value="10" label="January"></dc-bar>
                     <dc-bar value="15" label="February"></dc-bar>
@@ -632,12 +634,12 @@
                     <dc-bar value="19" label="October"></dc-bar>
                     <dc-bar value="14" label="November"></dc-bar>
                     <dc-bar value="12" label="December"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>Show All Labels (label-interval="1")</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350" show-value="false"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" show-value="false"&gt;
   &lt;dc-axis position="bottom" label-interval="1"&gt;&lt;/dc-axis&gt;
   &lt;dc-title&gt;All Labels Shown (Overlapping)&lt;/dc-title&gt;
   &lt;dc-bar value="10" label="January"&gt;&lt;/dc-bar&gt;
@@ -652,8 +654,8 @@
   &lt;dc-bar value="19" label="October"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="14" label="November"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="12" label="December"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" show-value="false">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" show-value="false">
                     <dc-axis position="bottom" label-interval="1"></dc-axis>
                     <dc-title>All Labels Shown (Overlapping)</dc-title>
                     <dc-bar value="10" label="January"></dc-bar>
@@ -668,12 +670,12 @@
                     <dc-bar value="19" label="October"></dc-bar>
                     <dc-bar value="14" label="November"></dc-bar>
                     <dc-bar value="12" label="December"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>Staggered Labels (label-lines="2")</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350" show-value="false"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" show-value="false"&gt;
   &lt;dc-axis position="bottom" label-interval="1" label-lines="2"&gt;&lt;/dc-axis&gt;
   &lt;dc-title&gt;Labels on Two Lines&lt;/dc-title&gt;
   &lt;dc-bar value="10" label="January"&gt;&lt;/dc-bar&gt;
@@ -688,8 +690,8 @@
   &lt;dc-bar value="19" label="October"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="14" label="November"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="12" label="December"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" show-value="false">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" show-value="false">
                     <dc-axis position="bottom" label-interval="1" label-lines="2"></dc-axis>
                     <dc-title>Labels on Two Lines</dc-title>
                     <dc-bar value="10" label="January"></dc-bar>
@@ -704,12 +706,12 @@
                     <dc-bar value="19" label="October"></dc-bar>
                     <dc-bar value="14" label="November"></dc-bar>
                     <dc-bar value="12" label="December"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>Every Third Label (label-interval="3")</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350" show-value="false"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" show-value="false"&gt;
   &lt;dc-axis position="bottom" label-interval="3"&gt;&lt;/dc-axis&gt;
   &lt;dc-title&gt;Every Third Label&lt;/dc-title&gt;
   &lt;dc-bar value="10" label="January"&gt;&lt;/dc-bar&gt;
@@ -724,8 +726,8 @@
   &lt;dc-bar value="19" label="October"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="14" label="November"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="12" label="December"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" show-value="false">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" show-value="false">
                     <dc-axis position="bottom" label-interval="3"></dc-axis>
                     <dc-title>Every Third Label</dc-title>
                     <dc-bar value="10" label="January"></dc-bar>
@@ -740,7 +742,7 @@
                     <dc-bar value="19" label="October"></dc-bar>
                     <dc-bar value="14" label="November"></dc-bar>
                     <dc-bar value="12" label="December"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
         </div>
     </div>
@@ -752,13 +754,13 @@
         <div class="grid">
             <div>
                 <h3>24 Quarters - Auto Interval</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350" show-value="false"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" show-value="false"&gt;
   &lt;dc-title&gt;6 Years of Quarterly Data&lt;/dc-title&gt;
   &lt;dc-bar value="10" label="2020 Q1"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="15" label="2020 Q2"&gt;&lt;/dc-bar&gt;
   ... (24 bars total)
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" show-value="false">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" show-value="false">
                     <dc-title>6 Years of Quarterly Data</dc-title>
                     <dc-bar value="10" label="2020 Q1"></dc-bar>
                     <dc-bar value="15" label="2020 Q2"></dc-bar>
@@ -784,17 +786,17 @@
                     <dc-bar value="24" label="2025 Q2"></dc-bar>
                     <dc-bar value="31" label="2025 Q3"></dc-bar>
                     <dc-bar value="35" label="2025 Q4"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>24 Quarters - 3 Lines</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350" show-value="false"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" show-value="false"&gt;
   &lt;dc-axis position="bottom" label-interval="1" label-lines="3"&gt;&lt;/dc-axis&gt;
   &lt;dc-title&gt;Quarterly Data - Staggered 3 Lines&lt;/dc-title&gt;
   ... (24 bars)
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350" show-value="false">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" show-value="false">
                     <dc-axis position="bottom" label-interval="1" label-lines="3"></dc-axis>
                     <dc-title>Quarterly Data - Staggered 3 Lines</dc-title>
                     <dc-bar value="10" label="2020 Q1"></dc-bar>
@@ -821,7 +823,7 @@
                     <dc-bar value="24" label="2025 Q2"></dc-bar>
                     <dc-bar value="31" label="2025 Q3"></dc-bar>
                     <dc-bar value="35" label="2025 Q4"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
         </div>
     </div>
@@ -833,7 +835,7 @@
         <div class="grid">
             <div>
                 <h3>Y-Axis Title</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-axis position="left"&gt;
     &lt;dc-title&gt;Revenue ($)&lt;/dc-title&gt;
   &lt;/dc-axis&gt;
@@ -842,8 +844,8 @@
   &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
                     <dc-axis position="left">
                         <dc-title>Revenue ($)</dc-title>
                     </dc-axis>
@@ -852,12 +854,12 @@
                     <dc-bar value="150" label="Feb"></dc-bar>
                     <dc-bar value="180" label="Mar"></dc-bar>
                     <dc-bar value="90" label="Apr"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>X-Axis Title</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-axis position="bottom"&gt;
     &lt;dc-title&gt;Month&lt;/dc-title&gt;
   &lt;/dc-axis&gt;
@@ -866,8 +868,8 @@
   &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
                     <dc-axis position="bottom">
                         <dc-title>Month</dc-title>
                     </dc-axis>
@@ -876,12 +878,12 @@
                     <dc-bar value="150" label="Feb"></dc-bar>
                     <dc-bar value="180" label="Mar"></dc-bar>
                     <dc-bar value="90" label="Apr"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>Both Axis Titles</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-axis position="left"&gt;
     &lt;dc-title&gt;Revenue ($)&lt;/dc-title&gt;
   &lt;/dc-axis&gt;
@@ -893,8 +895,8 @@
   &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
                     <dc-axis position="left">
                         <dc-title>Revenue ($)</dc-title>
                     </dc-axis>
@@ -906,12 +908,12 @@
                     <dc-bar value="150" label="Feb"></dc-bar>
                     <dc-bar value="180" label="Mar"></dc-bar>
                     <dc-bar value="90" label="Apr"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
 
             <div>
                 <h3>Styled Axis Titles</h3>
-                <pre><code>&lt;dc-bar-chart width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-axis position="left"&gt;
     &lt;dc-title fill="#1976d2" font-weight="bold"&gt;Revenue ($)&lt;/dc-title&gt;
   &lt;/dc-axis&gt;
@@ -923,8 +925,8 @@
   &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
-&lt;/dc-bar-chart&gt;</code></pre>
-                <dc-bar-chart width="500" height="350">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
                     <dc-axis position="left">
                         <dc-title fill="#1976d2" font-weight="bold">Revenue ($)</dc-title>
                     </dc-axis>
@@ -936,7 +938,7 @@
                     <dc-bar value="150" label="Feb"></dc-bar>
                     <dc-bar value="180" label="Mar"></dc-bar>
                     <dc-bar value="90" label="Apr"></dc-bar>
-                </dc-bar-chart>
+                </dc-chart>
             </div>
         </div>
     </div>

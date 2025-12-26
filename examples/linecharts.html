@@ -23,6 +23,7 @@
             <a href="legends.html">Legends</a>
             <a href="axes.html">Axes</a>
             <a href="colors.html">Colors</a>
+            <a href="palettes.html">Palettes</a>
             <a href="typography.html">Typography</a>
             <a href="borders-and-padding.html">Borders & Padding</a>
             <a href="bar-groups.html">Bar Groups</a>
@@ -32,17 +33,18 @@
             <a href="popups.html">Popups</a>
             <a href="logging.html">Logging</a>
             <a href="htmx-integration.html">htmx</a>
+            <a href="accessibility.html">Accessibility</a>
         </div>
     </nav>
 
     <div class="example">
-        <h2>Basic Line Chart</h2>
-        <p>Lines can contain multiple series. Use <code>line-color</code> on the chart as a default, or specify individual colors per line:</p>
+        <h2>Basic Line Charts</h2>
+        <p>Line charts display data points connected by lines. Use <code>&lt;dc-line&gt;</code> elements containing <code>&lt;dc-point&gt;</code> elements. Multiple lines can be displayed on the same chart, each with its own color.</p>
 
         <div class="grid">
             <div>
                 <h3>Multi-Line Chart</h3>
-                <pre><code>&lt;dc-line-chart width="600" height="400" stroke-colors="#9C27B0"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" stroke-colors="#9C27B0"&gt;
   &lt;dc-title&gt;Temperature Trend&lt;/dc-title&gt;
   &lt;dc-line label="City A"&gt;
     &lt;dc-point value="15" label="Mon"&gt;&lt;/dc-point&gt;
@@ -51,15 +53,15 @@
     &lt;dc-point value="20" label="Thu"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="25" label="Fri"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
-  &lt;dc-line color="#FF5722" label="City B"&gt;
+  &lt;dc-line stroke="#FF5722" label="City B"&gt;
     &lt;dc-point value="12" label="Mon"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="16" label="Tue"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="19" label="Wed"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="23" label="Thu"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="21" label="Fri"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
-&lt;/dc-line-chart&gt;</code></pre>
-                <dc-line-chart width="600" height="400" stroke-colors="#9C27B0">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" stroke-colors="#9C27B0">
                     <dc-title>Temperature Trend</dc-title>
                     <dc-line label="City A">
                         <dc-point value="15" label="Mon"></dc-point>
@@ -75,108 +77,34 @@
                         <dc-point value="23" label="Thu"></dc-point>
                         <dc-point value="21" label="Fri"></dc-point>
                     </dc-line>
-                </dc-line-chart>
+                </dc-chart>
             </div>
-        </div>
-    </div>
 
-    <div class="example">
-        <h2>Per-Point Colors</h2>
-        <p>Individual points can have their own colors, overriding the line's default color:</p>
-
-        <div class="grid">
             <div>
-                <h3>Temperature with Alerts</h3>
-                <pre><code>&lt;dc-line-chart width="700" height="350"&gt;
-  &lt;dc-title&gt;Temperature with Alerts&lt;/dc-title&gt;
-  &lt;dc-line color="#4CAF50" label="Temperature"&gt;
-    &lt;dc-point value="18" label="Mon"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="22" label="Tue"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="35" label="Wed" color="#FF5722"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="20" label="Thu"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="19" label="Fri"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="38" label="Sat" color="#FF5722"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="21" label="Sun"&gt;&lt;/dc-point&gt;
-  &lt;/dc-line&gt;
-&lt;/dc-line-chart&gt;</code></pre>
-                <dc-line-chart width="700" height="350">
-                    <dc-title>Temperature with Alerts - Red Points Exceed Safe Limits</dc-title>
-                    <dc-line stroke="#4CAF50" label="Temperature">
-                        <dc-point value="18" label="Mon"></dc-point>
-                        <dc-point value="22" label="Tue"></dc-point>
-                        <dc-point value="35" label="Wed" color="#FF5722"></dc-point>
-                        <dc-point value="20" label="Thu"></dc-point>
-                        <dc-point value="19" label="Fri"></dc-point>
-                        <dc-point value="38" label="Sat" color="#FF5722"></dc-point>
-                        <dc-point value="21" label="Sun"></dc-point>
-                    </dc-line>
-                </dc-line-chart>
-            </div>
-        </div>
-    </div>
-
-    <div class="example">
-        <h2>Custom Border Styling</h2>
-        <p>Use the standard <code>style</code> attribute to customize the chart border:</p>
-
-        <div class="grid">
-            <div>
-                <h3>Styled Line Chart</h3>
-                <pre><code>&lt;dc-line-chart width="700" height="400" stroke-colors="#FF5722"
-               style="border: 4px solid #FF5722; border-radius: 15px"&gt;
-  &lt;dc-title&gt;Styled Line Chart with Custom Border&lt;/dc-title&gt;
-  &lt;dc-line label="Revenue"&gt;
-    &lt;dc-point value="10" label="Jan"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="15" label="Feb"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="25" label="Mar"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="35" label="Apr"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="30" label="May"&gt;&lt;/dc-point&gt;
-  &lt;/dc-line&gt;
-&lt;/dc-line-chart&gt;</code></pre>
-                <dc-line-chart width="700" height="400" stroke-colors="#FF5722" style="border: 4px solid #FF5722; border-radius: 15px">
-                    <dc-title>Styled Line Chart with Custom Border</dc-title>
-                    <dc-line label="Revenue">
-                        <dc-point value="10" label="Jan"></dc-point>
-                        <dc-point value="15" label="Feb"></dc-point>
-                        <dc-point value="25" label="Mar"></dc-point>
-                        <dc-point value="35" label="Apr"></dc-point>
-                        <dc-point value="30" label="May"></dc-point>
-                    </dc-line>
-                </dc-line-chart>
-            </div>
-        </div>
-    </div>
-
-    <div class="example">
-        <h2>Multiple Series</h2>
-        <p>Display multiple data series on the same chart:</p>
-
-        <div class="grid">
-            <div>
-                <h3>Growth Trends</h3>
-                <pre><code>&lt;dc-line-chart width="700" height="400"&gt;
-  &lt;dc-title&gt;Growth Trends - Multiple Series&lt;/dc-title&gt;
-  &lt;dc-line color="#E91E63" label="Product A"&gt;
+                <h3>Multiple Series</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Growth Trends&lt;/dc-title&gt;
+  &lt;dc-line stroke="#E91E63" label="Product A"&gt;
     &lt;dc-point value="10" label="Q1"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="15" label="Q2"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="25" label="Q3"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="35" label="Q4"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
-  &lt;dc-line color="#9C27B0" label="Product B"&gt;
+  &lt;dc-line stroke="#9C27B0" label="Product B"&gt;
     &lt;dc-point value="20" label="Q1"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="22" label="Q2"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="30" label="Q3"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="28" label="Q4"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
-  &lt;dc-line color="#3F51B5" label="Product C"&gt;
+  &lt;dc-line stroke="#3F51B5" label="Product C"&gt;
     &lt;dc-point value="5" label="Q1"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="12" label="Q2"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="18" label="Q3"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="24" label="Q4"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
-&lt;/dc-line-chart&gt;</code></pre>
-                <dc-line-chart width="700" height="400">
-                    <dc-title>Growth Trends - Multiple Series</dc-title>
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Growth Trends</dc-title>
                     <dc-line stroke="#E91E63" label="Product A">
                         <dc-point value="10" label="Q1"></dc-point>
                         <dc-point value="15" label="Q2"></dc-point>
@@ -195,60 +123,418 @@
                         <dc-point value="18" label="Q3"></dc-point>
                         <dc-point value="24" label="Q4"></dc-point>
                     </dc-line>
-                </dc-line-chart>
+                </dc-chart>
             </div>
         </div>
     </div>
 
     <div class="example">
-        <h2>Point Shapes</h2>
-        <p>Customize point shapes at chart, line, or individual point level. Supports common shapes and unicode characters:</p>
+        <h2>Point Customization</h2>
+        <p>Customize point appearance at the chart, line, or individual point level. Use <code>point-shape</code> to change shapes and <code>fill</code> to change point colors.</p>
 
         <div class="grid">
             <div>
+                <h3>Per-Point Colors</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Temperature with Alerts&lt;/dc-title&gt;
+  &lt;dc-line stroke="#4CAF50" label="Temperature"&gt;
+    &lt;dc-point value="18" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="22" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="35" label="Wed" fill="#FF5722"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="20" label="Thu"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="19" label="Fri"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="38" label="Sat" fill="#FF5722"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="21" label="Sun"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Temperature with Alerts</dc-title>
+                    <dc-line stroke="#4CAF50" label="Temperature">
+                        <dc-point value="18" label="Mon"></dc-point>
+                        <dc-point value="22" label="Tue"></dc-point>
+                        <dc-point value="35" label="Wed" fill="#FF5722"></dc-point>
+                        <dc-point value="20" label="Thu"></dc-point>
+                        <dc-point value="19" label="Fri"></dc-point>
+                        <dc-point value="38" label="Sat" fill="#FF5722"></dc-point>
+                        <dc-point value="21" label="Sun"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+
+            <div>
                 <h3>Custom Point Shapes</h3>
-                <pre><code>&lt;dc-line-chart width="700" height="400"&gt;
-  &lt;dc-title&gt;Product Performance with Custom Shapes&lt;/dc-title&gt;
-  &lt;dc-line color="#E91E63" label="Product A" point-shape="square"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Product Performance&lt;/dc-title&gt;
+  &lt;dc-line stroke="#E91E63" label="Squares" point-shape="square"&gt;
     &lt;dc-point value="10" label="Q1"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="15" label="Q2"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="25" label="Q3"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="35" label="Q4"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
-  &lt;dc-line color="#9C27B0" label="Product B"&gt;
+  &lt;dc-line stroke="#9C27B0" label="Mixed"&gt;
     &lt;dc-point value="20" label="Q1" shape="circle"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="22" label="Q2" shape="triangle"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="30" label="Q3" shape="diamond"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="28" label="Q4" shape="star"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
-  &lt;dc-line color="#3F51B5" label="Product C" point-shape="★"&gt;
+  &lt;dc-line stroke="#3F51B5" label="Unicode" point-shape="★"&gt;
     &lt;dc-point value="5" label="Q1"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="12" label="Q2" shape="♦"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="18" label="Q3"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="24" label="Q4" shape="●"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
-&lt;/dc-line-chart&gt;</code></pre>
-                <dc-line-chart width="700" height="400">
-                    <dc-title>Product Performance with Custom Shapes</dc-title>
-                    <dc-line stroke="#E91E63" label="Product A (Squares)" point-shape="square">
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Product Performance</dc-title>
+                    <dc-line stroke="#E91E63" label="Squares" point-shape="square">
                         <dc-point value="10" label="Q1"></dc-point>
                         <dc-point value="15" label="Q2"></dc-point>
                         <dc-point value="25" label="Q3"></dc-point>
                         <dc-point value="35" label="Q4"></dc-point>
                     </dc-line>
-                    <dc-line stroke="#9C27B0" label="Product B (Mixed)">
+                    <dc-line stroke="#9C27B0" label="Mixed">
                         <dc-point value="20" label="Q1" shape="circle"></dc-point>
                         <dc-point value="22" label="Q2" shape="triangle"></dc-point>
                         <dc-point value="30" label="Q3" shape="diamond"></dc-point>
                         <dc-point value="28" label="Q4" shape="star"></dc-point>
                     </dc-line>
-                    <dc-line stroke="#3F51B5" label="Product C (Unicode)" point-shape="★">
+                    <dc-line stroke="#3F51B5" label="Unicode" point-shape="★">
                         <dc-point value="5" label="Q1"></dc-point>
                         <dc-point value="12" label="Q2" shape="♦"></dc-point>
                         <dc-point value="18" label="Q3"></dc-point>
                         <dc-point value="24" label="Q4" shape="●"></dc-point>
                     </dc-line>
-                </dc-line-chart>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Curve Fitting</h2>
+        <p>Control how lines connect points using the <code>curve-fit</code> attribute. Set at the chart level for all lines, or per-line for individual control:</p>
+        <ul>
+            <li><code>linear</code> (default) - Straight line segments between points</li>
+            <li><code>smooth</code> - Catmull-Rom spline that curves smoothly through all points</li>
+            <li><code>monotone</code> - Monotonic interpolation that never overshoots between points</li>
+            <li><code>step</code> - Step function (horizontal then vertical) for discrete value changes</li>
+        </ul>
+
+        <div class="grid">
+            <div>
+                <h3>Linear (Default)</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" curve-fit="linear"&gt;
+  &lt;dc-title&gt;Linear Interpolation&lt;/dc-title&gt;
+  &lt;dc-line stroke="#2196F3" label="Data"&gt;
+    &lt;dc-point value="10" label="A"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="45" label="B"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="25" label="C"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="60" label="D"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="35" label="E"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="50" label="F"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" curve-fit="linear">
+                    <dc-title>Linear Interpolation</dc-title>
+                    <dc-line stroke="#2196F3" label="Data">
+                        <dc-point value="10" label="A"></dc-point>
+                        <dc-point value="45" label="B"></dc-point>
+                        <dc-point value="25" label="C"></dc-point>
+                        <dc-point value="60" label="D"></dc-point>
+                        <dc-point value="35" label="E"></dc-point>
+                        <dc-point value="50" label="F"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Smooth (Catmull-Rom)</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" curve-fit="smooth"&gt;
+  &lt;dc-title&gt;Smooth Spline&lt;/dc-title&gt;
+  &lt;dc-line stroke="#9C27B0" label="Data"&gt;
+    &lt;dc-point value="10" label="A"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="45" label="B"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="25" label="C"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="60" label="D"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="35" label="E"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="50" label="F"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" curve-fit="smooth">
+                    <dc-title>Smooth Spline</dc-title>
+                    <dc-line stroke="#9C27B0" label="Data">
+                        <dc-point value="10" label="A"></dc-point>
+                        <dc-point value="45" label="B"></dc-point>
+                        <dc-point value="25" label="C"></dc-point>
+                        <dc-point value="60" label="D"></dc-point>
+                        <dc-point value="35" label="E"></dc-point>
+                        <dc-point value="50" label="F"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Monotone</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" curve-fit="monotone"&gt;
+  &lt;dc-title&gt;Monotone Interpolation&lt;/dc-title&gt;
+  &lt;dc-line stroke="#4CAF50" label="Data"&gt;
+    &lt;dc-point value="10" label="A"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="45" label="B"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="25" label="C"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="60" label="D"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="35" label="E"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="50" label="F"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" curve-fit="monotone">
+                    <dc-title>Monotone Interpolation</dc-title>
+                    <dc-line stroke="#4CAF50" label="Data">
+                        <dc-point value="10" label="A"></dc-point>
+                        <dc-point value="45" label="B"></dc-point>
+                        <dc-point value="25" label="C"></dc-point>
+                        <dc-point value="60" label="D"></dc-point>
+                        <dc-point value="35" label="E"></dc-point>
+                        <dc-point value="50" label="F"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Step</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" curve-fit="step"&gt;
+  &lt;dc-title&gt;Subscription Tier&lt;/dc-title&gt;
+  &lt;dc-line stroke="#FF5722" label="Plan"&gt;
+    &lt;dc-point value="20" label="Jan"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="20" label="Feb"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="50" label="Mar"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="50" label="Apr"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="50" label="May"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="30" label="Jun"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="30" label="Jul"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="60" label="Aug"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" curve-fit="step">
+                    <dc-title>Subscription Tier</dc-title>
+                    <dc-line stroke="#FF5722" label="Plan">
+                        <dc-point value="20" label="Jan"></dc-point>
+                        <dc-point value="20" label="Feb"></dc-point>
+                        <dc-point value="50" label="Mar"></dc-point>
+                        <dc-point value="50" label="Apr"></dc-point>
+                        <dc-point value="50" label="May"></dc-point>
+                        <dc-point value="30" label="Jun"></dc-point>
+                        <dc-point value="30" label="Jul"></dc-point>
+                        <dc-point value="60" label="Aug"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Per-Line Curve Fitting</h2>
+        <p>Override the chart-level <code>curve-fit</code> on individual lines to compare different interpolation methods:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Mixed Curve Types</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" show-value="false"&gt;
+  &lt;dc-title&gt;Comparing Curve Types&lt;/dc-title&gt;
+  &lt;dc-line stroke="#2196F3" label="Linear" curve-fit="linear"&gt;
+    &lt;dc-point value="15" label="A"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="75" label="B"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="75" label="C"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="20" label="D"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="60" label="E"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="55" label="F"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line stroke="#9C27B0" label="Smooth" curve-fit="smooth"&gt;
+    &lt;dc-point value="15" label="A"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="75" label="B"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="75" label="C"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="20" label="D"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="60" label="E"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="55" label="F"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line stroke="#4CAF50" label="Monotone" curve-fit="monotone"&gt;
+    &lt;dc-point value="15" label="A"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="75" label="B"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="75" label="C"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="20" label="D"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="60" label="E"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="55" label="F"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line stroke="#FF5722" label="Step" curve-fit="step"&gt;
+    &lt;dc-point value="15" label="A"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="75" label="B"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="75" label="C"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="20" label="D"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="60" label="E"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="55" label="F"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;
+
+&lt;!-- Interactive legend with swatches --&gt;
+&lt;div style="display: flex; gap: 1rem;"&gt;
+  &lt;label&gt;&lt;input type="checkbox" checked onchange="..."&gt;
+    &lt;dc-swatch fill="#2196F3" shape="line"&gt;&lt;/dc-swatch&gt; Linear&lt;/label&gt;
+  &lt;label&gt;&lt;input type="checkbox" checked onchange="..."&gt;
+    &lt;dc-swatch fill="#9C27B0" shape="line"&gt;&lt;/dc-swatch&gt; Smooth&lt;/label&gt;
+  &lt;label&gt;&lt;input type="checkbox" checked onchange="..."&gt;
+    &lt;dc-swatch fill="#4CAF50" shape="line"&gt;&lt;/dc-swatch&gt; Monotone&lt;/label&gt;
+  &lt;label&gt;&lt;input type="checkbox" checked onchange="..."&gt;
+    &lt;dc-swatch fill="#FF5722" shape="line"&gt;&lt;/dc-swatch&gt; Step&lt;/label&gt;
+&lt;/div&gt;</code></pre>
+                <dc-chart id="curve-compare" width="500" height="350" show-value="false">
+                    <dc-title>Comparing Curve Types</dc-title>
+                    <dc-line stroke="#2196F3" label="Linear" curve-fit="linear">
+                        <dc-point value="15" label="A"></dc-point>
+                        <dc-point value="75" label="B"></dc-point>
+                        <dc-point value="75" label="C"></dc-point>
+                        <dc-point value="20" label="D"></dc-point>
+                        <dc-point value="60" label="E"></dc-point>
+                        <dc-point value="55" label="F"></dc-point>
+                    </dc-line>
+                    <dc-line stroke="#9C27B0" label="Smooth" curve-fit="smooth">
+                        <dc-point value="15" label="A"></dc-point>
+                        <dc-point value="75" label="B"></dc-point>
+                        <dc-point value="75" label="C"></dc-point>
+                        <dc-point value="20" label="D"></dc-point>
+                        <dc-point value="60" label="E"></dc-point>
+                        <dc-point value="55" label="F"></dc-point>
+                    </dc-line>
+                    <dc-line stroke="#4CAF50" label="Monotone" curve-fit="monotone">
+                        <dc-point value="15" label="A"></dc-point>
+                        <dc-point value="75" label="B"></dc-point>
+                        <dc-point value="75" label="C"></dc-point>
+                        <dc-point value="20" label="D"></dc-point>
+                        <dc-point value="60" label="E"></dc-point>
+                        <dc-point value="55" label="F"></dc-point>
+                    </dc-line>
+                    <dc-line stroke="#FF5722" label="Step" curve-fit="step">
+                        <dc-point value="15" label="A"></dc-point>
+                        <dc-point value="75" label="B"></dc-point>
+                        <dc-point value="75" label="C"></dc-point>
+                        <dc-point value="20" label="D"></dc-point>
+                        <dc-point value="60" label="E"></dc-point>
+                        <dc-point value="55" label="F"></dc-point>
+                    </dc-line>
+                </dc-chart>
+                <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                    <label><input type="checkbox" checked onchange="document.querySelector('#curve-compare dc-line[label=Linear]').toggleAttribute('hidden'); document.querySelector('#curve-compare').requestUpdate()"> <dc-swatch fill="#2196F3" shape="line"></dc-swatch> Linear</label>
+                    <label><input type="checkbox" checked onchange="document.querySelector('#curve-compare dc-line[label=Smooth]').toggleAttribute('hidden'); document.querySelector('#curve-compare').requestUpdate()"> <dc-swatch fill="#9C27B0" shape="line"></dc-swatch> Smooth</label>
+                    <label><input type="checkbox" checked onchange="document.querySelector('#curve-compare dc-line[label=Monotone]').toggleAttribute('hidden'); document.querySelector('#curve-compare').requestUpdate()"> <dc-swatch fill="#4CAF50" shape="line"></dc-swatch> Monotone</label>
+                    <label><input type="checkbox" checked onchange="document.querySelector('#curve-compare dc-line[label=Step]').toggleAttribute('hidden'); document.querySelector('#curve-compare').requestUpdate()"> <dc-swatch fill="#FF5722" shape="line"></dc-swatch> Step</label>
+                </div>
+            </div>
+
+            <div>
+                <h3>Smooth vs Monotone Overshoot</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" show-value="false"&gt;
+  &lt;dc-title&gt;Smooth May Overshoot&lt;/dc-title&gt;
+  &lt;dc-legend position="bottom"&gt;&lt;/dc-legend&gt;
+  &lt;dc-line stroke="#E91E63" label="Smooth" curve-fit="smooth"&gt;
+    &lt;dc-point value="10" label="A"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="90" label="B"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="85" label="C"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="15" label="D"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="20" label="E"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line stroke="#00BCD4" label="Monotone" curve-fit="monotone"&gt;
+    &lt;dc-point value="10" label="A"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="90" label="B"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="85" label="C"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="15" label="D"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="20" label="E"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" show-value="false">
+                    <dc-title>Smooth May Overshoot</dc-title>
+                    <dc-legend position="bottom"></dc-legend>
+                    <dc-line stroke="#E91E63" label="Smooth" curve-fit="smooth">
+                        <dc-point value="10" label="A"></dc-point>
+                        <dc-point value="90" label="B"></dc-point>
+                        <dc-point value="85" label="C"></dc-point>
+                        <dc-point value="15" label="D"></dc-point>
+                        <dc-point value="20" label="E"></dc-point>
+                    </dc-line>
+                    <dc-line stroke="#00BCD4" label="Monotone" curve-fit="monotone">
+                        <dc-point value="10" label="A"></dc-point>
+                        <dc-point value="90" label="B"></dc-point>
+                        <dc-point value="85" label="C"></dc-point>
+                        <dc-point value="15" label="D"></dc-point>
+                        <dc-point value="20" label="E"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Styling</h2>
+        <p>Use the standard <code>style</code> attribute to customize the chart border and other CSS properties:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Custom Border</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" stroke-colors="#FF5722"
+          style="border: 4px solid #FF5722; border-radius: 15px"&gt;
+  &lt;dc-title&gt;Styled Line Chart&lt;/dc-title&gt;
+  &lt;dc-line label="Revenue"&gt;
+    &lt;dc-point value="10" label="Jan"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="15" label="Feb"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="25" label="Mar"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="35" label="Apr"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="30" label="May"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" stroke-colors="#FF5722" style="border: 4px solid #FF5722; border-radius: 15px">
+                    <dc-title>Styled Line Chart</dc-title>
+                    <dc-line label="Revenue">
+                        <dc-point value="10" label="Jan"></dc-point>
+                        <dc-point value="15" label="Feb"></dc-point>
+                        <dc-point value="25" label="Mar"></dc-point>
+                        <dc-point value="35" label="Apr"></dc-point>
+                        <dc-point value="30" label="May"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Hidden Values</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" show-value="false"&gt;
+  &lt;dc-title&gt;Clean Line Chart&lt;/dc-title&gt;
+  &lt;dc-line stroke="#2196F3" label="Series A"&gt;
+    &lt;dc-point value="15" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="22" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="18" label="Wed"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="28" label="Thu"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="25" label="Fri"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line stroke="#4CAF50" label="Series B"&gt;
+    &lt;dc-point value="10" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="18" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="24" label="Wed"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="20" label="Thu"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="30" label="Fri"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" show-value="false">
+                    <dc-title>Clean Line Chart</dc-title>
+                    <dc-line stroke="#2196F3" label="Series A">
+                        <dc-point value="15" label="Mon"></dc-point>
+                        <dc-point value="22" label="Tue"></dc-point>
+                        <dc-point value="18" label="Wed"></dc-point>
+                        <dc-point value="28" label="Thu"></dc-point>
+                        <dc-point value="25" label="Fri"></dc-point>
+                    </dc-line>
+                    <dc-line stroke="#4CAF50" label="Series B">
+                        <dc-point value="10" label="Mon"></dc-point>
+                        <dc-point value="18" label="Tue"></dc-point>
+                        <dc-point value="24" label="Wed"></dc-point>
+                        <dc-point value="20" label="Thu"></dc-point>
+                        <dc-point value="30" label="Fri"></dc-point>
+                    </dc-line>
+                </dc-chart>
             </div>
         </div>
     </div>
