@@ -162,6 +162,6 @@ code {
     font-size: 14px;
 }
 
-dc-bar-chart, dc-line-chart, dc-pie-chart, dc-funnel-chart {
+dc-chart {
     margin: 20px 0;
 }

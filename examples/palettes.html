@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palettes - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+    <style>
+        .swatch-demo {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin: 10px 0;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+        .swatch-demo dc-swatch {
+            margin-right: 5px;
+        }
+        .data-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        .data-table th, .data-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .data-table th {
+            background: #f3f4f6;
+        }
+        .data-table tr:nth-child(even) {
+            background: #f9fafb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Palettes</h1>
+    <p>Define reusable color schemes that can be shared across multiple charts and used outside of charts. For inline color options (gradients, color lists, element-level colors), see <a href="colors.html">Colors</a>.</p>
+
+    <nav>
+        <div class="nav-major">
+            <a href="../index.html">Home</a>
+            <a href="barcharts.html">Bar Charts</a>
+            <a href="linecharts.html">Line Charts</a>
+            <a href="piecharts.html">Pie Charts</a>
+            <a href="funnelcharts.html">Funnel Charts</a>
+        </div>
+        <div class="nav-minor">
+            <a href="titles.html">Titles</a>
+            <a href="legends.html">Legends</a>
+            <a href="axes.html">Axes</a>
+            <a href="colors.html">Colors</a>
+            <a href="palettes.html" class="current">Palettes</a>
+            <a href="typography.html">Typography</a>
+            <a href="borders-and-padding.html">Borders & Padding</a>
+            <a href="bar-groups.html">Bar Groups</a>
+            <a href="bar-width.html">Bar Width</a>
+            <a href="gutter.html">Gutter</a>
+            <a href="interactive.html">Interactive</a>
+            <a href="popups.html">Popups</a>
+            <a href="logging.html">Logging</a>
+            <a href="htmx-integration.html">htmx</a>
+            <a href="accessibility.html">Accessibility</a>
+        </div>
+    </nav>
+
+    <!-- Define palettes at the top of the document -->
+    <dc-palette id="brand-colors">
+        <dc-color label="Revenue" fill="#2563eb" stroke="#1e40af"></dc-color>
+        <dc-color label="Expenses" fill="#dc2626" stroke="#b91c1c"></dc-color>
+        <dc-color label="Profit" fill="#16a34a" stroke="#15803d"></dc-color>
+    </dc-palette>
+
+    <dc-palette id="performance-thresholds">
+        <dc-color max-value="30" fill="#fee2e2"></dc-color>
+        <dc-color min-value="30" max-value="70" fill="#fef3c7"></dc-color>
+        <dc-color min-value="70" fill="#dcfce7"></dc-color>
+    </dc-palette>
+
+    <dc-palette id="department-colors">
+        <dc-color label="Engineering" fill="#6366f1"></dc-color>
+        <dc-color label="Marketing" fill="#f59e0b"></dc-color>
+        <dc-color label="Sales" fill="#10b981"></dc-color>
+        <dc-color label="Operations" fill="#8b5cf6"></dc-color>
+    </dc-palette>
+
+    <div class="example">
+        <h2>Basic Label-Based Palettes</h2>
+        <p>Define a palette with <code>&lt;dc-palette&gt;</code> and <code>&lt;dc-color&gt;</code> elements, then reference it from charts using the <code>palette</code> attribute:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Bar Chart with Palette</h3>
+                <pre><code>&lt;dc-palette id="brand-colors"&gt;
+  &lt;dc-color label="Revenue" fill="#2563eb"&gt;&lt;/dc-color&gt;
+  &lt;dc-color label="Expenses" fill="#dc2626"&gt;&lt;/dc-color&gt;
+  &lt;dc-color label="Profit" fill="#16a34a"&gt;&lt;/dc-color&gt;
+&lt;/dc-palette&gt;
+
+&lt;dc-chart palette="brand-colors" width="500" height="350"&gt;
+  &lt;dc-title&gt;Q4 Financial Summary&lt;/dc-title&gt;
+  &lt;dc-bar value="120" label="Revenue"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="80" label="Expenses"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="40" label="Profit"&gt;&lt;/dc-bar&gt;
+  &lt;dc-legend&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart palette="brand-colors" width="500" height="350">
+                    <dc-title>Q4 Financial Summary</dc-title>
+                    <dc-bar value="120" label="Revenue"></dc-bar>
+                    <dc-bar value="80" label="Expenses"></dc-bar>
+                    <dc-bar value="40" label="Profit"></dc-bar>
+                    <dc-legend></dc-legend>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Pie Chart with Same Palette</h3>
+                <pre><code>&lt;dc-chart palette="brand-colors" width="500" height="350"&gt;
+  &lt;dc-title&gt;Q4 Breakdown&lt;/dc-title&gt;
+  &lt;dc-slice value="120" label="Revenue"&gt;&lt;/dc-slice&gt;
+  &lt;dc-slice value="80" label="Expenses"&gt;&lt;/dc-slice&gt;
+  &lt;dc-slice value="40" label="Profit"&gt;&lt;/dc-slice&gt;
+  &lt;dc-legend position="right"&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart palette="brand-colors" width="500" height="350">
+                    <dc-title>Q4 Breakdown</dc-title>
+                    <dc-slice value="120" label="Revenue"></dc-slice>
+                    <dc-slice value="80" label="Expenses"></dc-slice>
+                    <dc-slice value="40" label="Profit"></dc-slice>
+                    <dc-legend position="right"></dc-legend>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Value-Range Palettes</h2>
+        <p>Use <code>min-value</code> and <code>max-value</code> to define color thresholds based on numeric values:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Performance Thresholds</h3>
+                <pre><code>&lt;dc-palette id="performance-thresholds"&gt;
+  &lt;dc-color max-value="30" fill="#fee2e2"&gt;&lt;/dc-color&gt;
+  &lt;dc-color min-value="30" max-value="70" fill="#fef3c7"&gt;&lt;/dc-color&gt;
+  &lt;dc-color min-value="70" fill="#dcfce7"&gt;&lt;/dc-color&gt;
+&lt;/dc-palette&gt;
+
+&lt;dc-chart palette="performance-thresholds" width="500" height="350"&gt;
+  &lt;dc-title&gt;Team Performance Scores&lt;/dc-title&gt;
+  &lt;dc-bar value="25" label="Team A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="55" label="Team B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="85" label="Team C"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="42" label="Team D"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart palette="performance-thresholds" width="500" height="350">
+                    <dc-title>Team Performance Scores</dc-title>
+                    <dc-bar value="25" label="Team A"></dc-bar>
+                    <dc-bar value="55" label="Team B"></dc-bar>
+                    <dc-bar value="85" label="Team C"></dc-bar>
+                    <dc-bar value="42" label="Team D"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>How Value Matching Works</h3>
+                <p>Value ranges are checked in DOM order. The first matching range wins:</p>
+                <ul>
+                    <li><strong>Team A (25):</strong> Matches <code>max-value="30"</code> → Light red (low)</li>
+                    <li><strong>Team B (55):</strong> Matches <code>min="30" max="70"</code> → Yellow (medium)</li>
+                    <li><strong>Team C (85):</strong> Matches <code>min-value="70"</code> → Light green (high)</li>
+                    <li><strong>Team D (42):</strong> Matches <code>min="30" max="70"</code> → Yellow (medium)</li>
+                </ul>
+                <p><strong>Priority:</strong> Value matching takes precedence over label matching, allowing you to override colors based on thresholds.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Swatches for External Use</h2>
+        <p>Use <code>&lt;dc-swatch&gt;</code> to display palette colors outside of charts, creating visual associations in prose and tables:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Swatches in Prose</h3>
+                <pre><code>&lt;p&gt;
+  &lt;dc-swatch palette="brand-colors" label="Revenue"&gt;&lt;/dc-swatch&gt;
+  Revenue increased 15% this quarter.
+&lt;/p&gt;
+&lt;p&gt;
+  &lt;dc-swatch palette="brand-colors" label="Expenses"&gt;&lt;/dc-swatch&gt;
+  Expenses were held flat.
+&lt;/p&gt;
+&lt;p&gt;
+  &lt;dc-swatch palette="brand-colors" label="Profit"&gt;&lt;/dc-swatch&gt;
+  Profit margins improved significantly.
+&lt;/p&gt;</code></pre>
+                <div class="swatch-demo" style="flex-direction: column; align-items: flex-start;">
+                    <p style="margin: 5px 0;">
+                        <dc-swatch palette="brand-colors" label="Revenue"></dc-swatch>
+                        Revenue increased 15% this quarter.
+                    </p>
+                    <p style="margin: 5px 0;">
+                        <dc-swatch palette="brand-colors" label="Expenses"></dc-swatch>
+                        Expenses were held flat.
+                    </p>
+                    <p style="margin: 5px 0;">
+                        <dc-swatch palette="brand-colors" label="Profit"></dc-swatch>
+                        Profit margins improved significantly.
+                    </p>
+                </div>
+            </div>
+
+            <div>
+                <h3>Swatches in Tables</h3>
+                <pre><code>&lt;table&gt;
+  &lt;tr&gt;
+    &lt;th&gt;Category&lt;/th&gt;&lt;th&gt;Q4 Value&lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td&gt;&lt;dc-swatch palette="brand-colors" label="Revenue"&gt;&lt;/dc-swatch&gt; Revenue&lt;/td&gt;
+    &lt;td&gt;$120,000&lt;/td&gt;
+  &lt;/tr&gt;
+  ...
+&lt;/table&gt;</code></pre>
+                <table class="data-table">
+                    <tr>
+                        <th>Category</th>
+                        <th>Q4 Value</th>
+                    </tr>
+                    <tr>
+                        <td><dc-swatch palette="brand-colors" label="Revenue"></dc-swatch> Revenue</td>
+                        <td>$120,000</td>
+                    </tr>
+                    <tr>
+                        <td><dc-swatch palette="brand-colors" label="Expenses"></dc-swatch> Expenses</td>
+                        <td>$80,000</td>
+                    </tr>
+                    <tr>
+                        <td><dc-swatch palette="brand-colors" label="Profit"></dc-swatch> Profit</td>
+                        <td>$40,000</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Swatch Shapes</h2>
+        <p>Use the <code>shape</code> attribute to change the swatch appearance. Standard shapes include: circle, square, rect, line, triangle, diamond, star, cross, plus. You can also use Unicode characters.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Standard Shapes</h3>
+                <pre><code>&lt;dc-swatch palette="department-colors" label="Engineering" shape="circle"&gt;&lt;/dc-swatch&gt;
+&lt;dc-swatch palette="department-colors" label="Marketing" shape="square"&gt;&lt;/dc-swatch&gt;
+&lt;dc-swatch palette="department-colors" label="Sales" shape="triangle"&gt;&lt;/dc-swatch&gt;
+&lt;dc-swatch palette="department-colors" label="Operations" shape="diamond"&gt;&lt;/dc-swatch&gt;</code></pre>
+                <div class="swatch-demo">
+                    <span><dc-swatch palette="department-colors" label="Engineering" shape="circle"></dc-swatch> Circle</span>
+                    <span><dc-swatch palette="department-colors" label="Marketing" shape="square"></dc-swatch> Square</span>
+                    <span><dc-swatch palette="department-colors" label="Sales" shape="triangle"></dc-swatch> Triangle</span>
+                    <span><dc-swatch palette="department-colors" label="Operations" shape="diamond"></dc-swatch> Diamond</span>
+                </div>
+                <div class="swatch-demo">
+                    <span><dc-swatch palette="department-colors" label="Engineering" shape="star"></dc-swatch> Star</span>
+                    <span><dc-swatch palette="department-colors" label="Marketing" shape="cross"></dc-swatch> Cross</span>
+                    <span><dc-swatch palette="department-colors" label="Sales" shape="plus"></dc-swatch> Plus</span>
+                    <span><dc-swatch palette="department-colors" label="Operations" shape="line"></dc-swatch> Line</span>
+                </div>
+            </div>
+
+            <div>
+                <h3>Unicode Characters</h3>
+                <pre><code>&lt;dc-swatch palette="brand-colors" label="Revenue" shape="★"&gt;&lt;/dc-swatch&gt;
+&lt;dc-swatch palette="brand-colors" label="Expenses" shape="⚠"&gt;&lt;/dc-swatch&gt;
+&lt;dc-swatch palette="brand-colors" label="Profit" shape="✓"&gt;&lt;/dc-swatch&gt;</code></pre>
+                <div class="swatch-demo">
+                    <span><dc-swatch palette="brand-colors" label="Revenue" shape="★"></dc-swatch> Star</span>
+                    <span><dc-swatch palette="brand-colors" label="Expenses" shape="⚠"></dc-swatch> Warning</span>
+                    <span><dc-swatch palette="brand-colors" label="Profit" shape="✓"></dc-swatch> Checkmark</span>
+                </div>
+                <div class="swatch-demo">
+                    <span><dc-swatch palette="brand-colors" label="Revenue" shape="●"></dc-swatch> Filled circle</span>
+                    <span><dc-swatch palette="brand-colors" label="Expenses" shape="■"></dc-swatch> Filled square</span>
+                    <span><dc-swatch palette="brand-colors" label="Profit" shape="▲"></dc-swatch> Triangle up</span>
+                </div>
+                <p><em>Note: CSS color only works for monochrome Unicode symbols. Color emojis (like 📈) ignore the palette color.</em></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Line Charts with Palettes</h2>
+        <p>Line charts use the palette's <code>stroke</code> attribute for line colors:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Multi-Line Chart</h3>
+                <pre><code>&lt;dc-palette id="brand-colors"&gt;
+  &lt;dc-color label="Revenue" fill="#2563eb" stroke="#2563eb"&gt;&lt;/dc-color&gt;
+  &lt;dc-color label="Expenses" fill="#dc2626" stroke="#dc2626"&gt;&lt;/dc-color&gt;
+&lt;/dc-palette&gt;
+
+&lt;dc-chart palette="brand-colors" width="500" height="350"&gt;
+  &lt;dc-title&gt;Quarterly Trends&lt;/dc-title&gt;
+  &lt;dc-line label="Revenue"&gt;
+    &lt;dc-point value="100" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="120" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="115" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="140" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line label="Expenses"&gt;
+    &lt;dc-point value="80" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="85" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="90" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="88" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-legend position="top"&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart palette="brand-colors" width="500" height="350">
+                    <dc-title>Quarterly Trends</dc-title>
+                    <dc-line label="Revenue">
+                        <dc-point value="100" label="Q1"></dc-point>
+                        <dc-point value="120" label="Q2"></dc-point>
+                        <dc-point value="115" label="Q3"></dc-point>
+                        <dc-point value="140" label="Q4"></dc-point>
+                    </dc-line>
+                    <dc-line label="Expenses">
+                        <dc-point value="80" label="Q1"></dc-point>
+                        <dc-point value="85" label="Q2"></dc-point>
+                        <dc-point value="90" label="Q3"></dc-point>
+                        <dc-point value="88" label="Q4"></dc-point>
+                    </dc-line>
+                    <dc-legend position="top"></dc-legend>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Matching Swatches</h3>
+                <p>Use swatches with the <code>line</code> shape to match line chart legends:</p>
+                <pre><code>&lt;dc-swatch palette="brand-colors" label="Revenue" shape="line"&gt;&lt;/dc-swatch&gt;</code></pre>
+                <div class="swatch-demo" style="flex-direction: column; align-items: flex-start;">
+                    <p style="margin: 5px 0;">
+                        <dc-swatch palette="brand-colors" label="Revenue" shape="line"></dc-swatch>
+                        Revenue shows strong upward trend
+                    </p>
+                    <p style="margin: 5px 0;">
+                        <dc-swatch palette="brand-colors" label="Expenses" shape="line"></dc-swatch>
+                        Expenses remain stable
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Explicit Overrides</h2>
+        <p>Element-level <code>fill</code> and <code>stroke</code> attributes always take precedence over palette colors:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Override Individual Elements</h3>
+                <pre><code>&lt;dc-chart palette="brand-colors" width="500" height="350"&gt;
+  &lt;dc-bar value="120" label="Revenue"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="80" label="Expenses" fill="purple"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="40" label="Profit"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart palette="brand-colors" width="500" height="350">
+                    <dc-title>Override Example</dc-title>
+                    <dc-bar value="120" label="Revenue"></dc-bar>
+                    <dc-bar value="80" label="Expenses" fill="purple"></dc-bar>
+                    <dc-bar value="40" label="Profit"></dc-bar>
+                    <dc-legend></dc-legend>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Priority Order</h3>
+                <p>Colors are resolved in this priority order:</p>
+                <ol>
+                    <li><strong>Element's own fill/stroke</strong> (highest priority)</li>
+                    <li><strong>Palette value range match</strong> (min-value/max-value)</li>
+                    <li><strong>Palette label match</strong></li>
+                    <li><strong>Chart-level color settings</strong> (fill-colors, gradients, etc.)</li>
+                    <li><strong>Auto-generated colors</strong> (lowest priority)</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../dist/declarative-charts.js"></script>
+    <script src="examples.js"></script>
+</body>
+</html>

@@ -14,12 +14,12 @@ import { customElement, property } from 'lit/decorators.js';
  * @slot - Contains dc-bar elements that belong to this group
  *
  * @example
- * <dc-bar-chart>
+ * <dc-chart>
  *   <dc-bar-group label="Group A">
- *     <dc-bar value="10" label="A1" color="blue"></dc-bar>
- *     <dc-bar value="20" label="A2" color="blue"></dc-bar>
+ *     <dc-bar value="10" label="A1" fill="blue"></dc-bar>
+ *     <dc-bar value="20" label="A2" fill="blue"></dc-bar>
  *   </dc-bar-group>
- * </dc-bar-chart>
+ * </dc-chart>
  */
 @customElement('dc-bar-group')
 export class ChartBarGroup extends LitElement {

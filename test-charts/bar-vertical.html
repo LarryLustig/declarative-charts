@@ -68,7 +68,7 @@
 
                                 cell.innerHTML = `
                                     <h5>show-value=<code>${showValue}</code> show-percent=<code>${showPercent}</code> <span class="chart-id">${chartId}</span></h5>
-                                    <dc-bar-chart width="400" height="300" orientation="vertical" data-chart-id="${chartId}">
+                                    <dc-chart width="400" height="300" orientation="vertical" data-chart-id="${chartId}">
                                         ${titleHtml}
                                         <dc-bar value="10" fill="red" label="A"></dc-bar>
                                         <dc-bar value="25" fill="blue" label="B"></dc-bar>
@@ -76,7 +76,7 @@
                                         <dc-legend position="${legendPos}" show-value="${showValue}" show-percent="${showPercent}">
                                             ${legendTitleHtml}
                                         </dc-legend>
-                                    </dc-bar-chart>
+                                    </dc-chart>
                                 `;
                                 grid.appendChild(cell);
                             });

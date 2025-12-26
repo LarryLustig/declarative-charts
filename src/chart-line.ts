@@ -3,6 +3,11 @@ import { BaseShape } from './base-shape.js';
 import { showConditionConverter, type ShowCondition } from './base-chart.js';
 
 /**
+ * Type for curve fitting methods
+ */
+export type CurveFit = 'linear' | 'smooth' | 'monotone' | 'step';
+
+/**
  * Individual line element for line charts
  *
  * Supports attribute passthrough for integration with htmx and other libraries.
@@ -19,6 +24,7 @@ import { showConditionConverter, type ShowCondition } from './base-chart.js';
  * @attr {boolean} show-value - Whether to display numeric values for points on this line by default (default: true, can be overridden by chart-level or point-level settings)
  * @attr {boolean} show-percent - Whether to display percentages for points on this line by default (inherits from chart)
  * @attr {string} point-shape - Default shape for points on this line: "circle", "square", "triangle", "diamond", "star", "cross", "plus", or unicode character (default: "circle")
+ * @attr {string} curve-fit - Curve fitting method: "linear" (straight segments), "smooth" (Catmull-Rom spline), "monotone" (monotonic interpolation), "step" (step-after). Overrides chart-level setting.
  *
  * @slot - Child elements: dc-point elements
  *
@@ -43,6 +49,13 @@ import { showConditionConverter, type ShowCondition } from './base-chart.js';
  * <dc-line stroke="#9C27B0" label="Series A" point-shape="square">
  *   <dc-point value="15" label="Mon"></dc-point>
  *   <dc-point value="18" label="Tue"></dc-point>
+ * </dc-line>
+ *
+ * @example
+ * <dc-line stroke="#9C27B0" label="Smooth Curve" curve-fit="smooth">
+ *   <dc-point value="15" label="Mon"></dc-point>
+ *   <dc-point value="22" label="Tue"></dc-point>
+ *   <dc-point value="18" label="Wed"></dc-point>
  * </dc-line>
  *
  * @example
@@ -75,6 +88,9 @@ export class ChartLine extends BaseShape {
 
   @property({ type: String, attribute: 'point-shape' })
   pointShape = 'circle';
+
+  @property({ type: String, attribute: 'curve-fit' })
+  curveFit?: CurveFit;
 }
 
 declare global {

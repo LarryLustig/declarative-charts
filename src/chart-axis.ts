@@ -64,13 +64,13 @@ const CSS_UNIT_PATTERN = /^[\d.]+\s*(px|em|rem|pt|%)$/i;
  * @attr {string} font-family - Font family for axis labels
  *
  * @example
- * <dc-bar-chart>
+ * <dc-chart>
  *   <dc-axis position="bottom" label-interval="2"></dc-axis>
  *   <dc-axis position="left">
  *     <dc-title>Sales</dc-title>
  *   </dc-axis>
  *   <dc-bar value="30" label="A"></dc-bar>
- * </dc-bar-chart>
+ * </dc-chart>
  */
 @customElement('dc-axis')
 export class ChartAxis extends LitElement {

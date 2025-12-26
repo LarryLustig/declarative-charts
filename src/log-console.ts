@@ -14,16 +14,16 @@ import type { BaseChart, LogEntry } from './base-chart.js';
  * @attr {string} chart - CSS selector identifying the chart(s) to monitor (required)
  *
  * @example
- * <dc-bar-chart id="my-chart" logging="info" width="500" height="300">
+ * <dc-chart id="my-chart" logging="info" width="500" height="300">
  *   <dc-bar value="30" label="A"></dc-bar>
  *   <dc-bar value="45" label="B"></dc-bar>
- * </dc-bar-chart>
+ * </dc-chart>
  *
  * <dc-log-console chart="#my-chart"></dc-log-console>
  *
  * @example
  * <!-- Monitor multiple charts -->
- * <dc-log-console chart="dc-bar-chart, dc-pie-chart"></dc-log-console>
+ * <dc-log-console chart="dc-chart"></dc-log-console>
  */
 @customElement('dc-log-console')
 export class LogConsole extends LitElement {

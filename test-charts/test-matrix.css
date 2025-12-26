@@ -191,10 +191,7 @@ h1 {
 }
 
 /* Make charts smaller for the grid */
-.chart-cell dc-bar-chart,
-.chart-cell dc-pie-chart,
-.chart-cell dc-funnel-chart,
-.chart-cell dc-line-chart {
+.chart-cell dc-chart {
     border-width: 1px;
     padding: 10px;
 }

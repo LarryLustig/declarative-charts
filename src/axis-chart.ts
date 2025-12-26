@@ -31,13 +31,13 @@ export interface AxisConfig {
  * Axes can be configured using `<dc-axis>` child elements:
  *
  * ```html
- * <dc-bar-chart>
+ * <dc-chart>
  *   <dc-axis position="bottom" label-interval="2"></dc-axis>
  *   <dc-axis position="left">
  *     <dc-title>Revenue ($)</dc-title>
  *   </dc-axis>
  *   <dc-bar value="30" label="A"></dc-bar>
- * </dc-bar-chart>
+ * </dc-chart>
  * ```
  *
  * If no `<dc-axis>` elements are present, sensible defaults are used.
