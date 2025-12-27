@@ -411,6 +411,36 @@ describe('analyzeBars', () => {
     expect(result).toContain('target');
   });
 
+  it('compares against reference value - many above, few below (lists missed)', () => {
+    // More than 3 above target, 3 or fewer below - should list those that missed
+    const bars: BarData[] = [
+      { label: 'A', value: 60 },
+      { label: 'B', value: 70 },
+      { label: 'C', value: 80 },
+      { label: 'D', value: 90 },
+      { label: 'E', value: 30 },
+      { label: 'F', value: 40 },
+    ];
+    const result = analyzeBars(bars, 50);
+    expect(result).toContain('target missed in E, F');
+  });
+
+  it('compares against reference value - many above, many below (shows count)', () => {
+    // More than 3 above target AND more than 3 below - should show count
+    const bars: BarData[] = [
+      { label: 'A', value: 60 },
+      { label: 'B', value: 70 },
+      { label: 'C', value: 80 },
+      { label: 'D', value: 90 },
+      { label: 'E', value: 10 },
+      { label: 'F', value: 20 },
+      { label: 'G', value: 30 },
+      { label: 'H', value: 40 },
+    ];
+    const result = analyzeBars(bars, 50);
+    expect(result).toContain('4 of 8 met target');
+  });
+
   it('uses custom formatter', () => {
     const bars: BarData[] = [{ label: 'Sales', value: 1000 }];
     const formatter = (v: number) => `$${v}`;
