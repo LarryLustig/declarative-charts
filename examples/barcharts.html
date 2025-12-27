@@ -15,6 +15,7 @@
             <a href="../index.html">Home</a>
             <a href="barcharts.html" class="current">Bar Charts</a>
             <a href="linecharts.html">Line Charts</a>
+            <a href="bubblecharts.html">Bubble Charts</a>
             <a href="piecharts.html">Pie Charts</a>
             <a href="funnelcharts.html">Funnel Charts</a>
         </div>
@@ -430,6 +431,111 @@
                         </dc-bar>
                     </dc-bar-group>
                     <dc-legend position="right"></dc-legend>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Negative Values</h2>
+        <p>Bars automatically extend downward (or leftward for horizontal) for negative values. A zero line appears when the range spans both positive and negative values. Use palettes with <code>min-value</code> and <code>max-value</code> to style positive and negative bars differently.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Mixed Positive and Negative</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Quarterly Profit/Loss&lt;/dc-title&gt;
+  &lt;dc-bar value="50" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-30" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="75" label="Q3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-15" label="Q4"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Quarterly Profit/Loss</dc-title>
+                    <dc-bar value="50" label="Q1"></dc-bar>
+                    <dc-bar value="-30" label="Q2"></dc-bar>
+                    <dc-bar value="75" label="Q3"></dc-bar>
+                    <dc-bar value="-15" label="Q4"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Palette-Based Coloring</h3>
+                <p>Use palettes with value ranges to color positive and negative bars differently:</p>
+                <pre><code>&lt;dc-palette id="profit-loss"&gt;
+  &lt;dc-fill max-value="0" fill="#F44336"&gt;&lt;/dc-fill&gt;
+  &lt;dc-fill min-value="0" fill="#4CAF50"&gt;&lt;/dc-fill&gt;
+&lt;/dc-palette&gt;
+&lt;dc-chart width="500" height="350" palette="profit-loss"&gt;
+  &lt;dc-title&gt;Monthly Performance&lt;/dc-title&gt;
+  &lt;dc-bar value="45" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-20" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="60" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-35" label="Apr"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" label="May"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-10" label="Jun"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-palette id="profit-loss">
+                    <dc-fill max-value="0" fill="#F44336"></dc-fill>
+                    <dc-fill min-value="0" fill="#4CAF50"></dc-fill>
+                </dc-palette>
+                <dc-chart width="500" height="350" palette="profit-loss">
+                    <dc-title>Monthly Performance</dc-title>
+                    <dc-bar value="45" label="Jan"></dc-bar>
+                    <dc-bar value="-20" label="Feb"></dc-bar>
+                    <dc-bar value="60" label="Mar"></dc-bar>
+                    <dc-bar value="-35" label="Apr"></dc-bar>
+                    <dc-bar value="25" label="May"></dc-bar>
+                    <dc-bar value="-10" label="Jun"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Horizontal with Negatives</h3>
+                <pre><code>&lt;dc-palette id="budget-variance"&gt;
+  &lt;dc-fill max-value="0" fill="#E57373"&gt;&lt;/dc-fill&gt;
+  &lt;dc-fill min-value="0" fill="#81C784"&gt;&lt;/dc-fill&gt;
+&lt;/dc-palette&gt;
+&lt;dc-chart width="500" height="350" orientation="horizontal" palette="budget-variance"&gt;
+  &lt;dc-title&gt;Budget Variance by Department&lt;/dc-title&gt;
+  &lt;dc-bar value="15" label="Engineering"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-25" label="Marketing"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="8" label="Sales"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-12" label="Operations"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="20" label="Support"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-palette id="budget-variance">
+                    <dc-fill max-value="0" fill="#E57373"></dc-fill>
+                    <dc-fill min-value="0" fill="#81C784"></dc-fill>
+                </dc-palette>
+                <dc-chart width="500" height="350" orientation="horizontal" palette="budget-variance">
+                    <dc-title>Budget Variance by Department</dc-title>
+                    <dc-bar value="15" label="Engineering"></dc-bar>
+                    <dc-bar value="-25" label="Marketing"></dc-bar>
+                    <dc-bar value="8" label="Sales"></dc-bar>
+                    <dc-bar value="-12" label="Operations"></dc-bar>
+                    <dc-bar value="20" label="Support"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>All Negative Values</h3>
+                <p>When all values are negative, the zero line appears at the top:</p>
+                <pre><code>&lt;dc-chart width="500" height="350" fill-colors="#E53935"&gt;
+  &lt;dc-title&gt;Temperature Readings (Below Zero)&lt;/dc-title&gt;
+  &lt;dc-bar value="-5" label="Mon"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-12" label="Tue"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-8" label="Wed"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-15" label="Thu"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-3" label="Fri"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" fill-colors="#E53935">
+                    <dc-title>Temperature Readings (Below Zero)</dc-title>
+                    <dc-bar value="-5" label="Mon"></dc-bar>
+                    <dc-bar value="-12" label="Tue"></dc-bar>
+                    <dc-bar value="-8" label="Wed"></dc-bar>
+                    <dc-bar value="-15" label="Thu"></dc-bar>
+                    <dc-bar value="-3" label="Fri"></dc-bar>
                 </dc-chart>
             </div>
         </div>

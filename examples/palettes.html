@@ -45,6 +45,7 @@
             <a href="../index.html">Home</a>
             <a href="barcharts.html">Bar Charts</a>
             <a href="linecharts.html">Line Charts</a>
+            <a href="bubblecharts.html">Bubble Charts</a>
             <a href="piecharts.html">Pie Charts</a>
             <a href="funnelcharts.html">Funnel Charts</a>
         </div>
@@ -175,6 +176,55 @@
                     <li><strong>Team D (42):</strong> Matches <code>min="30" max="70"</code> → Yellow (medium)</li>
                 </ul>
                 <p><strong>Priority:</strong> Value matching takes precedence over label matching, allowing you to override colors based on thresholds.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Positive/Negative Value Palettes</h2>
+        <p>A common use case for value-range palettes is coloring positive values one color and negative values another:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Profit/Loss Bars</h3>
+                <pre><code>&lt;dc-palette id="pos-neg"&gt;
+  &lt;dc-fill max-value="0" fill="#F44336"&gt;&lt;/dc-fill&gt;
+  &lt;dc-fill min-value="0" fill="#4CAF50"&gt;&lt;/dc-fill&gt;
+&lt;/dc-palette&gt;
+
+&lt;dc-chart palette="pos-neg" width="500" height="350"&gt;
+  &lt;dc-title&gt;Monthly Profit/Loss&lt;/dc-title&gt;
+  &lt;dc-bar value="35" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-20" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="50" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-10" label="Apr"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" label="May"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-30" label="Jun"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-palette id="pos-neg">
+                    <dc-fill max-value="0" fill="#F44336"></dc-fill>
+                    <dc-fill min-value="0" fill="#4CAF50"></dc-fill>
+                </dc-palette>
+                <dc-chart palette="pos-neg" width="500" height="350">
+                    <dc-title>Monthly Profit/Loss</dc-title>
+                    <dc-bar value="35" label="Jan"></dc-bar>
+                    <dc-bar value="-20" label="Feb"></dc-bar>
+                    <dc-bar value="50" label="Mar"></dc-bar>
+                    <dc-bar value="-10" label="Apr"></dc-bar>
+                    <dc-bar value="25" label="May"></dc-bar>
+                    <dc-bar value="-30" label="Jun"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>How It Works</h3>
+                <p>The palette uses two <code>&lt;dc-fill&gt;</code> rules with value boundaries at zero:</p>
+                <ul>
+                    <li><code>max-value="0"</code> matches any value &le; 0 (negative values)</li>
+                    <li><code>min-value="0"</code> matches any value &ge; 0 (positive values)</li>
+                </ul>
+                <p>When a bar has a negative value, it matches the first rule and gets red. When positive, it matches the second rule and gets green.</p>
+                <p>This same palette works for any chart type that supports negative values, including line charts (point fills) and bubble charts.</p>
             </div>
         </div>
     </div>

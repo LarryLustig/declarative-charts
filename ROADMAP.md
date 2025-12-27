@@ -26,87 +26,11 @@ Named presets (`number`, `currency`, `compact`, `percent`) and d3-format subset 
 
 ### Negative Value Support
 
-**Status:** Not Started
-**Priority:** Critical
+**Status:** Complete
 
-**Problem:** Bar charts cannot display negative values. Bars always extend from zero upward/rightward, making the library unusable for profit/loss, temperature, or any data with negative values.
+Bar, line, and bubble charts now support negative values with automatic axis scaling and distinct zero line styling. For all-negative vertical charts, the category axis automatically positions at top (where zero is). Use palettes with `min-value`/`max-value` for positive/negative coloring. See [CHANGELOG.md](CHANGELOG.md) for details.
 
-**Requirements:**
-
-1. **Bar Charts**
-   - Bars extend downward (vertical) or leftward (horizontal) for negative values
-   - Zero line rendered distinctly
-   - Axis labels show negative values
-
-2. **Line Charts**
-   - Points can be positioned below zero line
-   - Grid extends into negative territory
-
-3. **Axis Rendering**
-   - Y-axis (or X-axis for horizontal) shows negative range
-   - Zero line emphasized (thicker or different color)
-   - Tick marks on both sides of zero
-
-4. **Color Differentiation**
-   - Optional: different colors for positive/negative
-   - `negative-fill` attribute on chart or elements
-
-**Proposed API:**
-```html
-<!-- Automatic negative handling -->
-<dc-chart>
-  <dc-bar value="50" label="Profit" fill="#4CAF50"></dc-bar>
-  <dc-bar value="-30" label="Loss" fill="#F44336"></dc-bar>
-  <dc-bar value="20" label="Net"></dc-bar>
-</dc-chart>
-
-<!-- Auto-color negatives -->
-<dc-chart fill-colors="#4CAF50" negative-fill="#F44336">
-  <dc-bar value="50" label="Q1"></dc-bar>
-  <dc-bar value="-30" label="Q2"></dc-bar>  <!-- Uses negative-fill -->
-  <dc-bar value="20" label="Q3"></dc-bar>
-</dc-chart>
-
-<!-- Line chart with negatives -->
-<dc-chart>
-  <dc-line label="Temperature">
-    <dc-point value="15" label="6am"></dc-point>
-    <dc-point value="-5" label="Midnight"></dc-point>
-  </dc-line>
-</dc-chart>
-
-<!-- Stacked bars with negatives (waterfall-style) -->
-<dc-chart>
-  <dc-bar label="Q1">
-    <dc-bar-segment value="100" label="Revenue"></dc-bar-segment>
-    <dc-bar-segment value="-30" label="Costs"></dc-bar-segment>
-    <dc-bar-segment value="-20" label="Tax"></dc-bar-segment>
-  </dc-bar>
-</dc-chart>
-```
-
-**Implementation Notes:**
-- Modify `getMaxValue()` to return `{ min, max }` or add `getMinValue()`
-- Calculate scale to span from min to max (with padding)
-- Calculate zero position: `zeroY = padding.top + (max / (max - min)) * chartHeight`
-- Positive bars: extend from zeroY upward
-- Negative bars: extend from zeroY downward
-- Add `zero-line-color` and `zero-line-width` attributes
-- Handle edge cases: all positive, all negative, mixed
-
-**Visual Design:**
-```
-     100 ─┼────────────────
-         │ ████
-      50 ─┼─████────────────
-         │ ████  ████
-       0 ═╪═████══████══════  ← Zero line (emphasized)
-         │       ████
-     -50 ─┼──────████───────
-         │       ████
-         └──────────────────
-           Q1    Q2
-```
+**Deferred:** Stacked bars with negative segments (waterfall-style) and zero line customization (via future Reference Lines feature)
 
 ---
 
@@ -677,7 +601,7 @@ test/
 **Status:** Not Started
 **Priority:** Nice-to-Have
 
-**Problem:** Users cannot add reference lines (e.g., target value, average) or shaded regions (e.g., "danger zone") to charts.
+**Problem:** Users cannot add reference lines (e.g., target value, average) or shaded regions (e.g., "danger zone") to charts. This feature will also provide a way to customize the zero line appearance when negative values are present.
 
 **Proposed API:**
 ```html
@@ -686,6 +610,13 @@ test/
   <dc-reference-line value="75" label="Target" stroke="#F44336" stroke-dasharray="5,5"></dc-reference-line>
   <dc-bar value="65" label="Q1"></dc-bar>
   <dc-bar value="80" label="Q2"></dc-bar>
+</dc-chart>
+
+<!-- Custom zero line styling (overrides default) -->
+<dc-chart>
+  <dc-reference-line value="0" stroke="#000" stroke-width="2"></dc-reference-line>
+  <dc-bar value="50" label="Profit"></dc-bar>
+  <dc-bar value="-30" label="Loss"></dc-bar>
 </dc-chart>
 
 <!-- Multiple reference lines -->
@@ -899,6 +830,6 @@ function MyChart({ data }) {
 
 | Version | Status | Key Features |
 |---------|--------|--------------|
-| 0.x | Current | Bar, Line, Bubble, Pie, Funnel charts; Legends; Titles; Popups; Palettes; Accessibility (ARIA, keyboard nav, patterns, high contrast); Number formatting |
-| 1.0 | Planned | Negative values; Axis config; npm publish |
+| 0.x | Current | Bar, Line, Bubble, Pie, Funnel charts; Legends; Titles; Popups; Palettes; Accessibility (ARIA, keyboard nav, patterns, high contrast); Number formatting; Negative value support |
+| 1.0 | Planned | Axis config; npm publish |
 | 1.x | Future | Area charts; Animations; Date axis; More chart types |

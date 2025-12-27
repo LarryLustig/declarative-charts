@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Negative Value Support**
+  - Bar charts extend downward (vertical) or leftward (horizontal) for negative values
+  - Line and bubble charts position points below zero when appropriate
+  - Automatic axis scaling for negative ranges with nice number algorithm
+  - Distinct zero line styling when range spans positive and negative
+  - All-negative vertical charts position category axis at top (where zero is)
+  - Use palettes with `min-value`/`max-value` for positive/negative coloring
+
 - **Number Formatting System**
   - Named presets: `number`, `integer`, `compact`, `currency`, `percent`
   - d3-format subset support: `,.2f`, `.1s`, `$,.0f`, `.1%`

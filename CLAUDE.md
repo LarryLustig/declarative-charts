@@ -87,6 +87,8 @@ Text elements (`<dc-title>`, `<dc-legend>`) use SVG attributes, not CSS:
 
 **Keyboard Navigation**: Roving tabindex pattern. Implement `getFocusableElements()`, `getShapeBounds()`, `renderFocusIndicator()`.
 
+**Negative Values**: Bar, line, and bubble charts support negative values. The `ValueRange` interface tracks `{ min, max, zeroPosition, hasNegatives, hasPositives }`. For all-negative vertical charts, the category axis renders at top (where zero is). Use `getNiceRange()` for axis calculations.
+
 **Number Formatting**: All numeric values (labels, axes, legends, popups) use the formatting system in `src/format.ts`.
 
 Format inheritance: element `value-format` → legend/axis `value-format` → chart `value-format` → default.
@@ -125,7 +127,7 @@ When rendering labels, always use `formatValueString()` which handles show-value
 ### Adding a New Chart Type
 
 1. Create file in `src/`, extend `AxisChart` (has axes) or `BaseChart` (no axes)
-2. For `AxisChart`: implement `getMaxValue()`, `getAllValues()`, `getCategoryLabels()`, `getAxisLabelPadding()`
+2. For `AxisChart`: implement `getMaxValue()`, `getMinValue()`, `getAllValues()`, `getCategoryLabels()`, `getAxisLabelPadding()`
 3. Implement `renderChart(): SVGTemplateResult`
 4. Use `this.getChartPadding()` for positioning
 5. Implement: logging, auto-popup, `getLegendItems()`, `getInsights()`, keyboard navigation

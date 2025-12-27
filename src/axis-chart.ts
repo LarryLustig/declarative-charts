@@ -3,6 +3,23 @@ import { BaseChart } from './base-chart.js';
 import type { ChartAxis, AxisPosition } from './chart-axis.js';
 
 /**
+ * Represents a value range for axis scaling, including information about
+ * where the zero line falls when the range spans both positive and negative values.
+ */
+export interface ValueRange {
+  /** Minimum value (may be negative) */
+  min: number;
+  /** Maximum value */
+  max: number;
+  /** Position of zero line as fraction from top (0 = top, 1 = bottom), or null if zero not in range */
+  zeroPosition: number | null;
+  /** Whether the range includes negative values */
+  hasNegatives: boolean;
+  /** Whether the range includes positive values */
+  hasPositives: boolean;
+}
+
+/**
  * Configuration for an axis, either from a dc-axis element or defaults.
  */
 export interface AxisConfig {
@@ -57,6 +74,13 @@ export abstract class AxisChart extends BaseChart {
    * @returns The maximum data value, minimum of 1 to avoid division by zero
    */
   protected abstract getMaxValue(): number;
+
+  /**
+   * Get the minimum value from the chart's data.
+   * Used for scaling the value axis when negative values are present.
+   * @returns The minimum data value (may be negative, or 0 if all values are positive)
+   */
+  protected abstract getMinValue(): number;
 
   /**
    * Get all values from the chart's data.
@@ -236,6 +260,80 @@ export abstract class AxisChart extends BaseChart {
     this.log('info', 'valueAxis.niceMax', `Nice maximum: ceil(${rawMax}/${tickSpacing}) × ${tickSpacing} = ${niceMax}`, niceMax);
 
     return niceMax;
+  }
+
+  /**
+   * Get a "nice" value range for the value axis, handling both positive and negative values.
+   * Returns min/max bounds that create clean tick intervals, plus information about
+   * the zero line position for charts with mixed positive/negative data.
+   *
+   * @returns ValueRange with nice bounds and zero line position info
+   */
+  protected getNiceRange(): ValueRange {
+    const rawMax = this.getMaxValue();
+    const rawMin = this.getMinValue();
+
+    this.log('info', 'valueAxis.rawRange', `Raw data range: [${rawMin}, ${rawMax}]`, { min: rawMin, max: rawMax });
+
+    // Case 1: All positive (or zero) - use existing behavior
+    if (rawMin >= 0) {
+      const niceMax = this.getNiceMax();
+      this.log('info', 'valueAxis.range', `All positive: range [0, ${niceMax}], zero at bottom`, { min: 0, max: niceMax });
+      return {
+        min: 0,
+        max: niceMax,
+        zeroPosition: 1, // Zero at bottom (fraction = 1)
+        hasNegatives: false,
+        hasPositives: rawMax > 0
+      };
+    }
+
+    // Case 2: All negative
+    if (rawMax <= 0) {
+      // Calculate nice minimum (negative value)
+      const absMin = Math.abs(rawMin);
+      const range = this.niceNumber(absMin, false);
+      const tickSpacing = this.niceNumber(range / this.gridSteps, true);
+      const niceAbsMin = Math.ceil(absMin / tickSpacing) * tickSpacing;
+
+      this.log('info', 'valueAxis.range', `All negative: range [${-niceAbsMin}, 0], zero at top`, { min: -niceAbsMin, max: 0 });
+      return {
+        min: -niceAbsMin,
+        max: 0,
+        zeroPosition: 0, // Zero at top (fraction = 0)
+        hasNegatives: true,
+        hasPositives: false
+      };
+    }
+
+    // Case 3: Mixed positive and negative
+    // Calculate tick spacing based on the larger absolute value to get consistent intervals
+    const maxAbsValue = Math.max(rawMax, Math.abs(rawMin));
+    const tickSpacing = this.niceNumber(maxAbsValue / this.gridSteps, true);
+
+    // Round max up and min down to tick spacing multiples
+    const niceMax = Math.ceil(rawMax / tickSpacing) * tickSpacing;
+    const niceMin = Math.floor(rawMin / tickSpacing) * tickSpacing;
+
+    const totalRange = niceMax - niceMin;
+    // Zero position: how far from the top is zero? (as fraction 0-1)
+    // zeroPosition = niceMax / totalRange
+    const zeroPosition = niceMax / totalRange;
+
+    this.log('info', 'valueAxis.tickSpacing', `Mixed range tick spacing`, tickSpacing);
+    this.log('info', 'valueAxis.range', `Mixed: range [${niceMin}, ${niceMax}], zero at ${(zeroPosition * 100).toFixed(0)}% from top`, {
+      min: niceMin,
+      max: niceMax,
+      zeroPosition
+    });
+
+    return {
+      min: niceMin,
+      max: niceMax,
+      zeroPosition,
+      hasNegatives: true,
+      hasPositives: true
+    };
   }
 
   // ============================================================================
@@ -551,9 +649,14 @@ export abstract class AxisChart extends BaseChart {
    * @returns Object with additional padding needed for each side
    */
   protected override getAxisLabelPadding(): { top: number; right: number; bottom: number; left: number } {
-    const max = this.getNiceMax();
-    const maxValueStr = max.toFixed(0);
-    const maxValueWidth = this.measureText(maxValueStr, 11) + 15; // 11px font + margin
+    const range = this.getNiceRange();
+    // Measure both min and max formatted strings to find the widest
+    const maxValueStr = this.formatValue(range.max);
+    const minValueStr = this.formatValue(range.min);
+    const maxValueWidth = Math.max(
+      this.measureText(maxValueStr, 11),
+      this.measureText(minValueStr, 11)
+    ) + 15; // 11px font + margin
 
     // Height for axis labels
     const labelHeight = 25;
@@ -586,11 +689,12 @@ export abstract class AxisChart extends BaseChart {
 
   /**
    * Render horizontal grid lines for vertical charts or vertical grid lines for horizontal charts.
+   * Supports negative value ranges and renders zero line with distinct styling when applicable.
    *
    * @param padding Chart padding values
    * @param chartWidth Width of the chart content area
    * @param chartHeight Height of the chart content area
-   * @param max Maximum data value for scaling
+   * @param range Value range (min, max) for scaling, or just max for backward compatibility
    * @param orientation 'vertical' for horizontal grid lines, 'horizontal' for vertical grid lines
    * @returns SVG template result for grid lines
    */
@@ -598,23 +702,44 @@ export abstract class AxisChart extends BaseChart {
     padding: { top: number; right: number; bottom: number; left: number },
     chartWidth: number,
     chartHeight: number,
-    max: number,
+    range: ValueRange | number,
     orientation: 'vertical' | 'horizontal' = 'vertical'
   ): SVGTemplateResult {
+    // Support both ValueRange and legacy number (max) parameter
+    const valueRange: ValueRange = typeof range === 'number'
+      ? { min: 0, max: range, zeroPosition: 1, hasNegatives: false, hasPositives: true }
+      : range;
+
+    const { min, max, hasNegatives, hasPositives } = valueRange;
+    const totalRange = max - min;
+
+    // Generate tick values from min to max
+    const tickValues: number[] = [];
+    for (let i = 0; i <= this.gridSteps; i++) {
+      tickValues.push(min + (totalRange / this.gridSteps) * i);
+    }
+
+    // Ensure zero is included when range spans both positive and negative
+    if (hasNegatives && hasPositives && !tickValues.some(v => Math.abs(v) < totalRange * 0.0001)) {
+      tickValues.push(0);
+      tickValues.sort((a, b) => a - b);
+    }
+
     if (orientation === 'vertical') {
       // Horizontal grid lines (for vertical bar/line charts)
       return svg`
-        ${Array.from({ length: this.gridSteps + 1 }, (_, i) => {
-          const value = (max / this.gridSteps) * i;
-          const y = this.height - padding.bottom - (value / max) * chartHeight;
+        ${tickValues.map(value => {
+          const y = this.height - padding.bottom - ((value - min) / totalRange) * chartHeight;
+          // Check if this is the zero line (within small tolerance for floating point)
+          const isZeroLine = Math.abs(value) < totalRange * 0.0001 && hasNegatives && hasPositives;
           return svg`
             <line
               x1="${padding.left}"
               y1="${y}"
               x2="${this.width - padding.right}"
               y2="${y}"
-              stroke="#ddd"
-              stroke-width="1"
+              stroke="${isZeroLine ? '#666' : '#ddd'}"
+              stroke-width="${isZeroLine ? 1.5 : 1}"
             />
           `;
         })}
@@ -622,17 +747,18 @@ export abstract class AxisChart extends BaseChart {
     } else {
       // Vertical grid lines (for horizontal bar charts)
       return svg`
-        ${Array.from({ length: this.gridSteps + 1 }, (_, i) => {
-          const value = (max / this.gridSteps) * i;
-          const x = padding.left + (value / max) * chartWidth;
+        ${tickValues.map(value => {
+          const x = padding.left + ((value - min) / totalRange) * chartWidth;
+          // Check if this is the zero line
+          const isZeroLine = Math.abs(value) < totalRange * 0.0001 && hasNegatives && hasPositives;
           return svg`
             <line
               x1="${x}"
               y1="${padding.top}"
               x2="${x}"
               y2="${this.height - padding.bottom}"
-              stroke="#ddd"
-              stroke-width="1"
+              stroke="${isZeroLine ? '#666' : '#ddd'}"
+              stroke-width="${isZeroLine ? 1.5 : 1}"
             />
           `;
         })}
@@ -652,13 +778,18 @@ export abstract class AxisChart extends BaseChart {
    * @param padding Chart padding values
    * @param orientation 'vertical' for standard axes, 'horizontal' for swapped axes
    * @param reverse If true, adjusts axis positions for reverse orientations
+   * @param range Optional value range - when all-negative, category axis moves to zero line
    * @returns SVG template result for axes
    */
   protected renderAxes(
     padding: { top: number; right: number; bottom: number; left: number },
     orientation: 'vertical' | 'horizontal' = 'vertical',
-    reverse = false
+    reverse = false,
+    range?: ValueRange
   ): SVGTemplateResult {
+    // For all-negative vertical charts, position the category axis at top (where zero is)
+    const allNegative = range && !range.hasPositives;
+    const categoryAxisAtTop = orientation === 'vertical' && !reverse && allNegative;
     const strokeWidth = this.axisStrokeWidth;
     // Extend axes by half the stroke width at intersection to eliminate notch
     const extend = strokeWidth / 2;
@@ -666,6 +797,26 @@ export abstract class AxisChart extends BaseChart {
     if (orientation === 'vertical') {
       if (reverse) {
         // Vertical-reverse: Y-axis on left, X-axis at top
+        return svg`
+          <line
+            x1="${padding.left}"
+            y1="${padding.top - extend}"
+            x2="${padding.left}"
+            y2="${this.height - padding.bottom}"
+            stroke="#333"
+            stroke-width="${strokeWidth}"
+          />
+          <line
+            x1="${padding.left - extend}"
+            y1="${padding.top}"
+            x2="${this.width - padding.right}"
+            y2="${padding.top}"
+            stroke="#333"
+            stroke-width="${strokeWidth}"
+          />
+        `;
+      } else if (categoryAxisAtTop) {
+        // All-negative vertical: Y-axis on left (full height), X-axis at top (where zero is)
         return svg`
           <line
             x1="${padding.left}"
@@ -752,34 +903,49 @@ export abstract class AxisChart extends BaseChart {
 
   /**
    * Render numeric labels along the value axis.
+   * Supports negative value ranges.
    *
    * @param padding Chart padding values
    * @param chartWidth Width of the chart content area
    * @param chartHeight Height of the chart content area
-   * @param max Maximum data value for scaling
+   * @param range Value range (min, max) for scaling, or just max for backward compatibility
    * @param orientation 'vertical' for Y-axis labels on left, 'horizontal' for X-axis labels at bottom
    * @param reverse If true, adjusts label positions for reverse orientations
+   * @param axisFormat Optional format string for axis labels
    * @returns SVG template result for value axis labels
    */
   protected renderValueAxisLabels(
     padding: { top: number; right: number; bottom: number; left: number },
     chartWidth: number,
     chartHeight: number,
-    max: number,
+    range: ValueRange | number,
     orientation: 'vertical' | 'horizontal' = 'vertical',
     reverse = false,
     axisFormat?: string
   ): SVGTemplateResult {
+    // Support both ValueRange and legacy number (max) parameter
+    const valueRange: ValueRange = typeof range === 'number'
+      ? { min: 0, max: range, zeroPosition: 1, hasNegatives: false, hasPositives: true }
+      : range;
+
+    const { min, max } = valueRange;
+    const totalRange = max - min;
+
     // Use axis format if provided, otherwise fall back to chart's valueFormat
     const format = axisFormat ?? this.valueFormat;
+
+    // Generate tick values from min to max
+    const tickValues: number[] = [];
+    for (let i = 0; i <= this.gridSteps; i++) {
+      tickValues.push(min + (totalRange / this.gridSteps) * i);
+    }
 
     if (orientation === 'vertical') {
       if (reverse) {
         // Vertical-reverse: values increase downward from top
         return svg`
-          ${Array.from({ length: this.gridSteps + 1 }, (_, i) => {
-            const value = (max / this.gridSteps) * i;
-            const y = padding.top + (value / max) * chartHeight;
+          ${tickValues.map(value => {
+            const y = padding.top + ((value - min) / totalRange) * chartHeight;
             return svg`
               <text
                 x="${padding.left - 10}"
@@ -796,9 +962,8 @@ export abstract class AxisChart extends BaseChart {
       } else {
         // Standard vertical: values increase upward from bottom
         return svg`
-          ${Array.from({ length: this.gridSteps + 1 }, (_, i) => {
-            const value = (max / this.gridSteps) * i;
-            const y = this.height - padding.bottom - (value / max) * chartHeight;
+          ${tickValues.map(value => {
+            const y = this.height - padding.bottom - ((value - min) / totalRange) * chartHeight;
             return svg`
               <text
                 x="${padding.left - 10}"
@@ -817,9 +982,8 @@ export abstract class AxisChart extends BaseChart {
       if (reverse) {
         // Horizontal-reverse: values increase from right to left
         return svg`
-          ${Array.from({ length: this.gridSteps + 1 }, (_, i) => {
-            const value = (max / this.gridSteps) * i;
-            const x = this.width - padding.right - (value / max) * chartWidth;
+          ${tickValues.map(value => {
+            const x = this.width - padding.right - ((value - min) / totalRange) * chartWidth;
             return svg`
               <text
                 x="${x}"
@@ -836,9 +1000,8 @@ export abstract class AxisChart extends BaseChart {
       } else {
         // Standard horizontal: values increase from left to right
         return svg`
-          ${Array.from({ length: this.gridSteps + 1 }, (_, i) => {
-            const value = (max / this.gridSteps) * i;
-            const x = padding.left + (value / max) * chartWidth;
+          ${tickValues.map(value => {
+            const x = padding.left + ((value - min) / totalRange) * chartWidth;
             return svg`
               <text
                 x="${x}"

@@ -491,6 +491,54 @@ Settings cascade from chart to element with explicit settings taking precedence:
 
 See [`examples/axes.html`](examples/axes.html) for comprehensive examples of all `show-*` attribute features.
 
+### Negative Values
+
+Bar, line, and bubble charts support negative values with automatic axis scaling and intuitive visual positioning.
+
+**Basic usage:**
+```html
+<!-- Bars extend downward for negative values -->
+<dc-chart width="600" height="400">
+  <dc-bar value="50" label="Q1"></dc-bar>
+  <dc-bar value="-30" label="Q2"></dc-bar>
+  <dc-bar value="25" label="Q3"></dc-bar>
+  <dc-bar value="-10" label="Q4"></dc-bar>
+</dc-chart>
+```
+
+**Automatic features:**
+- Zero line appears when range spans positive and negative values
+- Axis labels include negative values with proper formatting
+- All-negative charts position the category axis at top (where zero is)
+
+**Color positive/negative values with palettes:**
+```html
+<dc-palette id="profit-loss">
+  <dc-fill max-value="0" fill="#F44336"></dc-fill>  <!-- Negative: red -->
+  <dc-fill min-value="0" fill="#4CAF50"></dc-fill>  <!-- Positive: green -->
+</dc-palette>
+
+<dc-chart palette="profit-loss" width="600" height="400">
+  <dc-title>Profit/Loss by Quarter</dc-title>
+  <dc-bar value="50" label="Q1"></dc-bar>
+  <dc-bar value="-30" label="Q2"></dc-bar>
+  <dc-bar value="25" label="Q3"></dc-bar>
+</dc-chart>
+```
+
+**Line charts crossing zero:**
+```html
+<dc-chart width="600" height="400">
+  <dc-line stroke="#2196F3" label="Temperature">
+    <dc-point value="5" label="6am"></dc-point>
+    <dc-point value="-2" label="Midnight"></dc-point>
+    <dc-point value="8" label="Noon"></dc-point>
+  </dc-line>
+</dc-chart>
+```
+
+See [`examples/barcharts.html`](examples/barcharts.html) for comprehensive negative value examples.
+
 ### Number Formatting
 
 Control how numeric values are displayed using the `value-format` and `percent-format` attributes. Supports named presets and a subset of d3-format syntax.

@@ -1,6 +1,6 @@
 import { customElement, property } from 'lit/decorators.js';
 import { svg, SVGTemplateResult } from 'lit';
-import { AxisChart } from './axis-chart.js';
+import { AxisChart, type ValueRange } from './axis-chart.js';
 import { type ShowCondition, type FocusableElement } from './base-chart.js';
 import { analyzeLines, analyzeBars, analyzeBubbles, type LineData as InsightLineData, type BarData as InsightBarData, type BubbleData as InsightBubbleData } from './accessibility/index.js';
 import type { LegendItem, DimensionlessLegendItem } from './chart-legend.js';
@@ -320,13 +320,28 @@ export class Chart extends AxisChart {
     const barMax = this.getBarMaxValue();
     const lineMax = this.getLineMaxValue();
     const bubbleMax = this.getBubbleMaxValue();
-    return Math.max(barMax, lineMax, bubbleMax, 1);
+    return Math.max(barMax, lineMax, bubbleMax);
+  }
+
+  protected getMinValue(): number {
+    const barMin = this.getBarMinValue();
+    const lineMin = this.getLineMinValue();
+    const bubbleMin = this.getBubbleMinValue();
+    // Return the minimum, but don't go below 0 if all values are positive
+    return Math.min(barMin, lineMin, bubbleMin);
   }
 
   private getBarMaxValue(): number {
     const bars = this.getFlattenedBars();
     if (bars.length === 0) return 0;
     return Math.max(...bars.map(b => b.value));
+  }
+
+  private getBarMinValue(): number {
+    const bars = this.getFlattenedBars();
+    if (bars.length === 0) return 0;
+    // Return min of all bar values, but cap at 0 (we don't extend into positive if all positive)
+    return Math.min(...bars.map(b => b.value), 0);
   }
 
   private getLineMaxValue(): number {
@@ -336,10 +351,23 @@ export class Chart extends AxisChart {
     return Math.max(...allValues);
   }
 
+  private getLineMinValue(): number {
+    const lines = this.getLines();
+    const allValues = lines.flatMap(line => line.points.map(p => p.value));
+    if (allValues.length === 0) return 0;
+    return Math.min(...allValues, 0);
+  }
+
   private getBubbleMaxValue(): number {
     const bubbles = this.getBubbles();
     if (bubbles.length === 0) return 0;
     return Math.max(...bubbles.map(b => b.value));
+  }
+
+  private getBubbleMinValue(): number {
+    const bubbles = this.getBubbles();
+    if (bubbles.length === 0) return 0;
+    return Math.min(...bubbles.map(b => b.value), 0);
   }
 
   protected getAllValues(): number[] {
@@ -829,9 +857,14 @@ export class Chart extends AxisChart {
       return super.getAxisLabelPadding();
     }
 
-    const maxValue = this.getNiceMax();
-    const maxValueStr = maxValue.toFixed(0);
-    const maxValueWidth = this.measureText(maxValueStr, 11) + 15;
+    const range = this.getNiceRange();
+    // Measure both min and max to find widest (important for negative values)
+    const maxValueStr = this.formatValue(range.max);
+    const minValueStr = this.formatValue(range.min);
+    const maxValueWidth = Math.max(
+      this.measureText(maxValueStr, 11),
+      this.measureText(minValueStr, 11)
+    ) + 15;
 
     const hasGroups = structure.some(item => item.isGroup);
     const labelLines = this.getLabelLinesCount();
@@ -860,7 +893,10 @@ export class Chart extends AxisChart {
       const longestGroupLabelWidth = hasGroups
         ? Math.max(...structure.filter(s => s.isGroup).map(s => this.measureText((s as BarGroupData).label, 13))) + 20
         : 0;
-      const valueWidth = this.measureText(maxValueStr, 14) + 15;
+      const valueWidth = Math.max(
+        this.measureText(maxValueStr, 14),
+        this.measureText(minValueStr, 14)
+      ) + 15;
 
       return {
         top: (topAxisTitle?.height || 0) + bubbleTopPadding,
@@ -1095,12 +1131,15 @@ export class Chart extends AxisChart {
     index: number,
     orientation: 'vertical' | 'horizontal',
     rect: { x: number; y: number; width: number; height: number },
-    max: number,
+    range: ValueRange | number,
     chartSize: number,
     total: number,
     reverse = false
   ): SVGTemplateResult {
     if (bar.segments && bar.segments.length > 0) {
+      // For segmented bars, extract max for legacy calculation
+      // (negative segments in stacked bars is future work)
+      const max = typeof range === 'number' ? range : range.max;
       return this.renderSegmentedBar(bar, index, orientation, rect, max, chartSize, total, reverse);
     }
 
@@ -1258,15 +1297,15 @@ export class Chart extends AxisChart {
     const padding = this.getChartPadding();
     const chartWidth = this.width - padding.left - padding.right;
     const chartHeight = this.height - padding.top - padding.bottom;
-    const max = this.getNiceMax();
+    const range = this.getNiceRange();
     const allValues = this.getAllValues();
-    const total = allValues.reduce((sum, v) => sum + v, 0);
+    const total = allValues.reduce((sum, v) => sum + Math.abs(v), 0);  // Use absolute values for total
 
     // Log layout info
     this.log('info', 'data.barCount', `Number of bars`, bars.length);
     this.log('info', 'data.lineCount', `Number of lines`, lines.length);
     this.log('info', 'data.bubbleCount', `Number of bubbles`, bubbles.length);
-    this.log('info', 'data.maxValue', `Maximum value`, max);
+    this.log('info', 'data.range', `Value range [${range.min}, ${range.max}]`, range);
     this.log('info', 'layout.chartArea', `chartWidth=${chartWidth.toFixed(1)}, chartHeight=${chartHeight.toFixed(1)}`, { width: chartWidth, height: chartHeight });
 
     const isHorizontal = this.orientation.startsWith('horizontal');
@@ -1279,16 +1318,16 @@ export class Chart extends AxisChart {
       ${this.renderDefs()}
 
       <!-- Grid lines -->
-      ${this.renderGridLines(padding, chartWidth, chartHeight, max, isHorizontal ? 'horizontal' : 'vertical')}
+      ${this.renderGridLines(padding, chartWidth, chartHeight, range, isHorizontal ? 'horizontal' : 'vertical')}
 
       <!-- Bars -->
-      ${bars.length > 0 ? this.renderBars(bars, structure, padding, chartWidth, chartHeight, max, total, deferredLabels) : ''}
+      ${bars.length > 0 ? this.renderBars(bars, structure, padding, chartWidth, chartHeight, range, total, deferredLabels) : ''}
 
       <!-- Bubbles (rendered after bars but before lines) -->
-      ${bubbles.length > 0 ? this.renderBubbles(bubbles, padding, chartWidth, chartHeight, max, total, deferredLabels) : ''}
+      ${bubbles.length > 0 ? this.renderBubbles(bubbles, padding, chartWidth, chartHeight, range, total, deferredLabels) : ''}
 
       <!-- Lines (rendered on top of shapes) -->
-      ${lines.length > 0 ? this.renderLines(lines, padding, chartWidth, chartHeight, max, total, deferredLabels) : ''}
+      ${lines.length > 0 ? this.renderLines(lines, padding, chartWidth, chartHeight, range, total, deferredLabels) : ''}
 
       <!-- Value labels (rendered last, on top of everything) -->
       ${deferredLabels.map(label => svg`
@@ -1302,18 +1341,18 @@ export class Chart extends AxisChart {
       `)}
 
       <!-- Axes -->
-      ${this.renderAxes(padding, isHorizontal ? 'horizontal' : 'vertical', isReverse)}
+      ${this.renderAxes(padding, isHorizontal ? 'horizontal' : 'vertical', isReverse, range)}
 
       <!-- Value axis labels -->
       ${this.renderValueAxisLabels(
-        padding, chartWidth, chartHeight, max,
+        padding, chartWidth, chartHeight, range,
         isHorizontal ? 'horizontal' : 'vertical',
         isReverse,
         this.getAxisElement(isHorizontal ? 'bottom' : 'left')?.valueFormat
       )}
 
       <!-- Category axis labels -->
-      ${this.renderCategoryAxisLabels(bars, lines, bubbles, padding, chartWidth, chartHeight, structure)}
+      ${this.renderCategoryAxisLabels(bars, lines, bubbles, padding, chartWidth, chartHeight, structure, range)}
 
       <!-- Axis Titles -->
       ${this.renderAxisTitle('left', padding, chartWidth, chartHeight)}
@@ -1338,7 +1377,7 @@ export class Chart extends AxisChart {
     padding: { top: number; right: number; bottom: number; left: number },
     chartWidth: number,
     chartHeight: number,
-    max: number,
+    range: ValueRange,
     total: number,
     deferredLabels: DeferredLabel[]
   ): SVGTemplateResult {
@@ -1346,9 +1385,9 @@ export class Chart extends AxisChart {
     const isReverse = this.orientation.includes('reverse');
 
     if (isHorizontal) {
-      return this.renderHorizontalBars(bars, structure, padding, chartWidth, chartHeight, max, total, isReverse, deferredLabels);
+      return this.renderHorizontalBars(bars, structure, padding, chartWidth, chartHeight, range, total, isReverse, deferredLabels);
     } else {
-      return this.renderVerticalBars(bars, structure, padding, chartWidth, chartHeight, max, total, isReverse, deferredLabels);
+      return this.renderVerticalBars(bars, structure, padding, chartWidth, chartHeight, range, total, isReverse, deferredLabels);
     }
   }
 
@@ -1358,12 +1397,27 @@ export class Chart extends AxisChart {
     padding: { top: number; right: number; bottom: number; left: number },
     chartWidth: number,
     chartHeight: number,
-    max: number,
+    range: ValueRange,
     total: number,
     reverse: boolean,
     deferredLabels: DeferredLabel[]
   ): SVGTemplateResult {
     const { unitSizes: finalUnitWidths } = this.calculateUnitDimensions(structure, chartWidth);
+    const { min, max } = range;
+    const totalRange = max - min;
+
+    // Calculate zero line Y position
+    // For normal orientation:
+    //   - all-positive: zero is at bottom (this.height - padding.bottom)
+    //   - all-negative: zero is at top (padding.top)
+    //   - mixed: zero is proportionally positioned
+    // For reverse orientation:
+    //   - all-positive: zero is at top (padding.top)
+    //   - all-negative: zero is at bottom (this.height - padding.bottom)
+    //   - mixed: zero is proportionally positioned (inverted)
+    const zeroY = reverse
+      ? padding.top + ((0 - min) / totalRange) * chartHeight
+      : this.height - padding.bottom - ((0 - min) / totalRange) * chartHeight;
 
     let barIndex = 0;
     let unitIndex = 0;
@@ -1371,8 +1425,33 @@ export class Chart extends AxisChart {
 
     return svg`
       ${bars.map((bar, index) => {
-        const barHeight = (bar.value / max) * chartHeight;
-        const y = reverse ? padding.top : this.height - padding.bottom - barHeight;
+        const isNegative = bar.value < 0;
+        const barHeightRaw = (Math.abs(bar.value) / totalRange) * chartHeight;
+
+        let y: number;
+        let barHeight: number;
+
+        if (reverse) {
+          // Reverse orientation: flip the logic
+          if (isNegative) {
+            y = zeroY - barHeightRaw;
+            barHeight = barHeightRaw;
+          } else {
+            y = zeroY;
+            barHeight = barHeightRaw;
+          }
+        } else {
+          // Normal orientation
+          if (isNegative) {
+            // Negative bar: starts at zero line, extends downward
+            y = zeroY;
+            barHeight = barHeightRaw;
+          } else {
+            // Positive bar: ends at zero line, extends upward
+            y = zeroY - barHeightRaw;
+            barHeight = barHeightRaw;
+          }
+        }
 
         const currentUnit = structure[unitIndex];
         const currentUnitWidth = finalUnitWidths[unitIndex];
@@ -1416,16 +1495,20 @@ export class Chart extends AxisChart {
           unitIndex++;
         }
 
-        const percent = total > 0 ? (bar.value / total) * 100 : 0;
+        const percent = total > 0 ? (Math.abs(bar.value) / total) * 100 : 0;
         const shouldShowValue = this.evaluateShowCondition(bar.showValue, bar.value, percent);
         const shouldShowPercent = this.evaluateShowCondition(bar.showPercent, bar.value, percent);
         const valueString = this.formatValueString(bar.value, percent, shouldShowValue, shouldShowPercent, bar.valueFormat);
 
         // Defer label rendering to ensure it appears on top of lines
         if (valueString) {
+          // Position label above positive bars, below negative bars
+          const labelY = isNegative
+            ? (reverse ? y - 8 : y + barHeight + 15)
+            : (reverse ? y + barHeight + 15 : y - 8);
           deferredLabels.push({
             x: x + barWidth / 2,
-            y: reverse ? y + barHeight + 15 : y - 8,
+            y: labelY,
             text: valueString,
             anchor: 'middle',
             fontSize: 14
@@ -1433,7 +1516,7 @@ export class Chart extends AxisChart {
         }
 
         return svg`
-          ${this.renderBarContent(bar, index, 'vertical', { x, y, width: barWidth, height: barHeight }, max, chartHeight, total, reverse)}
+          ${this.renderBarContent(bar, index, 'vertical', { x, y, width: barWidth, height: barHeight }, range, chartHeight, total, reverse)}
         `;
       })}
     `;
@@ -1445,12 +1528,27 @@ export class Chart extends AxisChart {
     padding: { top: number; right: number; bottom: number; left: number },
     chartWidth: number,
     chartHeight: number,
-    max: number,
+    range: ValueRange,
     total: number,
     reverse: boolean,
     deferredLabels: DeferredLabel[]
   ): SVGTemplateResult {
     const { unitSizes: finalUnitHeights } = this.calculateUnitDimensions(structure, chartHeight);
+    const { min, max } = range;
+    const totalRange = max - min;
+
+    // Calculate zero line X position
+    // For normal orientation:
+    //   - all-positive: zero is at left (padding.left)
+    //   - all-negative: zero is at right (this.width - padding.right)
+    //   - mixed: zero is proportionally positioned
+    // For reverse orientation:
+    //   - all-positive: zero is at right (this.width - padding.right)
+    //   - all-negative: zero is at left (padding.left)
+    //   - mixed: zero is proportionally positioned (inverted)
+    const zeroX = reverse
+      ? this.width - padding.right - ((0 - min) / totalRange) * chartWidth
+      : padding.left + ((0 - min) / totalRange) * chartWidth;
 
     let barIndex = 0;
     let unitIndex = 0;
@@ -1458,8 +1556,33 @@ export class Chart extends AxisChart {
 
     return svg`
       ${bars.map((bar, index) => {
-        const barWidth = (bar.value / max) * chartWidth;
-        const x = reverse ? this.width - padding.right - barWidth : padding.left;
+        const isNegative = bar.value < 0;
+        const barWidthRaw = (Math.abs(bar.value) / totalRange) * chartWidth;
+
+        let x: number;
+        let barWidth: number;
+
+        if (reverse) {
+          // Reverse orientation: flip the logic
+          if (isNegative) {
+            x = zeroX;
+            barWidth = barWidthRaw;
+          } else {
+            x = zeroX - barWidthRaw;
+            barWidth = barWidthRaw;
+          }
+        } else {
+          // Normal orientation
+          if (isNegative) {
+            // Negative bar: extends leftward from zero line
+            x = zeroX - barWidthRaw;
+            barWidth = barWidthRaw;
+          } else {
+            // Positive bar: extends rightward from zero line
+            x = zeroX;
+            barWidth = barWidthRaw;
+          }
+        }
 
         const currentUnit = structure[unitIndex];
         const currentUnitHeight = finalUnitHeights[unitIndex];
@@ -1503,24 +1626,31 @@ export class Chart extends AxisChart {
           unitIndex++;
         }
 
-        const percent = total > 0 ? (bar.value / total) * 100 : 0;
+        const percent = total > 0 ? (Math.abs(bar.value) / total) * 100 : 0;
         const shouldShowValue = this.evaluateShowCondition(bar.showValue, bar.value, percent);
         const shouldShowPercent = this.evaluateShowCondition(bar.showPercent, bar.value, percent);
         const valueString = this.formatValueString(bar.value, percent, shouldShowValue, shouldShowPercent, bar.valueFormat);
 
         // Defer label rendering to ensure it appears on top of lines
         if (valueString) {
+          // Position label to the right of positive bars, left of negative bars
+          const labelX = isNegative
+            ? (reverse ? x + barWidth + 8 : x - 8)
+            : (reverse ? x - 8 : x + barWidth + 8);
+          const labelAnchor = isNegative
+            ? (reverse ? 'start' : 'end')
+            : (reverse ? 'end' : 'start');
           deferredLabels.push({
-            x: reverse ? x - 8 : x + barWidth + 8,
+            x: labelX,
             y: y + barHeight / 2 + 4,
             text: valueString,
-            anchor: reverse ? 'end' : 'start',
+            anchor: labelAnchor,
             fontSize: 14
           });
         }
 
         return svg`
-          ${this.renderBarContent(bar, index, 'horizontal', { x, y, width: barWidth, height: barHeight }, max, chartWidth, total, reverse)}
+          ${this.renderBarContent(bar, index, 'horizontal', { x, y, width: barWidth, height: barHeight }, range, chartWidth, total, reverse)}
         `;
       })}
     `;
@@ -1535,12 +1665,14 @@ export class Chart extends AxisChart {
     padding: { top: number; right: number; bottom: number; left: number },
     chartWidth: number,
     chartHeight: number,
-    max: number,
+    range: ValueRange,
     total: number,
     deferredLabels: DeferredLabel[]
   ): SVGTemplateResult {
     const isHorizontal = this.orientation.startsWith('horizontal');
     const isReverse = this.orientation.includes('reverse');
+    const { min, max } = range;
+    const totalRange = max - min;
 
     const bars = this.getFlattenedBars();
     const structure = this.getBarStructure();
@@ -1621,7 +1753,7 @@ export class Chart extends AxisChart {
 
           if (isHorizontal) {
             // Horizontal orientation: x is value-based, y is category-based
-            const valueX = (point.value / max) * chartWidth;
+            const valueX = ((point.value - min) / totalRange) * chartWidth;
             x = isReverse ? this.width - padding.right - valueX : padding.left + valueX;
 
             // Try label matching first, then fall back to index-based
@@ -1642,7 +1774,7 @@ export class Chart extends AxisChart {
                 ? padding.left + stepX / 2 + pointIndex * stepX
                 : padding.left + pointIndex * stepX;
             }
-            y = this.height - padding.bottom - (point.value / max) * chartHeight;
+            y = this.height - padding.bottom - ((point.value - min) / totalRange) * chartHeight;
           }
 
           return { x, y, ...point };
@@ -1721,17 +1853,19 @@ export class Chart extends AxisChart {
     padding: { top: number; right: number; bottom: number; left: number },
     chartWidth: number,
     chartHeight: number,
-    max: number,
+    range: ValueRange,
     total: number,
     deferredLabels: DeferredLabel[]
   ): SVGTemplateResult {
+    const { min, max } = range;
+    const totalRange = max - min;
     const maxSizeValue = Math.max(...bubbles.map(b => b.sizeValue), 1);
     const stepX = chartWidth / bubbles.length;
 
     return svg`
       ${bubbles.map((bubble, index) => {
         const x = padding.left + stepX / 2 + index * stepX;
-        const y = this.height - padding.bottom - (bubble.value / max) * chartHeight;
+        const y = this.height - padding.bottom - ((bubble.value - min) / totalRange) * chartHeight;
         const radius = this.calculateBubbleRadius(bubble.sizeValue, maxSizeValue);
 
         const bubbleHasPopup = bubble.href || bubble.popup || this.shouldShowAutoPopup(bubble.autoPopup);
@@ -1785,18 +1919,19 @@ export class Chart extends AxisChart {
     padding: { top: number; right: number; bottom: number; left: number },
     chartWidth: number,
     chartHeight: number,
-    structure: BarOrGroup[]
+    structure: BarOrGroup[],
+    range: ValueRange
   ): SVGTemplateResult {
     const isHorizontal = this.orientation.startsWith('horizontal');
     const isReverse = this.orientation.includes('reverse');
 
     // Determine labels and positions
     if (bars.length > 0) {
-      return this.renderBarCategoryLabels(bars, structure, padding, chartWidth, chartHeight, isHorizontal, isReverse);
+      return this.renderBarCategoryLabels(bars, structure, padding, chartWidth, chartHeight, isHorizontal, isReverse, range);
     } else if (lines.length > 0 && lines[0].points.length > 0) {
-      return this.renderLineCategoryLabels(lines[0].points, padding, chartWidth);
+      return this.renderLineCategoryLabels(lines[0].points, padding, chartWidth, range);
     } else if (bubbles.length > 0) {
-      return this.renderBubbleCategoryLabels(bubbles, padding, chartWidth);
+      return this.renderBubbleCategoryLabels(bubbles, padding, chartWidth, range);
     }
 
     return svg``;
@@ -1809,9 +1944,13 @@ export class Chart extends AxisChart {
     chartWidth: number,
     chartHeight: number,
     isHorizontal: boolean,
-    isReverse: boolean
+    isReverse: boolean,
+    range: ValueRange
   ): SVGTemplateResult {
     const { unitSizes } = this.calculateUnitDimensions(structure, isHorizontal ? chartHeight : chartWidth);
+    // For all-negative vertical charts, position labels at top (where zero is)
+    const allNegative = !range.hasPositives;
+    const labelsAtTop = !isHorizontal && !isReverse && allNegative;
 
     if (isHorizontal) {
       // Horizontal bars: labels on the left (or right if reverse)
@@ -1932,7 +2071,8 @@ export class Chart extends AxisChart {
 
           if (!bar.label || !this.shouldShowLabel(index, bars.length)) return '';
 
-          const labelY = isReverse
+          // Position at top for reverse OR all-negative charts
+          const labelY = (isReverse || labelsAtTop)
             ? padding.top - 8 - this.getLabelLineOffset(index)
             : this.height - padding.bottom + 20 + this.getLabelLineOffset(index);
 
@@ -1956,7 +2096,8 @@ export class Chart extends AxisChart {
 
             if (!item.isGroup) return '';
 
-            const labelY = isReverse
+            // Position at top for reverse OR all-negative charts
+            const labelY = (isReverse || labelsAtTop)
               ? padding.top - 28
               : this.height - padding.bottom + 40;
 
@@ -1977,19 +2118,26 @@ export class Chart extends AxisChart {
   private renderLineCategoryLabels(
     points: PointData[],
     padding: { top: number; right: number; bottom: number; left: number },
-    chartWidth: number
+    chartWidth: number,
+    range: ValueRange
   ): SVGTemplateResult {
     const stepX = chartWidth / (points.length - 1 || 1);
+    // For all-negative charts, position labels at top (where zero is)
+    const labelsAtTop = !range.hasPositives;
 
     return svg`
       ${points.map((point, index) => {
         const x = padding.left + index * stepX;
         if (!point.label || !this.shouldShowLabel(index, points.length)) return '';
 
+        const labelY = labelsAtTop
+          ? padding.top - 8 - this.getLabelLineOffset(index)
+          : this.height - padding.bottom + 20 + this.getLabelLineOffset(index);
+
         return svg`
           <text
             x="${x}"
-            y="${this.height - padding.bottom + 20 + this.getLabelLineOffset(index)}"
+            y="${labelY}"
             text-anchor="middle"
             font-size="12" fill="#666"
           >${point.label}</text>
@@ -2001,19 +2149,26 @@ export class Chart extends AxisChart {
   private renderBubbleCategoryLabels(
     bubbles: BubbleData[],
     padding: { top: number; right: number; bottom: number; left: number },
-    chartWidth: number
+    chartWidth: number,
+    range: ValueRange
   ): SVGTemplateResult {
     const stepX = chartWidth / bubbles.length;
+    // For all-negative charts, position labels at top (where zero is)
+    const labelsAtTop = !range.hasPositives;
 
     return svg`
       ${bubbles.map((bubble, index) => {
         const x = padding.left + stepX / 2 + index * stepX;
         if (!bubble.label || !this.shouldShowLabel(index, bubbles.length)) return '';
 
+        const labelY = labelsAtTop
+          ? padding.top - 8 - this.getLabelLineOffset(index)
+          : this.height - padding.bottom + 20 + this.getLabelLineOffset(index);
+
         return svg`
           <text
             x="${x}"
-            y="${this.height - padding.bottom + 20 + this.getLabelLineOffset(index)}"
+            y="${labelY}"
             text-anchor="middle"
             font-size="12" fill="#666"
           >${bubble.label}</text>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubble Charts - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+</head>
+<body>
+    <h1>Bubble Chart Examples</h1>
+    <p>Bubble charts display data points with variable sizes based on a second value dimension</p>
+
+    <nav>
+        <div class="nav-major">
+            <a href="../index.html">Home</a>
+            <a href="barcharts.html">Bar Charts</a>
+            <a href="linecharts.html">Line Charts</a>
+            <a href="bubblecharts.html" class="current">Bubble Charts</a>
+            <a href="piecharts.html">Pie Charts</a>
+            <a href="funnelcharts.html">Funnel Charts</a>
+        </div>
+        <div class="nav-minor">
+            <a href="titles.html">Titles</a>
+            <a href="legends.html">Legends</a>
+            <a href="axes.html">Axes</a>
+            <a href="colors.html">Colors</a>
+            <a href="palettes.html">Palettes</a>
+            <a href="typography.html">Typography</a>
+            <a href="borders-and-padding.html">Borders & Padding</a>
+            <a href="bar-groups.html">Bar Groups</a>
+            <a href="bar-width.html">Bar Width</a>
+            <a href="gutter.html">Gutter</a>
+            <a href="interactive.html">Interactive</a>
+            <a href="popups.html">Popups</a>
+            <a href="logging.html">Logging</a>
+            <a href="htmx-integration.html">htmx</a>
+            <a href="accessibility.html">Accessibility</a>
+        </div>
+    </nav>
+
+    <div class="example">
+        <h2>Basic Bubble Charts</h2>
+        <p>Bubble charts use <code>&lt;dc-bubble&gt;</code> elements with <code>value</code> for vertical position and <code>size-value</code> for bubble size. Labels appear on the category axis.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Simple Bubbles</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Project Metrics&lt;/dc-title&gt;
+  &lt;dc-bubble value="75" size-value="40" label="Alpha"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="50" size-value="80" label="Beta"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="90" size-value="25" label="Gamma"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="35" size-value="60" label="Delta"&gt;&lt;/dc-bubble&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Project Metrics</dc-title>
+                    <dc-bubble value="75" size-value="40" label="Alpha"></dc-bubble>
+                    <dc-bubble value="50" size-value="80" label="Beta"></dc-bubble>
+                    <dc-bubble value="90" size-value="25" label="Gamma"></dc-bubble>
+                    <dc-bubble value="35" size-value="60" label="Delta"></dc-bubble>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Colored Bubbles</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Market Segments&lt;/dc-title&gt;
+  &lt;dc-bubble value="60" size-value="50" label="Enterprise"
+    fill="#2196F3"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="45" size-value="70" label="SMB"
+    fill="#4CAF50"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="80" size-value="30" label="Startup"
+    fill="#FF9800"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="25" size-value="45" label="Consumer"
+    fill="#9C27B0"&gt;&lt;/dc-bubble&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Market Segments</dc-title>
+                    <dc-bubble value="60" size-value="50" label="Enterprise" fill="#2196F3"></dc-bubble>
+                    <dc-bubble value="45" size-value="70" label="SMB" fill="#4CAF50"></dc-bubble>
+                    <dc-bubble value="80" size-value="30" label="Startup" fill="#FF9800"></dc-bubble>
+                    <dc-bubble value="25" size-value="45" label="Consumer" fill="#9C27B0"></dc-bubble>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Bubble Size Scaling</h2>
+        <p>The <code>size-value</code> attribute determines bubble area (not radius), ensuring accurate visual comparison. Larger values create proportionally larger bubbles.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Varying Sizes</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" fill-colors="#3b82f6"&gt;
+  &lt;dc-title&gt;Revenue by Product&lt;/dc-title&gt;
+  &lt;dc-bubble value="70" size-value="100" label="Product A"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="55" size-value="50" label="Product B"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="85" size-value="25" label="Product C"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="40" size-value="75" label="Product D"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="65" size-value="10" label="Product E"&gt;&lt;/dc-bubble&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" fill-colors="#3b82f6">
+                    <dc-title>Revenue by Product</dc-title>
+                    <dc-bubble value="70" size-value="100" label="Product A"></dc-bubble>
+                    <dc-bubble value="55" size-value="50" label="Product B"></dc-bubble>
+                    <dc-bubble value="85" size-value="25" label="Product C"></dc-bubble>
+                    <dc-bubble value="40" size-value="75" label="Product D"></dc-bubble>
+                    <dc-bubble value="65" size-value="10" label="Product E"></dc-bubble>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>With Legend</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Team Performance&lt;/dc-title&gt;
+  &lt;dc-bubble value="85" size-value="60" label="Engineering"
+    fill="#6366f1"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="70" size-value="40" label="Design"
+    fill="#f59e0b"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="60" size-value="80" label="Marketing"
+    fill="#10b981"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-legend position="right"&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Team Performance</dc-title>
+                    <dc-bubble value="85" size-value="60" label="Engineering" fill="#6366f1"></dc-bubble>
+                    <dc-bubble value="70" size-value="40" label="Design" fill="#f59e0b"></dc-bubble>
+                    <dc-bubble value="60" size-value="80" label="Marketing" fill="#10b981"></dc-bubble>
+                    <dc-legend position="right"></dc-legend>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Negative Values</h2>
+        <p>Bubble charts support negative values on the y-axis. The zero line appears when the range spans both positive and negative values.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Mixed Positive and Negative</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Profit/Loss by Region&lt;/dc-title&gt;
+  &lt;dc-bubble value="45" size-value="60" label="North"
+    fill="#4CAF50"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="-20" size-value="40" label="South"
+    fill="#F44336"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="30" size-value="50" label="East"
+    fill="#4CAF50"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="-35" size-value="70" label="West"
+    fill="#F44336"&gt;&lt;/dc-bubble&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Profit/Loss by Region</dc-title>
+                    <dc-bubble value="45" size-value="60" label="North" fill="#4CAF50"></dc-bubble>
+                    <dc-bubble value="-20" size-value="40" label="South" fill="#F44336"></dc-bubble>
+                    <dc-bubble value="30" size-value="50" label="East" fill="#4CAF50"></dc-bubble>
+                    <dc-bubble value="-35" size-value="70" label="West" fill="#F44336"></dc-bubble>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Palette-Based Coloring</h3>
+                <p>Use palettes with value ranges to automatically color bubbles based on their value:</p>
+                <pre><code>&lt;dc-palette id="bubble-profit-loss"&gt;
+  &lt;dc-fill max-value="0" fill="#EF5350"&gt;&lt;/dc-fill&gt;
+  &lt;dc-fill min-value="0" fill="#66BB6A"&gt;&lt;/dc-fill&gt;
+&lt;/dc-palette&gt;
+&lt;dc-chart palette="bubble-profit-loss" width="500" height="350"&gt;
+  &lt;dc-title&gt;Quarterly Performance&lt;/dc-title&gt;
+  &lt;dc-bubble value="25" size-value="50" label="Q1"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="-15" size-value="35" label="Q2"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="40" size-value="65" label="Q3"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="-5" size-value="25" label="Q4"&gt;&lt;/dc-bubble&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-palette id="bubble-profit-loss">
+                    <dc-fill max-value="0" fill="#EF5350"></dc-fill>
+                    <dc-fill min-value="0" fill="#66BB6A"></dc-fill>
+                </dc-palette>
+                <dc-chart palette="bubble-profit-loss" width="500" height="350">
+                    <dc-title>Quarterly Performance</dc-title>
+                    <dc-bubble value="25" size-value="50" label="Q1"></dc-bubble>
+                    <dc-bubble value="-15" size-value="35" label="Q2"></dc-bubble>
+                    <dc-bubble value="40" size-value="65" label="Q3"></dc-bubble>
+                    <dc-bubble value="-5" size-value="25" label="Q4"></dc-bubble>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+</body>
+</html>
