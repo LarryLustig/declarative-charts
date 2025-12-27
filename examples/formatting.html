@@ -119,6 +119,20 @@
                 <td>&euro;1,234.56</td>
             </tr>
             <tr>
+                <td><code>currency USD compact</code></td>
+                <td>compact currency</td>
+                <td>2 sig digits</td>
+                <td>1234567</td>
+                <td>$1.2M</td>
+            </tr>
+            <tr>
+                <td><code>currency EUR compact 1</code></td>
+                <td>compact, 1 sig digit</td>
+                <td>-</td>
+                <td>1234567</td>
+                <td>&euro;1M</td>
+            </tr>
+            <tr>
                 <td><code>percent</code></td>
                 <td>decimals</td>
                 <td>1</td>
@@ -227,6 +241,19 @@
                     <dc-bar value="52000000" label="Q2"></dc-bar>
                     <dc-bar value="48000000" label="Q3"></dc-bar>
                     <dc-bar value="61000000" label="Q4"></dc-bar>
+                </dc-chart>
+            </div>
+            <div>
+                <h3>Compact Currency</h3>
+                <pre><code>&lt;dc-chart width="500" height="300" value-format="currency USD compact"&gt;
+    &lt;dc-bar value="1250000" label="Revenue"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="875000" label="Expenses"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="375000" label="Profit"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="300" value-format="currency USD compact">
+                    <dc-bar value="1250000" label="Revenue"></dc-bar>
+                    <dc-bar value="875000" label="Expenses"></dc-bar>
+                    <dc-bar value="375000" label="Profit"></dc-bar>
                 </dc-chart>
             </div>
             <div>

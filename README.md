@@ -506,6 +506,8 @@ Control how numeric values are displayed using the `value-format` and `percent-f
 | `compact 1` | 1234567 | 1M |
 | `currency USD` | 1234.56 | $1,234.56 |
 | `currency EUR` | 1234.56 | €1,234.56 |
+| `currency USD compact` | 1234567 | $1.2M |
+| `currency EUR compact 1` | 1234567 | €1M |
 | `percent` | 0.456 | 45.6% |
 | `percent 0` | 0.456 | 46% |
 

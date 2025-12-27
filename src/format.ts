@@ -16,6 +16,8 @@ export interface ParsedFormat {
   // For presets
   preset?: FormatPreset;
   presetArg?: string;
+  compact?: boolean;           // compact modifier (e.g., "currency USD compact")
+  compactPrecision?: number;   // sig digits for compact (default 2)
 
   // For d3-format
   prefix?: string;
@@ -47,6 +49,12 @@ const D3_FORMAT_REGEX = /^(\$)?(,)?(?:\.(\d+))?([fs%])?$/;
 /**
  * Parse a format string into its components.
  * Handles both preset compound syntax and d3-format strings.
+ *
+ * Preset syntax: "preset [arg] [compact [precision]]"
+ * Examples:
+ *   - "currency USD" → currency with USD
+ *   - "currency USD compact" → compact currency with USD, default precision
+ *   - "currency EUR compact 1" → compact currency with EUR, 1 sig digit
  */
 export function parseFormat(format: string): ParsedFormat {
   const trimmed = format.trim();
@@ -57,11 +65,31 @@ export function parseFormat(format: string): ParsedFormat {
 
   // Check if it's a preset
   if (PRESET_NAMES.has(firstToken as FormatPreset)) {
-    return {
+    const result: ParsedFormat = {
       type: 'preset',
       preset: firstToken as FormatPreset,
-      presetArg: parts[1], // May be undefined
     };
+
+    // Parse remaining tokens
+    let i = 1;
+
+    // First non-"compact" token is the preset arg (e.g., "USD", "2")
+    if (parts[i] && parts[i].toLowerCase() !== 'compact') {
+      result.presetArg = parts[i];
+      i++;
+    }
+
+    // Check for "compact" modifier
+    if (parts[i]?.toLowerCase() === 'compact') {
+      result.compact = true;
+      i++;
+      // Optional precision after "compact"
+      if (parts[i] && /^\d+$/.test(parts[i])) {
+        result.compactPrecision = parseInt(parts[i], 10);
+      }
+    }
+
+    return result;
   }
 
   // Try to parse as d3-format
@@ -115,14 +143,16 @@ export class NumberFormatter {
     const parsed = parseFormat(format);
 
     if (parsed.type === 'preset') {
-      return this.formatPreset(value, parsed.preset!, parsed.presetArg);
+      return this.formatPreset(value, parsed);
     }
 
     return this.formatD3(value, parsed);
   }
 
   /** Format using a named preset */
-  private formatPreset(value: number, preset: FormatPreset, arg?: string): string {
+  private formatPreset(value: number, parsed: ParsedFormat): string {
+    const { preset, presetArg: arg, compact, compactPrecision } = parsed;
+
     switch (preset) {
       case 'number': {
         const decimals = arg !== undefined ? parseInt(arg, 10) : 2;
@@ -136,6 +166,9 @@ export class NumberFormatter {
 
       case 'currency': {
         const currencyCode = arg || 'USD';
+        if (compact) {
+          return this.formatCompactCurrency(value, currencyCode, compactPrecision ?? 2);
+        }
         return this.formatCurrency(value, currencyCode);
       }
 
@@ -239,6 +272,22 @@ export class NumberFormatter {
     } catch {
       // Fallback for invalid currency code
       return '$' + this.formatFixed(value, 2, true);
+    }
+  }
+
+  /** Format as compact currency (e.g., $1.2M, €1,2 Mio.) */
+  private formatCompactCurrency(value: number, currencyCode: string, precision: number): string {
+    try {
+      return new Intl.NumberFormat(this.locale, {
+        style: 'currency',
+        currency: currencyCode,
+        notation: 'compact',
+        maximumSignificantDigits: precision + 1,
+        minimumSignificantDigits: 1,
+      }).format(value);
+    } catch {
+      // Fallback: use SI format with $ prefix
+      return '$' + this.formatSI(value, precision);
     }
   }
 }
