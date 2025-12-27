@@ -187,7 +187,9 @@ Always use `this.measureText(text, fontSize)` for text widths. Never estimate wi
 
 ## Testing
 
-Unit tests use **Vitest** (Vite-native test framework). Tests live in `test/unit/`.
+Tests use **Vitest** (Vite-native test framework) with two environments:
+- **Unit tests** (`test/unit/`): Node environment, pure functions
+- **Component tests** (`test/component/`): happy-dom environment, DOM-dependent code
 
 ### Files with Test Coverage
 
@@ -229,10 +231,37 @@ When adding new utility functions or modules:
 - Data analysis functions (statistics, trends)
 - Pure transformation functions
 
-**Not suitable for unit tests (need component tests later):**
+**Not suitable for unit tests (use component tests):**
 - Lit component rendering
-- DOM manipulation
+- DOM manipulation (querySelector, etc.)
 - Event handlers
+
+### Component Tests
+
+Component tests run in happy-dom and can test DOM-dependent code:
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { fixture, elementUpdated } from './setup';
+import '../../src/chart-palette';
+import { ChartPalette } from '../../src/chart-palette';
+
+describe('ChartPalette component', () => {
+  it('queries child elements', async () => {
+    const palette = await fixture<ChartPalette>(
+      'dc-palette',
+      {},
+      '<dc-fill fill="#ff0000" label="Red"></dc-fill>'
+    );
+    expect(palette.getFills()).toHaveLength(1);
+  });
+});
+```
+
+The setup file (`test/component/setup.ts`) provides:
+- `fixture<T>(tagName, attributes, innerHTML)` - creates and mounts elements
+- `elementUpdated(element)` - waits for Lit update cycle
+- Canvas context mock for `measureText()`
 
 ### Test Syntax Quick Reference
 
@@ -279,7 +308,7 @@ src/
 └── index.ts                # Exports
 
 test/
-├── unit/
+├── unit/                   # Pure function tests (node environment)
 │   ├── format.test.ts      # Tests for src/format.ts
 │   ├── insights.test.ts    # Tests for src/accessibility/insights.ts
 │   ├── patterns.test.ts    # Tests for src/patterns.ts
@@ -288,7 +317,10 @@ test/
 │   ├── chart-legend.test.ts # Tests for src/chart-legend.ts
 │   ├── chart-axis.test.ts  # Tests for src/chart-axis.ts
 │   └── chart-palette.test.ts # Tests for src/chart-palette.ts
-└── (future: components/, integration/, visual/)
+├── component/              # DOM-dependent tests (happy-dom environment)
+│   ├── setup.ts            # Test setup with mocks
+│   └── chart-palette.test.ts # Component tests for palette
+└── (future: integration/, visual/)
 
 examples/                   # Example pages (use examples.css, examples.js)
 test-charts/                # Visual test matrices for legend/title positions
