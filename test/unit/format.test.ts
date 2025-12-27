@@ -518,3 +518,91 @@ describe('formatNumber convenience function', () => {
     expect(formatNumber(0.456, 'percent 0', { locale: 'en-US' })).toBe('46%');
   });
 });
+
+describe('NumberFormatter fallbacks', () => {
+  // Test fallback behavior when Intl.NumberFormat throws
+  // This covers catch blocks at lines 222, 235, 259, 274, 290
+  // Note: Line 181 (default case in formatPreset) is unreachable because
+  // parseFormat only returns valid preset names from PRESET_NAMES set.
+
+  it('formatFixed falls back to toFixed when Intl throws', () => {
+    const formatter = new NumberFormatter({ locale: 'en-US' });
+    const originalNumberFormat = Intl.NumberFormat;
+
+    // Mock Intl.NumberFormat to throw
+    (Intl as { NumberFormat: unknown }).NumberFormat = function() {
+      throw new Error('Intl not supported');
+    };
+
+    try {
+      const result = formatter.format(1234.56, 'number 2');
+      expect(result).toBe('1234.56');
+    } finally {
+      (Intl as { NumberFormat: unknown }).NumberFormat = originalNumberFormat;
+    }
+  });
+
+  it('formatPercent falls back to manual calculation when Intl throws', () => {
+    const formatter = new NumberFormatter({ locale: 'en-US' });
+    const originalNumberFormat = Intl.NumberFormat;
+
+    (Intl as { NumberFormat: unknown }).NumberFormat = function() {
+      throw new Error('Intl not supported');
+    };
+
+    try {
+      const result = formatter.format(0.456, 'percent 1');
+      expect(result).toBe('45.6%');
+    } finally {
+      (Intl as { NumberFormat: unknown }).NumberFormat = originalNumberFormat;
+    }
+  });
+
+  it('formatSI falls back to toFixed when Intl throws', () => {
+    const formatter = new NumberFormatter({ locale: 'en-US' });
+    const originalNumberFormat = Intl.NumberFormat;
+
+    (Intl as { NumberFormat: unknown }).NumberFormat = function() {
+      throw new Error('Intl not supported');
+    };
+
+    try {
+      const result = formatter.format(1500000, 'compact 2');
+      expect(result).toBe('1.50M');
+    } finally {
+      (Intl as { NumberFormat: unknown }).NumberFormat = originalNumberFormat;
+    }
+  });
+
+  it('formatCurrency falls back to $ prefix when Intl throws', () => {
+    const formatter = new NumberFormatter({ locale: 'en-US' });
+    const originalNumberFormat = Intl.NumberFormat;
+
+    (Intl as { NumberFormat: unknown }).NumberFormat = function() {
+      throw new Error('Intl not supported');
+    };
+
+    try {
+      const result = formatter.format(1234.56, 'currency USD');
+      expect(result).toBe('$1234.56');
+    } finally {
+      (Intl as { NumberFormat: unknown }).NumberFormat = originalNumberFormat;
+    }
+  });
+
+  it('formatCompactCurrency falls back to SI format when Intl throws', () => {
+    const formatter = new NumberFormatter({ locale: 'en-US' });
+    const originalNumberFormat = Intl.NumberFormat;
+
+    (Intl as { NumberFormat: unknown }).NumberFormat = function() {
+      throw new Error('Intl not supported');
+    };
+
+    try {
+      const result = formatter.format(1500000, 'currency USD compact 2');
+      expect(result).toBe('$1.50M');
+    } finally {
+      (Intl as { NumberFormat: unknown }).NumberFormat = originalNumberFormat;
+    }
+  });
+});
