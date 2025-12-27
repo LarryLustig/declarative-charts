@@ -2,170 +2,25 @@
 
 Future enhancements planned for the declarative chart library, organized by priority for a v1.0 release.
 
+For completed features, see [CHANGELOG.md](CHANGELOG.md).
+
 ---
 
 ## Phase 1: Foundation (Critical for Release)
 
 ### Accessibility
 
-**Status:** ✅ Complete
-**Priority:** Critical
+**Status:** Complete
 
-**Problem:** The library renders SVG charts without proper accessibility attributes, making them unusable for screen reader users and inaccessible via keyboard navigation.
-
-#### Completed
-
-The following accessibility features have been implemented:
-
-1. **ARIA Labels on Charts** ✓
-   - `role="img"` added to the root SVG element
-   - `aria-label` attribute with chart type and title (e.g., "Bar chart: Sales Data")
-   - `aria-describedby` pointing to a `<desc>` element inside the SVG
-   - Auto-generated descriptions when no explicit description provided
-
-2. **Auto-Insights (Intelligent Description Generation)** ✓
-   - Automatically analyzes chart data to generate meaningful descriptions
-   - Goes beyond raw statistics to describe trends, comparisons, and patterns
-   - Implemented for all chart types: bar, line, bubble, pie, funnel
-   - `aria-insights` attribute controls insight level: `'auto'` (default), `'basic'`, `'none'`
-   - `aria-label` and `aria-description` attributes for manual overrides
-
-3. **Screen Reader Support** ✓
-   - SVG `<desc>` element contains full chart description
-   - Charts announce type, title, data summary, and insights
-   - Example: "4 bars, values from 38 to 95. Q4 highest at 95; Q3 lowest at 38"
-
-4. **Keyboard Navigation** ✓
-   - All chart types support full keyboard navigation using roving tabindex pattern
-   - Tab to focus chart, arrow keys to navigate between data elements
-   - Enter/Space to activate elements (follow links, toggle popups)
-   - Escape to close popups and exit keyboard navigation
-   - Home/End to jump to first/last element
-   - Visual focus indicator (blue dashed rectangle) appears during keyboard navigation
-   - Hover-triggered popups show automatically when element receives focus
-
-5. **High Contrast Mode** ✓
-   - Respects `prefers-contrast: high` media query for automatic activation
-   - `high-contrast` attribute to force high contrast mode
-   - WCAG AA compliant color palette with 8 distinct colors
-   - Automatic pattern assignment for visual distinction beyond color
-   - Custom high-contrast palettes via `<dc-palette high-contrast>`
-
-6. **Pattern Fills** ✓
-   - 8 built-in SVG pattern types: diagonal-lines, diagonal-lines-reverse, horizontal-lines, vertical-lines, dots, crosshatch, grid, checkerboard
-   - Direct pattern application via `pattern` attribute on elements
-   - Pattern definitions in palettes with `<dc-fill>` elements
-   - Pattern ID references for reusable pattern definitions
-   - Label-based and value-based pattern matching in palettes
-   - Customizable pattern stroke, fill, and scale
-
-**Files created/modified:**
-- `src/accessibility/insights.ts` - Statistical analysis functions
-- `src/accessibility/index.ts` - Accessibility module exports
-- `src/base-chart.ts` - ARIA properties, description generation, keyboard navigation, pattern resolution, high contrast detection
-- `src/chart.ts`, `src/pie-chart.ts`, `src/funnel-chart.ts` - Chart-specific `getInsights()` and `getFocusableElements()` implementations
-- `src/patterns.ts` - SVG pattern definitions and high contrast color palette
-- `src/chart-fill.ts` - `<dc-fill>` element for color/pattern definitions
-- `src/chart-palette.ts` - `<dc-palette>` container with pattern lookup
-- `examples/accessibility.html` - Comprehensive examples and screen reader testing guide
-- `examples/patterns.html` - Pattern fills and high contrast mode examples
+ARIA labels, auto-insights, keyboard navigation, pattern fills, and high contrast mode have been implemented for all chart types.
 
 ---
 
 ### Number Formatting
 
-**Status:** Not Started
-**Priority:** Critical
+**Status:** Complete
 
-**Problem:** Values display as raw numbers (e.g., "1234567.89"). Users need formatted output like "1,234,567.89", "$1.2M", or "45.5%".
-
-**Requirements:**
-
-1. **Thousand Separators**
-   - Locale-aware formatting (1,234 vs 1.234)
-   - Default to user's locale
-
-2. **Currency Formatting**
-   - Currency symbol placement ($100 vs 100$)
-   - Decimal places control
-
-3. **Abbreviations**
-   - K (thousands), M (millions), B (billions)
-   - Configurable threshold
-
-4. **Percentage Formatting**
-   - Decimal places control (45% vs 45.5% vs 45.50%)
-
-5. **Custom Formats**
-   - Format string or function support
-
-**Proposed API:**
-```html
-<!-- Chart-level formatting (applies to all values) -->
-<dc-chart value-format="$,.2f">
-  <dc-bar value="1234567.89" label="Revenue"></dc-bar>  <!-- Shows: $1,234,567.89 -->
-</dc-chart>
-
-<!-- Abbreviations -->
-<dc-chart value-format="$.2s">
-  <dc-bar value="1234567" label="Revenue"></dc-bar>  <!-- Shows: $1.2M -->
-</dc-chart>
-
-<!-- Element-level override -->
-<dc-chart value-format=",.0f">
-  <dc-bar value="1500" label="Units"></dc-bar>  <!-- Shows: 1,500 -->
-  <dc-bar value="2300.50" label="Special" value-format="$,.2f"></dc-bar>  <!-- Shows: $2,300.50 -->
-</dc-chart>
-
-<!-- Percentage formatting -->
-<dc-pie-chart percent-format=".1%">
-  <dc-pie-slice value="45" label="A"></dc-pie-slice>  <!-- Shows: 45.0% instead of 45% -->
-</dc-pie-chart>
-
-<!-- Axis value formatting -->
-<dc-chart>
-  <dc-axis position="left" value-format="$,.0f"></dc-axis>
-  ...
-</dc-chart>
-```
-
-**Format String Syntax:**
-Use d3-format compatible syntax for familiarity:
-- `,` - Thousand separator
-- `.Nf` - N decimal places (fixed)
-- `.Ns` - N significant digits with SI prefix (K, M, G)
-- `$` - Currency prefix
-- `%` - Multiply by 100 and add % suffix
-
-Common presets:
-- `",.0f"` → 1,234
-- `",.2f"` → 1,234.56
-- `"$,.2f"` → $1,234.56
-- `".2s"` → 1.2K, 1.2M
-- `"$.2s"` → $1.2M
-- `".1%"` → 45.5%
-
-**Implementation Notes:**
-- Create `src/format.ts` utility module
-- Implement subset of d3-format (don't need full library)
-- Add `valueFormat` and `percentFormat` properties to `BaseChart`
-- Add `valueFormat` property to shape elements for override
-- Add `valueFormat` property to `ChartAxis` for axis labels
-- Modify `formatValue()` and `formatPercent()` methods to use formatter
-- Consider Intl.NumberFormat for locale-aware defaults
-
-**Files to Modify:**
-- Create `src/format.ts` - Format parsing and number formatting utilities
-- `src/base-chart.ts` - Add `valueFormat`, `percentFormat` properties and methods
-- `src/axis-chart.ts` - Apply formatting to axis value labels
-- `src/chart-axis.ts` - Add `valueFormat` property
-- All shape elements - Add `valueFormat` property for override
-- `src/chart-legend.ts` - Apply formatting to legend values
-
-**Testing:**
-- Unit tests for format parsing
-- Unit tests for various number inputs
-- Locale testing (en-US, de-DE, etc.)
+Named presets (`number`, `currency`, `compact`, `percent`) and d3-format subset support. See [CHANGELOG.md](CHANGELOG.md) for details.
 
 ---
 
@@ -239,12 +94,6 @@ Common presets:
 - Add `zero-line-color` and `zero-line-width` attributes
 - Handle edge cases: all positive, all negative, mixed
 
-**Files to Modify:**
-- `src/axis-chart.ts` - Modify `getMaxValue()` or add `getMinValue()`, update axis rendering
-- `src/chart.ts` - Update bar positioning to handle negative values
-- `src/chart-bar.ts` - Add `negativeFill` property
-- `src/base-chart.ts` - Add `negativeFill` chart-level property
-
 **Visual Design:**
 ```
      100 ─┼────────────────
@@ -258,14 +107,6 @@ Common presets:
          └──────────────────
            Q1    Q2
 ```
-
-**Testing:**
-- All positive values (should work as before)
-- All negative values
-- Mixed positive/negative
-- Single bar crossing zero
-- Stacked bars with negative segments
-- Line charts crossing zero multiple times
 
 ---
 
@@ -289,7 +130,7 @@ Common presets:
    - `tick-values` - Explicit tick positions (e.g., "0, 50, 100, 150")
 
 3. **Formatting**
-   - `value-format` - Format string for axis labels (see Number Formatting feature)
+   - `value-format` - Format string for axis labels (already implemented)
 
 4. **Grid Lines**
    - `show-grid` - Boolean to show/hide grid lines (default: true)
@@ -315,12 +156,6 @@ Common presets:
   <dc-axis position="left" tick-values="0, 50, 75, 100"></dc-axis>
 </dc-chart>
 
-<!-- Formatted axis labels -->
-<dc-chart>
-  <dc-axis position="left" value-format="$,.0f"></dc-axis>
-  <!-- Shows: $0, $25, $50, etc. -->
-</dc-chart>
-
 <!-- Grid styling -->
 <dc-chart>
   <dc-axis position="left" show-grid grid-color="#eee" grid-style="dashed"></dc-axis>
@@ -332,18 +167,6 @@ Common presets:
   <!-- If data ranges 23-87, axis might show 20-90 -->
 </dc-chart>
 ```
-
-**Implementation Notes:**
-- Add properties to `ChartAxis`: `minValue`, `maxValue`, `tickCount`, `tickInterval`, `tickValues`, `valueFormat`, `showGrid`, `gridColor`, `gridStyle`
-- Implement "nice" tick calculation (round numbers like 0, 25, 50, 75, 100)
-- Modify `AxisChart.renderAxes()` to use axis configuration
-- When `max-value` is set, clip bars that exceed it (or show overflow indicator)
-- `min-value` with positive value creates a "broken axis" effect
-
-**Files to Modify:**
-- `src/chart-axis.ts` - Add new properties
-- `src/axis-chart.ts` - Read axis config, apply to scale calculations and rendering
-- `src/chart.ts` - Respect axis bounds when rendering bars/lines
 
 **Algorithm for Nice Ticks:**
 ```typescript
@@ -401,7 +224,7 @@ function calculateNiceTicks(min: number, max: number, targetCount: number): numb
 
 4. **Documentation Files**
    - LICENSE file (MIT)
-   - CHANGELOG.md
+   - CHANGELOG.md (created)
    - CONTRIBUTING.md
 
 **Proposed package.json Updates:**
@@ -459,21 +282,12 @@ function calculateNiceTicks(min: number, max: number, targetCount: number): numb
 
 **Implementation Notes:**
 - Create LICENSE file with MIT license text
-- Create CHANGELOG.md with initial release notes
 - Create CONTRIBUTING.md with contribution guidelines
 - Update vite.config.ts to generate proper builds
 - Add `prepublishOnly` script to run build
 - Add `.npmignore` or use `files` in package.json
 - Test with `npm pack` before publishing
 - Consider scoped package name (@yourorg/declarative-charts) to avoid conflicts
-
-**Files to Create/Modify:**
-- Create `LICENSE`
-- Create `CHANGELOG.md`
-- Create `CONTRIBUTING.md`
-- Modify `package.json`
-- Modify `vite.config.ts` if needed for builds
-- Update `README.md` with installation instructions
 
 ---
 
@@ -531,18 +345,6 @@ function calculateNiceTicks(min: number, max: number, targetCount: number): numb
   </dc-line>
 </dc-chart>
 ```
-
-**Implementation Notes:**
-- Add `fill`, `fillOpacity`, `fillStartColor`, `fillEndColor` properties to `ChartLine`
-- When line has fill, render `<path>` for area before rendering line stroke
-- Area path: starts at first point, follows line, drops to zero, returns to start
-- For stacked: each line's baseline is the previous line's values
-- Create SVG `<linearGradient>` for gradient fills
-
-**Files to Modify:**
-- `src/chart-line.ts` - Add fill properties
-- `src/chart.ts` - Render area paths, implement stacking logic
-- `src/base-chart.ts` - Add `stacked` property if shared across chart types
 
 ---
 
@@ -609,21 +411,6 @@ function calculateNiceTicks(min: number, max: number, targetCount: number): numb
 - **Pie Chart**: `spin` (rotate in), `expand` (grow from center), `fade`
 - **Funnel Chart**: `cascade` (top-down reveal), `fade`
 
-**Implementation Notes:**
-- Use CSS transitions where possible for performance
-- For complex animations (line drawing), use SVG `stroke-dasharray` animation
-- Store previous values for transition calculations
-- Use `requestAnimationFrame` for JavaScript-driven animations
-- Check `window.matchMedia('(prefers-reduced-motion: reduce)')` on init
-- Add `animation` property to `BaseChart`
-
-**Files to Modify:**
-- `src/base-chart.ts` - Add animation properties, reduced motion check
-- `src/chart.ts` - Bar/line animation implementation
-- `src/pie-chart.ts` - Pie animation implementation
-- `src/funnel-chart.ts` - Funnel animation implementation
-- Add CSS transitions in component styles
-
 ---
 
 ### Date/Time Axis
@@ -684,22 +471,6 @@ function calculateNiceTicks(min: number, max: number, targetCount: number): numb
 </dc-chart>
 ```
 
-**Implementation Notes:**
-- Add `type` property to `ChartAxis` ("category" default, "time", "value")
-- When `type="time"`, parse labels as dates and calculate X positions based on time
-- Implement smart tick selection based on time range:
-  - < 1 day: hours
-  - < 1 month: days
-  - < 1 year: months
-  - \> 1 year: years
-- Use `Intl.DateTimeFormat` for locale-aware formatting
-- Handle timezone considerations (display in local time by default)
-
-**Files to Modify:**
-- `src/chart-axis.ts` - Add `type`, `dateFormat`, `dateLabelFormat` properties
-- `src/axis-chart.ts` - Time-based positioning calculations
-- Create `src/date-utils.ts` - Date parsing and formatting utilities
-
 ---
 
 ### Empty State Handling
@@ -757,18 +528,6 @@ function calculateNiceTicks(min: number, max: number, targetCount: number): numb
 </dc-chart>
 ```
 
-**Implementation Notes:**
-- Add `emptyMessage`, `loading`, `hideWhenEmpty` properties to `BaseChart`
-- Check for empty data in `render()` before calling `renderChart()`
-- Render centered text/icon for empty state
-- Add CSS animation for loading spinner
-- Create `<dc-loading>` element for custom loading content
-
-**Files to Modify:**
-- `src/base-chart.ts` - Empty detection, empty/loading state rendering
-- Create `src/chart-loading.ts` - Loading element component
-- Add default empty state styles
-
 ---
 
 ### Error Handling & Validation
@@ -807,18 +566,6 @@ function calculateNiceTicks(min: number, max: number, targetCount: number): numb
   Element: <dc-bar value="abc" label="Test">
   Docs: https://docs.example.com/errors/DC001
 ```
-
-**Implementation Notes:**
-- Create `src/validation.ts` with validation utilities
-- Define error codes and messages catalog
-- Add validation in `updated()` lifecycle or property setters
-- Use `console.warn()` with structured messages
-- Add `strict` attribute to throw errors instead of warnings
-
-**Files to Modify:**
-- Create `src/validation.ts` - Validation utilities and error catalog
-- `src/base-chart.ts` - Add validation framework
-- All element classes - Add property validation
 
 ---
 
@@ -877,25 +624,13 @@ test/
     └── snapshots/
 ```
 
-**Implementation Notes:**
-- Add Vitest and @open-wc/testing to devDependencies
-- Add test scripts to package.json
-- Set up CI pipeline (GitHub Actions)
-- Use test-charts/ as basis for visual tests
-- Aim for >80% code coverage
-
-**Files to Create:**
-- `vitest.config.ts`
-- `test/` directory structure
-- `.github/workflows/test.yml` for CI
-
 ---
 
 ## Phase 3: Feature Parity
 
 ### Custom Legends
 
-**Status:** Planned (from original roadmap)
+**Status:** Planned
 **Priority:** Important
 
 **Problem:** The current legend auto-generates entries from data elements. This doesn't work well for charts using semantic coloring where the same color appears on multiple bars with different labels.
@@ -934,17 +669,6 @@ test/
 - When no children, fall back to current auto-generation behavior
 - Support both `fill` (for bars/shapes) and `stroke` (for lines) attributes
 - Optional `shape` attribute: `"square"` (default), `"circle"`, `"line"`
-
-**Implementation Notes:**
-- Create `ChartLegendItem` element class with `fill`, `stroke`, `label`, `shape` properties
-- Modify `ChartLegend.generateSvg()` to check for explicit items first
-- If explicit items exist, use them; otherwise auto-generate
-- Consider hybrid mode in future: auto-generate some, add custom ones
-
-**Files to Create/Modify:**
-- Create `src/chart-legend-item.ts`
-- Modify `src/chart-legend.ts`
-- Update `src/index.ts` exports
 
 ---
 
@@ -986,17 +710,6 @@ test/
   <dc-bar value="120" label="Q4"></dc-bar>
 </dc-chart>
 ```
-
-**Implementation Notes:**
-- Create `ChartReferenceLine` element with `value` (for Y position) or `position` (for X position/category)
-- Create `ChartReferenceBand` element with `minValue`, `maxValue`
-- Render as SVG `<line>` or `<rect>` in chart's `renderChart()` method
-- Render after grid lines but before data elements
-- Add label positioning (left, right, inline)
-
-**Files to Create:**
-- `src/chart-reference-line.ts`
-- `src/chart-reference-band.ts`
 
 ---
 
@@ -1121,16 +834,16 @@ test/
 
 ### Documentation Improvements
 
-**Status:** Partially Complete (README exists)
+**Status:** Partially Complete
 **Priority:** Important for 1.0
 
 **Required:**
 - [ ] LICENSE file (MIT text)
-- [ ] CHANGELOG.md (keep-a-changelog format)
-- [ ] CONTRIBUTING.md (how to contribute, code style, PR process)
+- [x] CHANGELOG.md
+- [ ] CONTRIBUTING.md
 - [ ] Browser compatibility table in README
 - [ ] Bundle size documentation
-- [ ] Performance guidelines (how many elements before slowdown)
+- [ ] Performance guidelines
 
 **Nice-to-Have:**
 - [ ] Documentation website (VitePress or Docusaurus)
@@ -1186,6 +899,6 @@ function MyChart({ data }) {
 
 | Version | Status | Key Features |
 |---------|--------|--------------|
-| 0.x | Current | Bar, Line, Bubble, Pie, Funnel charts; Legends; Titles; Popups; Palettes; ARIA labels & auto-insights; Keyboard navigation; Pattern fills; High contrast mode |
-| 1.0 | Planned | Number formatting; Negative values; Axis config; npm publish |
+| 0.x | Current | Bar, Line, Bubble, Pie, Funnel charts; Legends; Titles; Popups; Palettes; Accessibility (ARIA, keyboard nav, patterns, high contrast); Number formatting |
+| 1.0 | Planned | Negative values; Axis config; npm publish |
 | 1.x | Future | Area charts; Animations; Date axis; More chart types |

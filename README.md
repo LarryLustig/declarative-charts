@@ -1653,9 +1653,6 @@ Most chart libraries require complex configuration objects. This library lets yo
 
 MIT
 
-## Next Steps
+## Roadmap
 
-- Add more chart types (scatter, area, etc.)
-- Add animations and transitions
-- Add axis customization options (min/max values, tick intervals)
-- Publish to npm
+See [ROADMAP.md](ROADMAP.md) for planned features including additional chart types, animations, axis configuration, and npm publishing.
