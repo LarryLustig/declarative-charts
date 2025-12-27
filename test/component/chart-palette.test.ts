@@ -277,7 +277,7 @@ describe('ChartPalette component', () => {
   // ============================================================================
 
   describe('lookup with patterns', () => {
-    it('returns pattern info for patterned fills', async () => {
+    it('returns pattern info for patterned fills matched by label', async () => {
       palette = await fixture<ChartPalette>(
         'dc-palette',
         {},
@@ -302,6 +302,68 @@ describe('ChartPalette component', () => {
       expect(result.pattern?.scale).toBe(1.5);
     });
 
+    it('returns pattern info for patterned fills matched by value', async () => {
+      palette = await fixture<ChartPalette>(
+        'dc-palette',
+        {},
+        `
+        <dc-fill
+          max-value="30"
+          fill="#fee2e2"
+          stroke="#dc2626"
+          pattern="crosshatch"
+          scale="1.2"
+        ></dc-fill>
+        <dc-fill
+          min-value="30"
+          fill="#dcfce7"
+        ></dc-fill>
+        `
+      );
+
+      // Value 25 should match the first fill (pattern + value range)
+      const result = palette.lookup(undefined, 25);
+      expect(result.fill).toBe('#fee2e2');
+      expect(result.stroke).toBe('#dc2626');
+      expect(result.pattern).toBeDefined();
+      expect(result.pattern?.type).toBe('crosshatch');
+      expect(result.pattern?.stroke).toBe('#dc2626');
+      expect(result.pattern?.fill).toBe('#fee2e2');
+      expect(result.pattern?.scale).toBe(1.2);
+    });
+
+    it('pattern + value match takes priority over solid + value match', async () => {
+      palette = await fixture<ChartPalette>(
+        'dc-palette',
+        {},
+        `
+        <dc-fill max-value="50" fill="#solid" stroke="#solidstroke"></dc-fill>
+        <dc-fill max-value="50" fill="#pattern" stroke="#patternstroke" pattern="dots"></dc-fill>
+        `
+      );
+
+      // Pattern + value should match before solid + value (based on priority in lookup)
+      const result = palette.lookup(undefined, 25);
+      expect(result.fill).toBe('#pattern');
+      expect(result.pattern?.type).toBe('dots');
+    });
+
+    it('pattern + value match takes priority over pattern + label match', async () => {
+      palette = await fixture<ChartPalette>(
+        'dc-palette',
+        {},
+        `
+        <dc-fill label="Test" fill="#bylabel" pattern="grid"></dc-fill>
+        <dc-fill max-value="100" fill="#byvalue" pattern="dots"></dc-fill>
+        `
+      );
+
+      // When both label and value provided, pattern + value should match first
+      const result = palette.lookup('Test', 50);
+      expect(result.fill).toBe('#byvalue');
+      expect(result.pattern?.type).toBe('dots');
+    });
+
     it('returns pattern without optional properties', async () => {
       palette = await fixture<ChartPalette>(
         'dc-palette',
@@ -314,6 +376,18 @@ describe('ChartPalette component', () => {
       expect(result.pattern?.stroke).toBe('#000');
       expect(result.pattern?.fill).toBeUndefined();
       expect(result.pattern?.scale).toBeUndefined();
+    });
+
+    it('pattern uses default stroke when not specified', async () => {
+      palette = await fixture<ChartPalette>(
+        'dc-palette',
+        {},
+        `<dc-fill max-value="100" fill="#fff" pattern="diagonal-lines"></dc-fill>`
+      );
+
+      const result = palette.lookup(undefined, 50);
+      expect(result.pattern?.type).toBe('diagonal-lines');
+      expect(result.pattern?.stroke).toBe('#000'); // default stroke
     });
   });
 
