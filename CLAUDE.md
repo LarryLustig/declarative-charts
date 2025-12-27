@@ -197,6 +197,9 @@ Unit tests use **Vitest** (Vite-native test framework). Tests live in `test/unit
 | `src/accessibility/insights.ts` | `test/unit/insights.test.ts` | 97% |
 | `src/patterns.ts` | `test/unit/patterns.test.ts` | 100% |
 | `src/axis-chart.ts` (scale functions) | `test/unit/axis-scales.test.ts` | 22% (scale calcs only) |
+| `src/chart-fill.ts` | `test/unit/chart-fill.test.ts` | 96% |
+| `src/chart-legend.ts` (utilities) | `test/unit/chart-legend.test.ts` | 11% (type guard, warnings) |
+| `src/chart-axis.ts` | `test/unit/chart-axis.test.ts` | 52% (parsing, position) |
 
 ### ⚠️ REQUIRED: Update Tests When Modifying Covered Files
 
@@ -260,12 +263,13 @@ src/
 ├── funnel-chart.ts         # <dc-funnel-chart>
 ├── format.ts               # NumberFormatter, presets, d3-format parsing [TESTED]
 ├── accessibility/          # Insight analysis utilities [TESTED]
-├── chart-axis.ts           # <dc-axis> configuration
+├── chart-axis.ts           # <dc-axis> configuration [TESTED]
 ├── chart-palette.ts        # <dc-palette> container
-├── chart-fill.ts           # <dc-fill> color/pattern definition
+├── chart-fill.ts           # <dc-fill> color/pattern definition [TESTED]
+├── chart-legend.ts         # <dc-legend> legend rendering [TESTED]
 ├── chart-swatch.ts         # <dc-swatch> for displaying colors
 ├── patterns.ts             # SVG pattern definitions [TESTED]
-├── chart-*.ts              # Data elements
+├── chart-*.ts              # Other data elements
 └── index.ts                # Exports
 
 test/
@@ -273,7 +277,10 @@ test/
 │   ├── format.test.ts      # Tests for src/format.ts
 │   ├── insights.test.ts    # Tests for src/accessibility/insights.ts
 │   ├── patterns.test.ts    # Tests for src/patterns.ts
-│   └── axis-scales.test.ts # Tests for axis scale calculations
+│   ├── axis-scales.test.ts # Tests for axis scale calculations
+│   ├── chart-fill.test.ts  # Tests for src/chart-fill.ts
+│   ├── chart-legend.test.ts # Tests for src/chart-legend.ts
+│   └── chart-axis.test.ts  # Tests for src/chart-axis.ts
 └── (future: components/, integration/, visual/)
 
 examples/                   # Example pages (use examples.css, examples.js)
