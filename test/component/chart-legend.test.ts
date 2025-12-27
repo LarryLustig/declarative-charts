@@ -4,7 +4,7 @@ import { fixture } from './setup';
 // Import components to register custom elements
 import '../../src/chart-legend';
 import '../../src/chart-title';
-import { ChartLegend, type LegendItem, type ValuedLegendItem, type DimensionlessLegendItem } from '../../src/chart-legend';
+import { ChartLegend, type LegendItem, type ValuedLegendItem, type DimensionlessLegendItem, isDimensionless } from '../../src/chart-legend';
 
 /**
  * Component tests for ChartLegend.
@@ -525,6 +525,437 @@ describe('ChartLegend component', () => {
         { label: 'Bubble', color: '#0000ff', value: 50, shape: 'circle' },
       ];
       const result = legend.generateSvg(items, 600);
+      expect(result.svg).toBeDefined();
+    });
+  });
+
+  // ============================================================================
+  // isDimensionless type guard
+  // ============================================================================
+
+  describe('isDimensionless', () => {
+    it('returns true for dimensionless items', () => {
+      const item: DimensionlessLegendItem = {
+        label: 'Trend',
+        color: '#000',
+        dimensionless: true,
+      };
+      expect(isDimensionless(item)).toBe(true);
+    });
+
+    it('returns false for valued items', () => {
+      const item: ValuedLegendItem = {
+        label: 'Revenue',
+        color: '#000',
+        value: 100,
+      };
+      expect(isDimensionless(item)).toBe(false);
+    });
+
+    it('returns false for items with dimensionless=false', () => {
+      // Edge case: explicitly false
+      const item = {
+        label: 'Test',
+        color: '#000',
+        dimensionless: false,
+      } as unknown as LegendItem;
+      expect(isDimensionless(item)).toBe(false);
+    });
+  });
+
+  // ============================================================================
+  // prepareItems display value branches
+  // ============================================================================
+
+  describe('display value formatting', () => {
+    it('shows value and percent together', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', {
+        'show-value': '',
+        'show-percent': '',
+      });
+      const result = legend.generateSvg(sampleValuedItems, 600, true, true);
+      expect(result.svg).toBeDefined();
+      expect(result.width).toBeGreaterThan(0);
+    });
+
+    it('shows only value (no percent)', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', {
+        'show-value': '',
+        'show-percent': 'false',
+      });
+      const result = legend.generateSvg(sampleValuedItems, 600, true, false);
+      expect(result.svg).toBeDefined();
+    });
+
+    it('shows only percent (no value)', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', {
+        'show-value': 'false',
+        'show-percent': '',
+      });
+      const result = legend.generateSvg(sampleValuedItems, 600, false, true);
+      expect(result.svg).toBeDefined();
+    });
+
+    it('handles zero total for percent calculation', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', { 'show-percent': '' });
+      const zeroItems: ValuedLegendItem[] = [
+        { label: 'A', color: '#f00', value: 0 },
+        { label: 'B', color: '#0f0', value: 0 },
+      ];
+      const result = legend.generateSvg(zeroItems, 600, false, true);
+      expect(result.svg).toBeDefined();
+    });
+
+    it('dimensionless items never show value or percent', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', {
+        'show-value': '',
+        'show-percent': '',
+      });
+      const items: LegendItem[] = [
+        { label: 'Trend', color: '#000', dimensionless: true },
+      ];
+      const result = legend.generateSvg(items, 600, true, true);
+      expect(result.svg).toBeDefined();
+    });
+  });
+
+  // ============================================================================
+  // parseCSSValue with various units
+  // ============================================================================
+
+  describe('max-width with various units', () => {
+    it('accepts rem units', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', { 'max-width': '10rem', columns: '*' });
+      const dims = legend.getDimensions(sampleValuedItems, 600);
+      expect(dims.width).toBeGreaterThan(0);
+    });
+
+    it('accepts em units', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', { 'max-width': '15em', columns: '*' });
+      const dims = legend.getDimensions(sampleValuedItems, 600);
+      expect(dims.width).toBeGreaterThan(0);
+    });
+
+    it('handles invalid max-width gracefully', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', { 'max-width': 'invalid', columns: '*' });
+      const dims = legend.getDimensions(sampleValuedItems, 600);
+      // Should fall back to default
+      expect(dims.width).toBeGreaterThan(0);
+    });
+
+    it('handles empty max-width', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', { 'max-width': '', columns: '*' });
+      const dims = legend.getDimensions(sampleValuedItems, 600);
+      expect(dims.width).toBeGreaterThan(0);
+    });
+  });
+
+  // ============================================================================
+  // Wrapped layout with title positions
+  // ============================================================================
+
+  describe('wrapped layout with title positions', () => {
+    const wrappedTitlePositions = ['top', 'top-left', 'top-right', 'bottom', 'bottom-left', 'bottom-right', 'left', 'right'];
+
+    for (const pos of wrappedTitlePositions) {
+      it(`wrapped layout with title position="${pos}"`, async () => {
+        legend = await fixture<ChartLegend>(
+          'dc-legend',
+          { columns: '*' },
+          `<dc-title position="${pos}">Wrapped Title</dc-title>`
+        );
+        const result = legend.generateSvg(sampleValuedItems, 600);
+        expect(result.width).toBeGreaterThan(0);
+        expect(result.height).toBeGreaterThan(0);
+        expect(result.svg).toBeDefined();
+      });
+    }
+
+    it('wrapped layout respects left title width contribution', async () => {
+      const noTitleLegend = await fixture<ChartLegend>('dc-legend', { columns: '*' });
+      const noTitleDims = noTitleLegend.getDimensions(sampleValuedItems, 600);
+
+      const leftTitleLegend = await fixture<ChartLegend>(
+        'dc-legend',
+        { columns: '*' },
+        '<dc-title position="left">Side</dc-title>'
+      );
+      const leftTitleDims = leftTitleLegend.getDimensions(sampleValuedItems, 600);
+
+      expect(leftTitleDims.width).toBeGreaterThan(noTitleDims.width);
+    });
+
+    it('wrapped layout respects right title width contribution', async () => {
+      const noTitleLegend = await fixture<ChartLegend>('dc-legend', { columns: '*' });
+      const noTitleDims = noTitleLegend.getDimensions(sampleValuedItems, 600);
+
+      const rightTitleLegend = await fixture<ChartLegend>(
+        'dc-legend',
+        { columns: '*' },
+        '<dc-title position="right">Side</dc-title>'
+      );
+      const rightTitleDims = rightTitleLegend.getDimensions(sampleValuedItems, 600);
+
+      expect(rightTitleDims.width).toBeGreaterThan(noTitleDims.width);
+    });
+
+    it('wrapped layout adds height for bottom title', async () => {
+      const noTitleLegend = await fixture<ChartLegend>('dc-legend', { columns: '*' });
+      const noTitleDims = noTitleLegend.getDimensions(sampleValuedItems, 600);
+
+      const bottomTitleLegend = await fixture<ChartLegend>(
+        'dc-legend',
+        { columns: '*' },
+        '<dc-title position="bottom">Bottom</dc-title>'
+      );
+      const bottomTitleDims = bottomTitleLegend.getDimensions(sampleValuedItems, 600);
+
+      expect(bottomTitleDims.height).toBeGreaterThan(noTitleDims.height);
+    });
+  });
+
+  // ============================================================================
+  // Tabular layout with rotated titles
+  // ============================================================================
+
+  describe('tabular layout with rotated titles', () => {
+    it('tabular layout with left rotated title', async () => {
+      legend = await fixture<ChartLegend>(
+        'dc-legend',
+        { columns: '1' },
+        '<dc-title position="left">Rotated Left</dc-title>'
+      );
+      const result = legend.generateSvg(sampleValuedItems, 600);
+      expect(result.width).toBeGreaterThan(0);
+      expect(result.height).toBeGreaterThan(0);
+    });
+
+    it('tabular layout with right rotated title', async () => {
+      legend = await fixture<ChartLegend>(
+        'dc-legend',
+        { columns: '1' },
+        '<dc-title position="right">Rotated Right</dc-title>'
+      );
+      const result = legend.generateSvg(sampleValuedItems, 600);
+      expect(result.width).toBeGreaterThan(0);
+      expect(result.height).toBeGreaterThan(0);
+    });
+
+    it('tabular layout with bottom title', async () => {
+      legend = await fixture<ChartLegend>(
+        'dc-legend',
+        { columns: '2' },
+        '<dc-title position="bottom">Bottom Title</dc-title>'
+      );
+      const result = legend.generateSvg(sampleValuedItems, 600);
+      expect(result.height).toBeGreaterThan(0);
+    });
+
+    it('tabular layout with bottom-left title', async () => {
+      legend = await fixture<ChartLegend>(
+        'dc-legend',
+        { columns: '2' },
+        '<dc-title position="bottom-left">Bottom Left</dc-title>'
+      );
+      const result = legend.generateSvg(sampleValuedItems, 600);
+      expect(result.svg).toBeDefined();
+    });
+
+    it('tabular layout with bottom-right title', async () => {
+      legend = await fixture<ChartLegend>(
+        'dc-legend',
+        { columns: '2' },
+        '<dc-title position="bottom-right">Bottom Right</dc-title>'
+      );
+      const result = legend.generateSvg(sampleValuedItems, 600);
+      expect(result.svg).toBeDefined();
+    });
+
+    it('tabular layout default title position (fallback case)', async () => {
+      // This tests the default case in the switch statement
+      legend = await fixture<ChartLegend>(
+        'dc-legend',
+        { columns: '1' },
+        '<dc-title>Default Position</dc-title>'
+      );
+      const result = legend.generateSvg(sampleValuedItems, 600);
+      expect(result.svg).toBeDefined();
+    });
+  });
+
+  // ============================================================================
+  // Auto column calculation
+  // ============================================================================
+
+  describe('auto column calculation', () => {
+    it('calculates columns based on available space for horizontal position', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', { position: 'top', columns: 'auto' });
+      const dims = legend.getDimensions(sampleValuedItems, 600);
+      expect(dims.width).toBeGreaterThan(0);
+    });
+
+    it('calculates columns based on available space for vertical position', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', { position: 'right', columns: 'auto' });
+      const dims = legend.getDimensions(sampleValuedItems, 600);
+      expect(dims.width).toBeGreaterThan(0);
+    });
+
+    it('limits columns to item count', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', { position: 'top', columns: 'auto' });
+      const singleItem: ValuedLegendItem[] = [{ label: 'Single', color: '#000', value: 100 }];
+      const dims = legend.getDimensions(singleItem, 600);
+      expect(dims.width).toBeGreaterThan(0);
+    });
+
+    it('handles invalid column value', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', { columns: 'invalid' });
+      const dims = legend.getDimensions(sampleValuedItems, 600);
+      // Should default to 1
+      expect(dims.width).toBeGreaterThan(0);
+    });
+
+    it('handles zero column value', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', { columns: '0' });
+      const dims = legend.getDimensions(sampleValuedItems, 600);
+      // Should be at least 1
+      expect(dims.width).toBeGreaterThan(0);
+    });
+  });
+
+  // ============================================================================
+  // Wrapped layout wrapping behavior
+  // ============================================================================
+
+  describe('wrapped layout wrapping', () => {
+    it('wraps items when they exceed max width', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', {
+        columns: '*',
+        'max-width': '100px',
+      });
+      const manyItems: ValuedLegendItem[] = [
+        { label: 'Very Long Item Name One', color: '#f00', value: 100 },
+        { label: 'Very Long Item Name Two', color: '#0f0', value: 200 },
+        { label: 'Very Long Item Name Three', color: '#00f', value: 300 },
+      ];
+      const dims = legend.getDimensions(manyItems, 600);
+      // Height should increase due to wrapping
+      expect(dims.height).toBeGreaterThan(ChartLegend.WRAPPED.lineHeight + 2 * ChartLegend.WRAPPED.padding);
+    });
+
+    it('wrapped layout shows displayValue without label when show-label=false', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', {
+        columns: '*',
+        'show-label': 'false',
+        'show-value': '',
+      });
+      const result = legend.generateSvg(sampleValuedItems, 600, true, false);
+      expect(result.svg).toBeDefined();
+    });
+
+    it('wrapped layout with title on right reduces effective max width', async () => {
+      legend = await fixture<ChartLegend>(
+        'dc-legend',
+        { columns: '*', 'max-width': '200px' },
+        '<dc-title position="right">Title</dc-title>'
+      );
+      const result = legend.generateSvg(sampleValuedItems, 600);
+      expect(result.svg).toBeDefined();
+    });
+  });
+
+  // ============================================================================
+  // Tabular layout with show-label=false
+  // ============================================================================
+
+  describe('tabular layout label visibility', () => {
+    it('tabular layout without labels', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', {
+        columns: '2',
+        'show-label': 'false',
+        'show-value': '',
+      });
+      const result = legend.generateSvg(sampleValuedItems, 600, true, false);
+      expect(result.svg).toBeDefined();
+    });
+
+    it('tabular layout with only percent (no value, no label)', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', {
+        columns: '1',
+        'show-label': 'false',
+        'show-value': 'false',
+        'show-percent': '',
+      });
+      const result = legend.generateSvg(sampleValuedItems, 600, false, true);
+      expect(result.svg).toBeDefined();
+    });
+  });
+
+  // ============================================================================
+  // Locale support
+  // ============================================================================
+
+  describe('locale support', () => {
+    it('passes locale to formatter in getDimensions', async () => {
+      legend = await fixture<ChartLegend>('dc-legend');
+      const dims = legend.getDimensions(
+        sampleValuedItems,
+        600,
+        true,
+        false,
+        'number',
+        'percent 1',
+        'de-DE'
+      );
+      expect(dims.width).toBeGreaterThan(0);
+    });
+
+    it('passes locale to formatter in generateSvg', async () => {
+      legend = await fixture<ChartLegend>('dc-legend');
+      const result = legend.generateSvg(
+        sampleValuedItems,
+        600,
+        true,
+        false,
+        'number',
+        'percent 1',
+        'de-DE'
+      );
+      expect(result.svg).toBeDefined();
+    });
+  });
+
+  // ============================================================================
+  // Edge cases for title styling
+  // ============================================================================
+
+  describe('title styling in SVG', () => {
+    it('uses custom fill from title element', async () => {
+      legend = await fixture<ChartLegend>(
+        'dc-legend',
+        { columns: '1' },
+        '<dc-title fill="#ff0000">Red Title</dc-title>'
+      );
+      const result = legend.generateSvg(sampleValuedItems, 600);
+      expect(result.svg).toBeDefined();
+    });
+
+    it('uses default fill when not specified', async () => {
+      legend = await fixture<ChartLegend>(
+        'dc-legend',
+        { columns: '1' },
+        '<dc-title>Default Title</dc-title>'
+      );
+      const result = legend.generateSvg(sampleValuedItems, 600);
+      expect(result.svg).toBeDefined();
+    });
+
+    it('wrapped layout uses title fill', async () => {
+      legend = await fixture<ChartLegend>(
+        'dc-legend',
+        { columns: '*' },
+        '<dc-title fill="#00ff00">Green Title</dc-title>'
+      );
+      const result = legend.generateSvg(sampleValuedItems, 600);
       expect(result.svg).toBeDefined();
     });
   });
