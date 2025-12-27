@@ -204,181 +204,169 @@
         </tbody>
     </table>
 
-    <h2>Chart-Level Formatting</h2>
-    <p>Use <code>value-format</code> on the chart to set the default format for all values.</p>
-
     <div class="example">
-        <h3>Currency Format</h3>
+        <h2>Chart-Level Formatting</h2>
+        <p>Use <code>value-format</code> on the chart to set the default format for all values.</p>
         <div class="grid">
-            <pre><code>&lt;dc-chart width="500" height="300" value-format="currency USD"&gt;
+            <div>
+                <h3>Currency Format</h3>
+                <pre><code>&lt;dc-chart width="500" height="300" value-format="currency USD"&gt;
     &lt;dc-bar value="1234567" label="Revenue"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="876543" label="Expenses"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="358024" label="Profit"&gt;&lt;/dc-bar&gt;
 &lt;/dc-chart&gt;</code></pre>
-            <dc-chart width="500" height="300" value-format="currency USD">
-                <dc-bar value="1234567" label="Revenue"></dc-bar>
-                <dc-bar value="876543" label="Expenses"></dc-bar>
-                <dc-bar value="358024" label="Profit"></dc-bar>
-            </dc-chart>
-        </div>
-    </div>
-
-    <div class="example">
-        <h3>Compact Format (Large Numbers)</h3>
-        <div class="grid">
-            <pre><code>&lt;dc-chart width="500" height="300" value-format="compact 1"&gt;
+                <dc-chart width="500" height="300" value-format="currency USD">
+                    <dc-bar value="1234567" label="Revenue"></dc-bar>
+                    <dc-bar value="876543" label="Expenses"></dc-bar>
+                    <dc-bar value="358024" label="Profit"></dc-bar>
+                </dc-chart>
+            </div>
+            <div>
+                <h3>Compact Format (Large Numbers)</h3>
+                <pre><code>&lt;dc-chart width="500" height="300" value-format="compact 1"&gt;
     &lt;dc-bar value="45000000" label="Q1"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="52000000" label="Q2"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="48000000" label="Q3"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="61000000" label="Q4"&gt;&lt;/dc-bar&gt;
 &lt;/dc-chart&gt;</code></pre>
-            <dc-chart width="500" height="300" value-format="compact 1">
-                <dc-bar value="45000000" label="Q1"></dc-bar>
-                <dc-bar value="52000000" label="Q2"></dc-bar>
-                <dc-bar value="48000000" label="Q3"></dc-bar>
-                <dc-bar value="61000000" label="Q4"></dc-bar>
-            </dc-chart>
-        </div>
-    </div>
-
-    <div class="example">
-        <h3>d3-format: Dollar with No Decimals</h3>
-        <div class="grid">
-            <pre><code>&lt;dc-chart width="500" height="300" value-format="$,.0f"&gt;
+                <dc-chart width="500" height="300" value-format="compact 1">
+                    <dc-bar value="45000000" label="Q1"></dc-bar>
+                    <dc-bar value="52000000" label="Q2"></dc-bar>
+                    <dc-bar value="48000000" label="Q3"></dc-bar>
+                    <dc-bar value="61000000" label="Q4"></dc-bar>
+                </dc-chart>
+            </div>
+            <div>
+                <h3>d3-format: Dollar with No Decimals</h3>
+                <pre><code>&lt;dc-chart width="500" height="300" value-format="$,.0f"&gt;
     &lt;dc-bar value="85000" label="Budget"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="72500" label="Spent"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="12500" label="Remaining"&gt;&lt;/dc-bar&gt;
 &lt;/dc-chart&gt;</code></pre>
-            <dc-chart width="500" height="300" value-format="$,.0f">
-                <dc-bar value="85000" label="Budget"></dc-bar>
-                <dc-bar value="72500" label="Spent"></dc-bar>
-                <dc-bar value="12500" label="Remaining"></dc-bar>
-            </dc-chart>
+                <dc-chart width="500" height="300" value-format="$,.0f">
+                    <dc-bar value="85000" label="Budget"></dc-bar>
+                    <dc-bar value="72500" label="Spent"></dc-bar>
+                    <dc-bar value="12500" label="Remaining"></dc-bar>
+                </dc-chart>
+            </div>
         </div>
     </div>
 
-    <h2>Axis Formatting</h2>
-    <p>Override the chart's format for axis labels using <code>value-format</code> on <code>&lt;dc-axis&gt;</code>.</p>
-
     <div class="example">
-        <h3>Compact Axis Labels</h3>
+        <h2>Axis and Legend Formatting</h2>
+        <p>Override the chart's format for axis labels and legend values using <code>value-format</code> on <code>&lt;dc-axis&gt;</code> or <code>&lt;dc-legend&gt;</code>.</p>
         <div class="grid">
-            <pre><code>&lt;dc-chart width="500" height="300" value-format="$,.0f"&gt;
+            <div>
+                <h3>Compact Axis Labels</h3>
+                <pre><code>&lt;dc-chart width="500" height="300" value-format="$,.0f"&gt;
     &lt;dc-axis position="left" value-format="compact 1"&gt;&lt;/dc-axis&gt;
     &lt;dc-bar value="2500000" label="Product A"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="1800000" label="Product B"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="3200000" label="Product C"&gt;&lt;/dc-bar&gt;
 &lt;/dc-chart&gt;</code></pre>
-            <dc-chart width="500" height="300" value-format="$,.0f">
-                <dc-axis position="left" value-format="compact 1"></dc-axis>
-                <dc-bar value="2500000" label="Product A"></dc-bar>
-                <dc-bar value="1800000" label="Product B"></dc-bar>
-                <dc-bar value="3200000" label="Product C"></dc-bar>
-            </dc-chart>
-        </div>
-    </div>
-
-    <h2>Legend Formatting</h2>
-    <p>Override the chart's format for legend values and percentages using <code>value-format</code> and <code>percent-format</code> on <code>&lt;dc-legend&gt;</code>.</p>
-
-    <div class="example">
-        <h3>Pie Chart with Formatted Legend</h3>
-        <div class="grid">
-            <pre><code>&lt;dc-pie-chart width="500" height="350" show-value show-percent&gt;
-    &lt;dc-legend position="right" value-format="currency USD" percent-format="percent 0"&gt;&lt;/dc-legend&gt;
+                <dc-chart width="500" height="300" value-format="$,.0f">
+                    <dc-axis position="left" value-format="compact 1"></dc-axis>
+                    <dc-bar value="2500000" label="Product A"></dc-bar>
+                    <dc-bar value="1800000" label="Product B"></dc-bar>
+                    <dc-bar value="3200000" label="Product C"></dc-bar>
+                </dc-chart>
+            </div>
+            <div>
+                <h3>Pie Chart with Formatted Legend</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350" show-value show-percent&gt;
+    &lt;dc-legend position="right" value-format="currency USD"
+               percent-format="percent 0"&gt;&lt;/dc-legend&gt;
     &lt;dc-pie-slice value="450000" label="North America"&gt;&lt;/dc-pie-slice&gt;
     &lt;dc-pie-slice value="280000" label="Europe"&gt;&lt;/dc-pie-slice&gt;
     &lt;dc-pie-slice value="175000" label="Asia Pacific"&gt;&lt;/dc-pie-slice&gt;
     &lt;dc-pie-slice value="95000" label="Other"&gt;&lt;/dc-pie-slice&gt;
 &lt;/dc-pie-chart&gt;</code></pre>
-            <dc-pie-chart width="500" height="350" show-value show-percent>
-                <dc-legend position="right" value-format="currency USD" percent-format="percent 0"></dc-legend>
-                <dc-pie-slice value="450000" label="North America"></dc-pie-slice>
-                <dc-pie-slice value="280000" label="Europe"></dc-pie-slice>
-                <dc-pie-slice value="175000" label="Asia Pacific"></dc-pie-slice>
-                <dc-pie-slice value="95000" label="Other"></dc-pie-slice>
-            </dc-pie-chart>
+                <dc-pie-chart width="500" height="350" show-value show-percent>
+                    <dc-legend position="right" value-format="currency USD" percent-format="percent 0"></dc-legend>
+                    <dc-pie-slice value="450000" label="North America"></dc-pie-slice>
+                    <dc-pie-slice value="280000" label="Europe"></dc-pie-slice>
+                    <dc-pie-slice value="175000" label="Asia Pacific"></dc-pie-slice>
+                    <dc-pie-slice value="95000" label="Other"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
         </div>
     </div>
 
-    <h2>Element-Level Formatting</h2>
-    <p>Override formatting for individual elements using <code>value-format</code> on bars, slices, or other elements.</p>
-
     <div class="example">
-        <h3>Mixed Formats Per Bar</h3>
+        <h2>Element-Level Formatting</h2>
+        <p>Override formatting for individual elements using <code>value-format</code> on bars, slices, or other elements.</p>
         <div class="grid">
-            <pre><code>&lt;dc-chart width="500" height="300" value-format="number 0"&gt;
+            <div>
+                <h3>Mixed Formats Per Bar</h3>
+                <pre><code>&lt;dc-chart width="500" height="300" value-format="number 0"&gt;
     &lt;dc-bar value="125000" label="Units Sold"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="4750000" label="Revenue" value-format="currency USD"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="0.38" label="Margin" value-format="percent 0"&gt;&lt;/dc-bar&gt;
 &lt;/dc-chart&gt;</code></pre>
-            <dc-chart width="500" height="300" value-format="number 0">
-                <dc-bar value="125000" label="Units Sold"></dc-bar>
-                <dc-bar value="4750000" label="Revenue" value-format="currency USD"></dc-bar>
-                <dc-bar value="0.38" label="Margin" value-format="percent 0"></dc-bar>
-            </dc-chart>
+                <dc-chart width="500" height="300" value-format="number 0">
+                    <dc-bar value="125000" label="Units Sold"></dc-bar>
+                    <dc-bar value="4750000" label="Revenue" value-format="currency USD"></dc-bar>
+                    <dc-bar value="0.38" label="Margin" value-format="percent 0"></dc-bar>
+                </dc-chart>
+            </div>
         </div>
     </div>
 
-    <h2>Locale Support</h2>
-    <p>Number formatting respects the browser's locale by default. You can override this with the <code>locale</code> attribute.</p>
-
     <div class="example">
-        <h3>German Locale</h3>
+        <h2>Locale Support</h2>
+        <p>Number formatting respects the browser's locale by default. You can override this with the <code>locale</code> attribute.</p>
         <div class="grid">
-            <pre><code>&lt;dc-chart width="500" height="300" locale="de-DE" value-format="number 2"&gt;
+            <div>
+                <h3>German Locale</h3>
+                <pre><code>&lt;dc-chart width="500" height="300" locale="de-DE" value-format="number 2"&gt;
     &lt;dc-bar value="1234.56" label="Q1"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="2345.67" label="Q2"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="3456.78" label="Q3"&gt;&lt;/dc-bar&gt;
 &lt;/dc-chart&gt;</code></pre>
-            <dc-chart width="500" height="300" locale="de-DE" value-format="number 2">
-                <dc-bar value="1234.56" label="Q1"></dc-bar>
-                <dc-bar value="2345.67" label="Q2"></dc-bar>
-                <dc-bar value="3456.78" label="Q3"></dc-bar>
-            </dc-chart>
-        </div>
-    </div>
-
-    <div class="example">
-        <h3>Euro Currency</h3>
-        <div class="grid">
-            <pre><code>&lt;dc-chart width="500" height="300" locale="de-DE" value-format="currency EUR"&gt;
+                <dc-chart width="500" height="300" locale="de-DE" value-format="number 2">
+                    <dc-bar value="1234.56" label="Q1"></dc-bar>
+                    <dc-bar value="2345.67" label="Q2"></dc-bar>
+                    <dc-bar value="3456.78" label="Q3"></dc-bar>
+                </dc-chart>
+            </div>
+            <div>
+                <h3>Euro Currency</h3>
+                <pre><code>&lt;dc-chart width="500" height="300" locale="de-DE" value-format="currency EUR"&gt;
     &lt;dc-bar value="45000" label="Budget"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="38500" label="Spent"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="6500" label="Remaining"&gt;&lt;/dc-bar&gt;
 &lt;/dc-chart&gt;</code></pre>
-            <dc-chart width="500" height="300" locale="de-DE" value-format="currency EUR">
-                <dc-bar value="45000" label="Budget"></dc-bar>
-                <dc-bar value="38500" label="Spent"></dc-bar>
-                <dc-bar value="6500" label="Remaining"></dc-bar>
-            </dc-chart>
+                <dc-chart width="500" height="300" locale="de-DE" value-format="currency EUR">
+                    <dc-bar value="45000" label="Budget"></dc-bar>
+                    <dc-bar value="38500" label="Spent"></dc-bar>
+                    <dc-bar value="6500" label="Remaining"></dc-bar>
+                </dc-chart>
+            </div>
         </div>
     </div>
 
-    <h2>Funnel Chart Formatting</h2>
     <div class="example">
-        <h3>Sales Funnel with Compact Numbers</h3>
+        <h2>Other Chart Types</h2>
+        <p>Formatting works across all chart types including funnel and line charts.</p>
         <div class="grid">
-            <pre><code>&lt;dc-funnel-chart width="500" height="350" value-format="compact 2"&gt;
+            <div>
+                <h3>Funnel with Compact Numbers</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="350" value-format="compact 2"&gt;
     &lt;dc-funnel-stage value="100000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
     &lt;dc-funnel-stage value="35000" label="Signups"&gt;&lt;/dc-funnel-stage&gt;
     &lt;dc-funnel-stage value="12000" label="Trials"&gt;&lt;/dc-funnel-stage&gt;
     &lt;dc-funnel-stage value="4500" label="Customers"&gt;&lt;/dc-funnel-stage&gt;
 &lt;/dc-funnel-chart&gt;</code></pre>
-            <dc-funnel-chart width="500" height="350" value-format="compact 2">
-                <dc-funnel-stage value="100000" label="Visitors"></dc-funnel-stage>
-                <dc-funnel-stage value="35000" label="Signups"></dc-funnel-stage>
-                <dc-funnel-stage value="12000" label="Trials"></dc-funnel-stage>
-                <dc-funnel-stage value="4500" label="Customers"></dc-funnel-stage>
-            </dc-funnel-chart>
-        </div>
-    </div>
-
-    <h2>Line Chart Formatting</h2>
-    <div class="example">
-        <h3>Stock Price with Currency Format</h3>
-        <div class="grid">
-            <pre><code>&lt;dc-chart width="500" height="300" value-format="$,.2f"&gt;
+                <dc-funnel-chart width="500" height="350" value-format="compact 2">
+                    <dc-funnel-stage value="100000" label="Visitors"></dc-funnel-stage>
+                    <dc-funnel-stage value="35000" label="Signups"></dc-funnel-stage>
+                    <dc-funnel-stage value="12000" label="Trials"></dc-funnel-stage>
+                    <dc-funnel-stage value="4500" label="Customers"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+            <div>
+                <h3>Line Chart with Currency</h3>
+                <pre><code>&lt;dc-chart width="500" height="300" value-format="$,.2f"&gt;
     &lt;dc-line label="ACME Stock"&gt;
         &lt;dc-point value="142.50" label="Mon"&gt;&lt;/dc-point&gt;
         &lt;dc-point value="145.75" label="Tue"&gt;&lt;/dc-point&gt;
@@ -387,15 +375,16 @@
         &lt;dc-point value="151.50" label="Fri"&gt;&lt;/dc-point&gt;
     &lt;/dc-line&gt;
 &lt;/dc-chart&gt;</code></pre>
-            <dc-chart width="500" height="300" value-format="$,.2f">
-                <dc-line label="ACME Stock">
-                    <dc-point value="142.50" label="Mon"></dc-point>
-                    <dc-point value="145.75" label="Tue"></dc-point>
-                    <dc-point value="143.25" label="Wed"></dc-point>
-                    <dc-point value="148.00" label="Thu"></dc-point>
-                    <dc-point value="151.50" label="Fri"></dc-point>
-                </dc-line>
-            </dc-chart>
+                <dc-chart width="500" height="300" value-format="$,.2f">
+                    <dc-line label="ACME Stock">
+                        <dc-point value="142.50" label="Mon"></dc-point>
+                        <dc-point value="145.75" label="Tue"></dc-point>
+                        <dc-point value="143.25" label="Wed"></dc-point>
+                        <dc-point value="148.00" label="Thu"></dc-point>
+                        <dc-point value="151.50" label="Fri"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
         </div>
     </div>
 

@@ -215,12 +215,41 @@ See `examples/*.html`. Key examples:
 - `accessibility.html` - ARIA, insights, keyboard navigation
 - `patterns.html` - Pattern fills, high contrast mode
 
-Key rules:
-- Include `examples.css` and `examples.js`
-- Use two-tier nav (`.nav-major` + `.nav-minor`)
-- Wrap in `<div class="example"><div class="grid">`
-- Show complete code in `<pre><code>`, then rendered chart
-- Standard size: `width="500" height="350"`
+### ⚠️ REQUIRED: Example Page Structure
+
+Example pages **must** follow this HTML structure for proper grid layout:
+
+```html
+<div class="example">
+    <h2>Section Title</h2>
+    <p>Section description...</p>
+    <div class="grid">
+        <div>
+            <h3>Example Name</h3>
+            <pre><code>&lt;dc-chart ...&gt;...&lt;/dc-chart&gt;</code></pre>
+            <dc-chart width="500" height="350">...</dc-chart>
+        </div>
+        <div>
+            <h3>Another Example</h3>
+            <pre><code>...</code></pre>
+            <dc-chart width="500" height="350">...</dc-chart>
+        </div>
+    </div>
+</div>
+```
+
+**Critical rules:**
+- Each `<div class="example">` groups related examples under one `<h2>`
+- The `<div class="grid">` contains multiple `<div>` children displayed side-by-side
+- Each grid child has: `<h3>` title, `<pre><code>` block, then the rendered chart
+- `examples.js` wraps `<pre>` in `.code-wrapper` divs - structure must account for this
+- Related examples go in ONE grid (e.g., Currency + Compact + d3-format together)
+- Standard chart size: `width="500" height="350"`
+
+**Required includes:**
+- `<link rel="stylesheet" href="examples.css">`
+- `<script src="examples.js"></script>` (at end of body)
+- Two-tier nav: `.nav-major` (chart types) + `.nav-minor` (features)
 
 ## Test Charts
 
