@@ -105,6 +105,23 @@ export const showConditionConverter = {
 export type LogLevel = 'error' | 'warning' | 'info';
 
 /**
+ * Represents a focusable element within a chart for keyboard navigation.
+ * Used by the roving tabindex pattern to manage focus between chart elements.
+ */
+export interface FocusableElement {
+  /** Unique index for this element (used for data-shape-index) */
+  index: number;
+  /** Human-readable label for screen readers */
+  label: string;
+  /** Whether this element has an associated action (href, popup, etc.) */
+  hasAction: boolean;
+  /** Optional href for link elements */
+  href?: string;
+  /** Optional popup trigger type */
+  popupTrigger?: 'hover' | 'click';
+}
+
+/**
  * A single log entry captured during chart rendering.
  */
 export interface LogEntry {
@@ -365,6 +382,24 @@ export abstract class BaseChart extends LitElement {
    */
   @property({ type: String, attribute: 'aria-label' })
   override ariaLabel: string | null = null;
+
+  // ============================================================================
+  // Keyboard Navigation State
+  // ============================================================================
+
+  /**
+   * Index of the currently focused element within the chart.
+   * -1 means no element is focused (chart level focus).
+   * Used for roving tabindex pattern.
+   */
+  @state()
+  protected focusedIndex = -1;
+
+  /**
+   * Whether keyboard navigation is currently active (chart has focus).
+   */
+  @state()
+  protected keyboardActive = false;
 
   /**
    * Custom accessible description for the chart.
@@ -1371,6 +1406,21 @@ export abstract class BaseChart extends LitElement {
       height: auto;
     }
 
+    /* Focus styles for keyboard navigation */
+    svg:focus {
+      outline: 2px solid #005fcc;
+      outline-offset: 2px;
+    }
+
+    svg:focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    svg:focus-visible {
+      outline: 2px solid #005fcc;
+      outline-offset: 2px;
+    }
+
     .popup {
       position: absolute;
       background: rgba(0, 0, 0, 0.9);
@@ -1555,6 +1605,9 @@ export abstract class BaseChart extends LitElement {
     const ariaLabelValue = this.getAriaLabel();
     const descriptionContent = this.generateAccessibilityDescription();
 
+    // Check if chart has focusable elements for keyboard navigation
+    const hasFocusableElements = this.getFocusableElements().length > 0;
+
     return html`
       <svg
         viewBox="0 0 ${this.width} ${this.height}"
@@ -1563,10 +1616,15 @@ export abstract class BaseChart extends LitElement {
         role="img"
         aria-label="${ariaLabelValue}"
         aria-describedby="${descriptionContent ? this.descriptionId : ''}"
+        tabindex="${hasFocusableElements ? 0 : -1}"
+        @keydown="${this.handleChartKeyDown}"
+        @focus="${this.handleChartFocus}"
+        @blur="${this.handleChartBlur}"
       >
         ${descriptionContent ? svg`<desc id="${this.descriptionId}">${descriptionContent}</desc>` : ''}
         ${this.renderTitle()}
         ${this.renderChart()}
+        ${this.renderFocusIndicator()}
       </svg>
       <div
         class="popup ${this.popupVisible ? 'visible' : ''}"
@@ -2039,6 +2097,267 @@ export abstract class BaseChart extends LitElement {
 
   // ============================================================================
   // End Accessibility Methods
+  // ============================================================================
+
+  // ============================================================================
+  // Keyboard Navigation Methods
+  // ============================================================================
+
+  /**
+   * Get the list of focusable elements in this chart.
+   * Override in subclasses to return chart-specific focusable elements.
+   * Elements should be returned in logical navigation order.
+   *
+   * @returns Array of focusable elements, or empty array if none
+   */
+  protected getFocusableElements(): FocusableElement[] {
+    return [];
+  }
+
+  /**
+   * Handle keyboard events on the chart SVG.
+   * Implements roving tabindex navigation pattern.
+   */
+  protected handleChartKeyDown(e: KeyboardEvent): void {
+    const focusable = this.getFocusableElements();
+    if (focusable.length === 0) return;
+
+    switch (e.key) {
+      case 'ArrowRight':
+      case 'ArrowDown':
+        e.preventDefault();
+        this.focusNextElement();
+        break;
+
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        e.preventDefault();
+        this.focusPreviousElement();
+        break;
+
+      case 'Home':
+        e.preventDefault();
+        this.focusElement(0);
+        break;
+
+      case 'End':
+        e.preventDefault();
+        this.focusElement(focusable.length - 1);
+        break;
+
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        this.activateCurrentElement();
+        break;
+
+      case 'Escape':
+        e.preventDefault();
+        this.hidePopup();
+        // Return focus to the chart container
+        this.focusedIndex = -1;
+        this.keyboardActive = false;
+        const svg = this.shadowRoot?.querySelector('svg');
+        svg?.blur();
+        break;
+    }
+  }
+
+  /**
+   * Handle focus entering the chart SVG.
+   */
+  protected handleChartFocus(): void {
+    this.keyboardActive = true;
+    const focusable = this.getFocusableElements();
+    // If no element is focused yet, focus the first one
+    if (this.focusedIndex === -1 && focusable.length > 0) {
+      this.focusedIndex = 0;
+    }
+  }
+
+  /**
+   * Handle focus leaving the chart SVG.
+   */
+  protected handleChartBlur(e: FocusEvent): void {
+    // Only deactivate if focus is leaving the chart entirely
+    const relatedTarget = e.relatedTarget as Element | null;
+    if (!relatedTarget || !this.shadowRoot?.contains(relatedTarget)) {
+      this.keyboardActive = false;
+      // Keep focusedIndex so we return to the same element
+    }
+  }
+
+  /**
+   * Focus a specific element by index.
+   */
+  protected focusElement(index: number): void {
+    const focusable = this.getFocusableElements();
+    if (index < 0 || index >= focusable.length) return;
+
+    this.focusedIndex = index;
+    this.keyboardActive = true;
+
+    // Find the SVG element and focus it (the visual indicator shows on the shape)
+    const svg = this.shadowRoot?.querySelector('svg');
+    if (svg && document.activeElement !== svg) {
+      svg.focus();
+    }
+
+    // Show popup for the focused element if it has a hover popup
+    const element = focusable[index];
+    if (element.popupTrigger === 'hover') {
+      this.showPopupForFocusedElement(index);
+    }
+  }
+
+  /**
+   * Focus the next element in the list.
+   */
+  protected focusNextElement(): void {
+    const focusable = this.getFocusableElements();
+    if (focusable.length === 0) return;
+
+    const nextIndex = this.focusedIndex < focusable.length - 1
+      ? this.focusedIndex + 1
+      : 0; // Wrap to beginning
+
+    this.focusElement(nextIndex);
+  }
+
+  /**
+   * Focus the previous element in the list.
+   */
+  protected focusPreviousElement(): void {
+    const focusable = this.getFocusableElements();
+    if (focusable.length === 0) return;
+
+    const prevIndex = this.focusedIndex > 0
+      ? this.focusedIndex - 1
+      : focusable.length - 1; // Wrap to end
+
+    this.focusElement(prevIndex);
+  }
+
+  /**
+   * Activate the currently focused element.
+   * - If it has an href, navigate to it
+   * - If it has a click popup, toggle the popup
+   */
+  protected activateCurrentElement(): void {
+    const focusable = this.getFocusableElements();
+    if (this.focusedIndex < 0 || this.focusedIndex >= focusable.length) return;
+
+    const element = focusable[this.focusedIndex];
+
+    // If it has an href, navigate to it
+    if (element.href) {
+      window.location.href = element.href;
+      return;
+    }
+
+    // If it has a click popup, toggle it
+    if (element.popupTrigger === 'click') {
+      this.togglePopupForFocusedElement(this.focusedIndex);
+    }
+  }
+
+  /**
+   * Show popup for the focused element.
+   * Override in subclasses to provide chart-specific popup content.
+   */
+  protected showPopupForFocusedElement(_index: number): void {
+    // Default implementation - subclasses should override
+    // to get the popup content and position
+  }
+
+  /**
+   * Toggle popup for the focused element (for click-triggered popups).
+   * Override in subclasses to provide chart-specific popup handling.
+   */
+  protected togglePopupForFocusedElement(_index: number): void {
+    // Default implementation - subclasses should override
+  }
+
+  /**
+   * Get the tabindex value for a shape element.
+   * In roving tabindex pattern:
+   * - The chart SVG has tabindex="0" to be focusable
+   * - Individual shapes have tabindex="-1" (focusable via JS, not Tab)
+   *
+   * @param index The index of the shape
+   * @returns The tabindex value (-1 for all shapes in roving pattern)
+   */
+  protected getShapeTabIndex(_index: number): number {
+    // In roving tabindex, shapes are not in the tab order
+    // Focus is managed programmatically via the chart's keyboard handler
+    return -1;
+  }
+
+  /**
+   * Check if a shape at the given index is currently focused.
+   *
+   * @param index The index of the shape
+   * @returns true if the shape is focused and keyboard navigation is active
+   */
+  protected isShapeFocused(index: number): boolean {
+    return this.keyboardActive && this.focusedIndex === index;
+  }
+
+  /**
+   * Generate the aria-label for a shape element.
+   * Override in subclasses to provide chart-specific labels.
+   *
+   * @param index The index of the shape
+   * @returns The aria-label string
+   */
+  protected getShapeAriaLabel(index: number): string {
+    const focusable = this.getFocusableElements();
+    if (index < 0 || index >= focusable.length) return '';
+    return focusable[index].label;
+  }
+
+  /**
+   * Render a focus indicator for the currently focused shape.
+   * This draws a visible focus ring around the focused element.
+   * Override in subclasses to provide chart-specific focus indicators.
+   *
+   * @returns SVG template for the focus indicator, or empty if nothing focused
+   */
+  protected renderFocusIndicator(): SVGTemplateResult {
+    // Default implementation returns nothing
+    // Subclasses should override to render a focus ring around the focused shape
+    return svg``;
+  }
+
+  /**
+   * Get the bounding box of a shape element by its index.
+   * Used for rendering focus indicators.
+   *
+   * @param index The index of the shape
+   * @returns The bounding box {x, y, width, height} or null if not found
+   */
+  protected getShapeBounds(index: number): { x: number; y: number; width: number; height: number } | null {
+    const svgEl = this.shadowRoot?.querySelector('svg');
+    if (!svgEl) return null;
+
+    const shape = svgEl.querySelector(`[data-shape-index="${index}"]`) as SVGGraphicsElement | null;
+    if (!shape) return null;
+
+    try {
+      const bbox = shape.getBBox();
+      return {
+        x: bbox.x,
+        y: bbox.y,
+        width: bbox.width,
+        height: bbox.height
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  // ============================================================================
+  // End Keyboard Navigation Methods
   // ============================================================================
 
   protected abstract renderChart(): SVGTemplateResult;

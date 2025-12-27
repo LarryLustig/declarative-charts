@@ -1,6 +1,6 @@
 import { customElement, property } from 'lit/decorators.js';
 import { svg, SVGTemplateResult } from 'lit';
-import { BaseChart, type ShowCondition } from './base-chart.js';
+import { BaseChart, type ShowCondition, type FocusableElement } from './base-chart.js';
 import type { LegendItem } from './chart-legend.js';
 import type { ChartFunnelStage } from './chart-funnel-stage.js';
 import type { ChartPopup } from './chart-popup.js';
@@ -896,6 +896,105 @@ export class FunnelChart extends BaseChart {
     }));
 
     return analyzeFunnel(insightStages);
+  }
+
+  // ============================================================================
+  // Keyboard Navigation
+  // ============================================================================
+
+  /**
+   * Get the list of focusable elements (funnel stages).
+   */
+  protected override getFocusableElements(): FocusableElement[] {
+    const stages = this.getStages();
+    const firstValue = stages.length > 0 ? stages[0].value : 0;
+
+    return stages.map((stage, index) => {
+      const hasAction = !!(stage.popup || this.shouldShowAutoPopup(stage.autoPopup));
+      const conversionRate = firstValue > 0 ? (stage.value / firstValue) * 100 : 0;
+      return {
+        index,
+        label: `${stage.label}: ${stage.value} (${conversionRate.toFixed(1)}% of total)`,
+        hasAction,
+        popupTrigger: stage.popup?.trigger as 'hover' | 'click' | undefined ||
+                      (this.shouldShowAutoPopup(stage.autoPopup) ? 'hover' : undefined)
+      };
+    });
+  }
+
+  /**
+   * Render a focus indicator for the currently focused stage.
+   */
+  protected override renderFocusIndicator(): SVGTemplateResult {
+    if (!this.keyboardActive || this.focusedIndex < 0) {
+      return svg``;
+    }
+
+    const bounds = this.getShapeBounds(this.focusedIndex);
+    if (!bounds) return svg``;
+
+    // Draw a focus ring around the stage
+    const padding = 3;
+    return svg`
+      <rect
+        class="focus-indicator"
+        x="${bounds.x - padding}"
+        y="${bounds.y - padding}"
+        width="${bounds.width + padding * 2}"
+        height="${bounds.height + padding * 2}"
+        fill="none"
+        stroke="#005fcc"
+        stroke-width="2"
+        stroke-dasharray="4 2"
+        pointer-events="none"
+      />
+    `;
+  }
+
+  /**
+   * Show popup for the focused stage.
+   */
+  protected override showPopupForFocusedElement(index: number): void {
+    const stages = this.getStages();
+    if (index < 0 || index >= stages.length) return;
+
+    const stage = stages[index];
+    let content: string | null = null;
+
+    if (stage.popup) {
+      content = stage.popup.content;
+    } else if (this.shouldShowAutoPopup(stage.autoPopup)) {
+      const firstValue = stages.length > 0 ? stages[0].value : 0;
+      const conversionRate = firstValue > 0 ? ((stage.value / firstValue) * 100).toFixed(1) : '0';
+      content = `<strong>${stage.label}</strong><br>Value: ${stage.value}<br>Conversion: ${conversionRate}%`;
+    }
+
+    if (content) {
+      const bounds = this.getShapeBounds(index);
+      if (bounds) {
+        const rect = this.getBoundingClientRect();
+        const svgEl = this.shadowRoot?.querySelector('svg');
+        if (svgEl) {
+          const svgRect = svgEl.getBoundingClientRect();
+          const scaleX = svgRect.width / this.width;
+          const scaleY = svgRect.height / this.height;
+          const x = rect.left + (bounds.x + bounds.width / 2) * scaleX;
+          const y = rect.top + bounds.y * scaleY;
+          this.showPopup(content, x, y);
+        }
+      }
+    }
+  }
+
+  /**
+   * Toggle popup for the focused stage.
+   */
+  protected override togglePopupForFocusedElement(index: number): void {
+    if (this.popupVisible) {
+      this.hidePopup();
+    } else {
+      this.showPopupForFocusedElement(index);
+    }
   }
 
 }

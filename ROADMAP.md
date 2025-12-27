@@ -35,25 +35,27 @@ The following accessibility features have been implemented:
    - Charts announce type, title, data summary, and insights
    - Example: "4 bars, values from 38 to 95. Q4 highest at 95; Q3 lowest at 38"
 
+4. **Keyboard Navigation** ✓
+   - All chart types support full keyboard navigation using roving tabindex pattern
+   - Tab to focus chart, arrow keys to navigate between data elements
+   - Enter/Space to activate elements (follow links, toggle popups)
+   - Escape to close popups and exit keyboard navigation
+   - Home/End to jump to first/last element
+   - Visual focus indicator (blue dashed rectangle) appears during keyboard navigation
+   - Hover-triggered popups show automatically when element receives focus
+
 **Files created/modified:**
 - `src/accessibility/insights.ts` - Statistical analysis functions
 - `src/accessibility/index.ts` - Accessibility module exports
-- `src/base-chart.ts` - ARIA properties and description generation
-- `src/chart.ts`, `src/pie-chart.ts`, `src/funnel-chart.ts` - Chart-specific `getInsights()` implementations
+- `src/base-chart.ts` - ARIA properties, description generation, keyboard navigation infrastructure
+- `src/chart.ts`, `src/pie-chart.ts`, `src/funnel-chart.ts` - Chart-specific `getInsights()` and `getFocusableElements()` implementations
 - `examples/accessibility.html` - Comprehensive examples and screen reader testing guide
 
 #### Remaining (Phase B - Future)
 
 The following features are deferred for future implementation:
 
-1. **Keyboard Navigation**
-   - Interactive elements (bars with hrefs, popup triggers) must be focusable
-   - Tab order should follow logical reading order
-   - Enter/Space to activate links and click-triggered popups
-   - Escape to close popups
-   - Arrow keys to navigate between data elements within a chart
-
-2. **High Contrast Support**
+1. **High Contrast Support**
    - Respect `prefers-contrast: high` media query
    - Ensure sufficient color contrast ratios (WCAG AA minimum)
    - Provide `high-contrast` attribute to force high contrast mode
@@ -1175,6 +1177,6 @@ function MyChart({ data }) {
 
 | Version | Status | Key Features |
 |---------|--------|--------------|
-| 0.x | Current | Bar, Line, Bubble, Pie, Funnel charts; Legends; Titles; Popups; Palettes; ARIA labels & auto-insights |
-| 1.0 | Planned | Keyboard navigation; Number formatting; Negative values; Axis config; npm publish |
+| 0.x | Current | Bar, Line, Bubble, Pie, Funnel charts; Legends; Titles; Popups; Palettes; ARIA labels & auto-insights; Keyboard navigation |
+| 1.0 | Planned | Number formatting; Negative values; Axis config; npm publish |
 | 1.x | Future | Area charts; Animations; Date axis; High contrast; More chart types |

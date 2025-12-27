@@ -1,6 +1,6 @@
 import { customElement, property } from 'lit/decorators.js';
 import { svg, SVGTemplateResult } from 'lit';
-import { BaseChart, showConditionConverter, type ShowCondition } from './base-chart.js';
+import { BaseChart, showConditionConverter, type ShowCondition, type FocusableElement } from './base-chart.js';
 import type { LegendItem } from './chart-legend.js';
 import type { ChartPieSlice } from './chart-pie-slice.js';
 import type { ChartPopup } from './chart-popup.js';
@@ -508,6 +508,105 @@ export class PieChart extends BaseChart {
     }));
 
     return analyzePie(insightSlices);
+  }
+
+  // ============================================================================
+  // Keyboard Navigation
+  // ============================================================================
+
+  /**
+   * Get the list of focusable elements (pie slices).
+   */
+  protected override getFocusableElements(): FocusableElement[] {
+    const slices = this.getSlices();
+    const total = slices.reduce((sum, s) => sum + s.value, 0);
+
+    return slices.map((slice, index) => {
+      const hasAction = !!(slice.popup || this.shouldShowAutoPopup(slice.autoPopup));
+      const percent = total > 0 ? (slice.value / total) * 100 : 0;
+      return {
+        index,
+        label: `${slice.label}: ${slice.value} (${percent.toFixed(1)}%)`,
+        hasAction,
+        popupTrigger: slice.popup?.trigger as 'hover' | 'click' | undefined ||
+                      (this.shouldShowAutoPopup(slice.autoPopup) ? 'hover' : undefined)
+      };
+    });
+  }
+
+  /**
+   * Render a focus indicator for the currently focused slice.
+   */
+  protected override renderFocusIndicator(): SVGTemplateResult {
+    if (!this.keyboardActive || this.focusedIndex < 0) {
+      return svg``;
+    }
+
+    const bounds = this.getShapeBounds(this.focusedIndex);
+    if (!bounds) return svg``;
+
+    // For pie slices, draw a focus ring around the bounding box
+    const padding = 3;
+    return svg`
+      <rect
+        class="focus-indicator"
+        x="${bounds.x - padding}"
+        y="${bounds.y - padding}"
+        width="${bounds.width + padding * 2}"
+        height="${bounds.height + padding * 2}"
+        fill="none"
+        stroke="#005fcc"
+        stroke-width="2"
+        stroke-dasharray="4 2"
+        pointer-events="none"
+      />
+    `;
+  }
+
+  /**
+   * Show popup for the focused slice.
+   */
+  protected override showPopupForFocusedElement(index: number): void {
+    const slices = this.getSlices();
+    if (index < 0 || index >= slices.length) return;
+
+    const slice = slices[index];
+    let content: string | null = null;
+
+    if (slice.popup) {
+      content = slice.popup.content;
+    } else if (this.shouldShowAutoPopup(slice.autoPopup)) {
+      const total = slices.reduce((sum, s) => sum + s.value, 0);
+      const percent = total > 0 ? ((slice.value / total) * 100).toFixed(1) : '0';
+      content = `<strong>${slice.label}</strong><br>Value: ${slice.value}<br>Percent: ${percent}%`;
+    }
+
+    if (content) {
+      const bounds = this.getShapeBounds(index);
+      if (bounds) {
+        const rect = this.getBoundingClientRect();
+        const svgEl = this.shadowRoot?.querySelector('svg');
+        if (svgEl) {
+          const svgRect = svgEl.getBoundingClientRect();
+          const scaleX = svgRect.width / this.width;
+          const scaleY = svgRect.height / this.height;
+          const x = rect.left + (bounds.x + bounds.width / 2) * scaleX;
+          const y = rect.top + bounds.y * scaleY;
+          this.showPopup(content, x, y);
+        }
+      }
+    }
+  }
+
+  /**
+   * Toggle popup for the focused slice.
+   */
+  protected override togglePopupForFocusedElement(index: number): void {
+    if (this.popupVisible) {
+      this.hidePopup();
+    } else {
+      this.showPopupForFocusedElement(index);
+    }
   }
 }
 

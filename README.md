@@ -1216,6 +1216,58 @@ Use the `aria-insights` attribute to control the level of auto-generated descrip
 - `basic`: Use when auto-insights might be misleading or when you provide a manual `aria-description`.
 - `none`: Use only when you provide a complete manual description or when the chart is purely decorative.
 
+### Keyboard Navigation
+
+All chart types support full keyboard navigation, allowing users to interact with charts without a mouse.
+
+**Keyboard Shortcuts:**
+
+| Key | Action |
+|-----|--------|
+| Tab | Focus the chart |
+| Arrow Right / Arrow Down | Move to next data element |
+| Arrow Left / Arrow Up | Move to previous data element |
+| Home | Move to first data element |
+| End | Move to last data element |
+| Enter / Space | Activate element (follow link or toggle popup) |
+| Escape | Close popup and exit keyboard navigation |
+
+**How it works:**
+
+1. **Tab into the chart** - The chart receives focus and shows a focus indicator on the first data element
+2. **Navigate with arrow keys** - Move between bars, line points, pie slices, or funnel stages
+3. **Activate elements** - Press Enter or Space to:
+   - Follow a link (if the element has an `href` attribute)
+   - Toggle a click-triggered popup
+   - Show a hover-triggered popup
+4. **Exit navigation** - Press Escape to close any open popup and exit keyboard mode
+
+**Visual feedback:**
+
+When navigating with the keyboard, a blue dashed focus indicator appears around the currently focused element. This indicator only appears during keyboard navigation and disappears when using a mouse.
+
+**Example with interactive elements:**
+
+```html
+<dc-chart width="600" height="400">
+  <!-- Bar with link - Enter/Space follows the link -->
+  <dc-bar value="150" label="Q1" href="/reports/q1" fill="#4CAF50"></dc-bar>
+
+  <!-- Bar with popup - Enter/Space toggles the popup -->
+  <dc-bar value="200" label="Q2" fill="#2196F3">
+    <dc-popup trigger="click">
+      <strong>Q2 Details</strong><br>
+      Revenue: $200k
+    </dc-popup>
+  </dc-bar>
+
+  <!-- Bar with hover popup - popup shows on focus -->
+  <dc-bar value="175" label="Q3" fill="#FF9800">
+    <dc-popup trigger="hover">Q3: $175k revenue</dc-popup>
+  </dc-bar>
+</dc-chart>
+```
+
 ### Testing with Screen Readers
 
 To test accessibility:
@@ -1303,7 +1355,7 @@ MIT
 
 - Add more chart types (scatter, area, etc.)
 - Add animations and transitions
-- Add keyboard navigation for interactive elements
 - Add axis customization options (min/max values, tick intervals)
 - Add number formatting (currency, percentages, abbreviations)
+- Add high contrast mode support
 - Publish to npm

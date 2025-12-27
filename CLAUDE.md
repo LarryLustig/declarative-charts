@@ -196,6 +196,8 @@ This order ensures axes are always visible even when data elements touch or over
 
 **Accessibility System**: Charts automatically generate ARIA attributes for screen reader support. The SVG element receives `role="img"`, `aria-label` (chart type and title), and `aria-describedby` pointing to a `<desc>` element with auto-generated insights. See [Accessibility for New Chart Types](#accessibility-for-new-chart-types) for implementation details.
 
+**Keyboard Navigation System**: Charts support full keyboard navigation using the roving tabindex pattern. Users can Tab into a chart, use arrow keys to navigate between data elements, Enter/Space to activate elements (follow links, toggle popups), and Escape to close popups or exit navigation. See [Keyboard Navigation for New Chart Types](#keyboard-navigation-for-new-chart-types) for implementation details.
+
 **Palette System**: Define reusable color schemes with `<dc-palette>` containing `<dc-color>` elements. Charts reference palettes via the `palette` attribute. Colors are resolved by matching element labels and/or values against palette definitions. Priority: element fill/stroke > palette value range match > palette label match > chart-level colors > auto. Use `<dc-swatch>` to display palette colors outside charts.
 
 **Hidden Attribute**: Data elements support the standard HTML `hidden` attribute to dynamically show/hide chart elements. This follows web standards and enables interactive filtering.
@@ -252,9 +254,10 @@ document.querySelector('#my-chart').requestUpdate();
 8. **Implement auto-popup support**: Add `shouldShowAutoPopup()`, `generateShapePopupContent()` methods and update mouse handlers (see Auto-Popup System section above)
 9. **Implement `getLegendItems()`** - See [Legend Items for New Chart Types](#legend-items-for-new-chart-types) below
 10. **Implement accessibility** - Add `getInsights()` method for auto-generated descriptions (see [Accessibility for New Chart Types](#accessibility-for-new-chart-types))
-11. Export from `src/index.ts`
-12. **Add to index.html Basic Chart Types section** (see below)
-13. Create detailed example file in `examples/` (e.g., `examples/scattercharts.html`)
+11. **Implement keyboard navigation** - Add `getFocusableElements()` and related methods (see [Keyboard Navigation for New Chart Types](#keyboard-navigation-for-new-chart-types))
+12. Export from `src/index.ts`
+13. **Add to index.html Basic Chart Types section** (see below)
+14. Create detailed example file in `examples/` (e.g., `examples/scattercharts.html`)
 
 **Adding to index.html**: Add a grid cell to "Basic Chart Types" section with `<h3>` title, `<pre><code>` example, rendered chart, and links div. Also update nav section and CSS selector list.
 
@@ -694,6 +697,113 @@ See `examples/accessibility.html` for:
 - Auto-generated insights for all chart types
 - Manual override examples
 - Screen reader testing guide (NVDA, VoiceOver, browser DevTools)
+
+### Keyboard Navigation for New Chart Types
+
+Charts support keyboard navigation using the roving tabindex pattern. When creating a new chart type, implement the following methods to enable keyboard support.
+
+**How the keyboard navigation system works:**
+
+1. **BaseChart provides the infrastructure:**
+   - `focusedIndex` and `keyboardActive` state properties track navigation state
+   - `handleChartKeyDown()` handles Arrow, Enter, Space, Escape, Home, End keys
+   - `focusNextElement()`, `focusPreviousElement()` manage focus movement
+   - Focus indicator rendering via `renderFocusIndicator()`
+
+2. **Each chart type implements these methods:**
+
+   ```typescript
+   // Required: Return list of focusable elements
+   protected getFocusableElements(): FocusableElement[] {
+     return this.getShapes().map((shape, index) => ({
+       index,
+       label: shape.label || `Element ${index + 1}`,
+       hasAction: !!shape.href || shape.popupTrigger === 'click',
+       href: shape.href,
+       popupTrigger: shape.popupTrigger
+     }));
+   }
+
+   // Required: Get bounding box for focus indicator
+   protected getShapeBounds(index: number): { x: number; y: number; width: number; height: number } | null {
+     // Return bounds of shape at index for focus indicator positioning
+   }
+
+   // Required: Render focus indicator around focused shape
+   protected renderFocusIndicator(): SVGTemplateResult {
+     if (!this.keyboardActive || this.focusedIndex < 0) return svg``;
+     const bounds = this.getShapeBounds(this.focusedIndex);
+     if (!bounds) return svg``;
+     return svg`
+       <rect x="${bounds.x - 3}" y="${bounds.y - 3}"
+             width="${bounds.width + 6}" height="${bounds.height + 6}"
+             fill="none" stroke="#005fcc" stroke-width="2"
+             stroke-dasharray="4,2" rx="3" />
+     `;
+   }
+
+   // Required: Show popup for focused element (hover-trigger popups)
+   protected showPopupForFocusedElement(): void {
+     const elements = this.getFocusableElements();
+     if (this.focusedIndex < 0 || this.focusedIndex >= elements.length) return;
+     // Get shape data and show popup
+   }
+
+   // Required: Toggle popup for focused element (click-trigger popups)
+   protected togglePopupForFocusedElement(): void {
+     // Toggle click-triggered popup visibility
+   }
+   ```
+
+3. **Add focus indicator to your chart's render output:**
+
+   ```typescript
+   protected renderChart(): SVGTemplateResult {
+     return svg`
+       <!-- Your chart content -->
+       ${this.renderFocusIndicator()}
+     `;
+   }
+   ```
+
+4. **Add aria-label to focusable shapes:**
+
+   ```typescript
+   // In shape rendering, add aria-label for screen readers
+   <rect
+     aria-label="${shape.label}: ${shape.value}"
+     tabindex="${this.getShapeTabIndex(index)}"
+     ...
+   />
+   ```
+
+**The FocusableElement interface:**
+
+```typescript
+export interface FocusableElement {
+  index: number;       // Position in focusable elements list
+  label: string;       // Accessible label for the element
+  hasAction: boolean;  // True if element has href or click popup
+  href?: string;       // Optional navigation URL
+  popupTrigger?: 'hover' | 'click';  // Popup trigger type if any
+}
+```
+
+**Keyboard shortcuts handled by BaseChart:**
+
+| Key | Action |
+|-----|--------|
+| Tab | Focus chart SVG (standard browser behavior) |
+| Arrow Right/Down | Move to next element |
+| Arrow Left/Up | Move to previous element |
+| Home | Move to first element |
+| End | Move to last element |
+| Enter/Space | Activate element (follow link or toggle popup) |
+| Escape | Close popup and exit keyboard navigation |
+
+**Focus indicator styling:**
+
+The standard focus indicator is a blue dashed rectangle (`#005fcc`) with 2px stroke and 3px border radius. Charts can customize this by overriding `renderFocusIndicator()`.
 
 ## TypeScript Configuration
 

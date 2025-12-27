@@ -1,7 +1,7 @@
 import { customElement, property } from 'lit/decorators.js';
 import { svg, SVGTemplateResult } from 'lit';
 import { AxisChart } from './axis-chart.js';
-import { type ShowCondition } from './base-chart.js';
+import { type ShowCondition, type FocusableElement } from './base-chart.js';
 import { analyzeLines, analyzeBars, analyzeBubbles, type LineData as InsightLineData, type BarData as InsightBarData, type BubbleData as InsightBubbleData } from './accessibility/index.js';
 import type { LegendItem, DimensionlessLegendItem } from './chart-legend.js';
 import type { ChartBar } from './chart-bar.js';
@@ -2431,6 +2431,272 @@ export class Chart extends AxisChart {
     // TODO: Implement when reference lines feature is added
     // This would query for <dc-reference-line> elements and return the value
     return undefined;
+  }
+
+  // ============================================================================
+  // Keyboard Navigation
+  // ============================================================================
+
+  /**
+   * Get the list of focusable elements in this chart.
+   * Returns bars, line points, and bubbles that have actions (href, popup).
+   */
+  protected override getFocusableElements(): FocusableElement[] {
+    const elements: FocusableElement[] = [];
+    const bars = this.getFlattenedBars();
+    const lines = this.getLines();
+    const bubbles = this.getBubbles();
+    const total = bars.reduce((sum, b) => sum + b.value, 0) +
+                  lines.flatMap(l => l.points).reduce((sum, p) => sum + p.value, 0) +
+                  bubbles.reduce((sum, b) => sum + b.value, 0);
+
+    let index = 0;
+
+    // Add bars as focusable elements
+    bars.forEach((bar) => {
+      const hasAction = !!(bar.href || bar.popup || this.shouldShowAutoPopup(bar.autoPopup));
+      const percent = total > 0 ? (bar.value / total) * 100 : 0;
+      elements.push({
+        index,
+        label: `${bar.label}: ${bar.value}${percent > 0 ? ` (${percent.toFixed(1)}%)` : ''}`,
+        hasAction,
+        href: bar.href,
+        popupTrigger: bar.popup?.trigger as 'hover' | 'click' | undefined ||
+                      (this.shouldShowAutoPopup(bar.autoPopup) ? 'hover' : undefined)
+      });
+      index++;
+    });
+
+    // Add line points as focusable elements (lines are navigable but points are the targets)
+    lines.forEach((line) => {
+      line.points.forEach((point) => {
+        const hasAction = !!(point.href || point.popup || this.shouldShowAutoPopup(point.autoPopup));
+        elements.push({
+          index,
+          label: `${line.label}, ${point.label}: ${point.value}`,
+          hasAction,
+          href: point.href,
+          popupTrigger: point.popup?.trigger as 'hover' | 'click' | undefined ||
+                        (this.shouldShowAutoPopup(point.autoPopup) ? 'hover' : undefined)
+        });
+        index++;
+      });
+    });
+
+    // Add bubbles as focusable elements
+    bubbles.forEach((bubble) => {
+      const hasAction = !!(bubble.href || bubble.popup || this.shouldShowAutoPopup(bubble.autoPopup));
+      elements.push({
+        index,
+        label: `${bubble.label}: value ${bubble.value}, size ${bubble.sizeValue}`,
+        hasAction,
+        href: bubble.href,
+        popupTrigger: bubble.popup?.trigger as 'hover' | 'click' | undefined ||
+                      (this.shouldShowAutoPopup(bubble.autoPopup) ? 'hover' : undefined)
+      });
+      index++;
+    });
+
+    return elements;
+  }
+
+  /**
+   * Render a focus indicator for the currently focused shape.
+   */
+  protected override renderFocusIndicator(): SVGTemplateResult {
+    if (!this.keyboardActive || this.focusedIndex < 0) {
+      return svg``;
+    }
+
+    const bounds = this.getShapeBounds(this.focusedIndex);
+    if (!bounds) return svg``;
+
+    // Draw a focus ring around the shape
+    const padding = 3;
+    return svg`
+      <rect
+        class="focus-indicator"
+        x="${bounds.x - padding}"
+        y="${bounds.y - padding}"
+        width="${bounds.width + padding * 2}"
+        height="${bounds.height + padding * 2}"
+        fill="none"
+        stroke="#005fcc"
+        stroke-width="2"
+        stroke-dasharray="4 2"
+        pointer-events="none"
+      />
+    `;
+  }
+
+  /**
+   * Get the bounds of a shape by index, accounting for different element types.
+   */
+  protected override getShapeBounds(index: number): { x: number; y: number; width: number; height: number } | null {
+    // First try the parent's implementation
+    const parentBounds = super.getShapeBounds(index);
+    if (parentBounds) return parentBounds;
+
+    // For line points, we need special handling since they may be circles or other shapes
+    const svgEl = this.shadowRoot?.querySelector('svg');
+    if (!svgEl) return null;
+
+    // Try finding a circle (for line points)
+    const circle = svgEl.querySelector(`circle[data-shape-index="${index}"]`) as SVGCircleElement | null;
+    if (circle) {
+      const cx = parseFloat(circle.getAttribute('cx') || '0');
+      const cy = parseFloat(circle.getAttribute('cy') || '0');
+      const r = parseFloat(circle.getAttribute('r') || '0');
+      return {
+        x: cx - r,
+        y: cy - r,
+        width: r * 2,
+        height: r * 2
+      };
+    }
+
+    return null;
+  }
+
+  /**
+   * Show popup for the focused element.
+   */
+  protected override showPopupForFocusedElement(index: number): void {
+    const bars = this.getFlattenedBars();
+    const lines = this.getLines();
+    const bubbles = this.getBubbles();
+
+    // Determine which element is focused
+    if (index < bars.length) {
+      // It's a bar
+      const bar = bars[index];
+      const content = this.getBarPopupContent(bar, index);
+      if (content) {
+        const bounds = this.getShapeBounds(index);
+        if (bounds) {
+          // Position popup near the center of the bar
+          const rect = this.getBoundingClientRect();
+          const svgEl = this.shadowRoot?.querySelector('svg');
+          if (svgEl) {
+            const svgRect = svgEl.getBoundingClientRect();
+            const scaleX = svgRect.width / this.width;
+            const scaleY = svgRect.height / this.height;
+            const x = rect.left + (bounds.x + bounds.width / 2) * scaleX;
+            const y = rect.top + bounds.y * scaleY;
+            this.showPopup(content, x, y);
+          }
+        }
+      }
+    } else {
+      // Check if it's a line point or bubble
+      let adjustedIndex = index - bars.length;
+      const totalPoints = lines.reduce((sum, l) => sum + l.points.length, 0);
+
+      if (adjustedIndex < totalPoints) {
+        // It's a line point - find which line and point
+        let lineIndex = 0;
+        let pointIndex = adjustedIndex;
+        for (const line of lines) {
+          if (pointIndex < line.points.length) {
+            const point = line.points[pointIndex];
+            const content = this.getPointPopupContent(line, point, lineIndex, pointIndex);
+            if (content) {
+              const bounds = this.getShapeBounds(index);
+              if (bounds) {
+                const rect = this.getBoundingClientRect();
+                const svgEl = this.shadowRoot?.querySelector('svg');
+                if (svgEl) {
+                  const svgRect = svgEl.getBoundingClientRect();
+                  const scaleX = svgRect.width / this.width;
+                  const scaleY = svgRect.height / this.height;
+                  const x = rect.left + (bounds.x + bounds.width / 2) * scaleX;
+                  const y = rect.top + bounds.y * scaleY;
+                  this.showPopup(content, x, y);
+                }
+              }
+            }
+            break;
+          }
+          pointIndex -= line.points.length;
+          lineIndex++;
+        }
+      } else {
+        // It's a bubble
+        const bubbleIndex = adjustedIndex - totalPoints;
+        if (bubbleIndex < bubbles.length) {
+          const bubble = bubbles[bubbleIndex];
+          const content = this.getBubblePopupContent(bubble, bubbleIndex);
+          if (content) {
+            const bounds = this.getShapeBounds(index);
+            if (bounds) {
+              const rect = this.getBoundingClientRect();
+              const svgEl = this.shadowRoot?.querySelector('svg');
+              if (svgEl) {
+                const svgRect = svgEl.getBoundingClientRect();
+                const scaleX = svgRect.width / this.width;
+                const scaleY = svgRect.height / this.height;
+                const x = rect.left + (bounds.x + bounds.width / 2) * scaleX;
+                const y = rect.top + bounds.y * scaleY;
+                this.showPopup(content, x, y);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Toggle popup for the focused element (for click-triggered popups).
+   */
+  protected override togglePopupForFocusedElement(index: number): void {
+    if (this.popupVisible) {
+      this.hidePopup();
+    } else {
+      this.showPopupForFocusedElement(index);
+    }
+  }
+
+  /**
+   * Get popup content for a bar.
+   */
+  private getBarPopupContent(bar: FlattenedBar, _index: number): string | null {
+    if (bar.popup) {
+      return bar.popup.content;
+    }
+    if (this.shouldShowAutoPopup(bar.autoPopup)) {
+      const bars = this.getFlattenedBars();
+      const total = bars.reduce((sum, b) => sum + b.value, 0);
+      const percent = total > 0 ? ((bar.value / total) * 100).toFixed(1) : '0';
+      return `<strong>${bar.label}</strong><br>Value: ${bar.value}<br>Percent: ${percent}%`;
+    }
+    return null;
+  }
+
+  /**
+   * Get popup content for a line point.
+   */
+  private getPointPopupContent(line: LineData, point: PointData, _lineIndex: number, _pointIndex: number): string | null {
+    if (point.popup) {
+      return point.popup.content;
+    }
+    if (this.shouldShowAutoPopup(point.autoPopup)) {
+      return `<strong>${line.label}</strong><br>${point.label}: ${point.value}`;
+    }
+    return null;
+  }
+
+  /**
+   * Get popup content for a bubble.
+   */
+  private getBubblePopupContent(bubble: BubbleData, _index: number): string | null {
+    if (bubble.popup) {
+      return bubble.popup.content;
+    }
+    if (this.shouldShowAutoPopup(bubble.autoPopup)) {
+      return `<strong>${bubble.label}</strong><br>Value: ${bubble.value}<br>Size: ${bubble.sizeValue}`;
+    }
+    return null;
   }
 }
 
