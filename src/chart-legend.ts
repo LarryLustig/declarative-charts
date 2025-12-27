@@ -3,6 +3,7 @@ import { LitElement, svg, SVGTemplateResult } from 'lit';
 import { SVG_TEXT_STYLE_ATTRS, HTML_TO_SVG_WARNINGS, type TitleStyleWarning } from './chart-title.js';
 import type { ChartTitle } from './chart-title.js';
 import { ChartSwatch } from './chart-swatch.js';
+import { NumberFormatter } from './format.js';
 
 /**
  * Shape types for legend indicators.
@@ -156,6 +157,29 @@ export class ChartLegend extends LitElement {
   maxWidth: string | undefined = undefined;
 
   /**
+   * Format for values displayed in the legend.
+   * If not specified, inherits from parent chart's valueFormat.
+   * Uses the same format syntax as chart's value-format attribute.
+   *
+   * @example
+   * <dc-legend value-format="currency USD"></dc-legend>
+   * <dc-legend value-format="compact 1"></dc-legend>
+   */
+  @property({ type: String, attribute: 'value-format' })
+  valueFormat?: string;
+
+  /**
+   * Format for percentages displayed in the legend.
+   * If not specified, inherits from parent chart's percentFormat.
+   * Uses the same format syntax as chart's percent-format attribute.
+   *
+   * @example
+   * <dc-legend percent-format="percent 0"></dc-legend>
+   */
+  @property({ type: String, attribute: 'percent-format' })
+  percentFormat?: string;
+
+  /**
    * Get the custom title for this legend, if any
    * @deprecated Use getTitleInfo() instead for full title information including position
    */
@@ -292,7 +316,10 @@ export class ChartLegend extends LitElement {
     items: LegendItem[],
     _showLabel: boolean,
     showValue: boolean,
-    showPercent: boolean
+    showPercent: boolean,
+    formatter: NumberFormatter,
+    valueFormat: string,
+    percentFormat: string
   ): Array<LegendItem & { displayValue: string | null; resolvedShape: LegendShape }> {
     // Only sum valued items for percentage calculation
     const valuedItems = items.filter((item): item is ValuedLegendItem => !isDimensionless(item));
@@ -305,12 +332,16 @@ export class ChartLegend extends LitElement {
       if (!isDimensionless(item) && (showValue || showPercent)) {
         const percent = total > 0 ? (item.value / total) * 100 : 0;
 
+        // Format value and percent using the formatter
+        const formattedValue = formatter.format(item.value, valueFormat);
+        const formattedPercent = formatter.format(percent / 100, percentFormat);
+
         if (showValue && showPercent) {
-          displayValue = `${item.value} (${percent.toFixed(1)}%)`;
+          displayValue = `${formattedValue} (${formattedPercent})`;
         } else if (showValue) {
-          displayValue = `${item.value}`;
+          displayValue = formattedValue;
         } else {
-          displayValue = `${percent.toFixed(1)}%`;
+          displayValue = formattedPercent;
         }
       }
 
@@ -353,13 +384,19 @@ export class ChartLegend extends LitElement {
    * @param chartWidth Chart width (for percentage-based max-width calculations)
    * @param chartShowValue Chart-level show-value setting
    * @param chartShowPercent Chart-level show-percent setting
+   * @param chartValueFormat Chart-level value-format setting
+   * @param chartPercentFormat Chart-level percent-format setting
+   * @param chartLocale Chart-level locale setting
    * @returns Object with width and height in viewBox units
    */
   getDimensions(
     items: LegendItem[],
     chartWidth: number,
     chartShowValue: boolean = true,
-    chartShowPercent: boolean = false
+    chartShowPercent: boolean = false,
+    chartValueFormat: string = 'number',
+    chartPercentFormat: string = 'percent 1',
+    chartLocale?: string
   ): { width: number; height: number } {
     if (!items || items.length === 0) {
       return { width: 0, height: 0 };
@@ -370,7 +407,17 @@ export class ChartLegend extends LitElement {
     const showValue = this.hasAttribute('show-value') ? this.showValue : chartShowValue;
     const showPercent = this.hasAttribute('show-percent') ? this.showPercent : chartShowPercent;
 
-    const itemsWithDisplay = this.prepareItems(items, showLabel, showValue, showPercent);
+    // Resolve format settings (legend overrides chart)
+    const valueFormat = this.valueFormat ?? chartValueFormat;
+    const percentFormat = this.percentFormat ?? chartPercentFormat;
+
+    // Create formatter with the chart's locale
+    const formatter = new NumberFormatter({ locale: chartLocale });
+
+    const itemsWithDisplay = this.prepareItems(
+      items, showLabel, showValue, showPercent,
+      formatter, valueFormat, percentFormat
+    );
     const titleInfo = this.getTitleInfo();
 
     const isHorizontalPosition = this.position.startsWith('top') || this.position.startsWith('bottom');
@@ -505,13 +552,19 @@ export class ChartLegend extends LitElement {
    * @param chartWidth Chart width (for percentage-based calculations)
    * @param chartShowValue Chart-level show-value setting
    * @param chartShowPercent Chart-level show-percent setting
+   * @param chartValueFormat Chart-level value-format setting
+   * @param chartPercentFormat Chart-level percent-format setting
+   * @param chartLocale Chart-level locale setting
    * @returns Object with width, height, and SVG template
    */
   generateSvg(
     items: LegendItem[],
     chartWidth: number,
     chartShowValue: boolean = true,
-    chartShowPercent: boolean = false
+    chartShowPercent: boolean = false,
+    chartValueFormat: string = 'number',
+    chartPercentFormat: string = 'percent 1',
+    chartLocale?: string
   ): {
     width: number;
     height: number;
@@ -526,7 +579,17 @@ export class ChartLegend extends LitElement {
     const showValue = this.hasAttribute('show-value') ? this.showValue : chartShowValue;
     const showPercent = this.hasAttribute('show-percent') ? this.showPercent : chartShowPercent;
 
-    const itemsWithDisplay = this.prepareItems(items, showLabel, showValue, showPercent);
+    // Resolve format settings (legend overrides chart)
+    const valueFormat = this.valueFormat ?? chartValueFormat;
+    const percentFormat = this.percentFormat ?? chartPercentFormat;
+
+    // Create formatter with the chart's locale
+    const formatter = new NumberFormatter({ locale: chartLocale });
+
+    const itemsWithDisplay = this.prepareItems(
+      items, showLabel, showValue, showPercent,
+      formatter, valueFormat, percentFormat
+    );
     const titleInfo = this.getTitleInfo();
     const isHorizontalPosition = this.position.startsWith('top') || this.position.startsWith('bottom');
 

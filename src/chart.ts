@@ -40,6 +40,7 @@ interface SegmentData {
   showPercent: ShowCondition;
   element?: ChartBarSegment;
   passthroughAttrs?: Record<string, string>;
+  valueFormat?: string;
 }
 
 interface BarData {
@@ -63,6 +64,7 @@ interface BarData {
   patternStroke?: string;
   patternFill?: string;
   patternScale?: number;
+  valueFormat?: string;
 }
 
 interface BarGroupData {
@@ -100,6 +102,7 @@ interface PointData {
   showValue: ShowCondition;
   showPercent: ShowCondition;
   shape: string;
+  valueFormat?: string;
 }
 
 interface LineData {
@@ -139,6 +142,7 @@ interface BubbleData {
   patternStroke?: string;
   patternFill?: string;
   patternScale?: number;
+  valueFormat?: string;
 }
 
 /**
@@ -384,7 +388,8 @@ export class Chart extends AxisChart {
       showValue,
       showPercent,
       element: segment,
-      passthroughAttrs: Object.keys(passthroughAttrs).length > 0 ? passthroughAttrs : undefined
+      passthroughAttrs: Object.keys(passthroughAttrs).length > 0 ? passthroughAttrs : undefined,
+      valueFormat: segment.valueFormat
     };
   }
 
@@ -437,7 +442,8 @@ export class Chart extends AxisChart {
       pattern: bar.pattern,
       patternStroke: bar.patternStroke,
       patternFill: bar.patternFill,
-      patternScale: bar.patternScale
+      patternScale: bar.patternScale,
+      valueFormat: bar.valueFormat
     };
   }
 
@@ -726,7 +732,8 @@ export class Chart extends AxisChart {
             autoPopup: point.autoPopup,
             showValue,
             showPercent,
-            shape
+            shape,
+            valueFormat: point.valueFormat
           };
         })
       };
@@ -780,7 +787,8 @@ export class Chart extends AxisChart {
         pattern: bubble.pattern,
         patternStroke: bubble.patternStroke,
         patternFill: bubble.patternFill,
-        patternScale: bubble.patternScale
+        patternScale: bubble.patternScale,
+        valueFormat: bubble.valueFormat
       };
     });
 
@@ -1158,7 +1166,7 @@ export class Chart extends AxisChart {
           const segPercent = total > 0 ? (segment.value / total) * 100 : 0;
           const segShouldShowValue = this.evaluateShowCondition(segment.showValue, segment.value, segPercent);
           const segShouldShowPercent = this.evaluateShowCondition(segment.showPercent, segment.value, segPercent);
-          const segValueString = this.formatValueString(segment.value, segPercent, segShouldShowValue, segShouldShowPercent);
+          const segValueString = this.formatValueString(segment.value, segPercent, segShouldShowValue, segShouldShowPercent, segment.valueFormat);
 
           return svg`
             ${segment.href ? svg`<a href="${segment.href}" target="${segment.target || '_self'}">${segRect}</a>` : segRect}
@@ -1204,7 +1212,7 @@ export class Chart extends AxisChart {
           const segPercent = total > 0 ? (segment.value / total) * 100 : 0;
           const segShouldShowValue = this.evaluateShowCondition(segment.showValue, segment.value, segPercent);
           const segShouldShowPercent = this.evaluateShowCondition(segment.showPercent, segment.value, segPercent);
-          const segValueString = this.formatValueString(segment.value, segPercent, segShouldShowValue, segShouldShowPercent);
+          const segValueString = this.formatValueString(segment.value, segPercent, segShouldShowValue, segShouldShowPercent, segment.valueFormat);
 
           return svg`
             ${segment.href ? svg`<a href="${segment.href}" target="${segment.target || '_self'}">${segRect}</a>` : segRect}
@@ -1297,7 +1305,12 @@ export class Chart extends AxisChart {
       ${this.renderAxes(padding, isHorizontal ? 'horizontal' : 'vertical', isReverse)}
 
       <!-- Value axis labels -->
-      ${this.renderValueAxisLabels(padding, chartWidth, chartHeight, max, isHorizontal ? 'horizontal' : 'vertical', isReverse)}
+      ${this.renderValueAxisLabels(
+        padding, chartWidth, chartHeight, max,
+        isHorizontal ? 'horizontal' : 'vertical',
+        isReverse,
+        this.getAxisElement(isHorizontal ? 'bottom' : 'left')?.valueFormat
+      )}
 
       <!-- Category axis labels -->
       ${this.renderCategoryAxisLabels(bars, lines, bubbles, padding, chartWidth, chartHeight, structure)}
@@ -1406,7 +1419,7 @@ export class Chart extends AxisChart {
         const percent = total > 0 ? (bar.value / total) * 100 : 0;
         const shouldShowValue = this.evaluateShowCondition(bar.showValue, bar.value, percent);
         const shouldShowPercent = this.evaluateShowCondition(bar.showPercent, bar.value, percent);
-        const valueString = this.formatValueString(bar.value, percent, shouldShowValue, shouldShowPercent);
+        const valueString = this.formatValueString(bar.value, percent, shouldShowValue, shouldShowPercent, bar.valueFormat);
 
         // Defer label rendering to ensure it appears on top of lines
         if (valueString) {
@@ -1493,7 +1506,7 @@ export class Chart extends AxisChart {
         const percent = total > 0 ? (bar.value / total) * 100 : 0;
         const shouldShowValue = this.evaluateShowCondition(bar.showValue, bar.value, percent);
         const shouldShowPercent = this.evaluateShowCondition(bar.showPercent, bar.value, percent);
-        const valueString = this.formatValueString(bar.value, percent, shouldShowValue, shouldShowPercent);
+        const valueString = this.formatValueString(bar.value, percent, shouldShowValue, shouldShowPercent, bar.valueFormat);
 
         // Defer label rendering to ensure it appears on top of lines
         if (valueString) {
@@ -1677,7 +1690,7 @@ export class Chart extends AxisChart {
             const percent = total > 0 ? (pos.value / total) * 100 : 0;
             const shouldShowValue = this.evaluateShowCondition(pos.showValue, pos.value, percent);
             const shouldShowPercent = this.evaluateShowCondition(pos.showPercent, pos.value, percent);
-            const valueString = this.formatValueString(pos.value, percent, shouldShowValue, shouldShowPercent);
+            const valueString = this.formatValueString(pos.value, percent, shouldShowValue, shouldShowPercent, pos.valueFormat);
 
             // Defer label rendering to ensure it appears on top of bars
             if (valueString) {
@@ -1741,7 +1754,7 @@ export class Chart extends AxisChart {
         const percent = total > 0 ? (bubble.value / total) * 100 : 0;
         const shouldShowValue = this.evaluateShowCondition(bubble.showValue, bubble.value, percent);
         const shouldShowPercent = this.evaluateShowCondition(bubble.showPercent, bubble.value, percent);
-        const valueString = this.formatValueString(bubble.value, percent, shouldShowValue, shouldShowPercent);
+        const valueString = this.formatValueString(bubble.value, percent, shouldShowValue, shouldShowPercent, bubble.valueFormat);
 
         // Defer label rendering to ensure it appears on top of lines
         if (valueString) {
@@ -2426,6 +2439,9 @@ export class Chart extends AxisChart {
 
     const insights: string[] = [];
 
+    // Create a formatter function for insight generation
+    const formatValue = (value: number) => this.formatValue(value);
+
     // Generate bar insights
     if (bars.length > 0) {
       const barData: InsightBarData[] = bars.map(b => ({
@@ -2434,7 +2450,7 @@ export class Chart extends AxisChart {
       }));
       // Stub for reference line - will be implemented when that feature exists
       const referenceValue = this.getReferenceLineValue();
-      const barInsight = analyzeBars(barData, referenceValue);
+      const barInsight = analyzeBars(barData, referenceValue, formatValue);
       if (barInsight) {
         insights.push(barInsight);
       }
@@ -2446,7 +2462,7 @@ export class Chart extends AxisChart {
         label: line.label,
         points: line.points.map(p => ({ value: p.value, label: p.label }))
       }));
-      const lineInsight = analyzeLines(lineData);
+      const lineInsight = analyzeLines(lineData, formatValue);
       if (lineInsight) {
         insights.push(lineInsight);
       }
@@ -2459,7 +2475,7 @@ export class Chart extends AxisChart {
         value: b.value,
         sizeValue: b.sizeValue
       }));
-      const bubbleInsight = analyzeBubbles(bubbleData);
+      const bubbleInsight = analyzeBubbles(bubbleData, formatValue);
       if (bubbleInsight) {
         insights.push(bubbleInsight);
       }

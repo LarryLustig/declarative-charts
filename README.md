@@ -9,6 +9,7 @@ A modern Web Components-based chart library built with Lit that allows you to cr
 - 🎨 **Individual Styling** - Style each bar/point/slice independently
 - 🎭 **Pattern Fills** - 8 built-in SVG patterns for visual distinction
 - ♿ **High Contrast Mode** - WCAG-compliant colors with automatic patterns
+- 🔢 **Number Formatting** - Currency, compact (1.2M), percentages, locale-aware
 - 🔄 **Automatic Updates** - Charts update when you modify child elements
 - 📦 **Lightweight** - Built on Lit (~5KB overhead)
 - 🎯 **TypeScript** - Full TypeScript support with type definitions
@@ -489,6 +490,121 @@ Settings cascade from chart to element with explicit settings taking precedence:
 4. **Default**: Chart-type specific defaults
 
 See [`examples/axes.html`](examples/axes.html) for comprehensive examples of all `show-*` attribute features.
+
+### Number Formatting
+
+Control how numeric values are displayed using the `value-format` and `percent-format` attributes. Supports named presets and a subset of d3-format syntax.
+
+#### Named Presets
+
+| Format | Example Input | Output |
+|--------|---------------|--------|
+| `number` | 1234.567 | 1,234.57 |
+| `number 0` | 1234.567 | 1,235 |
+| `number 4` | 1234.567 | 1,234.5670 |
+| `integer` | 1234.567 | 1,235 |
+| `compact` | 1234567 | 1.2M |
+| `compact 1` | 1234567 | 1M |
+| `currency USD` | 1234.56 | $1,234.56 |
+| `currency EUR` | 1234.56 | €1,234.56 |
+| `percent` | 0.456 | 45.6% |
+| `percent 0` | 0.456 | 46% |
+
+#### d3-format Subset
+
+| Format | Meaning | Output |
+|--------|---------|--------|
+| `,.2f` | Comma separator, 2 decimals | 1,234.57 |
+| `,.0f` | Comma separator, 0 decimals | 1,235 |
+| `.1s` | SI prefix, 1 sig digit | 1M |
+| `.2s` | SI prefix, 2 sig digits | 1.2M |
+| `$,.2f` | Dollar, comma, 2 decimals | $1,234.57 |
+| `$,.0f` | Dollar, comma, 0 decimals | $1,235 |
+| `.1%` | Percent, 1 decimal | 45.6% |
+| `.0%` | Percent, 0 decimals | 46% |
+
+#### Chart-Level Formatting
+
+Set `value-format` on the chart to apply to all values:
+
+```html
+<!-- Currency format -->
+<dc-chart value-format="currency USD">
+  <dc-bar value="1234567" label="Revenue"></dc-bar>
+  <dc-bar value="876543" label="Expenses"></dc-bar>
+</dc-chart>
+
+<!-- Compact numbers for large values -->
+<dc-chart value-format="compact 1">
+  <dc-bar value="45000000" label="Q1"></dc-bar>
+  <dc-bar value="52000000" label="Q2"></dc-bar>
+</dc-chart>
+
+<!-- d3-format syntax -->
+<dc-chart value-format="$,.0f">
+  <dc-bar value="85000" label="Budget"></dc-bar>
+</dc-chart>
+```
+
+#### Axis and Legend Formatting
+
+Override formatting for axes and legends:
+
+```html
+<dc-chart value-format="currency USD">
+  <!-- Compact format for axis labels only -->
+  <dc-axis position="left" value-format="compact 1"></dc-axis>
+  <dc-bar value="2500000" label="Product A"></dc-bar>
+</dc-chart>
+
+<!-- Legend with custom value and percent formatting -->
+<dc-pie-chart show-value show-percent>
+  <dc-legend value-format="currency USD" percent-format="percent 0"></dc-legend>
+  <dc-pie-slice value="450000" label="North"></dc-pie-slice>
+  <dc-pie-slice value="280000" label="South"></dc-pie-slice>
+</dc-pie-chart>
+```
+
+#### Element-Level Formatting
+
+Override formatting for individual elements:
+
+```html
+<dc-chart value-format="number 0">
+  <dc-bar value="125000" label="Units Sold"></dc-bar>
+  <dc-bar value="4750000" label="Revenue" value-format="currency USD"></dc-bar>
+  <dc-bar value="0.38" label="Margin" value-format="percent 0"></dc-bar>
+</dc-chart>
+```
+
+**Important:** Percent values should be passed as decimals (0.38 = 38%). The formatter multiplies by 100.
+
+#### Locale Support
+
+Number formatting respects the browser's locale by default. Override with the `locale` attribute:
+
+```html
+<!-- German locale: 1.234,56 -->
+<dc-chart locale="de-DE" value-format="number 2">
+  <dc-bar value="1234.56" label="Q1"></dc-bar>
+</dc-chart>
+
+<!-- Euro currency with German locale -->
+<dc-chart locale="de-DE" value-format="currency EUR">
+  <dc-bar value="45000" label="Budget"></dc-bar>
+</dc-chart>
+```
+
+#### Format Inheritance
+
+Formats cascade with the most specific taking precedence:
+
+1. **Element-level** (highest): `<dc-bar value-format="...">`
+2. **Legend/Axis-level**: `<dc-legend value-format="...">` or `<dc-axis value-format="...">`
+3. **Chart-level**: `<dc-chart value-format="...">`
+4. **Default**: `number` format with 2 decimal places
+
+See [`examples/formatting.html`](examples/formatting.html) for comprehensive formatting examples.
 
 ## Components
 
@@ -1542,5 +1658,4 @@ MIT
 - Add more chart types (scatter, area, etc.)
 - Add animations and transitions
 - Add axis customization options (min/max values, tick intervals)
-- Add number formatting (currency, percentages, abbreviations)
 - Publish to npm

@@ -100,6 +100,18 @@ export class ChartAxis extends LitElement {
   @property({ type: String, attribute: 'label-lines' })
   labelLines: number | 'auto' = 1;
 
+  /**
+   * Format for value axis labels.
+   * Overrides the chart's value-format for this axis only.
+   * Uses the same format syntax as chart's value-format attribute.
+   *
+   * @example
+   * <dc-axis position="left" value-format="$,.0f"></dc-axis>
+   * <dc-axis position="left" value-format="compact 1"></dc-axis>
+   */
+  @property({ type: String, attribute: 'value-format' })
+  valueFormat?: string;
+
   static styles = css`
     :host {
       display: none !important;

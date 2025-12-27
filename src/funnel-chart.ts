@@ -120,6 +120,7 @@ export class FunnelChart extends BaseChart {
     patternStroke?: string;
     patternFill?: string;
     patternScale?: number;
+    valueFormat?: string;
   }> {
     const stageElements = Array.from(
       this.querySelectorAll('dc-funnel-stage')
@@ -161,7 +162,8 @@ export class FunnelChart extends BaseChart {
         pattern: stage.pattern,
         patternStroke: stage.patternStroke,
         patternFill: stage.patternFill,
-        patternScale: stage.patternScale
+        patternScale: stage.patternScale,
+        valueFormat: stage.valueFormat
       };
     });
   }
@@ -379,6 +381,7 @@ export class FunnelChart extends BaseChart {
       popup?: { content: string; trigger: string };
       autoPopup?: boolean;
       passthroughAttrs?: Record<string, string>;
+      valueFormat?: string;
     }>;
     padding: { top: number; right: number; bottom: number; left: number };
     chartWidth: number;
@@ -547,7 +550,8 @@ export class FunnelChart extends BaseChart {
         showPercent: stage.showPercent,
         popup: stage.popup,
         autoPopup: stage.autoPopup,
-        passthroughAttrs: stage.passthroughAttrs
+        passthroughAttrs: stage.passthroughAttrs,
+        valueFormat: stage.valueFormat
       };
     });
 
@@ -655,7 +659,7 @@ export class FunnelChart extends BaseChart {
         const shouldShowValue = this.evaluateShowCondition(stage.showValue, stage.value, percent);
         const shouldShowLabel = this.evaluateShowCondition(stage.showLabel, stage.value, percent);
         const shouldShowPercent = this.evaluateShowCondition(stage.showPercent, stage.value, percent);
-        const valueString = this.formatValueString(stage.value, percent, shouldShowValue, shouldShowPercent);
+        const valueString = this.formatValueString(stage.value, percent, shouldShowValue, shouldShowPercent, stage.valueFormat);
 
         // Calculate text positions based on what's being shown
         let labelY: number;
@@ -893,13 +897,16 @@ export class FunnelChart extends BaseChart {
     const stages = this.getStages();
     if (stages.length === 0) return '';
 
+    // Create a formatter function for insight generation
+    const formatValue = (value: number) => this.formatValue(value);
+
     // Convert to insight format
     const insightStages: InsightStageData[] = stages.map(s => ({
       label: s.label,
       value: s.value
     }));
 
-    return analyzeFunnel(insightStages);
+    return analyzeFunnel(insightStages, formatValue);
   }
 
   // ============================================================================

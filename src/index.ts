@@ -88,3 +88,7 @@ export type {
   StageData,
   BubbleData
 } from './accessibility/index.js';
+
+// Export formatting utilities
+export { NumberFormatter, formatNumber, parseFormat } from './format.js';
+export type { FormatPreset, FormatType, ParsedFormat, FormatterConfig } from './format.js';

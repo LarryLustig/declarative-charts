@@ -25,5 +25,6 @@ export {
   type BarData,
   type SliceData,
   type StageData,
-  type BubbleData
+  type BubbleData,
+  type ValueFormatter
 } from './insights.js';

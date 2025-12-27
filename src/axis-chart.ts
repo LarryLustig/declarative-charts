@@ -767,8 +767,12 @@ export abstract class AxisChart extends BaseChart {
     chartHeight: number,
     max: number,
     orientation: 'vertical' | 'horizontal' = 'vertical',
-    reverse = false
+    reverse = false,
+    axisFormat?: string
   ): SVGTemplateResult {
+    // Use axis format if provided, otherwise fall back to chart's valueFormat
+    const format = axisFormat ?? this.valueFormat;
+
     if (orientation === 'vertical') {
       if (reverse) {
         // Vertical-reverse: values increase downward from top
@@ -784,7 +788,7 @@ export abstract class AxisChart extends BaseChart {
                 font-size="11"
                 fill="#666"
               >
-                ${value.toFixed(0)}
+                ${this.formatValue(value, format)}
               </text>
             `;
           })}
@@ -803,7 +807,7 @@ export abstract class AxisChart extends BaseChart {
                 font-size="11"
                 fill="#666"
               >
-                ${value.toFixed(0)}
+                ${this.formatValue(value, format)}
               </text>
             `;
           })}
@@ -824,7 +828,7 @@ export abstract class AxisChart extends BaseChart {
                 font-size="11"
                 fill="#666"
               >
-                ${value.toFixed(0)}
+                ${this.formatValue(value, format)}
               </text>
             `;
           })}
@@ -843,7 +847,7 @@ export abstract class AxisChart extends BaseChart {
                 font-size="11"
                 fill="#666"
               >
-                ${value.toFixed(0)}
+                ${this.formatValue(value, format)}
               </text>
             `;
           })}

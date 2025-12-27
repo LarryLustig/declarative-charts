@@ -7,6 +7,21 @@
  */
 
 // ============================================================================
+// Types
+// ============================================================================
+
+/**
+ * A function that formats a number for display.
+ * Used to apply consistent number formatting in accessibility descriptions.
+ */
+export type ValueFormatter = (value: number) => string;
+
+/**
+ * Default formatter that returns the number as-is.
+ */
+const defaultFormatter: ValueFormatter = (value: number) => String(value);
+
+// ============================================================================
 // Utility Functions
 // ============================================================================
 
@@ -82,10 +97,12 @@ export interface LineData {
 /**
  * Analyze the trend of a single line's data points.
  * Returns a human-readable description of the trend.
+ * @param points - The line points to analyze
+ * @param format - Optional formatter function for values
  */
-export function analyzeLineTrend(points: LinePoint[]): string {
+export function analyzeLineTrend(points: LinePoint[], format: ValueFormatter = defaultFormatter): string {
   if (points.length === 0) return '';
-  if (points.length === 1) return `single point at ${points[0].value}`;
+  if (points.length === 1) return `single point at ${format(points[0].value)}`;
 
   const values = points.map(p => p.value);
   const labels = points.map(p => p.label);
@@ -132,7 +149,7 @@ export function analyzeLineTrend(points: LinePoint[]): string {
   if (maxIndex > 0 && maxIndex < values.length - 1) {
     parts.push(`peaked at ${labels[maxIndex]}`);
   } else if (max !== min) {
-    parts.push(`highest at ${labels[maxIndex]} (${max})`);
+    parts.push(`highest at ${labels[maxIndex]} (${format(max)})`);
   }
 
   if (minIndex > 0 && minIndex < values.length - 1 && minIndex !== maxIndex) {
@@ -144,13 +161,15 @@ export function analyzeLineTrend(points: LinePoint[]): string {
 
 /**
  * Analyze multiple lines and generate a combined description.
+ * @param lines - The lines to analyze
+ * @param format - Optional formatter function for values
  */
-export function analyzeLines(lines: LineData[]): string {
+export function analyzeLines(lines: LineData[], format: ValueFormatter = defaultFormatter): string {
   if (lines.length === 0) return '';
 
   if (lines.length === 1) {
     const line = lines[0];
-    const trend = analyzeLineTrend(line.points);
+    const trend = analyzeLineTrend(line.points, format);
     return line.label ? `${line.label}: ${trend}` : trend;
   }
 
@@ -184,11 +203,14 @@ export interface BarData {
 /**
  * Analyze bar chart data and generate a description.
  * Optionally compares against a reference/target value.
+ * @param bars - The bars to analyze
+ * @param referenceValue - Optional reference value for comparison
+ * @param format - Optional formatter function for values
  */
-export function analyzeBars(bars: BarData[], referenceValue?: number): string {
+export function analyzeBars(bars: BarData[], referenceValue?: number, format: ValueFormatter = defaultFormatter): string {
   if (bars.length === 0) return '';
   if (bars.length === 1) {
-    return `single bar: ${bars[0].label} at ${bars[0].value}`;
+    return `single bar: ${bars[0].label} at ${format(bars[0].value)}`;
   }
 
   const values = bars.map(b => b.value);
@@ -205,11 +227,11 @@ export function analyzeBars(bars: BarData[], referenceValue?: number): string {
   const parts: string[] = [];
 
   if (spread < 0.2) {
-    parts.push(`values relatively consistent around ${Math.round(avg)}`);
+    parts.push(`values relatively consistent around ${format(Math.round(avg))}`);
   } else {
-    parts.push(`${highest.label} highest at ${highest.value}`);
+    parts.push(`${highest.label} highest at ${format(highest.value)}`);
     if (lowest.label !== highest.label) {
-      parts.push(`${lowest.label} lowest at ${lowest.value}`);
+      parts.push(`${lowest.label} lowest at ${format(lowest.value)}`);
     }
   }
 
@@ -247,8 +269,10 @@ export interface SliceData {
 
 /**
  * Analyze pie chart data and generate a description.
+ * @param slices - The pie slices to analyze
+ * @param format - Optional formatter function for values
  */
-export function analyzePie(slices: SliceData[]): string {
+export function analyzePie(slices: SliceData[], _format: ValueFormatter = defaultFormatter): string {
   if (slices.length === 0) return '';
   if (slices.length === 1) {
     return `single category: ${slices[0].label} (100%)`;
@@ -294,11 +318,13 @@ export interface StageData {
 
 /**
  * Analyze funnel chart data and generate a description.
+ * @param stages - The funnel stages to analyze
+ * @param format - Optional formatter function for values
  */
-export function analyzeFunnel(stages: StageData[]): string {
+export function analyzeFunnel(stages: StageData[], format: ValueFormatter = defaultFormatter): string {
   if (stages.length === 0) return '';
   if (stages.length === 1) {
-    return `single stage: ${stages[0].label} with ${stages[0].value}`;
+    return `single stage: ${stages[0].label} with ${format(stages[0].value)}`;
   }
 
   const first = stages[0].value;
@@ -353,11 +379,13 @@ export interface BubbleData {
 
 /**
  * Analyze bubble chart data and generate a description.
+ * @param bubbles - The bubbles to analyze
+ * @param format - Optional formatter function for values
  */
-export function analyzeBubbles(bubbles: BubbleData[]): string {
+export function analyzeBubbles(bubbles: BubbleData[], format: ValueFormatter = defaultFormatter): string {
   if (bubbles.length === 0) return '';
   if (bubbles.length === 1) {
-    return `single bubble: ${bubbles[0].label} at value ${bubbles[0].value}`;
+    return `single bubble: ${bubbles[0].label} at value ${format(bubbles[0].value)}`;
   }
 
   // Find bubble with highest value
@@ -367,7 +395,7 @@ export function analyzeBubbles(bubbles: BubbleData[]): string {
 
   const parts: string[] = [];
 
-  parts.push(`${highestValue.label} has highest value (${highestValue.value})`);
+  parts.push(`${highestValue.label} has highest value (${format(highestValue.value)})`);
 
   if (largestSize.label !== highestValue.label) {
     parts.push(`${largestSize.label} is largest by size`);

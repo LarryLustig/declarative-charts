@@ -87,6 +87,37 @@ Text elements (`<dc-title>`, `<dc-legend>`) use SVG attributes, not CSS:
 
 **Keyboard Navigation**: Roving tabindex pattern. Implement `getFocusableElements()`, `getShapeBounds()`, `renderFocusIndicator()`.
 
+**Number Formatting**: All numeric values (labels, axes, legends, popups) use the formatting system in `src/format.ts`.
+
+Format inheritance: element `value-format` → legend/axis `value-format` → chart `value-format` → default.
+
+```html
+<!-- Named presets with optional argument -->
+<dc-chart value-format="currency USD">     <!-- $1,234.56 -->
+<dc-chart value-format="number 2">         <!-- 1,234.56 -->
+<dc-chart value-format="compact 1">        <!-- 1.2M -->
+<dc-chart value-format="percent 0">        <!-- 46% -->
+<dc-chart value-format="integer">          <!-- 1,235 -->
+
+<!-- d3-format subset -->
+<dc-chart value-format="$,.2f">            <!-- $1,234.56 -->
+<dc-chart value-format=".1s">              <!-- 1.2M -->
+
+<!-- Override at axis, legend, or element level -->
+<dc-axis position="left" value-format="compact 1"></dc-axis>
+<dc-legend value-format="currency USD" percent-format="percent 0"></dc-legend>
+<dc-bar value="0.38" value-format="percent 0"></dc-bar>
+```
+
+**⚠️ Percent Convention**: Percent values are passed as decimals (0.38 → "38%"). The formatter multiplies by 100.
+
+In code:
+- `this.formatValue(value, elementFormat?)` - formats a value using element override or chart default
+- `this.formatPercent(decimal, elementFormat?)` - formats a percentage (input as decimal)
+- `this.getFormatter()` - returns cached `NumberFormatter` instance
+
+When rendering labels, always use `formatValueString()` which handles show-value/show-percent logic and applies element-level format overrides.
+
 ## Development Workflow
 
 ### Adding a New Chart Type
@@ -96,16 +127,21 @@ Text elements (`<dc-title>`, `<dc-legend>`) use SVG attributes, not CSS:
 3. Implement `renderChart(): SVGTemplateResult`
 4. Use `this.getChartPadding()` for positioning
 5. Implement: logging, auto-popup, `getLegendItems()`, `getInsights()`, keyboard navigation
-6. Export from `src/index.ts`
-7. Add examples to `index.html` and `examples/`
+6. **Use formatting system for all numeric display:**
+   - Labels: use `formatValueString(value, percent, showValue, showPercent, elementFormat)`
+   - Insights: pass `this.formatValue` to insight functions
+   - Extract `valueFormat` from data elements and pass through data structures
+7. Export from `src/index.ts`
+8. Add examples to `index.html` and `examples/`
 
 ### Adding a New Data Element
 
 1. Extend `BaseShape` (renders to SVG) or `BaseChartElement` (container)
 2. Add `@property()` decorated properties
-3. Export from `src/index.ts`
+3. Include `valueFormat` property if element supports per-element formatting (inherited from `BaseShape`)
+4. Export from `src/index.ts`
 
-For `BaseShape`: parent chart must capture passthrough attrs, add `data-shape-index`, call `applyPassthroughAttributes()`.
+For `BaseShape`: parent chart must capture passthrough attrs (including `valueFormat`), add `data-shape-index`, call `applyPassthroughAttributes()`.
 
 ### Legend Items
 
@@ -146,13 +182,14 @@ Always use `this.measureText(text, fontSize)` for text widths. Never estimate wi
 
 ```
 src/
-├── base-chart.ts           # Abstract base (logging, accessibility, keyboard nav)
+├── base-chart.ts           # Abstract base (logging, accessibility, keyboard nav, formatting)
 ├── axis-chart.ts           # Abstract base for axis charts
 ├── base-chart-element.ts   # Abstract base for data elements
-├── base-shape.ts           # Abstract base for shapes (passthrough support)
+├── base-shape.ts           # Abstract base for shapes (passthrough, valueFormat)
 ├── chart.ts                # <dc-chart> - bars/lines/bubbles
 ├── pie-chart.ts            # <dc-pie-chart>
 ├── funnel-chart.ts         # <dc-funnel-chart>
+├── format.ts               # NumberFormatter, presets, d3-format parsing
 ├── accessibility/          # Insight analysis utilities
 ├── chart-axis.ts           # <dc-axis> configuration
 ├── chart-palette.ts        # <dc-palette> container
@@ -173,7 +210,12 @@ test-charts/                # Visual test matrices for legend/title positions
 
 ## Examples
 
-See `examples/*.html`. Key rules:
+See `examples/*.html`. Key examples:
+- `formatting.html` - Number formatting presets, d3-format, locale, element-level overrides
+- `accessibility.html` - ARIA, insights, keyboard navigation
+- `patterns.html` - Pattern fills, high contrast mode
+
+Key rules:
 - Include `examples.css` and `examples.js`
 - Use two-tier nav (`.nav-major` + `.nav-minor`)
 - Wrap in `<div class="example"><div class="grid">`

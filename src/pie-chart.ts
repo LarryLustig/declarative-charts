@@ -70,6 +70,7 @@ export class PieChart extends BaseChart {
     autoPopup?: boolean;
     element?: ChartPieSlice;
     passthroughAttrs?: Record<string, string>;
+    valueFormat?: string;
   }> {
     const sliceElements = Array.from(
       this.querySelectorAll('dc-pie-slice')
@@ -109,7 +110,8 @@ export class PieChart extends BaseChart {
           : undefined,
         autoPopup: slice.autoPopup,
         element: slice,
-        passthroughAttrs: Object.keys(passthroughAttrs).length > 0 ? passthroughAttrs : undefined
+        passthroughAttrs: Object.keys(passthroughAttrs).length > 0 ? passthroughAttrs : undefined,
+        valueFormat: slice.valueFormat
       };
     });
   }
@@ -141,6 +143,7 @@ export class PieChart extends BaseChart {
       popup?: { content: string; trigger: string };
       autoPopup?: boolean;
       passthroughAttrs?: Record<string, string>;
+      valueFormat?: string;
     }>;
     centerX: number;
     centerY: number;
@@ -235,7 +238,8 @@ export class PieChart extends BaseChart {
         showPercent: slice.showPercent,
         popup: slice.popup,
         autoPopup: slice.autoPopup,
-        passthroughAttrs: slice.passthroughAttrs
+        passthroughAttrs: slice.passthroughAttrs,
+        valueFormat: slice.valueFormat
       };
     });
 
@@ -320,7 +324,7 @@ export class PieChart extends BaseChart {
         const shouldShowValue = this.evaluateShowCondition(slice.showValue, slice.value, slice.percentage);
         const shouldShowLabel = this.evaluateShowCondition(slice.showLabel, slice.value, slice.percentage);
         const shouldShowPercent = this.evaluateShowCondition(slice.showPercent, slice.value, slice.percentage);
-        const valueString = this.formatValueString(slice.value, slice.percentage, shouldShowValue, shouldShowPercent);
+        const valueString = this.formatValueString(slice.value, slice.percentage, shouldShowValue, shouldShowPercent, slice.valueFormat);
 
         // Determine if any popup should show (explicit or auto)
         const hasPopup = slice.popup || this.shouldShowAutoPopup(slice.autoPopup);
@@ -516,13 +520,16 @@ export class PieChart extends BaseChart {
     const slices = this.getSlices();
     if (slices.length === 0) return '';
 
+    // Create a formatter function for insight generation
+    const formatValue = (value: number) => this.formatValue(value);
+
     // Convert to insight format
     const insightSlices: InsightSliceData[] = slices.map(s => ({
       label: s.label,
       value: s.value
     }));
 
-    return analyzePie(insightSlices);
+    return analyzePie(insightSlices, formatValue);
   }
 
   // ============================================================================

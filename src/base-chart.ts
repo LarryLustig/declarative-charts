@@ -15,6 +15,7 @@ import {
   generatePatternId,
   getHighContrastPattern
 } from './patterns.js';
+import { NumberFormatter } from './format.js';
 
 /**
  * Color mode for resolving chart element colors.
@@ -287,6 +288,52 @@ export abstract class BaseChart extends LitElement {
   showPercent: ShowCondition = false;
 
   // ============================================================================
+  // Number Formatting Properties
+  // ============================================================================
+
+  /**
+   * Format for numeric values displayed on chart elements.
+   * Supports named presets with compound syntax or d3-format subset.
+   *
+   * Presets:
+   * - "number" or "number N" - Fixed decimals with grouping (default: 2)
+   * - "integer" - Whole numbers with grouping
+   * - "compact" or "compact N" - SI prefix (K, M, B) with N significant digits
+   * - "currency CODE" - Locale-aware currency (e.g., "currency USD")
+   * - "percent" or "percent N" - Percentage with N decimals
+   *
+   * d3-format subset:
+   * - ",.2f" - Grouping with 2 decimals
+   * - "$,.0f" - Dollar prefix with grouping
+   * - ".1s" - SI prefix with 1 significant digit
+   * - ".1%" - Percentage with 1 decimal
+   */
+  @property({ type: String, attribute: 'value-format' })
+  valueFormat: string = 'number';
+
+  /**
+   * Format for percentage values displayed on chart elements.
+   * Uses the same format syntax as value-format.
+   * Default: "percent 1" (e.g., "45.6%")
+   */
+  @property({ type: String, attribute: 'percent-format' })
+  percentFormat: string = 'percent 1';
+
+  /**
+   * Locale for number formatting (e.g., "en-US", "de-DE", "fr-FR").
+   * Affects thousand separators, decimal separators, and currency formatting.
+   * Default: browser's navigator.language
+   */
+  @property({ type: String })
+  locale?: string;
+
+  /**
+   * Cached NumberFormatter instance.
+   * Invalidated when locale changes.
+   */
+  private _formatter: NumberFormatter | null = null;
+
+  // ============================================================================
   // Color System Properties
   // ============================================================================
 
@@ -519,38 +566,96 @@ export abstract class BaseChart extends LitElement {
     return value >= condition.threshold;
   }
 
+  // ============================================================================
+  // Number Formatting Methods
+  // ============================================================================
+
+  /**
+   * Get or create the NumberFormatter for this chart.
+   * The formatter is cached and recreated when locale changes.
+   */
+  getFormatter(): NumberFormatter {
+    if (!this._formatter) {
+      this._formatter = new NumberFormatter({
+        locale: this.locale,
+      });
+    }
+    return this._formatter;
+  }
+
+  /**
+   * Invalidate the cached formatter when locale changes.
+   * Called by Lit when observed properties change.
+   */
+  protected willUpdate(changedProperties: Map<string, unknown>): void {
+    if (changedProperties.has('locale')) {
+      this._formatter = null;
+    }
+  }
+
+  /**
+   * Format a numeric value using the chart's formatter.
+   * @param value The number to format
+   * @param format Optional format string (defaults to chart's valueFormat)
+   */
+  formatValue(value: number, format?: string): string {
+    return this.getFormatter().format(value, format ?? this.valueFormat);
+  }
+
+  /**
+   * Format a percentage value using the chart's formatter.
+   * Note: The value should be a decimal (0.456 = 45.6%), not 0-100.
+   * @param percent The percentage as a decimal (0-1 range)
+   * @param format Optional format string (defaults to chart's percentFormat)
+   */
+  formatPercent(percent: number, format?: string): string {
+    return this.getFormatter().format(percent, format ?? this.percentFormat);
+  }
+
   /**
    * Format a value string based on show-value and show-percent settings.
    *
    * Logic:
    * - Both false: returns null (nothing to display)
-   * - show-value only: returns the value as string
-   * - show-percent only: returns the percentage with % suffix
-   * - Both true: returns "value (percent%)"
+   * - show-value only: returns the formatted value
+   * - show-percent only: returns the formatted percentage
+   * - Both true: returns "value (percent)"
    *
    * @param value The numeric value
-   * @param percent The percentage value (0-100)
+   * @param percent The percentage value (0-100 scale for backward compatibility)
    * @param showValue Whether to show the value (after threshold evaluation)
    * @param showPercent Whether to show the percentage (after threshold evaluation)
+   * @param elementFormat Optional per-element format override
    * @returns Formatted string or null if nothing should be displayed
    */
   protected formatValueString(
     value: number,
     percent: number,
     showValue: boolean,
-    showPercent: boolean
+    showPercent: boolean,
+    elementFormat?: string
   ): string | null {
     if (!showValue && !showPercent) {
       return null;
     }
+
+    const formattedValue = showValue
+      ? this.formatValue(value, elementFormat)
+      : '';
+
+    // Convert percent from 0-100 to 0-1 for the formatter
+    const formattedPercent = showPercent
+      ? this.formatPercent(percent / 100)
+      : '';
+
     if (showValue && showPercent) {
-      return `${value} (${percent.toFixed(1)}%)`;
+      return `${formattedValue} (${formattedPercent})`;
     }
     if (showValue) {
-      return `${value}`;
+      return formattedValue;
     }
     // showPercent only
-    return `${percent.toFixed(1)}%`;
+    return formattedPercent;
   }
 
   /**
@@ -2165,7 +2270,10 @@ export abstract class BaseChart extends LitElement {
     // Convert ShowCondition to boolean (threshold conditions count as "show")
     const showValue = this.showValue !== false;
     const showPercent = this.showPercent !== false;
-    const dims = legend.getDimensions(items, this.width, showValue, showPercent);
+    const dims = legend.getDimensions(
+      items, this.width, showValue, showPercent,
+      this.valueFormat, this.percentFormat, this.locale
+    );
 
     this.log('info', 'legend.position', `Legend position`, position);
     this.log('info', 'legend.dimensions', `width=${dims.width.toFixed(1)}, height=${dims.height.toFixed(1)}`, { width: dims.width, height: dims.height });
@@ -2191,7 +2299,10 @@ export abstract class BaseChart extends LitElement {
     // Convert ShowCondition to boolean (threshold conditions count as "show")
     const showValue = this.showValue !== false;
     const showPercent = this.showPercent !== false;
-    const result = legend.generateSvg(items, this.width, showValue, showPercent);
+    const result = legend.generateSvg(
+      items, this.width, showValue, showPercent,
+      this.valueFormat, this.percentFormat, this.locale
+    );
 
     if (result.width === 0 || result.height === 0) {
       return svg``;

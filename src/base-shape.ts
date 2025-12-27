@@ -72,6 +72,20 @@ export abstract class BaseShape extends BaseChartElement {
   patternScale?: number;
 
   /**
+   * Format for values displayed on this element's label.
+   * Overrides the chart's value-format for this element only.
+   * Uses the same format syntax as chart's value-format attribute.
+   *
+   * @example
+   * <dc-bar value="1234567" value-format="currency USD"></dc-bar>
+   * <dc-pie-slice value="1234567" value-format="compact 1"></dc-pie-slice>
+   *
+   * @attr value-format
+   */
+  @property({ type: String, attribute: 'value-format' })
+  valueFormat?: string;
+
+  /**
    * Common attributes handled by BaseChartElement and BaseShape.
    * Subclasses should merge their own known attributes with this set.
    */
@@ -87,7 +101,8 @@ export abstract class BaseShape extends BaseChartElement {
     'pattern',
     'pattern-stroke',
     'pattern-fill',
-    'pattern-scale'
+    'pattern-scale',
+    'value-format'
   ]);
 
   /**
