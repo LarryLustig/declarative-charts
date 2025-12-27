@@ -115,6 +115,11 @@ export class FunnelChart extends BaseChart {
     popup?: { content: string; trigger: string };
     autoPopup?: boolean;
     passthroughAttrs?: Record<string, string>;
+    // Pattern properties
+    pattern?: string;
+    patternStroke?: string;
+    patternFill?: string;
+    patternScale?: number;
   }> {
     const stageElements = Array.from(
       this.querySelectorAll('dc-funnel-stage')
@@ -151,7 +156,12 @@ export class FunnelChart extends BaseChart {
           ? { content: popupEl.content, trigger: popupEl.trigger }
           : undefined,
         autoPopup: stage.autoPopup,
-        passthroughAttrs: Object.keys(passthroughAttrs).length > 0 ? passthroughAttrs : undefined
+        passthroughAttrs: Object.keys(passthroughAttrs).length > 0 ? passthroughAttrs : undefined,
+        // Pattern properties
+        pattern: stage.pattern,
+        patternStroke: stage.patternStroke,
+        patternFill: stage.patternFill,
+        patternScale: stage.patternScale
       };
     });
   }
@@ -360,6 +370,7 @@ export class FunnelChart extends BaseChart {
       bottomLeft: number;
       bottomRight: number;
       fillColor: string;
+      originalColor: string;  // Original solid color for legend (fillColor may be pattern URL)
       strokeColor: string;
       strokeWidth: number;
       showValue: ShowCondition;
@@ -391,49 +402,42 @@ export class FunnelChart extends BaseChart {
     // Calculate total for percentage calculations
     const total = stagesData.reduce((sum, stage) => sum + stage.value, 0);
 
-    // Resolve fill colors using the new color system with palette support
-    // First, check palette for each stage (palette takes priority over gradient/default colors)
-    const elements = stagesData.map(s => ({
-      fill: s.fill,
-      label: s.label,
-      value: s.value
-    }));
-
-    // Check palette for colors
-    const paletteColors = elements.map(el => {
-      if (el.fill) return undefined; // Element has explicit fill, skip palette
-      const result = this.lookupPaletteColor(el.label, el.value);
-      return result.fill;
-    });
-
-    // Combine element fills with palette fills
-    const effectiveFills = elements.map((el, i) => el.fill || paletteColors[i]);
-
-    // Log palette usage
-    const paletteMatchCount = paletteColors.filter(c => c !== undefined).length;
-    if (this.paletteId && paletteMatchCount > 0) {
-      this.log('info', 'colors.palette', `Palette "${this.paletteId}" matched ${paletteMatchCount} stage(s)`, paletteMatchCount);
-    }
-
+    // Determine base colors (gradient or cool-to-warm)
     const effectiveStartColor = this.getEffectiveFillStartColor();
     const effectiveEndColor = this.getEffectiveFillEndColor();
 
-    let fillColors: string[];
+    let baseColors: string[];
     if (effectiveStartColor && effectiveEndColor) {
-      const gradientColors = this.generateGradientColors(effectiveStartColor, effectiveEndColor, stagesData.length);
-      fillColors = gradientColors || this.generateCoolToWarmColors(stagesData.length);
-      // Apply element/palette overrides on top of gradient
-      fillColors = fillColors.map((color, i) => effectiveFills[i] || color);
+      baseColors = this.generateGradientColors(effectiveStartColor, effectiveEndColor, stagesData.length)
+        || this.generateCoolToWarmColors(stagesData.length);
     } else if (this.fillColors) {
-      fillColors = this.resolveColors(stagesData.length, {
-        elementColors: effectiveFills,
-        palette: this.fillColors
-      });
+      // Use fill-colors attribute as base
+      baseColors = this.resolveColors(stagesData.length, { palette: this.fillColors });
     } else {
-      fillColors = this.generateCoolToWarmColors(stagesData.length);
-      // Apply element/palette overrides on top of default cool-to-warm colors
-      fillColors = fillColors.map((color, i) => effectiveFills[i] || color);
+      baseColors = this.generateCoolToWarmColors(stagesData.length);
     }
+
+    // Clear used patterns before resolving fills
+    this.clearUsedPatterns();
+
+    // Prepare elements for pattern-aware fill resolution
+    const elementsForResolution = stagesData.map((s, i) => ({
+      fill: s.fill,
+      label: s.label,
+      value: s.value,
+      pattern: s.pattern,
+      patternStroke: s.patternStroke,
+      patternFill: s.patternFill,
+      patternScale: s.patternScale,
+      defaultColor: baseColors[i]
+    }));
+
+    // Resolve fills with pattern support
+    const resolvedFills = this.resolveFillsWithPatterns(elementsForResolution);
+
+    // Extract fill colors and original colors for legend
+    const fillColors = resolvedFills.map(r => r.fill);
+    const originalColors = resolvedFills.map(r => r.originalFill);
 
     // Resolve stroke colors (default to #e0e0e0)
     const elementStrokes = stagesData.map(s => s.stroke);
@@ -535,6 +539,7 @@ export class FunnelChart extends BaseChart {
         bottomLeft,
         bottomRight,
         fillColor: fillColors[index],
+        originalColor: originalColors[index],
         strokeColor: strokeColors[index],
         strokeWidth: stage.strokeWidth ?? defaultStrokeWidth,
         showValue: stage.showValue,
@@ -574,13 +579,16 @@ export class FunnelChart extends BaseChart {
     const { stages, total, chevronDepth, chartCenterX } = layout;
 
     return svg`
+      ${this.renderDefs()}
+
       <!-- Funnel stages -->
       ${stages.map((stage) => {
         const y = stage.y;
         const nextY = y + stage.height;
         const { topLeft, topRight, bottomLeft, bottomRight } = stage;
 
-        const textColor = this.getContrastingTextColor(stage.fillColor);
+        // Use originalColor for text contrast (fillColor may be pattern URL)
+        const textColor = this.getContrastingTextColor(stage.originalColor);
 
         // Create polygon points based on whether chevron is enabled
         let polygonPoints: string;
@@ -722,10 +730,12 @@ export class FunnelChart extends BaseChart {
       ${this.renderLegend(
         stages.map((stage) => ({
           label: stage.label,
-          color: stage.fillColor,
+          color: stage.originalColor,  // Use originalColor (fillColor may be pattern URL)
           value: stage.value
         }))
       )}
+
+      ${this.renderFocusIndicator()}
     `;
   }
 
@@ -814,44 +824,38 @@ export class FunnelChart extends BaseChart {
     const stagesData = this.getStages();
     if (stagesData.length === 0) return [];
 
-    // Resolve colors with palette support without calling calculateStageLayout
-    const elements = stagesData.map(s => ({
-      fill: s.fill,
-      label: s.label,
-      value: s.value
-    }));
-
-    // Check palette for colors
-    const paletteColors = elements.map(el => {
-      if (el.fill) return undefined;
-      const result = this.lookupPaletteColor(el.label, el.value);
-      return result.fill;
-    });
-
-    // Combine element fills with palette fills
-    const effectiveFills = elements.map((el, i) => el.fill || paletteColors[i]);
-
+    // Determine base colors (gradient or cool-to-warm)
     const effectiveStartColor = this.getEffectiveFillStartColor();
     const effectiveEndColor = this.getEffectiveFillEndColor();
 
-    let fillColors: string[];
+    let baseColors: string[];
     if (effectiveStartColor && effectiveEndColor) {
-      const gradientColors = this.generateGradientColors(effectiveStartColor, effectiveEndColor, stagesData.length);
-      fillColors = gradientColors || this.generateCoolToWarmColors(stagesData.length);
-      fillColors = fillColors.map((color, i) => effectiveFills[i] || color);
+      baseColors = this.generateGradientColors(effectiveStartColor, effectiveEndColor, stagesData.length)
+        || this.generateCoolToWarmColors(stagesData.length);
     } else if (this.fillColors) {
-      fillColors = this.resolveColors(stagesData.length, {
-        elementColors: effectiveFills,
-        palette: this.fillColors
-      });
+      baseColors = this.resolveColors(stagesData.length, { palette: this.fillColors });
     } else {
-      fillColors = this.generateCoolToWarmColors(stagesData.length);
-      fillColors = fillColors.map((color, i) => effectiveFills[i] || color);
+      baseColors = this.generateCoolToWarmColors(stagesData.length);
     }
+
+    // Prepare elements for pattern-aware fill resolution
+    const elementsForResolution = stagesData.map((s, i) => ({
+      fill: s.fill,
+      label: s.label,
+      value: s.value,
+      pattern: s.pattern,
+      patternStroke: s.patternStroke,
+      patternFill: s.patternFill,
+      patternScale: s.patternScale,
+      defaultColor: baseColors[i]
+    }));
+
+    // Resolve fills with pattern support (but we only need originalFill for legend)
+    const resolvedFills = this.resolveFillsWithPatterns(elementsForResolution);
 
     return stagesData.map((stage, index) => ({
       label: stage.label,
-      color: fillColors[index],
+      color: resolvedFills[index].originalFill,  // Use originalFill for legend (not pattern URL)
       value: stage.value,
       shape: 'square' as const  // Funnel stages use squares in legend
     }));

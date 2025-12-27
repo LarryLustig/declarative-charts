@@ -58,6 +58,11 @@ interface BarData {
   element?: ChartBar;
   passthroughAttrs?: Record<string, string>;
   segments?: SegmentData[];
+  // Pattern properties
+  pattern?: string;
+  patternStroke?: string;
+  patternFill?: string;
+  patternScale?: number;
 }
 
 interface BarGroupData {
@@ -77,6 +82,7 @@ interface FlattenedBar extends BarData {
   groupLabel?: string;
   groupIndex?: number;
   barIndexInGroup?: number;
+  originalFill?: string;  // Original solid color for legend (fill may be pattern URL)
 }
 
 // ============================================================================
@@ -119,6 +125,7 @@ interface BubbleData {
   sizeValue: number;
   label: string;
   fill?: string;
+  originalFill?: string;  // Original solid color for legend (fill may be pattern URL)
   stroke?: string;
   href?: string;
   target?: string;
@@ -127,6 +134,11 @@ interface BubbleData {
   showValue: ShowCondition;
   showPercent: ShowCondition;
   passthroughAttrs?: Record<string, string>;
+  // Pattern properties
+  pattern?: string;
+  patternStroke?: string;
+  patternFill?: string;
+  patternScale?: number;
 }
 
 /**
@@ -420,7 +432,12 @@ export class Chart extends AxisChart {
       gutter,
       element: bar,
       passthroughAttrs: Object.keys(passthroughAttrs).length > 0 ? passthroughAttrs : undefined,
-      segments
+      segments,
+      // Pattern properties
+      pattern: bar.pattern,
+      patternStroke: bar.patternStroke,
+      patternFill: bar.patternFill,
+      patternScale: bar.patternScale
     };
   }
 
@@ -478,14 +495,21 @@ export class Chart extends AxisChart {
     });
 
     if (flattened.length > 0) {
+      // Prepare elements for pattern-aware fill resolution
       const elements = flattened.map(b => ({
         fill: b.elementFill,
         label: b.label,
-        value: b.value
+        value: b.value,
+        pattern: b.pattern,
+        patternStroke: b.patternStroke,
+        patternFill: b.patternFill,
+        patternScale: b.patternScale,
+        defaultColor: this.getDefaultBarFill()
       }));
-      const fillColors = this.resolveFillColorsWithPalette(elements, this.getDefaultBarFill());
+      const resolvedFills = this.resolveFillsWithPatterns(elements);
       flattened.forEach((bar, index) => {
-        bar.fill = fillColors[index];
+        bar.fill = resolvedFills[index].fill;
+        bar.originalFill = resolvedFills[index].originalFill;
       });
     }
 
@@ -743,6 +767,7 @@ export class Chart extends AxisChart {
         sizeValue: bubble.sizeValue,
         label: bubble.label,
         fill: effectiveFill || undefined,
+        originalFill: undefined as string | undefined,  // Will be set after pattern resolution
         stroke: bubble.stroke || undefined,
         href: bubble.href || undefined,
         target: bubble.target || undefined,
@@ -750,19 +775,31 @@ export class Chart extends AxisChart {
         autoPopup: bubble.autoPopup,
         showValue,
         showPercent,
-        passthroughAttrs: Object.keys(passthroughAttrs).length > 0 ? passthroughAttrs : undefined
+        passthroughAttrs: Object.keys(passthroughAttrs).length > 0 ? passthroughAttrs : undefined,
+        // Pattern properties
+        pattern: bubble.pattern,
+        patternStroke: bubble.patternStroke,
+        patternFill: bubble.patternFill,
+        patternScale: bubble.patternScale
       };
     });
 
     if (bubblesData.length > 0) {
+      // Prepare elements for pattern-aware fill resolution
       const elements = bubblesData.map(b => ({
         fill: b.fill,
         label: b.label,
-        value: b.value
+        value: b.value,
+        pattern: b.pattern,
+        patternStroke: b.patternStroke,
+        patternFill: b.patternFill,
+        patternScale: b.patternScale,
+        defaultColor: '#4CAF50'
       }));
-      const fillColors = this.resolveFillColorsWithPalette(elements, '#4CAF50');
+      const resolvedFills = this.resolveFillsWithPatterns(elements);
       bubblesData.forEach((bubble, index) => {
-        bubble.fill = fillColors[index];
+        bubble.fill = resolvedFills[index].fill;
+        bubble.originalFill = resolvedFills[index].originalFill;
       });
     }
 
@@ -1197,6 +1234,8 @@ export class Chart extends AxisChart {
   }
 
   protected renderChart(): SVGTemplateResult {
+    // Clear used patterns before resolving fills
+    this.clearUsedPatterns();
     this.buildSegmentColorMap();
 
     const bars = this.getFlattenedBars();
@@ -1229,6 +1268,8 @@ export class Chart extends AxisChart {
     const deferredLabels: DeferredLabel[] = [];
 
     return svg`
+      ${this.renderDefs()}
+
       <!-- Grid lines -->
       ${this.renderGridLines(padding, chartWidth, chartHeight, max, isHorizontal ? 'horizontal' : 'vertical')}
 
@@ -1269,6 +1310,8 @@ export class Chart extends AxisChart {
 
       <!-- Legend -->
       ${this.renderLegend(this.getLegendItems())}
+
+      ${this.renderFocusIndicator()}
     `;
   }
 
@@ -2283,10 +2326,11 @@ export class Chart extends AxisChart {
     const items: LegendItem[] = [];
 
     // Add bar items (shape: square)
+    // Use originalFill for legend (fill may be pattern URL)
     bars.forEach(bar => {
       items.push({
         label: bar.label,
-        color: bar.fill,
+        color: bar.originalFill || bar.fill,
         value: bar.value,
         shape: 'square'
       });
@@ -2304,10 +2348,11 @@ export class Chart extends AxisChart {
     });
 
     // Add bubble items (shape: circle)
+    // Use originalFill for legend (fill may be pattern URL)
     bubbles.forEach(bubble => {
       items.push({
         label: bubble.label,
-        color: bubble.fill || '#4CAF50',
+        color: bubble.originalFill || bubble.fill || '#4CAF50',
         value: bubble.value,
         shape: 'circle'
       });

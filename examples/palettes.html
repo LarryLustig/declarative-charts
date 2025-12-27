@@ -69,35 +69,35 @@
 
     <!-- Define palettes at the top of the document -->
     <dc-palette id="brand-colors">
-        <dc-color label="Revenue" fill="#2563eb" stroke="#1e40af"></dc-color>
-        <dc-color label="Expenses" fill="#dc2626" stroke="#b91c1c"></dc-color>
-        <dc-color label="Profit" fill="#16a34a" stroke="#15803d"></dc-color>
+        <dc-fill label="Revenue" fill="#2563eb" stroke="#1e40af"></dc-fill>
+        <dc-fill label="Expenses" fill="#dc2626" stroke="#b91c1c"></dc-fill>
+        <dc-fill label="Profit" fill="#16a34a" stroke="#15803d"></dc-fill>
     </dc-palette>
 
     <dc-palette id="performance-thresholds">
-        <dc-color max-value="30" fill="#fee2e2"></dc-color>
-        <dc-color min-value="30" max-value="70" fill="#fef3c7"></dc-color>
-        <dc-color min-value="70" fill="#dcfce7"></dc-color>
+        <dc-fill max-value="30" fill="#fee2e2"></dc-fill>
+        <dc-fill min-value="30" max-value="70" fill="#fef3c7"></dc-fill>
+        <dc-fill min-value="70" fill="#dcfce7"></dc-fill>
     </dc-palette>
 
     <dc-palette id="department-colors">
-        <dc-color label="Engineering" fill="#6366f1"></dc-color>
-        <dc-color label="Marketing" fill="#f59e0b"></dc-color>
-        <dc-color label="Sales" fill="#10b981"></dc-color>
-        <dc-color label="Operations" fill="#8b5cf6"></dc-color>
+        <dc-fill label="Engineering" fill="#6366f1"></dc-fill>
+        <dc-fill label="Marketing" fill="#f59e0b"></dc-fill>
+        <dc-fill label="Sales" fill="#10b981"></dc-fill>
+        <dc-fill label="Operations" fill="#8b5cf6"></dc-fill>
     </dc-palette>
 
     <div class="example">
         <h2>Basic Label-Based Palettes</h2>
-        <p>Define a palette with <code>&lt;dc-palette&gt;</code> and <code>&lt;dc-color&gt;</code> elements, then reference it from charts using the <code>palette</code> attribute:</p>
+        <p>Define a palette with <code>&lt;dc-palette&gt;</code> and <code>&lt;dc-fill&gt;</code> elements, then reference it from charts using the <code>palette</code> attribute:</p>
 
         <div class="grid">
             <div>
                 <h3>Bar Chart with Palette</h3>
                 <pre><code>&lt;dc-palette id="brand-colors"&gt;
-  &lt;dc-color label="Revenue" fill="#2563eb"&gt;&lt;/dc-color&gt;
-  &lt;dc-color label="Expenses" fill="#dc2626"&gt;&lt;/dc-color&gt;
-  &lt;dc-color label="Profit" fill="#16a34a"&gt;&lt;/dc-color&gt;
+  &lt;dc-fill label="Revenue" fill="#2563eb"&gt;&lt;/dc-fill&gt;
+  &lt;dc-fill label="Expenses" fill="#dc2626"&gt;&lt;/dc-fill&gt;
+  &lt;dc-fill label="Profit" fill="#16a34a"&gt;&lt;/dc-fill&gt;
 &lt;/dc-palette&gt;
 
 &lt;dc-chart palette="brand-colors" width="500" height="350"&gt;
@@ -144,9 +144,9 @@
             <div>
                 <h3>Performance Thresholds</h3>
                 <pre><code>&lt;dc-palette id="performance-thresholds"&gt;
-  &lt;dc-color max-value="30" fill="#fee2e2"&gt;&lt;/dc-color&gt;
-  &lt;dc-color min-value="30" max-value="70" fill="#fef3c7"&gt;&lt;/dc-color&gt;
-  &lt;dc-color min-value="70" fill="#dcfce7"&gt;&lt;/dc-color&gt;
+  &lt;dc-fill max-value="30" fill="#fee2e2"&gt;&lt;/dc-fill&gt;
+  &lt;dc-fill min-value="30" max-value="70" fill="#fef3c7"&gt;&lt;/dc-fill&gt;
+  &lt;dc-fill min-value="70" fill="#dcfce7"&gt;&lt;/dc-fill&gt;
 &lt;/dc-palette&gt;
 
 &lt;dc-chart palette="performance-thresholds" width="500" height="350"&gt;
@@ -301,8 +301,8 @@
             <div>
                 <h3>Multi-Line Chart</h3>
                 <pre><code>&lt;dc-palette id="brand-colors"&gt;
-  &lt;dc-color label="Revenue" fill="#2563eb" stroke="#2563eb"&gt;&lt;/dc-color&gt;
-  &lt;dc-color label="Expenses" fill="#dc2626" stroke="#dc2626"&gt;&lt;/dc-color&gt;
+  &lt;dc-fill label="Revenue" fill="#2563eb" stroke="#2563eb"&gt;&lt;/dc-fill&gt;
+  &lt;dc-fill label="Expenses" fill="#dc2626" stroke="#dc2626"&gt;&lt;/dc-fill&gt;
 &lt;/dc-palette&gt;
 
 &lt;dc-chart palette="brand-colors" width="500" height="350"&gt;

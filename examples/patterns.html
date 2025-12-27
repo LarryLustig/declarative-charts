@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patterns & High Contrast - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+</head>
+<body>
+    <h1>Patterns & High Contrast</h1>
+    <p>Add SVG pattern fills to chart elements for visual distinction and accessibility. Enable high-contrast mode for WCAG-compliant color schemes with automatic patterns.</p>
+
+    <nav>
+        <div class="nav-major">
+            <a href="../index.html">Home</a>
+            <a href="barcharts.html">Bar Charts</a>
+            <a href="linecharts.html">Line Charts</a>
+            <a href="piecharts.html">Pie Charts</a>
+            <a href="funnelcharts.html">Funnel Charts</a>
+        </div>
+        <div class="nav-minor">
+            <a href="titles.html">Titles</a>
+            <a href="legends.html">Legends</a>
+            <a href="axes.html">Axes</a>
+            <a href="colors.html">Colors</a>
+            <a href="palettes.html">Palettes</a>
+            <a href="patterns.html" class="current">Patterns</a>
+            <a href="typography.html">Typography</a>
+            <a href="borders-and-padding.html">Borders & Padding</a>
+            <a href="bar-groups.html">Bar Groups</a>
+            <a href="bar-width.html">Bar Width</a>
+            <a href="gutter.html">Gutter</a>
+            <a href="interactive.html">Interactive</a>
+            <a href="popups.html">Popups</a>
+            <a href="logging.html">Logging</a>
+            <a href="htmx-integration.html">htmx</a>
+            <a href="accessibility.html">Accessibility</a>
+        </div>
+    </nav>
+
+    <!-- Define palettes -->
+    <dc-palette id="shared-patterns">
+        <dc-fill id="danger-pattern" pattern="crosshatch" stroke="#dc2626" fill="#fee2e2"></dc-fill>
+        <dc-fill id="warning-pattern" pattern="diagonal-lines" stroke="#f59e0b" fill="#fef3c7"></dc-fill>
+    </dc-palette>
+
+    <dc-palette id="pattern-palette">
+        <dc-fill label="Critical" pattern="crosshatch" stroke="#dc2626" fill="#fee2e2"></dc-fill>
+        <dc-fill label="Warning" pattern="diagonal-lines" stroke="#f59e0b" fill="#fef3c7"></dc-fill>
+        <dc-fill label="OK" fill="#10b981"></dc-fill>
+    </dc-palette>
+
+    <dc-palette id="threshold-patterns">
+        <dc-fill max-value="30" pattern="crosshatch" stroke="#dc2626"></dc-fill>
+        <dc-fill min-value="30" max-value="70" pattern="diagonal-lines" stroke="#f59e0b"></dc-fill>
+        <dc-fill min-value="70" fill="#16a34a"></dc-fill>
+    </dc-palette>
+
+    <div class="example">
+        <h2>Direct Pattern on Elements</h2>
+        <p>Apply patterns directly on chart elements using the <code>pattern</code> attribute. Choose from 8 built-in pattern types:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Bar Chart with Patterns</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-bar value="75" label="Diagonal"
+    fill="#3b82f6" pattern="diagonal-lines"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="60" label="Dots"
+    fill="#10b981" pattern="dots"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="85" label="Crosshatch"
+    fill="#f59e0b" pattern="crosshatch"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="45" label="Grid"
+    fill="#8b5cf6" pattern="grid"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-bar value="75" label="Diagonal" fill="#3b82f6" pattern="diagonal-lines"></dc-bar>
+                    <dc-bar value="60" label="Dots" fill="#10b981" pattern="dots"></dc-bar>
+                    <dc-bar value="85" label="Crosshatch" fill="#f59e0b" pattern="crosshatch"></dc-bar>
+                    <dc-bar value="45" label="Grid" fill="#8b5cf6" pattern="grid"></dc-bar>
+                </dc-chart>
+            </div>
+            <div>
+                <h3>Pie Chart with Patterns</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350"&gt;
+  &lt;dc-pie-slice value="40" label="Sales"
+    fill="#3b82f6" pattern="diagonal-lines"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="30" label="Marketing"
+    fill="#10b981" pattern="dots"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="20" label="R&amp;D"
+    fill="#f59e0b" pattern="crosshatch"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="10" label="Admin"
+    fill="#8b5cf6" pattern="checkerboard"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350">
+                    <dc-pie-slice value="40" label="Sales" fill="#3b82f6" pattern="diagonal-lines"></dc-pie-slice>
+                    <dc-pie-slice value="30" label="Marketing" fill="#10b981" pattern="dots"></dc-pie-slice>
+                    <dc-pie-slice value="20" label="R&D" fill="#f59e0b" pattern="crosshatch"></dc-pie-slice>
+                    <dc-pie-slice value="10" label="Admin" fill="#8b5cf6" pattern="checkerboard"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>All Pattern Types</h2>
+        <p>The library includes 8 built-in pattern types:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Pattern Gallery</h3>
+                <pre><code>Available patterns:
+- diagonal-lines
+- diagonal-lines-reverse
+- horizontal-lines
+- vertical-lines
+- dots
+- crosshatch
+- grid
+- checkerboard</code></pre>
+                <dc-chart width="500" height="400">
+                    <dc-bar value="100" label="diagonal-lines" fill="#3b82f6" pattern="diagonal-lines"></dc-bar>
+                    <dc-bar value="100" label="diagonal-reverse" fill="#10b981" pattern="diagonal-lines-reverse"></dc-bar>
+                    <dc-bar value="100" label="horizontal" fill="#f59e0b" pattern="horizontal-lines"></dc-bar>
+                    <dc-bar value="100" label="vertical" fill="#8b5cf6" pattern="vertical-lines"></dc-bar>
+                    <dc-bar value="100" label="dots" fill="#ec4899" pattern="dots"></dc-bar>
+                    <dc-bar value="100" label="crosshatch" fill="#14b8a6" pattern="crosshatch"></dc-bar>
+                    <dc-bar value="100" label="grid" fill="#f97316" pattern="grid"></dc-bar>
+                    <dc-bar value="100" label="checkerboard" fill="#6366f1" pattern="checkerboard"></dc-bar>
+                </dc-chart>
+            </div>
+            <div>
+                <h3>Pattern Customization</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-bar value="80" label="Custom Stroke"
+    fill="#e2e8f0" pattern="diagonal-lines"
+    pattern-stroke="#0f172a"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="60" label="Custom Background"
+    fill="#fef3c7" pattern="dots"
+    pattern-stroke="#78350f"
+    pattern-fill="#fffbeb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="70" label="Large Pattern"
+    fill="#dbeafe" pattern="crosshatch"
+    pattern-scale="2"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-bar value="80" label="Custom Stroke" fill="#e2e8f0" pattern="diagonal-lines" pattern-stroke="#0f172a"></dc-bar>
+                    <dc-bar value="60" label="Custom Background" fill="#fef3c7" pattern="dots" pattern-stroke="#78350f" pattern-fill="#fffbeb"></dc-bar>
+                    <dc-bar value="70" label="Large Pattern" fill="#dbeafe" pattern="crosshatch" pattern-scale="2"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Pattern by ID Reference</h2>
+        <p>Give <code>&lt;dc-fill&gt;</code> elements an <code>id</code> attribute inside a palette, then reference them by ID in any chart:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Shared Pattern Definitions</h3>
+                <pre><code>&lt;!-- Define patterns in a palette --&gt;
+&lt;dc-palette id="shared-patterns"&gt;
+  &lt;dc-fill id="danger-pattern" pattern="crosshatch"
+    stroke="#dc2626" fill="#fee2e2"&gt;&lt;/dc-fill&gt;
+  &lt;dc-fill id="warning-pattern" pattern="diagonal-lines"
+    stroke="#f59e0b" fill="#fef3c7"&gt;&lt;/dc-fill&gt;
+&lt;/dc-palette&gt;
+
+&lt;!-- Reference by ID in any chart --&gt;
+&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-bar value="25" label="Critical" pattern="danger-pattern"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="45" label="Warning" pattern="warning-pattern"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="80" label="Good" fill="#16a34a"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-bar value="25" label="Critical" pattern="danger-pattern"></dc-bar>
+                    <dc-bar value="45" label="Warning" pattern="warning-pattern"></dc-bar>
+                    <dc-bar value="80" label="Good" fill="#16a34a"></dc-bar>
+                </dc-chart>
+            </div>
+            <div>
+                <h3>Funnel with Pattern References</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="350"&gt;
+  &lt;dc-funnel-stage value="1000" label="Visitors"
+    pattern="danger-pattern"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="500" label="Leads"
+    pattern="warning-pattern"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="100" label="Customers"
+    fill="#16a34a"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="350">
+                    <dc-funnel-stage value="1000" label="Visitors" pattern="danger-pattern"></dc-funnel-stage>
+                    <dc-funnel-stage value="500" label="Leads" pattern="warning-pattern"></dc-funnel-stage>
+                    <dc-funnel-stage value="100" label="Customers" fill="#16a34a"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Patterns in Palettes</h2>
+        <p>Include <code>&lt;dc-fill&gt;</code> elements inside <code>&lt;dc-palette&gt;</code> for label and value-based pattern matching:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Label-Based Pattern Matching</h3>
+                <pre><code>&lt;dc-palette id="pattern-palette"&gt;
+  &lt;dc-fill label="Critical" pattern="crosshatch"
+    stroke="#dc2626" fill="#fee2e2"&gt;&lt;/dc-fill&gt;
+  &lt;dc-fill label="Warning" pattern="diagonal-lines"
+    stroke="#f59e0b" fill="#fef3c7"&gt;&lt;/dc-fill&gt;
+  &lt;dc-fill label="OK" fill="#10b981"&gt;&lt;/dc-fill&gt;
+&lt;/dc-palette&gt;
+
+&lt;dc-chart palette="pattern-palette" width="500" height="350"&gt;
+  &lt;dc-bar value="25" label="Critical"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="55" label="Warning"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="85" label="OK"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart palette="pattern-palette" width="500" height="350">
+                    <dc-bar value="25" label="Critical"></dc-bar>
+                    <dc-bar value="55" label="Warning"></dc-bar>
+                    <dc-bar value="85" label="OK"></dc-bar>
+                </dc-chart>
+            </div>
+            <div>
+                <h3>Value-Based Pattern Matching</h3>
+                <pre><code>&lt;dc-palette id="threshold-patterns"&gt;
+  &lt;dc-fill max-value="30" pattern="crosshatch"
+    stroke="#dc2626"&gt;&lt;/dc-fill&gt;
+  &lt;dc-fill min-value="30" max-value="70"
+    pattern="diagonal-lines" stroke="#f59e0b"&gt;&lt;/dc-fill&gt;
+  &lt;dc-fill min-value="70" fill="#16a34a"&gt;&lt;/dc-fill&gt;
+&lt;/dc-palette&gt;
+
+&lt;dc-chart palette="threshold-patterns" width="500" height="350"&gt;
+  &lt;dc-bar value="20" label="Low"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="50" label="Medium"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="80" label="High"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart palette="threshold-patterns" width="500" height="350">
+                    <dc-bar value="20" label="Low"></dc-bar>
+                    <dc-bar value="50" label="Medium"></dc-bar>
+                    <dc-bar value="80" label="High"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>High Contrast Mode</h2>
+        <p>Enable high-contrast mode with the <code>high-contrast</code> attribute. Charts automatically use WCAG AA compliant colors and distinct patterns:</p>
+
+        <div class="grid">
+            <div>
+                <h3>High Contrast Bar Chart</h3>
+                <pre><code>&lt;dc-chart high-contrast width="500" height="350"&gt;
+  &lt;dc-bar value="75" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="60" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="85" label="Q3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="45" label="Q4"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart high-contrast width="500" height="350">
+                    <dc-bar value="75" label="Q1"></dc-bar>
+                    <dc-bar value="60" label="Q2"></dc-bar>
+                    <dc-bar value="85" label="Q3"></dc-bar>
+                    <dc-bar value="45" label="Q4"></dc-bar>
+                </dc-chart>
+            </div>
+            <div>
+                <h3>High Contrast Pie Chart</h3>
+                <pre><code>&lt;dc-pie-chart high-contrast width="500" height="350"&gt;
+  &lt;dc-pie-slice value="40" label="Sales"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="30" label="Marketing"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="20" label="R&amp;D"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="10" label="Admin"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart high-contrast width="500" height="350">
+                    <dc-pie-slice value="40" label="Sales"></dc-pie-slice>
+                    <dc-pie-slice value="30" label="Marketing"></dc-pie-slice>
+                    <dc-pie-slice value="20" label="R&D"></dc-pie-slice>
+                    <dc-pie-slice value="10" label="Admin"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Custom High Contrast Palettes</h2>
+        <p>Override the built-in high-contrast colors by providing a <code>&lt;dc-palette high-contrast&gt;</code> inside the chart:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Brand-Aligned High Contrast</h3>
+                <pre><code>&lt;dc-chart high-contrast width="500" height="350"&gt;
+  &lt;dc-palette high-contrast&gt;
+    &lt;dc-fill fill="#0047AB"&gt;&lt;/dc-fill&gt;
+    &lt;dc-fill fill="#CC5500"&gt;&lt;/dc-fill&gt;
+    &lt;dc-fill fill="#228B22"&gt;&lt;/dc-fill&gt;
+    &lt;dc-fill fill="#8B008B"&gt;&lt;/dc-fill&gt;
+  &lt;/dc-palette&gt;
+  &lt;dc-bar value="75" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="60" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="85" label="Q3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="45" label="Q4"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart high-contrast width="500" height="350">
+                    <dc-palette high-contrast>
+                        <dc-fill fill="#0047AB"></dc-fill>
+                        <dc-fill fill="#CC5500"></dc-fill>
+                        <dc-fill fill="#228B22"></dc-fill>
+                        <dc-fill fill="#8B008B"></dc-fill>
+                    </dc-palette>
+                    <dc-bar value="75" label="Q1"></dc-bar>
+                    <dc-bar value="60" label="Q2"></dc-bar>
+                    <dc-bar value="85" label="Q3"></dc-bar>
+                    <dc-bar value="45" label="Q4"></dc-bar>
+                </dc-chart>
+            </div>
+            <div>
+                <h3>Auto-Detect High Contrast</h3>
+                <pre><code>&lt;!-- Charts auto-detect OS high-contrast setting --&gt;
+&lt;!-- via prefers-contrast: high media query --&gt;
+&lt;dc-chart width="500" height="350"&gt;
+  &lt;!-- High contrast palette used only when needed --&gt;
+  &lt;dc-palette high-contrast&gt;
+    &lt;dc-fill fill="#000080"&gt;&lt;/dc-fill&gt;
+    &lt;dc-fill fill="#800000"&gt;&lt;/dc-fill&gt;
+    &lt;dc-fill fill="#006400"&gt;&lt;/dc-fill&gt;
+  &lt;/dc-palette&gt;
+  &lt;dc-bar value="75" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="60" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="85" label="Q3"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-palette high-contrast>
+                        <dc-fill fill="#000080"></dc-fill>
+                        <dc-fill fill="#800000"></dc-fill>
+                        <dc-fill fill="#006400"></dc-fill>
+                    </dc-palette>
+                    <dc-bar value="75" label="Q1"></dc-bar>
+                    <dc-bar value="60" label="Q2"></dc-bar>
+                    <dc-bar value="85" label="Q3"></dc-bar>
+                </dc-chart>
+                <p style="margin-top: 15px; font-style: italic; color: #666;">
+                    This chart uses normal colors now, but will switch to the high-contrast palette when your OS enables high contrast mode.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Bubble Charts with Patterns</h2>
+        <p>Patterns work on bubble charts too:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Patterned Bubbles</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-bubble value="20" size-value="50" label="A"
+    fill="#3b82f6" pattern="diagonal-lines"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="40" size-value="30" label="B"
+    fill="#10b981" pattern="dots"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="60" size-value="70" label="C"
+    fill="#f59e0b" pattern="crosshatch"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="80" size-value="40" label="D"
+    fill="#8b5cf6" pattern="grid"&gt;&lt;/dc-bubble&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-bubble value="20" size-value="50" label="A" fill="#3b82f6" pattern="diagonal-lines"></dc-bubble>
+                    <dc-bubble value="40" size-value="30" label="B" fill="#10b981" pattern="dots"></dc-bubble>
+                    <dc-bubble value="60" size-value="70" label="C" fill="#f59e0b" pattern="crosshatch"></dc-bubble>
+                    <dc-bubble value="80" size-value="40" label="D" fill="#8b5cf6" pattern="grid"></dc-bubble>
+                </dc-chart>
+            </div>
+            <div>
+                <h3>High Contrast Bubbles</h3>
+                <pre><code>&lt;dc-chart high-contrast width="500" height="350"&gt;
+  &lt;dc-bubble value="20" size-value="50" label="A"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="40" size-value="30" label="B"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="60" size-value="70" label="C"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="80" size-value="40" label="D"&gt;&lt;/dc-bubble&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart high-contrast width="500" height="350">
+                    <dc-bubble value="20" size-value="50" label="A"></dc-bubble>
+                    <dc-bubble value="40" size-value="30" label="B"></dc-bubble>
+                    <dc-bubble value="60" size-value="70" label="C"></dc-bubble>
+                    <dc-bubble value="80" size-value="40" label="D"></dc-bubble>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+</body>
+</html>

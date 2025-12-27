@@ -1,6 +1,7 @@
 import { LitElement, css } from 'lit';
-import { customElement } from 'lit/decorators.js';
-import type { ChartColor } from './chart-color.js';
+import { customElement, property } from 'lit/decorators.js';
+import type { ChartFill } from './chart-fill.js';
+import type { PatternConfig } from './patterns.js';
 
 /**
  * Result of a palette color lookup.
@@ -8,66 +9,72 @@ import type { ChartColor } from './chart-color.js';
 export interface PaletteColorResult {
   fill?: string;
   stroke?: string;
+  /** Pattern configuration if a pattern was matched */
+  pattern?: PatternConfig;
 }
 
 /**
  * Palette definition element for defining reusable color schemes.
  *
- * A palette is a container for <dc-color> elements that define colors for
- * chart elements. Charts can reference a palette by its ID using the `palette`
- * attribute, and elements will be colored by matching their label or value
- * against the palette's color definitions.
+ * A palette is a container for `<dc-fill>` elements that define how chart
+ * elements should be filled. Charts can reference a palette by its ID using
+ * the `palette` attribute, and elements will be styled by matching their
+ * label or value against the palette's fill definitions.
  *
  * **Matching Priority (first match wins):**
- * 1. Element's own fill/stroke attributes (explicit override)
+ * 1. Element's own fill/stroke/pattern attributes (explicit override)
  * 2. Palette match by value range (min-value/max-value or exact value)
  * 3. Palette match by label (exact string match)
  * 4. Chart's default color sequence
  *
- * When multiple <dc-color> elements could match (e.g., overlapping value ranges),
- * the first match in DOM order wins.
+ * Within value/label matching, pattern fills take precedence over solid fills.
  *
  * @element dc-palette
  *
  * @attr {string} id - Unique identifier for this palette (standard HTML id attribute)
+ * @attr {boolean} high-contrast - Marks this as a high-contrast palette
  *
- * @slot - Contains <dc-color> elements defining the palette colors
+ * @slot - Contains `<dc-fill>` elements defining the palette fills
  *
  * @example
- * <!-- Define a palette with label-based colors -->
+ * <!-- Define a palette with solid fills -->
  * <dc-palette id="brand-colors">
- *   <dc-color label="Revenue" fill="#2563eb" stroke="#1e40af"></dc-color>
- *   <dc-color label="Expenses" fill="#dc2626"></dc-color>
- *   <dc-color label="Profit" fill="#16a34a"></dc-color>
- * </dc-palette>
- *
- * <!-- Use in a chart -->
- * <dc-chart palette="brand-colors">
- *   <dc-bar label="Revenue" value="100"></dc-bar>
- *   <dc-bar label="Expenses" value="60"></dc-bar>
- *   <dc-bar label="Profit" value="40"></dc-bar>
- * </dc-chart>
- *
- * @example
- * <!-- Define a palette with value-range colors for thresholds -->
- * <dc-palette id="performance">
- *   <dc-color max-value="50" fill="#fee2e2"></dc-color>
- *   <dc-color min-value="50" max-value="80" fill="#fef3c7"></dc-color>
- *   <dc-color min-value="80" fill="#dcfce7"></dc-color>
+ *   <dc-fill label="Revenue" fill="#2563eb"></dc-fill>
+ *   <dc-fill label="Expenses" fill="#dc2626"></dc-fill>
+ *   <dc-fill label="Profit" fill="#16a34a"></dc-fill>
  * </dc-palette>
  *
  * @example
- * <!-- Combine label and value-range matching -->
- * <dc-palette id="sales-with-alerts">
- *   <!-- Default colors by category -->
- *   <dc-color label="Sales" fill="#2563eb"></dc-color>
- *   <dc-color label="Returns" fill="#6b7280"></dc-color>
- *   <!-- Override: anything below 20 is danger, regardless of label -->
- *   <dc-color max-value="20" fill="#dc2626"></dc-color>
+ * <!-- Mix solid and pattern fills -->
+ * <dc-palette id="status">
+ *   <dc-fill label="Critical" fill="#fee2e2" stroke="#dc2626" pattern="crosshatch"></dc-fill>
+ *   <dc-fill label="Warning" fill="#fef3c7" stroke="#f59e0b" pattern="diagonal-lines"></dc-fill>
+ *   <dc-fill label="OK" fill="#10b981"></dc-fill>
+ * </dc-palette>
+ *
+ * @example
+ * <!-- Value-based thresholds -->
+ * <dc-palette id="thresholds">
+ *   <dc-fill max-value="30" fill="#fee2e2" stroke="#dc2626" pattern="crosshatch"></dc-fill>
+ *   <dc-fill min-value="30" max-value="70" fill="#fef3c7"></dc-fill>
+ *   <dc-fill min-value="70" fill="#dcfce7"></dc-fill>
  * </dc-palette>
  */
 @customElement('dc-palette')
 export class ChartPalette extends LitElement {
+  /**
+   * Marks this palette as a high-contrast palette.
+   *
+   * When a chart is in high contrast mode (either explicitly via `high-contrast`
+   * attribute or via OS `prefers-contrast: high` setting), it will look for a
+   * child `<dc-palette high-contrast>` to use instead of the built-in high
+   * contrast colors.
+   *
+   * @attr high-contrast
+   */
+  @property({ type: Boolean, attribute: 'high-contrast' })
+  highContrast = false;
+
   static styles = css`
     :host {
       display: none !important;
@@ -75,46 +82,84 @@ export class ChartPalette extends LitElement {
   `;
 
   /**
-   * Get all color definitions in this palette.
-   * @returns Array of ChartColor elements in DOM order
+   * Get all fill definitions in this palette.
+   * @returns Array of ChartFill elements in DOM order
    */
-  getColors(): ChartColor[] {
-    return Array.from(this.querySelectorAll('dc-color')) as ChartColor[];
+  getFills(): ChartFill[] {
+    return Array.from(this.querySelectorAll('dc-fill')) as ChartFill[];
   }
 
   /**
-   * Look up colors for an element based on its label and/or value.
+   * Look up fill styling for an element based on its label and/or value.
    *
    * Matching priority (first match wins):
-   * 1. Value range match (min-value/max-value or exact value)
-   * 2. Label match (exact string match)
+   * 1. dc-fill with pattern + value match
+   * 2. dc-fill with pattern + label match
+   * 3. dc-fill (solid) + value match
+   * 4. dc-fill (solid) + label match
    *
    * @param label The element's label (optional)
    * @param value The element's value (optional)
-   * @returns Object with fill and/or stroke colors, or empty object if no match
+   * @returns Object with fill, stroke, and/or pattern, or empty object if no match
    */
   lookup(label?: string, value?: number): PaletteColorResult {
-    const colors = this.getColors();
+    const fills = this.getFills();
 
-    // First pass: check value matches (higher priority)
+    // Check dc-fill with pattern + value match
     if (value !== undefined) {
-      for (const color of colors) {
-        if (color.matchesValue(value)) {
+      for (const fill of fills) {
+        if (fill.hasPattern() && fill.matchesValue(value)) {
           return {
-            fill: color.fill,
-            stroke: color.stroke
+            fill: fill.fill,
+            stroke: fill.stroke,
+            pattern: {
+              type: fill.pattern!,
+              stroke: fill.stroke || '#000',
+              fill: fill.fill,
+              scale: fill.scale
+            }
           };
         }
       }
     }
 
-    // Second pass: check label matches
+    // Check dc-fill with pattern + label match
     if (label !== undefined) {
-      for (const color of colors) {
-        if (color.matchesLabel(label)) {
+      for (const fill of fills) {
+        if (fill.hasPattern() && fill.matchesLabel(label)) {
           return {
-            fill: color.fill,
-            stroke: color.stroke
+            fill: fill.fill,
+            stroke: fill.stroke,
+            pattern: {
+              type: fill.pattern!,
+              stroke: fill.stroke || '#000',
+              fill: fill.fill,
+              scale: fill.scale
+            }
+          };
+        }
+      }
+    }
+
+    // Check dc-fill (solid) + value match
+    if (value !== undefined) {
+      for (const fill of fills) {
+        if (!fill.hasPattern() && fill.matchesValue(value)) {
+          return {
+            fill: fill.fill,
+            stroke: fill.stroke
+          };
+        }
+      }
+    }
+
+    // Check dc-fill (solid) + label match
+    if (label !== undefined) {
+      for (const fill of fills) {
+        if (!fill.hasPattern() && fill.matchesLabel(label)) {
+          return {
+            fill: fill.fill,
+            stroke: fill.stroke
           };
         }
       }
@@ -125,11 +170,22 @@ export class ChartPalette extends LitElement {
   }
 
   /**
-   * Check if this palette has any color definitions.
-   * @returns true if the palette contains at least one dc-color element
+   * Check if this palette has any fill definitions.
+   * @returns true if the palette contains at least one dc-fill element
    */
-  hasColors(): boolean {
-    return this.querySelectorAll('dc-color').length > 0;
+  hasFills(): boolean {
+    return this.querySelectorAll('dc-fill').length > 0;
+  }
+
+  /**
+   * Get all fill colors from this palette.
+   * Useful for getting colors to use in high-contrast mode.
+   * @returns Array of fill color strings (undefined entries filtered out)
+   */
+  getFillColors(): string[] {
+    return this.getFills()
+      .map(f => f.fill)
+      .filter((f): f is string => f !== undefined);
   }
 
   // No visual rendering - this is a data container

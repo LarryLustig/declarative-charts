@@ -45,9 +45,18 @@ export { ChartTitle } from './chart-title.js';
 // Export palette components
 export { ChartPalette } from './chart-palette.js';
 export type { PaletteColorResult } from './chart-palette.js';
-export { ChartColor } from './chart-color.js';
+export { ChartFill } from './chart-fill.js';
 export { ChartSwatch, STANDARD_SHAPES } from './chart-swatch.js';
 export type { StandardShape } from './chart-swatch.js';
+export {
+  PATTERN_DEFINITIONS,
+  HIGH_CONTRAST_PATTERN_SEQUENCE,
+  HIGH_CONTRAST_COLORS,
+  isPatternType,
+  generatePatternId,
+  getHighContrastPattern
+} from './patterns.js';
+export type { PatternType, PatternConfig, ResolvedPattern, ResolvedFillAndPattern } from './patterns.js';
 
 // Export logging/debugging components
 export { LogConsole } from './log-console.js';

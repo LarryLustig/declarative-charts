@@ -7,12 +7,14 @@ A modern Web Components-based chart library built with Lit that allows you to cr
 - ✨ **Declarative Syntax** - Define charts with nested HTML elements
 - 📊 **Multiple Chart Types** - Bar, Line, Pie, and Funnel charts
 - 🎨 **Individual Styling** - Style each bar/point/slice independently
+- 🎭 **Pattern Fills** - 8 built-in SVG patterns for visual distinction
+- ♿ **High Contrast Mode** - WCAG-compliant colors with automatic patterns
 - 🔄 **Automatic Updates** - Charts update when you modify child elements
 - 📦 **Lightweight** - Built on Lit (~5KB overhead)
 - 🎯 **TypeScript** - Full TypeScript support with type definitions
 - 🌐 **Standards-Based** - Uses Web Components standard
 - 🎭 **Rich Interactions** - Popups, legends, grouped bars, and more
-- ♿ **Accessible** - Auto-generated ARIA labels and intelligent descriptions for screen readers
+- ♿ **Accessible** - Auto-generated ARIA labels, keyboard navigation, and screen reader support
 
 ## Quick Start
 
@@ -270,6 +272,118 @@ Control borders/outlines with stroke attributes:
 | Chart (shorthand) | - | `stroke` (e.g., "2 #333") |
 
 See [`examples/colors.html`](examples/colors.html) for comprehensive color system examples.
+
+### Palettes and Pattern Fills
+
+For more sophisticated color schemes, use `<dc-palette>` with `<dc-fill>` elements to define reusable fills that can include solid colors, patterns, and conditional matching.
+
+#### Basic Palette Usage
+
+Define a palette with `<dc-fill>` elements, then reference it from charts:
+
+```html
+<!-- Define a palette -->
+<dc-palette id="brand-colors">
+  <dc-fill label="Revenue" fill="#2563eb"></dc-fill>
+  <dc-fill label="Expenses" fill="#dc2626"></dc-fill>
+  <dc-fill label="Profit" fill="#16a34a"></dc-fill>
+</dc-palette>
+
+<!-- Use the palette -->
+<dc-chart palette="brand-colors">
+  <dc-bar value="150" label="Revenue"></dc-bar>
+  <dc-bar value="80" label="Expenses"></dc-bar>
+  <dc-bar value="70" label="Profit"></dc-bar>
+</dc-chart>
+```
+
+#### Pattern Fills
+
+Add visual patterns to chart elements for better accessibility and distinction:
+
+```html
+<dc-palette id="status-patterns">
+  <dc-fill label="Critical" fill="#fee2e2" stroke="#dc2626" pattern="crosshatch"></dc-fill>
+  <dc-fill label="Warning" fill="#fef3c7" stroke="#f59e0b" pattern="diagonal-lines"></dc-fill>
+  <dc-fill label="OK" fill="#10b981"></dc-fill>
+</dc-palette>
+```
+
+**Available pattern types:**
+- `diagonal-lines` - Lines from bottom-left to top-right
+- `diagonal-lines-reverse` - Lines from top-left to bottom-right
+- `horizontal-lines` - Horizontal parallel lines
+- `vertical-lines` - Vertical parallel lines
+- `dots` - Regular dot grid
+- `crosshatch` - Diagonal lines in both directions
+- `grid` - Horizontal + vertical lines
+- `checkerboard` - Alternating filled squares
+
+**Direct patterns on elements:**
+```html
+<dc-chart>
+  <dc-bar value="50" pattern="diagonal-lines" pattern-stroke="#000"></dc-bar>
+  <dc-bar value="30" pattern="dots" fill="#fef3c7" pattern-stroke="#78350f"></dc-bar>
+</dc-chart>
+```
+
+**Pattern by ID reference:**
+```html
+<dc-palette id="shared-patterns">
+  <dc-fill id="danger" pattern="crosshatch" stroke="#dc2626" fill="#fee2e2"></dc-fill>
+</dc-palette>
+
+<dc-chart>
+  <dc-bar value="25" label="Critical" pattern="danger"></dc-bar>
+</dc-chart>
+```
+
+#### Value-Based Matching
+
+Match fills based on data values using `min-value` and `max-value`:
+
+```html
+<dc-palette id="thresholds">
+  <dc-fill max-value="30" fill="#fee2e2" pattern="crosshatch"></dc-fill>
+  <dc-fill min-value="30" max-value="70" fill="#fef3c7"></dc-fill>
+  <dc-fill min-value="70" fill="#dcfce7"></dc-fill>
+</dc-palette>
+
+<dc-chart palette="thresholds">
+  <dc-bar value="20" label="Low"></dc-bar>    <!-- red with pattern -->
+  <dc-bar value="50" label="Medium"></dc-bar> <!-- yellow -->
+  <dc-bar value="80" label="High"></dc-bar>   <!-- green -->
+</dc-chart>
+```
+
+#### High Contrast Mode
+
+Enable high contrast mode for WCAG-compliant colors with automatic patterns:
+
+```html
+<!-- Explicit high contrast -->
+<dc-chart high-contrast>
+  <dc-bar value="50" label="A"></dc-bar>
+  <dc-bar value="30" label="B"></dc-bar>
+</dc-chart>
+```
+
+Charts also auto-detect the OS `prefers-contrast: high` setting.
+
+**Custom high contrast palette:**
+```html
+<dc-chart>
+  <dc-palette high-contrast>
+    <dc-fill fill="#0047AB"></dc-fill>
+    <dc-fill fill="#CC5500"></dc-fill>
+    <dc-fill fill="#228B22"></dc-fill>
+  </dc-palette>
+  <dc-bar value="50" label="A"></dc-bar>
+  <dc-bar value="30" label="B"></dc-bar>
+</dc-chart>
+```
+
+See [`examples/palettes.html`](examples/palettes.html) and [`examples/patterns.html`](examples/patterns.html) for comprehensive examples.
 
 ### Controlling Labels, Values, and Percentages
 
@@ -890,6 +1004,75 @@ Mix auto-popup with explicit popups:
 - Shows percentage of total
 - For grouped bars, also shows group name
 
+### `<dc-palette>`
+
+Container for reusable fill definitions. Define once and reference from multiple charts.
+
+**Attributes:**
+- `id` (string) - Unique identifier to reference this palette from charts
+- `high-contrast` (boolean) - When present, this palette is used when high contrast mode is active
+
+**Child Elements:**
+- `<dc-fill>` - Fill definitions (one or more)
+
+**Example:**
+```html
+<dc-palette id="brand-colors">
+  <dc-fill label="Revenue" fill="#2563eb"></dc-fill>
+  <dc-fill label="Expenses" fill="#dc2626"></dc-fill>
+</dc-palette>
+
+<dc-chart palette="brand-colors">
+  <dc-bar value="150" label="Revenue"></dc-bar>
+  <dc-bar value="80" label="Expenses"></dc-bar>
+</dc-chart>
+```
+
+### `<dc-fill>`
+
+Defines a fill style (solid color and/or pattern) within a palette. Fills are matched to chart elements by label or value range.
+
+**Attributes:**
+- `id` (string) - Optional ID for direct reference via `pattern="id"`
+- `label` (string) - Match elements with this label
+- `fill` (string) - CSS color for the fill
+- `stroke` (string) - CSS color for the stroke/border
+- `pattern` (string) - Pattern type (see available patterns below)
+- `scale` (number) - Pattern scale multiplier (default: 1)
+- `min-value` (number) - Minimum value for range matching (inclusive)
+- `max-value` (number) - Maximum value for range matching (exclusive)
+
+**Available patterns:** `diagonal-lines`, `diagonal-lines-reverse`, `horizontal-lines`, `vertical-lines`, `dots`, `crosshatch`, `grid`, `checkerboard`
+
+**Matching priority:**
+1. Pattern fills with value match
+2. Pattern fills with label match
+3. Solid fills with value match
+4. Solid fills with label match
+
+**Examples:**
+
+Label matching:
+```html
+<dc-fill label="Critical" fill="#fee2e2" pattern="crosshatch"></dc-fill>
+```
+
+Value range matching:
+```html
+<dc-fill max-value="30" fill="#fee2e2"></dc-fill>
+<dc-fill min-value="30" max-value="70" fill="#fef3c7"></dc-fill>
+<dc-fill min-value="70" fill="#dcfce7"></dc-fill>
+```
+
+ID reference:
+```html
+<dc-palette id="patterns">
+  <dc-fill id="danger" pattern="crosshatch" stroke="#dc2626" fill="#fee2e2"></dc-fill>
+</dc-palette>
+
+<dc-bar value="25" pattern="danger"></dc-bar>
+```
+
 ## Dynamic Updates
 
 Charts automatically update when you modify their child elements.
@@ -1313,6 +1496,9 @@ declarative-charts/
 │   ├── chart-popup.ts         # Popup element
 │   ├── chart-title.ts         # Title element
 │   ├── chart-legend.ts        # Legend element
+│   ├── chart-palette.ts       # Palette container element
+│   ├── chart-fill.ts          # Fill definition element (colors/patterns)
+│   ├── patterns.ts            # SVG pattern definitions
 │   ├── log-console.ts         # Log console element for debugging
 │   ├── base-chart.ts          # Abstract base for all charts
 │   ├── base-chart-element.ts  # Abstract base for data elements
@@ -1357,5 +1543,4 @@ MIT
 - Add animations and transitions
 - Add axis customization options (min/max values, tick intervals)
 - Add number formatting (currency, percentages, abbreviations)
-- Add high contrast mode support
 - Publish to npm

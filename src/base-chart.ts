@@ -1,8 +1,20 @@
 import { LitElement, css, html, svg, SVGTemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
+import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
 import type { ChartTitle } from './chart-title.js';
 import type { ChartLegend, LegendItem } from './chart-legend.js';
 import type { ChartPalette, PaletteColorResult } from './chart-palette.js';
+import type { ChartFill } from './chart-fill.js';
+import {
+  PatternConfig,
+  ResolvedPattern,
+  ResolvedFillAndPattern,
+  PATTERN_DEFINITIONS,
+  HIGH_CONTRAST_COLORS,
+  isPatternType,
+  generatePatternId,
+  getHighContrastPattern
+} from './patterns.js';
 
 /**
  * Color mode for resolving chart element colors.
@@ -346,6 +358,52 @@ export abstract class BaseChart extends LitElement {
   @property({ type: String, attribute: 'palette' })
   paletteId?: string;
 
+  /**
+   * Enable high contrast mode for accessibility.
+   *
+   * When enabled (or auto-detected via OS setting):
+   * - Each data element gets a unique pattern for differentiation
+   * - Colors are replaced with high-contrast WCAG AA compliant colors
+   * - Stroke widths are increased for better visibility
+   *
+   * The chart will look for a child `<dc-palette high-contrast>` to use
+   * custom high-contrast colors. If not found, built-in high-contrast
+   * colors are used.
+   *
+   * Values:
+   * - undefined (default): Auto-detect from OS `prefers-contrast: high`
+   * - true: Force high contrast mode on
+   * - false: Force high contrast mode off
+   *
+   * @attr high-contrast
+   */
+  @property({ type: Boolean, attribute: 'high-contrast' })
+  highContrast?: boolean;
+
+  // ============================================================================
+  // Pattern System Properties
+  // ============================================================================
+
+  /**
+   * Counter for generating unique chart instance IDs.
+   * Used to create unique pattern IDs to avoid conflicts between multiple charts.
+   */
+  private static chartIdCounter = 0;
+
+  /**
+   * Unique ID for this chart instance.
+   * Format: "dc-chart-N" where N is a sequential number.
+   * Used as prefix for pattern IDs in the SVG <defs> section.
+   */
+  protected readonly chartInstanceId = `dc-chart-${++BaseChart.chartIdCounter}`;
+
+  /**
+   * Patterns used in the current render cycle.
+   * Maps pattern ID to resolved pattern configuration.
+   * Cleared at the start of each render, populated during data extraction.
+   */
+  protected usedPatterns: Map<string, ResolvedPattern> = new Map();
+
   // ============================================================================
   // End Color System Properties
   // ============================================================================
@@ -662,6 +720,283 @@ export abstract class BaseChart extends LitElement {
     if (!palette) return {};
     return palette.lookup(label, value);
   }
+
+  // ============================================================================
+  // High Contrast and Pattern Methods
+  // ============================================================================
+
+  /**
+   * Check if high contrast mode is currently active.
+   *
+   * Priority:
+   * 1. Explicit highContrast attribute (true/false)
+   * 2. OS prefers-contrast: high media query
+   *
+   * @returns true if high contrast mode should be used
+   */
+  protected isHighContrastActive(): boolean {
+    // Explicit attribute takes precedence
+    if (this.highContrast === true) return true;
+    if (this.highContrast === false) return false;
+
+    // Auto-detect from OS setting
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(prefers-contrast: high)').matches;
+    }
+    return false;
+  }
+
+  /**
+   * Find a child <dc-palette high-contrast> element for custom high-contrast colors.
+   *
+   * @returns The high-contrast palette, or null if not found
+   */
+  protected getHighContrastPalette(): ChartPalette | null {
+    const palette = this.querySelector(':scope > dc-palette[high-contrast]') as ChartPalette | null;
+    return palette;
+  }
+
+  /**
+   * Get high contrast colors for a given count.
+   *
+   * If a custom high-contrast palette is provided, uses those colors.
+   * Otherwise, uses the built-in HIGH_CONTRAST_COLORS.
+   *
+   * @param count Number of colors needed
+   * @returns Array of color strings
+   */
+  protected getHighContrastColors(count: number): string[] {
+    // Check for custom high-contrast palette
+    const palette = this.getHighContrastPalette();
+    if (palette && palette.hasFills()) {
+      const customColors = palette.getFillColors();
+      if (customColors.length > 0) {
+        // Cycle through custom colors if count exceeds available
+        const colors: string[] = [];
+        for (let i = 0; i < count; i++) {
+          colors.push(customColors[i % customColors.length]);
+        }
+        return colors;
+      }
+    }
+
+    // Use built-in high contrast colors
+    const colors: string[] = [];
+    for (let i = 0; i < count; i++) {
+      colors.push(HIGH_CONTRAST_COLORS[i % HIGH_CONTRAST_COLORS.length]);
+    }
+    return colors;
+  }
+
+  /**
+   * Clear used patterns at the start of each render cycle.
+   */
+  protected clearUsedPatterns(): void {
+    this.usedPatterns = new Map();
+  }
+
+  /**
+   * Register a pattern for use and return its fill URL reference.
+   *
+   * @param config The pattern configuration
+   * @param fillColor The fill color to use as pattern fill (if not specified in config)
+   * @param index Element index for unique pattern ID
+   * @returns Object with patternId and fillUrl for SVG rendering
+   */
+  protected registerPattern(
+    config: PatternConfig,
+    fillColor: string,
+    index: number
+  ): { patternId: string; fillUrl: string } {
+    const patternId = generatePatternId(this.chartInstanceId, config.type, index);
+
+    // Determine stroke and fill colors
+    const stroke = config.stroke || this.getContrastingTextColor(config.fill || fillColor);
+    const fill = config.fill || fillColor;
+
+    const resolved: ResolvedPattern = {
+      id: patternId,
+      type: config.type,
+      stroke,
+      fill,
+      scale: config.scale || 1
+    };
+
+    this.usedPatterns.set(patternId, resolved);
+
+    return {
+      patternId,
+      fillUrl: `url(#${patternId})`
+    };
+  }
+
+  /**
+   * Resolve a pattern attribute value to a PatternConfig.
+   *
+   * The pattern attribute can be:
+   * - A built-in pattern type name (e.g., "diagonal-lines", "dots")
+   * - An ID reference to a <dc-pattern> element
+   *
+   * @param patternAttr The pattern attribute value
+   * @param elementStroke Optional stroke color override from element
+   * @param elementFill Optional fill color override from element
+   * @param elementScale Optional scale override from element
+   * @returns PatternConfig if valid, null otherwise
+   */
+  protected resolvePatternAttribute(
+    patternAttr: string | undefined,
+    elementStroke?: string,
+    elementFill?: string,
+    elementScale?: number
+  ): PatternConfig | null {
+    if (!patternAttr) return null;
+
+    // Check if it's a built-in pattern type
+    if (isPatternType(patternAttr)) {
+      return {
+        type: patternAttr,
+        stroke: elementStroke || '#000',
+        fill: elementFill,
+        scale: elementScale
+      };
+    }
+
+    // Try to find a <dc-fill> element by ID
+    const fillEl = document.getElementById(patternAttr) as ChartFill | null;
+    if (fillEl?.tagName.toLowerCase() === 'dc-fill' && fillEl.hasPattern()) {
+      return {
+        type: fillEl.pattern!,
+        stroke: elementStroke || fillEl.stroke || '#000',
+        fill: elementFill || fillEl.fill,
+        scale: elementScale ?? fillEl.scale
+      };
+    }
+
+    this.log('warning', 'pattern.resolve', `Pattern "${patternAttr}" is not a valid type or ID reference`, null);
+    return null;
+  }
+
+  /**
+   * Resolve fills and patterns for chart elements with high contrast support.
+   *
+   * Priority order:
+   * 1. Element's own pattern attribute → use pattern with element's fill
+   * 2. Palette pattern match → use matched pattern
+   * 3. High contrast mode active → use high-contrast colors + auto-assign patterns
+   * 4. Normal color resolution → solid fill, no pattern
+   *
+   * @param elements Array of element info objects
+   * @param defaultColor Default fill color if nothing else is specified
+   * @returns Array of resolved fill and pattern info
+   */
+  protected resolveFillsWithPatterns(
+    elements: Array<{
+      fill?: string;
+      stroke?: string;
+      label?: string;
+      value?: number;
+      pattern?: string;
+      patternStroke?: string;
+      patternFill?: string;
+      patternScale?: number;
+    }>,
+    defaultColor?: string
+  ): ResolvedFillAndPattern[] {
+    const count = elements.length;
+    if (count === 0) return [];
+
+    const highContrast = this.isHighContrastActive();
+    const results: ResolvedFillAndPattern[] = [];
+
+    // First resolve base fill colors
+    // In high contrast mode, use high contrast colors instead of normal resolution
+    let fillColors: string[];
+    if (highContrast) {
+      fillColors = this.getHighContrastColors(count);
+    } else {
+      fillColors = this.resolveFillColorsWithPalette(
+        elements.map(e => ({ fill: e.fill, label: e.label, value: e.value })),
+        defaultColor
+      );
+    }
+
+    for (let i = 0; i < count; i++) {
+      const element = elements[i];
+      const baseFill = fillColors[i];
+      let patternConfig: PatternConfig | null = null;
+
+      // Priority 1: Element's own pattern attribute
+      if (element.pattern) {
+        patternConfig = this.resolvePatternAttribute(
+          element.pattern,
+          element.patternStroke,
+          element.patternFill,
+          element.patternScale
+        );
+      }
+
+      // Priority 2: Palette pattern match (only if not high contrast, as HC overrides colors)
+      if (!patternConfig && !highContrast && this.paletteId) {
+        const paletteResult = this.lookupPaletteColor(element.label, element.value);
+        if (paletteResult.pattern) {
+          patternConfig = paletteResult.pattern;
+        }
+      }
+
+      // Priority 3: High contrast auto-pattern
+      if (!patternConfig && highContrast) {
+        const patternType = getHighContrastPattern(i);
+        patternConfig = {
+          type: patternType,
+          stroke: this.getContrastingTextColor(baseFill),
+          fill: baseFill,
+          scale: 1
+        };
+      }
+
+      // Apply pattern if we have one
+      if (patternConfig) {
+        const { fillUrl } = this.registerPattern(patternConfig, baseFill, i);
+        results.push({
+          fill: fillUrl,
+          patternId: patternConfig.type,
+          originalFill: baseFill
+        });
+      } else {
+        results.push({
+          fill: baseFill,
+          originalFill: baseFill
+        });
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * Render SVG <defs> section with all used patterns.
+   *
+   * @returns SVGTemplateResult with <defs> element, or empty if no patterns used
+   */
+  protected renderDefs(): SVGTemplateResult {
+    if (this.usedPatterns.size === 0) {
+      return svg``;
+    }
+
+    const patternSvgs: string[] = [];
+    for (const pattern of this.usedPatterns.values()) {
+      const generator = PATTERN_DEFINITIONS[pattern.type];
+      if (generator) {
+        patternSvgs.push(generator(pattern.id, pattern.stroke, pattern.fill, pattern.scale));
+      }
+    }
+
+    return svg`<defs>${unsafeSVG(patternSvgs.join(''))}</defs>`;
+  }
+
+  // ============================================================================
+  // End High Contrast and Pattern Methods
+  // ============================================================================
 
   /**
    * Parse a CSS color string to RGB values.
@@ -1598,8 +1933,9 @@ export abstract class BaseChart extends LitElement {
   }
 
   render() {
-    // Clear log entries at the start of each render cycle
+    // Clear log entries and used patterns at the start of each render cycle
     this.clearLog();
+    this.clearUsedPatterns();
 
     // Generate accessibility content
     const ariaLabelValue = this.getAriaLabel();
@@ -1621,6 +1957,7 @@ export abstract class BaseChart extends LitElement {
         @focus="${this.handleChartFocus}"
         @blur="${this.handleChartBlur}"
       >
+        ${this.renderDefs()}
         ${descriptionContent ? svg`<desc id="${this.descriptionId}">${descriptionContent}</desc>` : ''}
         ${this.renderTitle()}
         ${this.renderChart()}
@@ -2077,6 +2414,11 @@ export abstract class BaseChart extends LitElement {
     }
 
     const parts: string[] = [];
+
+    // Announce high contrast mode at the start for screen reader users
+    if (this.isHighContrastActive()) {
+      parts.push('High contrast mode active');
+    }
 
     // Add basic data summary
     const summary = this.getDataSummary();

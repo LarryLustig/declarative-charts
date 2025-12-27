@@ -8,12 +8,12 @@ Future enhancements planned for the declarative chart library, organized by prio
 
 ### Accessibility
 
-**Status:** Partially Complete (Phase A done)
+**Status:** ✅ Complete
 **Priority:** Critical
 
 **Problem:** The library renders SVG charts without proper accessibility attributes, making them unusable for screen reader users and inaccessible via keyboard navigation.
 
-#### Completed (Phase A)
+#### Completed
 
 The following accessibility features have been implemented:
 
@@ -44,22 +44,31 @@ The following accessibility features have been implemented:
    - Visual focus indicator (blue dashed rectangle) appears during keyboard navigation
    - Hover-triggered popups show automatically when element receives focus
 
+5. **High Contrast Mode** ✓
+   - Respects `prefers-contrast: high` media query for automatic activation
+   - `high-contrast` attribute to force high contrast mode
+   - WCAG AA compliant color palette with 8 distinct colors
+   - Automatic pattern assignment for visual distinction beyond color
+   - Custom high-contrast palettes via `<dc-palette high-contrast>`
+
+6. **Pattern Fills** ✓
+   - 8 built-in SVG pattern types: diagonal-lines, diagonal-lines-reverse, horizontal-lines, vertical-lines, dots, crosshatch, grid, checkerboard
+   - Direct pattern application via `pattern` attribute on elements
+   - Pattern definitions in palettes with `<dc-fill>` elements
+   - Pattern ID references for reusable pattern definitions
+   - Label-based and value-based pattern matching in palettes
+   - Customizable pattern stroke, fill, and scale
+
 **Files created/modified:**
 - `src/accessibility/insights.ts` - Statistical analysis functions
 - `src/accessibility/index.ts` - Accessibility module exports
-- `src/base-chart.ts` - ARIA properties, description generation, keyboard navigation infrastructure
+- `src/base-chart.ts` - ARIA properties, description generation, keyboard navigation, pattern resolution, high contrast detection
 - `src/chart.ts`, `src/pie-chart.ts`, `src/funnel-chart.ts` - Chart-specific `getInsights()` and `getFocusableElements()` implementations
+- `src/patterns.ts` - SVG pattern definitions and high contrast color palette
+- `src/chart-fill.ts` - `<dc-fill>` element for color/pattern definitions
+- `src/chart-palette.ts` - `<dc-palette>` container with pattern lookup
 - `examples/accessibility.html` - Comprehensive examples and screen reader testing guide
-
-#### Remaining (Phase B - Future)
-
-The following features are deferred for future implementation:
-
-1. **High Contrast Support**
-   - Respect `prefers-contrast: high` media query
-   - Ensure sufficient color contrast ratios (WCAG AA minimum)
-   - Provide `high-contrast` attribute to force high contrast mode
-   - Consider pattern fills as alternative to color-only differentiation
+- `examples/patterns.html` - Pattern fills and high contrast mode examples
 
 ---
 
@@ -1177,6 +1186,6 @@ function MyChart({ data }) {
 
 | Version | Status | Key Features |
 |---------|--------|--------------|
-| 0.x | Current | Bar, Line, Bubble, Pie, Funnel charts; Legends; Titles; Popups; Palettes; ARIA labels & auto-insights; Keyboard navigation |
+| 0.x | Current | Bar, Line, Bubble, Pie, Funnel charts; Legends; Titles; Popups; Palettes; ARIA labels & auto-insights; Keyboard navigation; Pattern fills; High contrast mode |
 | 1.0 | Planned | Number formatting; Negative values; Axis config; npm publish |
-| 1.x | Future | Area charts; Animations; Date axis; High contrast; More chart types |
+| 1.x | Future | Area charts; Animations; Date axis; More chart types |

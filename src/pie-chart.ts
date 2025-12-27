@@ -59,6 +59,10 @@ export class PieChart extends BaseChart {
     fill?: string;
     stroke?: string;
     strokeWidth?: number;
+    pattern?: string;
+    patternStroke?: string;
+    patternFill?: string;
+    patternScale?: number;
     showValue: ShowCondition;
     showLabel: ShowCondition;
     showPercent: ShowCondition;
@@ -93,6 +97,10 @@ export class PieChart extends BaseChart {
         fill: effectiveFill || undefined,
         stroke: slice.stroke || undefined,
         strokeWidth: slice.strokeWidth,
+        pattern: slice.pattern || undefined,
+        patternStroke: slice.patternStroke || undefined,
+        patternFill: slice.patternFill || undefined,
+        patternScale: slice.patternScale || undefined,
         showValue,
         showLabel,
         showPercent,
@@ -124,6 +132,7 @@ export class PieChart extends BaseChart {
       labelX: number;
       labelY: number;
       color: string;
+      originalColor: string;
       stroke: string;
       strokeWidth: number;
       showValue: ShowCondition;
@@ -157,14 +166,18 @@ export class PieChart extends BaseChart {
     this.log('info', 'layout.radius', `min(chartWidth(${chartWidth.toFixed(1)}), chartHeight(${chartHeight.toFixed(1)})) / 2 = ${radius.toFixed(1)}`, radius);
     this.log('info', 'layout.innerRadius', `${this.innerRadius}% of radius(${radius.toFixed(1)}) = ${innerRadiusPixels.toFixed(1)}`, innerRadiusPixels);
 
-    // Resolve fill colors with palette support
+    // Resolve fill colors and patterns with high contrast support
     // Pass sliceColor as default for backwards compatibility
     const elements = sliceData.map(s => ({
       fill: s.fill,
       label: s.label,
-      value: s.value
+      value: s.value,
+      pattern: s.pattern,
+      patternStroke: s.patternStroke,
+      patternFill: s.patternFill,
+      patternScale: s.patternScale
     }));
-    const fillColors = this.resolveFillColorsWithPalette(elements, this.sliceColor);
+    const resolvedFills = this.resolveFillsWithPatterns(elements, this.sliceColor);
 
     // Resolve stroke colors
     const elementStrokes = sliceData.map(s => s.stroke);
@@ -213,7 +226,8 @@ export class PieChart extends BaseChart {
         percentage,
         labelX,
         labelY,
-        color: fillColors[index],
+        color: resolvedFills[index].fill,
+        originalColor: resolvedFills[index].originalFill,
         stroke: strokeColors[index],
         strokeWidth: slice.strokeWidth ?? defaultStrokeWidth,
         showValue: slice.showValue,
@@ -290,6 +304,7 @@ export class PieChart extends BaseChart {
     const { slices, centerX, centerY, radius, innerRadiusPixels } = layout;
 
     return svg`
+      ${this.renderDefs()}
       <!-- Pie slices -->
       ${slices.map((slice) => {
         const path = this.createSlicePath(
@@ -359,7 +374,7 @@ export class PieChart extends BaseChart {
       ${this.renderLegend(
         slices.map((slice) => ({
           label: slice.label,
-          color: slice.color,
+          color: slice.originalColor,
           value: slice.value
         }))
       )}
