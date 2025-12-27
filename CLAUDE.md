@@ -95,9 +95,9 @@ Format inheritance: element `value-format` → legend/axis `value-format` → ch
 <!-- Named presets with optional argument -->
 <dc-chart value-format="currency USD">     <!-- $1,234.56 -->
 <dc-chart value-format="number 2">         <!-- 1,234.56 -->
+<dc-chart value-format="number 0">         <!-- 1,235 (integers) -->
 <dc-chart value-format="compact 1">        <!-- 1.2M -->
 <dc-chart value-format="percent 0">        <!-- 46% -->
-<dc-chart value-format="integer">          <!-- 1,235 -->
 
 <!-- d3-format subset -->
 <dc-chart value-format="$,.2f">            <!-- $1,234.56 -->

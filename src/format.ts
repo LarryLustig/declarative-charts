@@ -4,7 +4,7 @@
  */
 
 /** Named preset types */
-export type FormatPreset = 'number' | 'integer' | 'compact' | 'currency' | 'percent';
+export type FormatPreset = 'number' | 'compact' | 'currency' | 'percent';
 
 /** Format type from d3-format subset */
 export type FormatType = 'f' | 's' | '%' | 'none';
@@ -39,7 +39,7 @@ const SI_PREFIXES: Array<{ value: number; symbol: string }> = [
 ];
 
 /** Preset names for detection */
-const PRESET_NAMES: Set<FormatPreset> = new Set(['number', 'integer', 'compact', 'currency', 'percent']);
+const PRESET_NAMES: Set<FormatPreset> = new Set(['number', 'compact', 'currency', 'percent']);
 
 /** Regex for d3-format subset: [prefix$][,][.precision][type] */
 const D3_FORMAT_REGEX = /^(\$)?(,)?(?:\.(\d+))?([fs%])?$/;
@@ -127,10 +127,6 @@ export class NumberFormatter {
       case 'number': {
         const decimals = arg !== undefined ? parseInt(arg, 10) : 2;
         return this.formatFixed(value, decimals, true);
-      }
-
-      case 'integer': {
-        return this.formatFixed(value, 0, true);
       }
 
       case 'compact': {

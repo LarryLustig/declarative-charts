@@ -502,7 +502,6 @@ Control how numeric values are displayed using the `value-format` and `percent-f
 | `number` | 1234.567 | 1,234.57 |
 | `number 0` | 1234.567 | 1,235 |
 | `number 4` | 1234.567 | 1,234.5670 |
-| `integer` | 1234.567 | 1,235 |
 | `compact` | 1234567 | 1.2M |
 | `compact 1` | 1234567 | 1M |
 | `currency USD` | 1234.56 | $1,234.56 |
