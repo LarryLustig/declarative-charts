@@ -200,6 +200,10 @@ Unit tests use **Vitest** (Vite-native test framework). Tests live in `test/unit
 | `src/chart-fill.ts` | `test/unit/chart-fill.test.ts` | 96% |
 | `src/chart-legend.ts` (utilities) | `test/unit/chart-legend.test.ts` | 11% (type guard, warnings) |
 | `src/chart-axis.ts` | `test/unit/chart-axis.test.ts` | 52% (parsing, position) |
+| `src/chart-palette.ts` | `test/unit/chart-palette.test.ts` | 8% (properties only) |
+| `src/chart-title.ts` | `test/unit/chart-title.test.ts` | 44% (constants, warnings) |
+| `src/chart-swatch.ts` | `test/unit/chart-swatch.test.ts` | 25% (constants, properties) |
+| `src/base-shape.ts` | `test/unit/base-shape.test.ts` | 100% |
 
 ### ⚠️ REQUIRED: Update Tests When Modifying Covered Files
 
@@ -264,10 +268,12 @@ src/
 ├── format.ts               # NumberFormatter, presets, d3-format parsing [TESTED]
 ├── accessibility/          # Insight analysis utilities [TESTED]
 ├── chart-axis.ts           # <dc-axis> configuration [TESTED]
-├── chart-palette.ts        # <dc-palette> container
+├── chart-palette.ts        # <dc-palette> container [TESTED]
 ├── chart-fill.ts           # <dc-fill> color/pattern definition [TESTED]
 ├── chart-legend.ts         # <dc-legend> legend rendering [TESTED]
-├── chart-swatch.ts         # <dc-swatch> for displaying colors
+├── chart-swatch.ts         # <dc-swatch> for displaying colors [TESTED]
+├── chart-title.ts          # <dc-title> title rendering [TESTED]
+├── base-shape.ts           # Abstract base for shapes [TESTED]
 ├── patterns.ts             # SVG pattern definitions [TESTED]
 ├── chart-*.ts              # Other data elements
 └── index.ts                # Exports
@@ -280,7 +286,8 @@ test/
 │   ├── axis-scales.test.ts # Tests for axis scale calculations
 │   ├── chart-fill.test.ts  # Tests for src/chart-fill.ts
 │   ├── chart-legend.test.ts # Tests for src/chart-legend.ts
-│   └── chart-axis.test.ts  # Tests for src/chart-axis.ts
+│   ├── chart-axis.test.ts  # Tests for src/chart-axis.ts
+│   └── chart-palette.test.ts # Tests for src/chart-palette.ts
 └── (future: components/, integration/, visual/)
 
 examples/                   # Example pages (use examples.css, examples.js)
