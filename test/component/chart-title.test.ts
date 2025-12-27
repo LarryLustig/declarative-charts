@@ -376,5 +376,24 @@ describe('ChartTitle component', () => {
       const result = title.generateSvg();
       expect(result.width).toBeGreaterThan(0);
     });
+
+    it('uses fallback text measurement when canvas context unavailable', async () => {
+      title = await fixture<ChartTitle>('dc-title', { 'font-size': '20' }, 'Test Title');
+
+      // Temporarily override getContext to return null
+      const originalGetContext = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = () => null;
+
+      try {
+        const dims = title.getDimensions();
+        // Fallback calculation: text.length * fontSize * 0.6
+        // "Test Title" = 10 chars, fontSize = 20, so width = 10 * 20 * 0.6 = 120
+        expect(dims.width).toBe(120);
+        expect(dims.height).toBeGreaterThan(0);
+      } finally {
+        // Restore the original mock
+        HTMLCanvasElement.prototype.getContext = originalGetContext;
+      }
+    });
   });
 });
