@@ -16,6 +16,9 @@ A declarative chart library built with Lit (Web Components) and TypeScript. User
 npm run dev      # Vite dev server at localhost:5173
 npm run build    # TypeScript + Vite build → dist/
 npm run preview  # Preview production build
+npm test         # Run tests in watch mode
+npm run test:run # Run tests once
+npm run test:coverage  # Run tests with coverage report
 ```
 
 ## Design Principles
@@ -182,6 +185,68 @@ In code: `const padding = this.getChartPadding()` returns viewBox units.
 
 Always use `this.measureText(text, fontSize)` for text widths. Never estimate with character count.
 
+## Testing
+
+Unit tests use **Vitest** (Vite-native test framework). Tests live in `test/unit/`.
+
+### Files with Test Coverage
+
+| Source File | Test File | Coverage |
+|-------------|-----------|----------|
+| `src/format.ts` | `test/unit/format.test.ts` | 92% |
+| `src/accessibility/insights.ts` | `test/unit/insights.test.ts` | 97% |
+| `src/patterns.ts` | `test/unit/patterns.test.ts` | 100% |
+| `src/axis-chart.ts` (scale functions) | `test/unit/axis-scales.test.ts` | 22% (scale calcs only) |
+
+### ⚠️ REQUIRED: Update Tests When Modifying Covered Files
+
+When modifying a file that has test coverage:
+
+1. **Run existing tests first**: `npm run test:run`
+2. **Update tests** if you change function signatures or behavior
+3. **Add tests** for new functions or code paths
+4. **Verify tests pass** before committing
+
+### Adding Tests for New Code
+
+When adding new utility functions or modules:
+
+1. **Unit-testable code** = pure functions with minimal dependencies (no DOM, no Lit rendering)
+2. Create test file at `test/unit/{filename}.test.ts`
+3. Follow existing patterns in `format.test.ts` or `insights.test.ts`
+4. Aim for >90% coverage on utility modules
+
+**Good candidates for unit tests:**
+- Calculation functions (scales, ranges, padding)
+- Parsing functions (format strings, attributes)
+- Data analysis functions (statistics, trends)
+- Pure transformation functions
+
+**Not suitable for unit tests (need component tests later):**
+- Lit component rendering
+- DOM manipulation
+- Event handlers
+
+### Test Syntax Quick Reference
+
+```typescript
+import { describe, it, expect, beforeEach } from 'vitest';
+import { myFunction } from '../../src/myModule';
+
+describe('myFunction', () => {
+  it('handles typical input', () => {
+    expect(myFunction(input)).toBe(expectedOutput);
+  });
+
+  it('handles edge cases', () => {
+    expect(myFunction(null)).toBe(defaultValue);
+    expect(myFunction([])).toEqual([]);
+  });
+});
+```
+
+Common matchers: `toBe()` (exact), `toEqual()` (deep), `toMatch()` (regex), `toContain()`, `toBeCloseTo()` (floats), `toThrow()`.
+
 ## File Structure
 
 ```
@@ -193,15 +258,23 @@ src/
 ├── chart.ts                # <dc-chart> - bars/lines/bubbles
 ├── pie-chart.ts            # <dc-pie-chart>
 ├── funnel-chart.ts         # <dc-funnel-chart>
-├── format.ts               # NumberFormatter, presets, d3-format parsing
-├── accessibility/          # Insight analysis utilities
+├── format.ts               # NumberFormatter, presets, d3-format parsing [TESTED]
+├── accessibility/          # Insight analysis utilities [TESTED]
 ├── chart-axis.ts           # <dc-axis> configuration
 ├── chart-palette.ts        # <dc-palette> container
 ├── chart-fill.ts           # <dc-fill> color/pattern definition
 ├── chart-swatch.ts         # <dc-swatch> for displaying colors
-├── patterns.ts             # SVG pattern definitions
+├── patterns.ts             # SVG pattern definitions [TESTED]
 ├── chart-*.ts              # Data elements
 └── index.ts                # Exports
+
+test/
+├── unit/
+│   ├── format.test.ts      # Tests for src/format.ts
+│   ├── insights.test.ts    # Tests for src/accessibility/insights.ts
+│   ├── patterns.test.ts    # Tests for src/patterns.ts
+│   └── axis-scales.test.ts # Tests for axis scale calculations
+└── (future: components/, integration/, visual/)
 
 examples/                   # Example pages (use examples.css, examples.js)
 test-charts/                # Visual test matrices for legend/title positions
