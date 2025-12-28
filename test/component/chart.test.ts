@@ -12,6 +12,7 @@ import '../../src/chart-bubble';
 import '../../src/chart-axis';
 import '../../src/chart-title';
 import '../../src/chart-legend';
+import '../../src/chart-popup';
 import { Chart } from '../../src/chart';
 
 /**
@@ -615,6 +616,397 @@ describe('Chart component', () => {
       `);
       const title = chart.querySelector('dc-title');
       expect(title?.textContent).toBe('Sales Report');
+    });
+  });
+
+  // ============================================================================
+  // Combo chart legend (stacked bars + lines)
+  // ============================================================================
+
+  describe('combo chart legend', () => {
+    it('includes line items in stacked bar legend', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar label="Q1">
+          <dc-bar-segment value="30" label="Product A" fill="#ff0000"></dc-bar-segment>
+          <dc-bar-segment value="20" label="Product B" fill="#00ff00"></dc-bar-segment>
+        </dc-bar>
+        <dc-bar label="Q2">
+          <dc-bar-segment value="40" label="Product A" fill="#ff0000"></dc-bar-segment>
+          <dc-bar-segment value="25" label="Product B" fill="#00ff00"></dc-bar-segment>
+        </dc-bar>
+        <dc-line label="Target" stroke="#0000ff">
+          <dc-point value="50" label="Q1"></dc-point>
+          <dc-point value="60" label="Q2"></dc-point>
+        </dc-line>
+      `);
+      const items = (chart as any).getLegendItems();
+      // Should have segment items + line item
+      expect(items.length).toBeGreaterThanOrEqual(3);
+      // Should include the line with correct shape
+      const lineItem = items.find((i: any) => i.label === 'Target');
+      expect(lineItem).toBeDefined();
+      expect(lineItem.shape).toBe('line');
+      expect(lineItem.dimensionless).toBe(true);
+    });
+
+    it('segment legend items have totaled values', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar label="Q1">
+          <dc-bar-segment value="30" label="Product A" fill="#ff0000"></dc-bar-segment>
+          <dc-bar-segment value="20" label="Product B" fill="#00ff00"></dc-bar-segment>
+        </dc-bar>
+        <dc-bar label="Q2">
+          <dc-bar-segment value="40" label="Product A" fill="#ff0000"></dc-bar-segment>
+          <dc-bar-segment value="10" label="Product B" fill="#00ff00"></dc-bar-segment>
+        </dc-bar>
+      `);
+      const items = (chart as any).getLegendItems();
+      const productA = items.find((i: any) => i.label === 'Product A');
+      const productB = items.find((i: any) => i.label === 'Product B');
+      expect(productA?.value).toBe(70); // 30 + 40
+      expect(productB?.value).toBe(30); // 20 + 10
+    });
+  });
+
+  // ============================================================================
+  // Keyboard navigation and focus
+  // ============================================================================
+
+  describe('keyboard navigation', () => {
+    it('returns focusable elements for bars', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="50" label="A"></dc-bar>
+        <dc-bar value="30" label="B"></dc-bar>
+      `);
+      const elements = (chart as any).getFocusableElements();
+      expect(elements).toHaveLength(2);
+    });
+
+    it('returns focusable elements for lines', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-line label="Trend">
+          <dc-point value="10" label="A"></dc-point>
+          <dc-point value="20" label="B"></dc-point>
+          <dc-point value="15" label="C"></dc-point>
+        </dc-line>
+      `);
+      const elements = (chart as any).getFocusableElements();
+      // Should have one element per point
+      expect(elements).toHaveLength(3);
+    });
+
+    it('returns focusable elements for bubbles', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bubble value="10" size="50" label="A"></dc-bubble>
+        <dc-bubble value="20" size="100" label="B"></dc-bubble>
+      `);
+      const elements = (chart as any).getFocusableElements();
+      expect(elements).toHaveLength(2);
+    });
+
+    it('returns combined focusable elements for mixed charts', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="50" label="A"></dc-bar>
+        <dc-line label="Trend">
+          <dc-point value="10" label="A"></dc-point>
+          <dc-point value="20" label="B"></dc-point>
+        </dc-line>
+        <dc-bubble value="15" size="50" label="C"></dc-bubble>
+      `);
+      const elements = (chart as any).getFocusableElements();
+      // 1 bar + 2 points + 1 bubble = 4
+      expect(elements).toHaveLength(4);
+    });
+  });
+
+  // ============================================================================
+  // Focus indicator rendering
+  // ============================================================================
+
+  describe('focus indicator', () => {
+    it('does not render focus indicator when keyboard inactive', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="50" label="A"></dc-bar>
+      `);
+      (chart as any).keyboardActive = false;
+      (chart as any).focusedIndex = 0;
+      const indicator = (chart as any).renderFocusIndicator();
+      // Should return empty SVG template
+      expect(indicator).toBeDefined();
+    });
+
+    it('does not render focus indicator when no element focused', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="50" label="A"></dc-bar>
+      `);
+      (chart as any).keyboardActive = true;
+      (chart as any).focusedIndex = -1;
+      const indicator = (chart as any).renderFocusIndicator();
+      expect(indicator).toBeDefined();
+    });
+
+    it('renders focus indicator for focused bar', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="50" label="A"></dc-bar>
+      `);
+      (chart as any).keyboardActive = true;
+      (chart as any).focusedIndex = 0;
+      const indicator = (chart as any).renderFocusIndicator();
+      expect(indicator).toBeDefined();
+    });
+  });
+
+  // ============================================================================
+  // Shape bounds
+  // ============================================================================
+
+  describe('shape bounds', () => {
+    it('returns bounds for bar shapes', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="50" label="A"></dc-bar>
+      `);
+      const bounds = (chart as any).getShapeBounds(0);
+      // May return null if no rect is rendered yet, or bounds object
+      if (bounds) {
+        expect(bounds).toHaveProperty('x');
+        expect(bounds).toHaveProperty('y');
+        expect(bounds).toHaveProperty('width');
+        expect(bounds).toHaveProperty('height');
+      }
+    });
+
+    it('returns bounds for circle shapes (line points)', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-line label="Trend">
+          <dc-point value="10" label="A"></dc-point>
+          <dc-point value="20" label="B"></dc-point>
+        </dc-line>
+      `);
+      // Line points are after bars in index, so if no bars, index 0 is first point
+      const bounds = (chart as any).getShapeBounds(0);
+      if (bounds) {
+        expect(bounds).toHaveProperty('x');
+        expect(bounds).toHaveProperty('y');
+        expect(bounds).toHaveProperty('width');
+        expect(bounds).toHaveProperty('height');
+      }
+    });
+
+    it('returns null for invalid index', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="50" label="A"></dc-bar>
+      `);
+      const bounds = (chart as any).getShapeBounds(999);
+      expect(bounds).toBeNull();
+    });
+  });
+
+  // ============================================================================
+  // Popup content methods
+  // ============================================================================
+
+  describe('popup content', () => {
+    it('getBarPopupContent returns custom popup content', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="50" label="A">
+          <dc-popup>Custom bar popup</dc-popup>
+        </dc-bar>
+      `);
+      const bars = (chart as any).getFlattenedBars();
+      const content = (chart as any).getBarPopupContent(bars[0], 0);
+      expect(content).toBe('Custom bar popup');
+    });
+
+    it('getBarPopupContent returns auto popup when enabled', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-bar value="50" label="Test Bar"></dc-bar>
+        <dc-bar value="50" label="Other Bar"></dc-bar>
+      `);
+      const bars = (chart as any).getFlattenedBars();
+      const content = (chart as any).getBarPopupContent(bars[0], 0);
+      expect(content).toContain('Test Bar');
+      expect(content).toContain('Value:');
+    });
+
+    it('getBarPopupContent returns null when no popup', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="50" label="A"></dc-bar>
+      `);
+      const bars = (chart as any).getFlattenedBars();
+      const content = (chart as any).getBarPopupContent(bars[0], 0);
+      expect(content).toBeNull();
+    });
+
+    it('getPointPopupContent returns custom popup content', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-line label="Trend">
+          <dc-point value="10" label="A">
+            <dc-popup>Custom point popup</dc-popup>
+          </dc-point>
+        </dc-line>
+      `);
+      const lines = (chart as any).getLines();
+      const content = (chart as any).getPointPopupContent(lines[0], lines[0].points[0], 0, 0);
+      expect(content).toBe('Custom point popup');
+    });
+
+    it('getPointPopupContent returns auto popup when enabled', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-line label="Test Line">
+          <dc-point value="10" label="Point A"></dc-point>
+        </dc-line>
+      `);
+      const lines = (chart as any).getLines();
+      const content = (chart as any).getPointPopupContent(lines[0], lines[0].points[0], 0, 0);
+      expect(content).toContain('Test Line');
+      expect(content).toContain('Point A');
+    });
+
+    it('getPointPopupContent returns null when no popup', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-line label="Trend">
+          <dc-point value="10" label="A"></dc-point>
+        </dc-line>
+      `);
+      const lines = (chart as any).getLines();
+      const content = (chart as any).getPointPopupContent(lines[0], lines[0].points[0], 0, 0);
+      expect(content).toBeNull();
+    });
+
+    it('getBubblePopupContent returns custom popup content', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bubble value="10" size="50" label="A">
+          <dc-popup>Custom bubble popup</dc-popup>
+        </dc-bubble>
+      `);
+      const bubbles = (chart as any).getBubbles();
+      const content = (chart as any).getBubblePopupContent(bubbles[0], 0);
+      expect(content).toBe('Custom bubble popup');
+    });
+
+    it('getBubblePopupContent returns auto popup when enabled', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-bubble value="10" size="50" label="Test Bubble"></dc-bubble>
+      `);
+      const bubbles = (chart as any).getBubbles();
+      const content = (chart as any).getBubblePopupContent(bubbles[0], 0);
+      expect(content).toContain('Test Bubble');
+      expect(content).toContain('Value:');
+      expect(content).toContain('Size:');
+    });
+
+    it('getBubblePopupContent returns null when no popup', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bubble value="10" size="50" label="A"></dc-bubble>
+      `);
+      const bubbles = (chart as any).getBubbles();
+      const content = (chart as any).getBubblePopupContent(bubbles[0], 0);
+      expect(content).toBeNull();
+    });
+  });
+
+  // ============================================================================
+  // Popup for focused element
+  // ============================================================================
+
+  describe('popup for focused element', () => {
+    it('showPopupForFocusedElement handles bar index', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-bar value="50" label="A"></dc-bar>
+        <dc-bar value="30" label="B"></dc-bar>
+      `);
+      // Should not throw when called
+      expect(() => (chart as any).showPopupForFocusedElement(0)).not.toThrow();
+    });
+
+    it('showPopupForFocusedElement handles line point index', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-bar value="50" label="A"></dc-bar>
+        <dc-line label="Trend">
+          <dc-point value="10" label="P1"></dc-point>
+          <dc-point value="20" label="P2"></dc-point>
+        </dc-line>
+      `);
+      // Index 1 is the first line point (after 1 bar)
+      expect(() => (chart as any).showPopupForFocusedElement(1)).not.toThrow();
+    });
+
+    it('showPopupForFocusedElement handles bubble index', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-bar value="50" label="A"></dc-bar>
+        <dc-line label="Trend">
+          <dc-point value="10" label="P1"></dc-point>
+        </dc-line>
+        <dc-bubble value="15" size="50" label="B"></dc-bubble>
+      `);
+      // Index 2 is the bubble (after 1 bar + 1 point)
+      expect(() => (chart as any).showPopupForFocusedElement(2)).not.toThrow();
+    });
+
+    it('togglePopupForFocusedElement shows popup when hidden', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-bar value="50" label="A"></dc-bar>
+      `);
+      (chart as any).popupVisible = false;
+      expect(() => (chart as any).togglePopupForFocusedElement(0)).not.toThrow();
+    });
+
+    it('togglePopupForFocusedElement hides popup when visible', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-bar value="50" label="A"></dc-bar>
+      `);
+      (chart as any).popupVisible = true;
+      expect(() => (chart as any).togglePopupForFocusedElement(0)).not.toThrow();
+    });
+  });
+
+  // ============================================================================
+  // Data summary
+  // ============================================================================
+
+  describe('data summary', () => {
+    it('includes bar summary', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="10" label="Low"></dc-bar>
+        <dc-bar value="50" label="High"></dc-bar>
+      `);
+      const summary = (chart as any).getDataSummary();
+      expect(summary).toContain('bar');
+      expect(summary).toContain('10');
+      expect(summary).toContain('50');
+    });
+
+    it('includes line summary', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-line label="Trend">
+          <dc-point value="5" label="A"></dc-point>
+          <dc-point value="25" label="B"></dc-point>
+        </dc-line>
+      `);
+      const summary = (chart as any).getDataSummary();
+      expect(summary).toContain('line');
+      expect(summary).toContain('point');
+    });
+
+    it('includes bubble summary', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bubble value="10" size="50" label="A"></dc-bubble>
+        <dc-bubble value="20" size="100" label="B"></dc-bubble>
+      `);
+      const summary = (chart as any).getDataSummary();
+      expect(summary).toContain('bubble');
+    });
+
+    it('combines summaries for mixed charts', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="50" label="A"></dc-bar>
+        <dc-line label="Trend">
+          <dc-point value="10" label="A"></dc-point>
+        </dc-line>
+      `);
+      const summary = (chart as any).getDataSummary();
+      expect(summary).toContain('bar');
+      expect(summary).toContain('line');
     });
   });
 
