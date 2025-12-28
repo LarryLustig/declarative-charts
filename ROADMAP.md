@@ -1019,6 +1019,17 @@ Same as Points, plus:
 </dc-gauge-chart>
 ```
 
+**Treemap:**
+```html
+<dc-treemap-chart>
+  <dc-treemap-node value="100" label="Category A" fill="#4CAF50">
+    <dc-treemap-node value="60" label="Sub A1"></dc-treemap-node>
+    <dc-treemap-node value="40" label="Sub A2"></dc-treemap-node>
+  </dc-treemap-node>
+  <dc-treemap-node value="80" label="Category B" fill="#2196F3"></dc-treemap-node>
+</dc-treemap-chart>
+```
+
 ---
 
 ### Tooltip/Popup Customization
@@ -1097,6 +1108,103 @@ Same as Points, plus:
 <dc-chart zoom-x zoom-y min-zoom="0.5" max-zoom="10">
   ...
 </dc-chart>
+```
+
+---
+
+### Responsive SVG Mode
+
+**Status:** Not Started
+**Priority:** Nice-to-Have (Post-1.0)
+
+**Problem:** Charts have fixed pixel dimensions. Users want charts that fill their container and scale responsively.
+
+**Requirements:**
+
+1. **Container-Filling Mode**
+   - `responsive` attribute sets `width="100%"` with `viewBox` preservation
+   - Chart scales to fill container while maintaining aspect ratio
+
+2. **Popup Positioning Fix**
+   - Current popup positioning assumes 1:1 pixel mapping
+   - Must account for SVG scaling via CTM (Current Transformation Matrix)
+   - Use `getScreenCTM()` to convert SVG coordinates to screen coordinates
+
+**Proposed API:**
+```html
+<!-- Fixed size (current behavior) -->
+<dc-chart width="600" height="400">...</dc-chart>
+
+<!-- Responsive - fills container, maintains 600:400 aspect ratio -->
+<dc-chart width="600" height="400" responsive>...</dc-chart>
+```
+
+---
+
+### Null/Gap Handling in Lines
+
+**Status:** Not Started
+**Priority:** Nice-to-Have (Post-1.0)
+
+**Problem:** Line charts have no way to represent missing data points. All points are connected regardless of gaps in the data.
+
+**Requirements:**
+
+1. **Null Values**
+   - `value="null"` or omitted value creates a gap in the line
+   - Line breaks at gap, resumes at next valid point
+
+2. **Gap Visualization Options**
+   - `gap-style="break"` - Line breaks (default)
+   - `gap-style="dashed"` - Dashed line across gap
+   - `gap-style="zero"` - Treat null as zero
+
+**Proposed API:**
+```html
+<dc-chart gap-style="break">
+  <dc-line>
+    <dc-point value="10" label="Jan"></dc-point>
+    <dc-point value="null" label="Feb"></dc-point>  <!-- Gap -->
+    <dc-point value="25" label="Mar"></dc-point>
+  </dc-line>
+</dc-chart>
+```
+
+---
+
+### Export Options
+
+**Status:** Partially Complete (SVG export exists)
+**Priority:** Nice-to-Have (Post-1.0)
+
+**Current:** `chart.downloadSvg(filename)` method exports SVG files.
+
+**Problem:** Users also need PNG export and print-optimized rendering.
+
+**Requirements:**
+
+1. **PNG Export**
+   - `chart.downloadPng(filename, scale?)` method
+   - Uses canvas to rasterize SVG
+   - Optional scale factor for high-DPI output
+
+2. **Print Styles**
+   - `@media print` CSS for optimized rendering
+   - Remove interactive elements (popups)
+   - Ensure colors print well (consider `print-colors` attribute)
+
+**Proposed API:**
+```javascript
+// PNG export at 2x resolution
+chart.downloadPng('my-chart', 2);
+
+// PNG with options
+chart.downloadPng('my-chart', { scale: 2, background: 'white' });
+```
+
+```html
+<!-- Print-friendly colors -->
+<dc-chart print-colors="grayscale">...</dc-chart>
 ```
 
 ---

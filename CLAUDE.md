@@ -21,6 +21,19 @@ npm run test:run # Run tests once
 npm run test:coverage  # Run tests with coverage report
 ```
 
+## Documentation
+
+- **README.md** - Quick-start guide with installation, basic examples, and links
+- **API.md** - Complete API reference (all elements, attributes, styling options)
+- **CHANGELOG.md** - Version history following Keep a Changelog format
+- **ROADMAP.md** - Planned features and future directions
+- **examples/** - Live HTML examples demonstrating all features
+
+When adding new features:
+1. Update **API.md** with complete attribute/element documentation
+2. Add examples to appropriate files in **examples/**
+3. Update **CHANGELOG.md** under `[Unreleased]` section
+
 ## Design Principles
 
 ### Follow Web Standards
@@ -139,7 +152,7 @@ When rendering labels, always use `formatValueString()` which handles show-value
    - Insights: pass `this.formatValue` to insight functions
    - Extract `valueFormat` from data elements and pass through data structures
 7. Export from `src/index.ts`
-8. Add examples to `index.html` and `examples/`
+8. Document in `API.md` and add examples to `examples/`
 
 ### Adding a New Data Element
 
@@ -375,6 +388,12 @@ Common matchers: `toBe()` (exact), `toEqual()` (deep), `toMatch()` (regex), `toC
 ## File Structure
 
 ```
+README.md                   # Quick-start guide
+API.md                      # Complete API reference
+CHANGELOG.md                # Version history
+ROADMAP.md                  # Planned features
+LICENSE                     # MIT license
+
 src/
 ├── base-chart.ts           # Abstract base (logging, accessibility, keyboard nav, formatting)
 ├── axis-chart.ts           # Abstract base for axis charts
@@ -420,7 +439,6 @@ test/
     └── charts.spec.ts-snapshots/  # Baseline images (auto-generated)
 
 examples/                   # Example pages (use examples.css, examples.js)
-test-charts/                # Visual test matrices for legend/title positions
 ```
 
 ## TypeScript Configuration
@@ -470,11 +488,3 @@ Example pages **must** follow this HTML structure for proper grid layout:
 - `<link rel="stylesheet" href="examples.css">`
 - `<script src="examples.js"></script>` (at end of body)
 - Two-tier nav: `.nav-major` (chart types) + `.nav-minor` (features)
-
-## Test Charts
-
-Visual test matrices in `test-charts/` verify legend/title positioning.
-
-Chart ID format: `{type}-L{legend}-T{title}-LT{legendTitle}-V{value}-P{percent}`
-
-Position codes: `r`=right, `l`=left, `t`=top, `b`=bottom, `tl`/`tr`/`bl`/`br`=corners, `n`=none.
