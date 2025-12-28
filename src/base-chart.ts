@@ -2732,7 +2732,7 @@ export abstract class BaseChart extends LitElement {
 
     // If it has an href, navigate to it
     if (element.href) {
-      window.location.href = element.href;
+      this.navigateToHref(element.href);
       return;
     }
 
@@ -2740,6 +2740,14 @@ export abstract class BaseChart extends LitElement {
     if (element.popupTrigger === 'click') {
       this.togglePopupForFocusedElement(this.focusedIndex);
     }
+  }
+
+  /**
+   * Navigate to the specified URL.
+   * Extracted for testability - can be mocked in tests.
+   */
+  protected navigateToHref(href: string): void {
+    window.location.href = href;
   }
 
   /**
