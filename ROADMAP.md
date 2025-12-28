@@ -555,26 +555,37 @@ function calculateNiceTicks(min: number, max: number, targetCount: number): numb
 
 **Current Progress:**
 - Vitest configured with coverage reporting
-- Unit tests for `format.ts` (77 tests, 92% coverage)
-- Unit tests for `accessibility/insights.ts` (71 tests, 97% coverage)
-- Unit tests for `patterns.ts` (92 tests, 100% coverage)
-- Unit tests for axis scale calculations (32 tests, covers niceNumber/getNiceMax/getNiceRange)
-- Integration tests for dynamic updates (30 tests) and htmx-style swaps (20 tests)
+- **Unit tests (13 files, 605 tests):**
+  - `format.ts` (82 tests, 99% coverage)
+  - `accessibility/insights.ts` (73 tests, 100% coverage)
+  - `patterns.ts` (92 tests, 100% coverage)
+  - `axis-scales.ts` (47 tests) - scale and padding calculations
+  - `base-chart-calc.ts` (30 tests) - converters
+  - `chart-fill.ts`, `chart-legend.ts`, `chart-axis.ts`, `chart-palette.ts`, `chart-title.ts`, `chart-swatch.ts`, `base-shape.ts`, `chart-utils.ts`
+- **Component tests (9 files, 740 tests):**
+  - `chart.test.ts` (170 tests) - bar/line/bubble rendering, events
+  - `base-chart.test.ts` (131 tests) - keyboard nav, color utils, padding parsing
+  - `pie-chart.test.ts` (88 tests), `funnel-chart.test.ts` (86 tests)
+  - `chart-legend.test.ts` (97 tests), `chart-axis.test.ts` (41 tests), `chart-title.test.ts` (46 tests)
+  - `chart-swatch.test.ts` (51 tests), `chart-palette.test.ts` (30 tests)
+- **Integration tests (2 files, 50 tests):**
+  - `dynamic-updates.test.ts` (30 tests)
+  - `htmx-integration.test.ts` (20 tests)
 
 **Requirements:**
 
-1. **Unit Tests**
+1. **Unit Tests** ✓
    - ~~Format utilities~~ ✓
-   - Date utilities
-   - Color calculations
-   - Scale calculations
-   - Padding calculations
+   - Date utilities (not started)
+   - ~~Color calculations~~ ✓
+   - ~~Scale calculations~~ ✓
+   - ~~Padding calculations~~ ✓
 
-2. **Component Tests**
-   - Element rendering
-   - Attribute handling
-   - Event handling
-   - Slot handling
+2. **Component Tests** ✓
+   - ~~Element rendering~~ ✓
+   - ~~Attribute handling~~ ✓
+   - ~~Event handling~~ ✓
+   - ~~Slot handling~~ ✓
 
 3. **Integration Tests** ✓
    - ~~Complete chart rendering~~ ✓
