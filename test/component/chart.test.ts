@@ -1181,6 +1181,56 @@ describe('Chart component', () => {
       const bounds = (chart as any).getShapeBounds(999);
       expect(bounds).toBeNull();
     });
+
+    it('returns circle bounds when parent returns null', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-line label="Trend">
+          <dc-point value="10" label="A"></dc-point>
+        </dc-line>
+      `);
+
+      // Mock the parent's getShapeBounds to return null
+      const originalGetShapeBounds = Object.getPrototypeOf(Object.getPrototypeOf(chart)).getShapeBounds;
+      vi.spyOn(Object.getPrototypeOf(Object.getPrototypeOf(chart)), 'getShapeBounds').mockReturnValue(null);
+
+      // Mock the SVG to have a circle element with correct attributes
+      const mockCircle = {
+        getAttribute: (attr: string) => {
+          if (attr === 'cx') return '100';
+          if (attr === 'cy') return '50';
+          if (attr === 'r') return '10';
+          return null;
+        }
+      };
+      const mockSvg = {
+        querySelector: (selector: string) => {
+          if (selector.includes('circle')) return mockCircle;
+          return null;
+        }
+      };
+      vi.spyOn(chart.shadowRoot!, 'querySelector').mockReturnValue(mockSvg as any);
+
+      const bounds = (chart as any).getShapeBounds(0);
+      expect(bounds).toEqual({ x: 90, y: 40, width: 20, height: 20 });
+    });
+
+    it('returns null when parent returns null and no circle exists', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="50" label="A"></dc-bar>
+      `);
+
+      // Mock the parent's getShapeBounds to return null
+      vi.spyOn(Object.getPrototypeOf(Object.getPrototypeOf(chart)), 'getShapeBounds').mockReturnValue(null);
+
+      // Mock the SVG to return null for circle
+      const mockSvg = {
+        querySelector: () => null
+      };
+      vi.spyOn(chart.shadowRoot!, 'querySelector').mockReturnValue(mockSvg as any);
+
+      const bounds = (chart as any).getShapeBounds(0);
+      expect(bounds).toBeNull();
+    });
   });
 
   // ============================================================================
@@ -1339,6 +1389,130 @@ describe('Chart component', () => {
       `);
       (chart as any).popupVisible = true;
       expect(() => (chart as any).togglePopupForFocusedElement(0)).not.toThrow();
+    });
+
+    it('showPopupForFocusedElement shows popup for line point', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-line label="Trend">
+          <dc-point value="10" label="Point A"></dc-point>
+          <dc-point value="20" label="Point B"></dc-point>
+        </dc-line>
+      `);
+
+      // Mock getShapeBounds to return valid bounds
+      vi.spyOn(chart as any, 'getShapeBounds').mockReturnValue({ x: 100, y: 50, width: 10, height: 10 });
+      const showPopupSpy = vi.spyOn(chart as any, 'showPopupAtBounds');
+
+      // Index 0 is first line point (no bars)
+      (chart as any).showPopupForFocusedElement(0);
+
+      expect(showPopupSpy).toHaveBeenCalled();
+      const content = showPopupSpy.mock.calls[0][0];
+      expect(content).toContain('Point A');
+    });
+
+    it('showPopupForFocusedElement shows popup for second line point', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-line label="Line 1">
+          <dc-point value="10" label="P1"></dc-point>
+          <dc-point value="20" label="P2"></dc-point>
+        </dc-line>
+      `);
+
+      vi.spyOn(chart as any, 'getShapeBounds').mockReturnValue({ x: 100, y: 50, width: 10, height: 10 });
+      const showPopupSpy = vi.spyOn(chart as any, 'showPopupAtBounds');
+
+      // Index 1 is second line point
+      (chart as any).showPopupForFocusedElement(1);
+
+      expect(showPopupSpy).toHaveBeenCalled();
+      const content = showPopupSpy.mock.calls[0][0];
+      expect(content).toContain('P2');
+    });
+
+    it('showPopupForFocusedElement shows popup for bubble after lines', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-line label="Trend">
+          <dc-point value="10" label="P1"></dc-point>
+        </dc-line>
+        <dc-bubble value="50" size="30" label="Bubble A"></dc-bubble>
+      `);
+
+      vi.spyOn(chart as any, 'getShapeBounds').mockReturnValue({ x: 100, y: 50, width: 30, height: 30 });
+      const showPopupSpy = vi.spyOn(chart as any, 'showPopupAtBounds');
+
+      // Index 1 is bubble (after 1 line point)
+      (chart as any).showPopupForFocusedElement(1);
+
+      expect(showPopupSpy).toHaveBeenCalled();
+      const content = showPopupSpy.mock.calls[0][0];
+      expect(content).toContain('Bubble A');
+    });
+
+    it('showPopupForFocusedElement handles multiple lines', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-line label="Line 1">
+          <dc-point value="10" label="L1P1"></dc-point>
+          <dc-point value="20" label="L1P2"></dc-point>
+        </dc-line>
+        <dc-line label="Line 2">
+          <dc-point value="30" label="L2P1"></dc-point>
+        </dc-line>
+      `);
+
+      vi.spyOn(chart as any, 'getShapeBounds').mockReturnValue({ x: 100, y: 50, width: 10, height: 10 });
+      const showPopupSpy = vi.spyOn(chart as any, 'showPopupAtBounds');
+
+      // Index 2 is first point of second line (after 2 points from first line)
+      (chart as any).showPopupForFocusedElement(2);
+
+      expect(showPopupSpy).toHaveBeenCalled();
+      const content = showPopupSpy.mock.calls[0][0];
+      expect(content).toContain('L2P1');
+    });
+
+    it('showPopupForFocusedElement returns early when bounds is null', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-bar value="50" label="A"></dc-bar>
+      `);
+
+      vi.spyOn(chart as any, 'getShapeBounds').mockReturnValue(null);
+      const showPopupSpy = vi.spyOn(chart as any, 'showPopupAtBounds');
+
+      (chart as any).showPopupForFocusedElement(0);
+
+      expect(showPopupSpy).not.toHaveBeenCalled();
+    });
+
+    it('showPopupForFocusedElement shows popup for bar with auto-popup', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-bar value="50" label="Test Bar"></dc-bar>
+        <dc-bar value="30" label="Other Bar"></dc-bar>
+      `);
+
+      vi.spyOn(chart as any, 'getShapeBounds').mockReturnValue({ x: 100, y: 50, width: 40, height: 100 });
+      const showPopupSpy = vi.spyOn(chart as any, 'showPopupAtBounds');
+
+      // Index 0 is first bar
+      (chart as any).showPopupForFocusedElement(0);
+
+      expect(showPopupSpy).toHaveBeenCalled();
+      const content = showPopupSpy.mock.calls[0][0];
+      expect(content).toContain('Test Bar');
+    });
+
+    it('showPopupForFocusedElement does not show popup when no content', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="50" label="A"></dc-bar>
+      `);
+
+      vi.spyOn(chart as any, 'getShapeBounds').mockReturnValue({ x: 100, y: 50, width: 40, height: 100 });
+      const showPopupSpy = vi.spyOn(chart as any, 'showPopupAtBounds');
+
+      // No auto-popup, no custom popup, so no content
+      (chart as any).showPopupForFocusedElement(0);
+
+      expect(showPopupSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -1534,9 +1708,20 @@ describe('Chart component', () => {
   // ============================================================================
 
   describe('bubble event handlers', () => {
-    it('handleBubbleMouseEnter shows popup', async () => {
+    it('handleBubbleMouseEnter shows popup with auto-popup', async () => {
       chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
         <dc-bubble value="50" size="30" label="A"></dc-bubble>
+      `);
+      const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handleBubbleMouseEnter(event, 0);
+      expect((chart as any).popupVisible).toBe(true);
+    });
+
+    it('handleBubbleMouseEnter shows popup with hover trigger', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bubble value="50" size="30" label="A">
+          <dc-popup trigger="hover">Bubble hover popup</dc-popup>
+        </dc-bubble>
       `);
       const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
       (chart as any).handleBubbleMouseEnter(event, 0);
@@ -1568,6 +1753,22 @@ describe('Chart component', () => {
       // Click again to hide
       (chart as any).handleBubbleClick(event, 0);
       expect((chart as any).popupVisible).toBe(false);
+    });
+
+    it('handleBubbleClick hides popup when bubble has no popup', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bubble value="50" size="30" label="A"></dc-bubble>
+      `);
+      // First show a popup manually
+      (chart as any).popupVisible = true;
+      (chart as any).clickedBubbleIndex = 0;
+
+      const event = new MouseEvent('click', { clientX: 100, clientY: 100 });
+      (chart as any).handleBubbleClick(event, 0);
+
+      // Should hide popup since bubble has no popup defined
+      expect((chart as any).popupVisible).toBe(false);
+      expect((chart as any).clickedBubbleIndex).toBe(-1);
     });
   });
 
@@ -1612,6 +1813,10 @@ describe('Chart component', () => {
       const event = new MouseEvent('click', { clientX: 100, clientY: 100 });
       (chart as any).handleLineClick(event, 0);
       expect((chart as any).popupVisible).toBe(true);
+
+      // Click again to hide
+      (chart as any).handleLineClick(event, 0);
+      expect((chart as any).popupVisible).toBe(false);
     });
   });
 
@@ -1656,6 +1861,28 @@ describe('Chart component', () => {
       const event = new MouseEvent('click', { clientX: 100, clientY: 100 });
       (chart as any).handlePointClick(event, 0, 0);
       expect((chart as any).popupVisible).toBe(true);
+
+      // Click again to hide
+      (chart as any).handlePointClick(event, 0, 0);
+      expect((chart as any).popupVisible).toBe(false);
+    });
+
+    it('handlePointClick hides popup when point has no popup', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-line label="Line A">
+          <dc-point value="10" label="P1"></dc-point>
+        </dc-line>
+      `);
+      // First show a popup manually
+      (chart as any).popupVisible = true;
+      (chart as any).clickedPointIndex = { lineIndex: 0, pointIndex: 0 };
+
+      const event = new MouseEvent('click', { clientX: 100, clientY: 100 });
+      (chart as any).handlePointClick(event, 0, 0);
+
+      // Should hide popup since point has no popup defined
+      expect((chart as any).popupVisible).toBe(false);
+      expect((chart as any).clickedPointIndex).toEqual({ lineIndex: -1, pointIndex: -1 });
     });
   });
 
@@ -1702,6 +1929,28 @@ describe('Chart component', () => {
       const event = new MouseEvent('click', { clientX: 100, clientY: 100 });
       (chart as any).handleSegmentClick(event, 0, 0);
       expect((chart as any).popupVisible).toBe(true);
+
+      // Click again to hide
+      (chart as any).handleSegmentClick(event, 0, 0);
+      expect((chart as any).popupVisible).toBe(false);
+    });
+
+    it('handleSegmentClick hides popup when segment has no popup', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="100" label="Stacked">
+          <dc-bar-segment value="60" label="A"></dc-bar-segment>
+        </dc-bar>
+      `);
+      // First show a popup manually
+      (chart as any).popupVisible = true;
+      (chart as any).clickedBarIndex = 0;
+
+      const event = new MouseEvent('click', { clientX: 100, clientY: 100 });
+      (chart as any).handleSegmentClick(event, 0, 0);
+
+      // Should hide popup since segment has no popup
+      expect((chart as any).popupVisible).toBe(false);
+      expect((chart as any).clickedBarIndex).toBe(-1);
     });
 
     it('handleSegmentMouseEnter ignores invalid segment', async () => {
