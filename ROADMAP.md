@@ -559,6 +559,7 @@ function calculateNiceTicks(min: number, max: number, targetCount: number): numb
 - Unit tests for `accessibility/insights.ts` (71 tests, 97% coverage)
 - Unit tests for `patterns.ts` (92 tests, 100% coverage)
 - Unit tests for axis scale calculations (32 tests, covers niceNumber/getNiceMax/getNiceRange)
+- Integration tests for dynamic updates (30 tests) and htmx-style swaps (20 tests)
 
 **Requirements:**
 
@@ -575,10 +576,10 @@ function calculateNiceTicks(min: number, max: number, targetCount: number): numb
    - Event handling
    - Slot handling
 
-3. **Integration Tests**
-   - Complete chart rendering
-   - Dynamic updates
-   - Browser compatibility
+3. **Integration Tests** ✓
+   - ~~Complete chart rendering~~ ✓
+   - ~~Dynamic updates~~ ✓
+   - ~~htmx-style innerHTML swaps~~ ✓
 
 4. **Visual Regression Tests**
    - Screenshot comparison
@@ -592,18 +593,21 @@ function calculateNiceTicks(min: number, max: number, targetCount: number): numb
 **Test Structure:**
 ```
 test/
-├── unit/
+├── unit/                       # Pure function tests (node environment)
 │   ├── format.test.ts
-│   ├── color.test.ts
-│   └── scale.test.ts
-├── components/
+│   ├── insights.test.ts
+│   ├── patterns.test.ts
+│   └── ...
+├── component/                  # DOM-dependent tests (happy-dom)
+│   ├── setup.ts
 │   ├── chart.test.ts
 │   ├── pie-chart.test.ts
 │   └── funnel-chart.test.ts
-├── integration/
+├── integration/                # End-to-end chart rendering (happy-dom) ✓
+│   ├── setup.ts
 │   ├── dynamic-updates.test.ts
 │   └── htmx-integration.test.ts
-└── visual/
+└── visual/                     # (future)
     ├── bar-chart.spec.ts
     └── snapshots/
 ```
