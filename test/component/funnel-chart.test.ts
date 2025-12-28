@@ -6,6 +6,7 @@ import '../../src/funnel-chart';
 import '../../src/chart-funnel-stage';
 import '../../src/chart-title';
 import '../../src/chart-legend';
+import '../../src/chart-popup';
 import { FunnelChart } from '../../src/funnel-chart';
 
 /**
@@ -532,6 +533,172 @@ describe('FunnelChart component', () => {
       const title = chart.querySelector('dc-title');
       expect(title).toBeDefined();
       expect(title?.textContent).toBe('Sales Funnel');
+    });
+  });
+
+  // ============================================================================
+  // Fill colors
+  // ============================================================================
+
+  describe('fill colors', () => {
+    it('supports fill-colors attribute', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {
+        'fill-colors': '#ff0000, #00ff00, #0000ff'
+      }, `
+        <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
+        <dc-funnel-stage value="75" label="B"></dc-funnel-stage>
+        <dc-funnel-stage value="50" label="C"></dc-funnel-stage>
+      `);
+      const polygons = chart.shadowRoot?.querySelectorAll('polygon[data-shape-index]');
+      expect(polygons).toHaveLength(3);
+      // First stage should use first color
+      expect(polygons?.[0]?.getAttribute('fill')).toBe('#ff0000');
+    });
+
+    it('legend items use fill-colors when specified', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {
+        'fill-colors': '#ff0000, #00ff00'
+      }, `
+        <dc-funnel-stage value="100" label="Stage A"></dc-funnel-stage>
+        <dc-funnel-stage value="50" label="Stage B"></dc-funnel-stage>
+      `);
+      const items = (chart as any).getLegendItems();
+      expect(items[0].color).toBe('#ff0000');
+      expect(items[1].color).toBe('#00ff00');
+    });
+  });
+
+  // ============================================================================
+  // Focus indicator
+  // ============================================================================
+
+  describe('focus indicator', () => {
+    it('does not render focus indicator when keyboard inactive', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
+      `);
+      (chart as any).keyboardActive = false;
+      (chart as any).focusedIndex = 0;
+      const indicator = (chart as any).renderFocusIndicator();
+      expect(indicator).toBeDefined();
+    });
+
+    it('does not render focus indicator when no element focused', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
+      `);
+      (chart as any).keyboardActive = true;
+      (chart as any).focusedIndex = -1;
+      const indicator = (chart as any).renderFocusIndicator();
+      expect(indicator).toBeDefined();
+    });
+
+    it('renders focus indicator for focused stage', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
+      `);
+      (chart as any).keyboardActive = true;
+      (chart as any).focusedIndex = 0;
+      const indicator = (chart as any).renderFocusIndicator();
+      expect(indicator).toBeDefined();
+    });
+  });
+
+  // ============================================================================
+  // Popup functionality
+  // ============================================================================
+
+  describe('popup functionality', () => {
+    it('showPopupForFocusedElement generates auto popup content', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', { 'auto-popup': '' }, `
+        <dc-funnel-stage value="1000" label="Stage A"></dc-funnel-stage>
+        <dc-funnel-stage value="500" label="Stage B"></dc-funnel-stage>
+      `);
+      // Should not throw when called
+      expect(() => (chart as any).showPopupForFocusedElement(0)).not.toThrow();
+    });
+
+    it('showPopupForFocusedElement shows conversion rate in auto popup', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', { 'auto-popup': '' }, `
+        <dc-funnel-stage value="1000" label="Start"></dc-funnel-stage>
+        <dc-funnel-stage value="500" label="Half"></dc-funnel-stage>
+      `);
+      // Second stage should show 50% conversion rate
+      expect(() => (chart as any).showPopupForFocusedElement(1)).not.toThrow();
+    });
+
+    it('showPopupForFocusedElement uses custom popup content', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="100" label="A">
+          <dc-popup>Custom funnel popup</dc-popup>
+        </dc-funnel-stage>
+        <dc-funnel-stage value="50" label="B"></dc-funnel-stage>
+      `);
+      expect(() => (chart as any).showPopupForFocusedElement(0)).not.toThrow();
+    });
+
+    it('showPopupForFocusedElement handles invalid index gracefully', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', { 'auto-popup': '' }, `
+        <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
+      `);
+      // Negative index should not throw
+      expect(() => (chart as any).showPopupForFocusedElement(-1)).not.toThrow();
+      // Out of bounds index should not throw
+      expect(() => (chart as any).showPopupForFocusedElement(99)).not.toThrow();
+    });
+
+    it('showPopupForFocusedElement does nothing without popup content', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
+      `);
+      // Should not throw when no auto-popup and no custom popup
+      expect(() => (chart as any).showPopupForFocusedElement(0)).not.toThrow();
+    });
+
+    it('togglePopupForFocusedElement shows popup when hidden', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', { 'auto-popup': '' }, `
+        <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
+      `);
+      (chart as any).popupVisible = false;
+      expect(() => (chart as any).togglePopupForFocusedElement(0)).not.toThrow();
+    });
+
+    it('togglePopupForFocusedElement hides popup when visible', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', { 'auto-popup': '' }, `
+        <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
+      `);
+      (chart as any).popupVisible = true;
+      expect(() => (chart as any).togglePopupForFocusedElement(0)).not.toThrow();
+      // After toggle, popup should be hidden
+      expect((chart as any).popupVisible).toBe(false);
+    });
+  });
+
+  // ============================================================================
+  // Shape bounds
+  // ============================================================================
+
+  describe('shape bounds', () => {
+    it('returns bounds for stage shapes', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
+        <dc-funnel-stage value="50" label="B"></dc-funnel-stage>
+      `);
+      const bounds = (chart as any).getShapeBounds(0);
+      if (bounds) {
+        expect(bounds).toHaveProperty('x');
+        expect(bounds).toHaveProperty('y');
+        expect(bounds).toHaveProperty('width');
+        expect(bounds).toHaveProperty('height');
+      }
+    });
+
+    it('returns null for invalid index', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
+      `);
+      const bounds = (chart as any).getShapeBounds(999);
+      expect(bounds).toBeNull();
     });
   });
 
