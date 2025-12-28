@@ -92,3 +92,12 @@ export type {
 // Export formatting utilities
 export { NumberFormatter, formatNumber, parseFormat } from './format.js';
 export type { FormatPreset, FormatType, ParsedFormat, FormatterConfig } from './format.js';
+
+// Export chart calculation utilities (pure functions)
+export {
+  calculateLabelLines,
+  calculateLabelInterval,
+  calculatePopupPosition,
+  showPopupAtBounds
+} from './chart-utils.js';
+export type { ShapeBounds, ClientRect } from './chart-utils.js';

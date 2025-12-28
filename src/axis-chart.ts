@@ -1,6 +1,7 @@
 import { svg, SVGTemplateResult } from 'lit';
 import { BaseChart } from './base-chart.js';
 import type { ChartAxis, AxisPosition } from './chart-axis.js';
+import { calculateLabelLines, calculateLabelInterval } from './chart-utils.js';
 
 /**
  * Represents a value range for axis scaling, including information about
@@ -382,56 +383,40 @@ export abstract class AxisChart extends BaseChart {
 
   /**
    * Calculate the minimum number of lines needed to prevent label overlap.
-   * Used when label-lines="auto".
+   * Uses the pure calculateLabelLines() utility function.
    * @returns Number of lines needed (capped at 4)
    */
   protected calculateAutoLabelLines(): number {
     const labels = this.getCategoryLabels();
     if (labels.length === 0) return 1;
 
-    // Measure widest label
     const maxLabelWidth = Math.max(...labels.map(l => this.measureText(l, 12)));
-
-    // Calculate available space per label (approximate)
     const padding = this.getChartPadding();
     const chartWidth = this.width - padding.left - padding.right;
-    const spacePerLabel = chartWidth / labels.length;
 
-    // How many lines needed?
-    const linesNeeded = Math.ceil(maxLabelWidth / spacePerLabel);
-    const lines = Math.max(1, Math.min(linesNeeded, 4)); // Cap at 4 lines
+    const lines = calculateLabelLines(labels.length, maxLabelWidth, chartWidth);
 
-    this.log('info', 'labels.lines', `Auto: maxLabelWidth=${maxLabelWidth.toFixed(1)}, spacePerLabel=${spacePerLabel.toFixed(1)} → ${lines} line(s)`, lines);
+    this.log('info', 'labels.lines', `Auto: maxLabelWidth=${maxLabelWidth.toFixed(1)}, chartWidth=${chartWidth.toFixed(1)} → ${lines} line(s)`, lines);
     return lines;
   }
 
   /**
    * Calculate interval to prevent label overlap when using single line.
-   * Used when label-interval="auto".
+   * Uses the pure calculateLabelInterval() utility function.
    * @returns Interval for showing labels
    */
   protected calculateAutoLabelInterval(): number {
     const labels = this.getCategoryLabels();
     if (labels.length === 0) return 1;
 
-    // Measure widest label
     const maxLabelWidth = Math.max(...labels.map(l => this.measureText(l, 12)));
-
-    // Calculate available space per label
     const padding = this.getChartPadding();
     const chartWidth = this.width - padding.left - padding.right;
-    const spacePerLabel = chartWidth / labels.length;
 
-    // Add minimum gap between labels (8px)
-    const minGap = 8;
-    const requiredSpace = maxLabelWidth + minGap;
+    const interval = calculateLabelInterval(labels.length, maxLabelWidth, chartWidth);
 
-    // Calculate interval
-    const interval = Math.ceil(requiredSpace / spacePerLabel);
-    const result = Math.max(1, interval);
-
-    this.log('info', 'labels.interval', `Auto: maxLabelWidth=${maxLabelWidth.toFixed(1)} + gap=${minGap} = ${requiredSpace.toFixed(1)}, spacePerLabel=${spacePerLabel.toFixed(1)} → interval=${result}`, result);
-    return result;
+    this.log('info', 'labels.interval', `Auto: maxLabelWidth=${maxLabelWidth.toFixed(1)}, chartWidth=${chartWidth.toFixed(1)} → interval=${interval}`, interval);
+    return interval;
   }
 
   /**
@@ -629,9 +614,7 @@ export abstract class AxisChart extends BaseChart {
           </text>
         `;
       }
-
-      default:
-        return svg``;
+      // No default case needed - all AxisPosition values are handled
     }
   }
 

@@ -2776,33 +2776,21 @@ export class Chart extends AxisChart {
 
   /**
    * Show popup for the focused element.
+   * Uses showPopupAtBounds() helper for consistent popup positioning.
    */
   protected override showPopupForFocusedElement(index: number): void {
     const bars = this.getFlattenedBars();
     const lines = this.getLines();
     const bubbles = this.getBubbles();
 
-    // Determine which element is focused
+    // Get content and bounds based on element type
+    let content: string | null = null;
+    const bounds = this.getShapeBounds(index);
+    if (!bounds) return;
+
     if (index < bars.length) {
       // It's a bar
-      const bar = bars[index];
-      const content = this.getBarPopupContent(bar, index);
-      if (content) {
-        const bounds = this.getShapeBounds(index);
-        if (bounds) {
-          // Position popup near the center of the bar
-          const rect = this.getBoundingClientRect();
-          const svgEl = this.shadowRoot?.querySelector('svg');
-          if (svgEl) {
-            const svgRect = svgEl.getBoundingClientRect();
-            const scaleX = svgRect.width / this.width;
-            const scaleY = svgRect.height / this.height;
-            const x = rect.left + (bounds.x + bounds.width / 2) * scaleX;
-            const y = rect.top + bounds.y * scaleY;
-            this.showPopup(content, x, y);
-          }
-        }
-      }
+      content = this.getBarPopupContent(bars[index], index);
     } else {
       // Check if it's a line point or bubble
       let adjustedIndex = index - bars.length;
@@ -2815,22 +2803,7 @@ export class Chart extends AxisChart {
         for (const line of lines) {
           if (pointIndex < line.points.length) {
             const point = line.points[pointIndex];
-            const content = this.getPointPopupContent(line, point, lineIndex, pointIndex);
-            if (content) {
-              const bounds = this.getShapeBounds(index);
-              if (bounds) {
-                const rect = this.getBoundingClientRect();
-                const svgEl = this.shadowRoot?.querySelector('svg');
-                if (svgEl) {
-                  const svgRect = svgEl.getBoundingClientRect();
-                  const scaleX = svgRect.width / this.width;
-                  const scaleY = svgRect.height / this.height;
-                  const x = rect.left + (bounds.x + bounds.width / 2) * scaleX;
-                  const y = rect.top + bounds.y * scaleY;
-                  this.showPopup(content, x, y);
-                }
-              }
-            }
+            content = this.getPointPopupContent(line, point, lineIndex, pointIndex);
             break;
           }
           pointIndex -= line.points.length;
@@ -2840,25 +2813,14 @@ export class Chart extends AxisChart {
         // It's a bubble
         const bubbleIndex = adjustedIndex - totalPoints;
         if (bubbleIndex < bubbles.length) {
-          const bubble = bubbles[bubbleIndex];
-          const content = this.getBubblePopupContent(bubble, bubbleIndex);
-          if (content) {
-            const bounds = this.getShapeBounds(index);
-            if (bounds) {
-              const rect = this.getBoundingClientRect();
-              const svgEl = this.shadowRoot?.querySelector('svg');
-              if (svgEl) {
-                const svgRect = svgEl.getBoundingClientRect();
-                const scaleX = svgRect.width / this.width;
-                const scaleY = svgRect.height / this.height;
-                const x = rect.left + (bounds.x + bounds.width / 2) * scaleX;
-                const y = rect.top + bounds.y * scaleY;
-                this.showPopup(content, x, y);
-              }
-            }
-          }
+          content = this.getBubblePopupContent(bubbles[bubbleIndex], bubbleIndex);
         }
       }
+    }
+
+    // Show popup if we have content
+    if (content) {
+      this.showPopupAtBounds(content, bounds);
     }
   }
 

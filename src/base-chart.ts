@@ -16,6 +16,7 @@ import {
   getHighContrastPattern
 } from './patterns.js';
 import { NumberFormatter } from './format.js';
+import { calculatePopupPosition, type ShapeBounds } from './chart-utils.js';
 
 /**
  * Color mode for resolving chart element colors.
@@ -1901,6 +1902,33 @@ export abstract class BaseChart extends LitElement {
 
   protected hidePopup() {
     this.popupVisible = false;
+  }
+
+  /**
+   * Show popup at the center-top of a shape's bounds.
+   * Uses the pure calculatePopupPosition() utility for coordinate conversion.
+   *
+   * @param content Popup content HTML string
+   * @param bounds Shape bounds in viewBox coordinates
+   * @returns true if popup was shown, false if SVG element not found
+   */
+  protected showPopupAtBounds(content: string, bounds: ShapeBounds): boolean {
+    const svgEl = this.shadowRoot?.querySelector('svg');
+    if (!svgEl) return false;
+
+    const chartRect = this.getBoundingClientRect();
+    const svgRect = svgEl.getBoundingClientRect();
+
+    const pos = calculatePopupPosition(
+      bounds,
+      chartRect,
+      svgRect,
+      this.width,
+      this.height
+    );
+
+    this.showPopup(content, pos.x, pos.y);
+    return true;
   }
 
   /**

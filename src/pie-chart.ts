@@ -587,6 +587,7 @@ export class PieChart extends BaseChart {
 
   /**
    * Show popup for the focused slice.
+   * Uses showPopupAtBounds() helper for consistent popup positioning.
    */
   protected override showPopupForFocusedElement(index: number): void {
     const slices = this.getSlices();
@@ -606,16 +607,7 @@ export class PieChart extends BaseChart {
     if (content) {
       const bounds = this.getShapeBounds(index);
       if (bounds) {
-        const rect = this.getBoundingClientRect();
-        const svgEl = this.shadowRoot?.querySelector('svg');
-        if (svgEl) {
-          const svgRect = svgEl.getBoundingClientRect();
-          const scaleX = svgRect.width / this.width;
-          const scaleY = svgRect.height / this.height;
-          const x = rect.left + (bounds.x + bounds.width / 2) * scaleX;
-          const y = rect.top + bounds.y * scaleY;
-          this.showPopup(content, x, y);
-        }
+        this.showPopupAtBounds(content, bounds);
       }
     }
   }
