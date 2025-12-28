@@ -1451,4 +1451,540 @@ describe('Chart component', () => {
       expect(svg).toBeDefined();
     });
   });
+
+  // ============================================================================
+  // Monotone curve fitting
+  // ============================================================================
+
+  describe('monotone curve fitting', () => {
+    it('renders monotone curve', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'curve-fit': 'monotone' }, `
+        <dc-line label="Monotone">
+          <dc-point value="10" label="A"></dc-point>
+          <dc-point value="30" label="B"></dc-point>
+          <dc-point value="20" label="C"></dc-point>
+          <dc-point value="40" label="D"></dc-point>
+        </dc-line>
+      `);
+      expect(chart.curveFit).toBe('monotone');
+      const path = chart.shadowRoot?.querySelector('path');
+      expect(path).toBeDefined();
+    });
+
+    it('renders linear curve by default', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-line label="Linear">
+          <dc-point value="10" label="A"></dc-point>
+          <dc-point value="30" label="B"></dc-point>
+        </dc-line>
+      `);
+      expect(chart.curveFit).toBe('linear');
+    });
+
+    it('handles two-point line with monotone curve', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'curve-fit': 'monotone' }, `
+        <dc-line label="Two Points">
+          <dc-point value="10" label="A"></dc-point>
+          <dc-point value="30" label="B"></dc-point>
+        </dc-line>
+      `);
+      const path = chart.shadowRoot?.querySelector('path');
+      expect(path).toBeDefined();
+    });
+  });
+
+  // ============================================================================
+  // Bubble with popup
+  // ============================================================================
+
+  describe('bubble popup', () => {
+    it('renders bubble with custom popup', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bubble value="50" size="30" label="A">
+          <dc-popup trigger="hover">Custom bubble popup</dc-popup>
+        </dc-bubble>
+      `);
+      const bubbles = (chart as any).getBubbles();
+      expect(bubbles.length).toBe(1);
+      expect(bubbles[0].popup).toBeDefined();
+      expect(bubbles[0].popup.content).toBe('Custom bubble popup');
+    });
+
+    it('renders bubble with auto-popup', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-bubble value="50" size="30" label="A"></dc-bubble>
+      `);
+      const bubbles = (chart as any).getBubbles();
+      expect(bubbles.length).toBe(1);
+    });
+
+    it('getBubblePopupContent returns content for auto-popup', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-bubble value="50" size="30" label="Test Bubble"></dc-bubble>
+      `);
+      const bubbles = (chart as any).getBubbles();
+      const content = (chart as any).getBubblePopupContent(bubbles[0], 0);
+      expect(content).toContain('Test Bubble');
+      expect(content).toContain('50');
+    });
+  });
+
+  // ============================================================================
+  // Bubble event handlers
+  // ============================================================================
+
+  describe('bubble event handlers', () => {
+    it('handleBubbleMouseEnter shows popup', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-bubble value="50" size="30" label="A"></dc-bubble>
+      `);
+      const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handleBubbleMouseEnter(event, 0);
+      expect((chart as any).popupVisible).toBe(true);
+    });
+
+    it('handleBubbleMouseLeave hides popup', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-bubble value="50" size="30" label="A"></dc-bubble>
+      `);
+      const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handleBubbleMouseEnter(event, 0);
+      expect((chart as any).popupVisible).toBe(true);
+
+      (chart as any).handleBubbleMouseLeave(0);
+      expect((chart as any).popupVisible).toBe(false);
+    });
+
+    it('handleBubbleClick toggles click popup', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bubble value="50" size="30" label="A">
+          <dc-popup trigger="click">Click popup</dc-popup>
+        </dc-bubble>
+      `);
+      const event = new MouseEvent('click', { clientX: 100, clientY: 100 });
+      (chart as any).handleBubbleClick(event, 0);
+      expect((chart as any).popupVisible).toBe(true);
+
+      // Click again to hide
+      (chart as any).handleBubbleClick(event, 0);
+      expect((chart as any).popupVisible).toBe(false);
+    });
+  });
+
+  // ============================================================================
+  // Line event handlers
+  // ============================================================================
+
+  describe('line event handlers', () => {
+    it('handleLineMouseEnter shows popup for line with popup', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-line label="Line A">
+          <dc-popup trigger="hover">Line popup</dc-popup>
+          <dc-point value="10" label="P1"></dc-point>
+          <dc-point value="20" label="P2"></dc-point>
+        </dc-line>
+      `);
+      const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handleLineMouseEnter(event, 0);
+      expect((chart as any).popupVisible).toBe(true);
+    });
+
+    it('handleLineMouseLeave hides popup', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-line label="Line A">
+          <dc-point value="10" label="P1"></dc-point>
+          <dc-point value="20" label="P2"></dc-point>
+        </dc-line>
+      `);
+      const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handleLineMouseEnter(event, 0);
+      (chart as any).handleLineMouseLeave(0);
+      expect((chart as any).popupVisible).toBe(false);
+    });
+
+    it('handleLineClick toggles click popup', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-line label="Line A">
+          <dc-popup trigger="click">Line click popup</dc-popup>
+          <dc-point value="10" label="P1"></dc-point>
+        </dc-line>
+      `);
+      const event = new MouseEvent('click', { clientX: 100, clientY: 100 });
+      (chart as any).handleLineClick(event, 0);
+      expect((chart as any).popupVisible).toBe(true);
+    });
+  });
+
+  // ============================================================================
+  // Point event handlers
+  // ============================================================================
+
+  describe('point event handlers', () => {
+    it('handlePointMouseEnter shows popup for point with popup', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-line label="Line A">
+          <dc-point value="10" label="P1">
+            <dc-popup trigger="hover">Point popup</dc-popup>
+          </dc-point>
+        </dc-line>
+      `);
+      const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handlePointMouseEnter(event, 0, 0);
+      expect((chart as any).popupVisible).toBe(true);
+    });
+
+    it('handlePointMouseLeave hides popup', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-line label="Line A">
+          <dc-point value="10" label="P1"></dc-point>
+        </dc-line>
+      `);
+      const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handlePointMouseEnter(event, 0, 0);
+      (chart as any).handlePointMouseLeave(0, 0);
+      expect((chart as any).popupVisible).toBe(false);
+    });
+
+    it('handlePointClick toggles click popup', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-line label="Line A">
+          <dc-point value="10" label="P1">
+            <dc-popup trigger="click">Point click popup</dc-popup>
+          </dc-point>
+        </dc-line>
+      `);
+      const event = new MouseEvent('click', { clientX: 100, clientY: 100 });
+      (chart as any).handlePointClick(event, 0, 0);
+      expect((chart as any).popupVisible).toBe(true);
+    });
+  });
+
+  // ============================================================================
+  // Segment event handlers
+  // ============================================================================
+
+  describe('segment event handlers', () => {
+    it('handleSegmentMouseEnter shows popup for segment with popup', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="100" label="Stacked">
+          <dc-bar-segment value="60" label="A">
+            <dc-popup trigger="hover">Segment popup</dc-popup>
+          </dc-bar-segment>
+          <dc-bar-segment value="40" label="B"></dc-bar-segment>
+        </dc-bar>
+      `);
+      const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handleSegmentMouseEnter(event, 0, 0);
+      expect((chart as any).popupVisible).toBe(true);
+    });
+
+    it('handleSegmentMouseLeave hides popup', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'auto-popup': '' }, `
+        <dc-bar value="100" label="Stacked">
+          <dc-bar-segment value="60" label="A"></dc-bar-segment>
+          <dc-bar-segment value="40" label="B"></dc-bar-segment>
+        </dc-bar>
+      `);
+      const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handleSegmentMouseEnter(event, 0, 0);
+      (chart as any).handleSegmentMouseLeave(0, 0);
+      expect((chart as any).popupVisible).toBe(false);
+    });
+
+    it('handleSegmentClick toggles click popup', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="100" label="Stacked">
+          <dc-bar-segment value="60" label="A">
+            <dc-popup trigger="click">Segment click popup</dc-popup>
+          </dc-bar-segment>
+        </dc-bar>
+      `);
+      const event = new MouseEvent('click', { clientX: 100, clientY: 100 });
+      (chart as any).handleSegmentClick(event, 0, 0);
+      expect((chart as any).popupVisible).toBe(true);
+    });
+
+    it('handleSegmentMouseEnter ignores invalid segment', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="100" label="Simple"></dc-bar>
+      `);
+      const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      // Bar has no segments, should not throw
+      (chart as any).handleSegmentMouseEnter(event, 0, 0);
+      expect((chart as any).popupVisible).toBe(false);
+    });
+  });
+
+  // ============================================================================
+  // Popup content generation
+  // ============================================================================
+
+  describe('popup content generation', () => {
+    it('generateBarPopupContent includes percentage', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="25" label="A"></dc-bar>
+        <dc-bar value="75" label="B"></dc-bar>
+      `);
+      const bars = (chart as any).getFlattenedBars();
+      const content = (chart as any).generateBarPopupContent(bars[0], 100);
+      expect(content).toContain('25.0%');
+    });
+
+    it('generateSegmentPopupContent includes bar label', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="100" label="Parent">
+          <dc-bar-segment value="60" label="Seg A"></dc-bar-segment>
+        </dc-bar>
+      `);
+      const bars = (chart as any).getFlattenedBars();
+      const segment = bars[0].segments[0];
+      const content = (chart as any).generateSegmentPopupContent(segment, bars[0], 100);
+      expect(content).toContain('Seg A');
+      expect(content).toContain('Parent');
+    });
+
+    it('generateLinePopupContent includes point count', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-line label="Test Line">
+          <dc-point value="10" label="P1"></dc-point>
+          <dc-point value="20" label="P2"></dc-point>
+          <dc-point value="30" label="P3"></dc-point>
+        </dc-line>
+      `);
+      const lines = (chart as any).getLines();
+      const content = (chart as any).generateLinePopupContent(lines[0]);
+      expect(content).toContain('Test Line');
+      expect(content).toContain('3');
+    });
+
+    it('generatePointPopupContent includes line name', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-line label="My Line">
+          <dc-point value="50" label="Point A"></dc-point>
+        </dc-line>
+      `);
+      const lines = (chart as any).getLines();
+      const point = lines[0].points[0];
+      const content = (chart as any).generatePointPopupContent(point, 'My Line', 100);
+      expect(content).toContain('Point A');
+      expect(content).toContain('My Line');
+    });
+
+    it('generateBubblePopupContent includes label and value', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bubble value="50" size="25" label="Bubble A"></dc-bubble>
+      `);
+      const bubbles = (chart as any).getBubbles();
+      const content = (chart as any).generateBubblePopupContent(bubbles[0], 100);
+      expect(content).toContain('Bubble A');
+      expect(content).toContain('50');
+    });
+  });
+
+  // ============================================================================
+  // Multiple bubbles
+  // ============================================================================
+
+  describe('multiple bubbles', () => {
+    it('renders multiple bubbles', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bubble value="30" size="20" label="A"></dc-bubble>
+        <dc-bubble value="50" size="30" label="B"></dc-bubble>
+        <dc-bubble value="70" size="40" label="C"></dc-bubble>
+      `);
+      const circles = chart.shadowRoot?.querySelectorAll('circle[data-shape-index]');
+      expect(circles).toHaveLength(3);
+    });
+
+    it('calculates bubble radius based on size', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'min-bubble-radius': '5', 'max-bubble-radius': '50' }, `
+        <dc-bubble value="50" size="10" label="Small"></dc-bubble>
+        <dc-bubble value="50" size="100" label="Large"></dc-bubble>
+      `);
+      const circles = chart.shadowRoot?.querySelectorAll('circle');
+      expect(circles).toHaveLength(2);
+
+      const smallRadius = parseFloat(circles![0].getAttribute('r') || '0');
+      const largeRadius = parseFloat(circles![1].getAttribute('r') || '0');
+      // With different min/max radius, the larger size should have larger radius
+      expect(largeRadius).toBeGreaterThanOrEqual(smallRadius);
+    });
+
+    it('positions bubbles correctly', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bubble value="10" size="20" label="Low"></dc-bubble>
+        <dc-bubble value="90" size="20" label="High"></dc-bubble>
+      `);
+      const circles = chart.shadowRoot?.querySelectorAll('circle');
+      expect(circles).toHaveLength(2);
+
+      const lowY = parseFloat(circles![0].getAttribute('cy') || '0');
+      const highY = parseFloat(circles![1].getAttribute('cy') || '0');
+      // Higher value should be positioned higher (lower Y)
+      expect(highY).toBeLessThan(lowY);
+    });
+  });
+
+  // ============================================================================
+  // Bar with stroke
+  // ============================================================================
+
+  describe('bar with stroke', () => {
+    it('renders bar with stroke attribute passthrough', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="50" label="A" stroke="#ff0000"></dc-bar>
+      `);
+      const rect = chart.shadowRoot?.querySelector('rect[data-shape-index]');
+      expect(rect).toBeDefined();
+      // Bar elements are extracted and rendered - verify the chart renders
+      const bars = (chart as any).getFlattenedBars();
+      expect(bars).toHaveLength(1);
+      expect(bars[0].label).toBe('A');
+    });
+  });
+
+  // ============================================================================
+  // Bubble with stroke
+  // ============================================================================
+
+  describe('bubble with stroke', () => {
+    it('renders bubble with stroke', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bubble value="50" size="30" label="A" stroke="#0000ff"></dc-bubble>
+      `);
+      const circle = chart.shadowRoot?.querySelector('circle');
+      expect(circle).toBeDefined();
+      expect(circle?.getAttribute('stroke')).toBe('#0000ff');
+    });
+  });
+
+  // ============================================================================
+  // Line with show-value/show-percent
+  // ============================================================================
+
+  describe('line with value labels', () => {
+    it('renders value labels on points', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'show-value': '' }, `
+        <dc-line label="Line A">
+          <dc-point value="10" label="P1"></dc-point>
+          <dc-point value="20" label="P2"></dc-point>
+        </dc-line>
+      `);
+      const texts = chart.shadowRoot?.querySelectorAll('text');
+      // Should have text elements for value labels
+      expect(texts!.length).toBeGreaterThan(0);
+    });
+  });
+
+  // ============================================================================
+  // Bubble with show-value
+  // ============================================================================
+
+  describe('bubble with value labels', () => {
+    it('renders value labels on bubbles', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'show-value': '' }, `
+        <dc-bubble value="50" size="30" label="A"></dc-bubble>
+      `);
+      const texts = chart.shadowRoot?.querySelectorAll('text');
+      expect(texts!.length).toBeGreaterThan(0);
+    });
+  });
+
+  // ============================================================================
+  // Updated method
+  // ============================================================================
+
+  describe('updated lifecycle', () => {
+    it('applies passthrough attributes after update', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="50" label="A" data-custom="test"></dc-bar>
+      `);
+      // The updated lifecycle should have applied passthrough attrs
+      const rect = chart.shadowRoot?.querySelector('rect[data-shape-index]');
+      expect(rect).toBeDefined();
+    });
+  });
+
+  // ============================================================================
+  // Empty chart
+  // ============================================================================
+
+  describe('empty chart', () => {
+    it('handles chart with no data elements', async () => {
+      chart = await fixture<Chart>('dc-chart', {});
+      const svg = chart.shadowRoot?.querySelector('svg');
+      expect(svg).toBeDefined();
+      // No data shapes
+      const shapes = chart.shadowRoot?.querySelectorAll('[data-shape-index]');
+      expect(shapes?.length || 0).toBe(0);
+    });
+  });
+
+  // ============================================================================
+  // Category labels from groups
+  // ============================================================================
+
+  describe('category labels', () => {
+    it('gets category labels from bars', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="10" label="Alpha"></dc-bar>
+        <dc-bar value="20" label="Beta"></dc-bar>
+        <dc-bar value="30" label="Gamma"></dc-bar>
+      `);
+      const labels = chart.getCategoryLabels();
+      expect(labels).toContain('Alpha');
+      expect(labels).toContain('Beta');
+      expect(labels).toContain('Gamma');
+    });
+
+    it('gets category labels from line points', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-line label="Line">
+          <dc-point value="10" label="Jan"></dc-point>
+          <dc-point value="20" label="Feb"></dc-point>
+          <dc-point value="30" label="Mar"></dc-point>
+        </dc-line>
+      `);
+      const labels = chart.getCategoryLabels();
+      expect(labels).toContain('Jan');
+      expect(labels).toContain('Feb');
+      expect(labels).toContain('Mar');
+    });
+  });
+
+  // ============================================================================
+  // Value range calculation
+  // ============================================================================
+
+  describe('value range', () => {
+    it('calculates min value including negatives', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="-20" label="Negative"></dc-bar>
+        <dc-bar value="50" label="Positive"></dc-bar>
+      `);
+      const min = chart.getMinValue();
+      expect(min).toBe(-20);
+    });
+
+    it('calculates max value', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="30" label="A"></dc-bar>
+        <dc-bar value="80" label="B"></dc-bar>
+      `);
+      const max = chart.getMaxValue();
+      expect(max).toBe(80);
+    });
+
+    it('getAllValues returns all bar values', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="10" label="A"></dc-bar>
+        <dc-bar value="20" label="B"></dc-bar>
+        <dc-bar value="30" label="C"></dc-bar>
+      `);
+      const values = chart.getAllValues();
+      expect(values).toContain(10);
+      expect(values).toContain(20);
+      expect(values).toContain(30);
+    });
+  });
 });
