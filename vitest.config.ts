@@ -38,6 +38,24 @@ export default defineConfig({
           },
         },
       },
+      {
+        // Integration tests - complete chart rendering scenarios
+        extends: true,
+        test: {
+          name: 'integration',
+          environment: 'happy-dom',
+          include: ['test/integration/**/*.test.ts'],
+          setupFiles: ['./test/integration/setup.ts'],
+          // Ensure Lit is properly handled
+          deps: {
+            optimizer: {
+              web: {
+                include: ['lit', 'lit-html', '@lit/reactive-element'],
+              },
+            },
+          },
+        },
+      },
     ],
   },
 });

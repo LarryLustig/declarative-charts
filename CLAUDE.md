@@ -263,6 +263,50 @@ The setup file (`test/component/setup.ts`) provides:
 - `elementUpdated(element)` - waits for Lit update cycle
 - Canvas context mock for `measureText()`
 
+### Integration Tests
+
+Integration tests verify complete chart rendering scenarios and dynamic updates. They run in happy-dom and test:
+- Adding/removing data elements dynamically
+- Updating element attributes (values, colors, labels)
+- htmx-style innerHTML swaps
+- Chart attribute changes (dimensions, orientation)
+- Hidden attribute toggling
+- Mixed content (bars + lines)
+- Negative value transitions
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { fixture, elementUpdated, queryShadowAll, simulateHtmxSwap } from './setup';
+import '../../src/chart';
+import { Chart } from '../../src/chart';
+
+describe('Dynamic updates', () => {
+  it('adds bars dynamically', async () => {
+    const chart = await fixture<Chart>('dc-chart', {}, `
+      <dc-bar value="50" label="A"></dc-bar>
+    `);
+
+    const newBar = document.createElement('dc-bar');
+    newBar.setAttribute('value', '60');
+    newBar.setAttribute('label', 'B');
+    chart.appendChild(newBar);
+
+    chart.requestUpdate();
+    await elementUpdated(chart);
+
+    const bars = queryShadowAll(chart, 'rect[data-shape-index]');
+    expect(bars).toHaveLength(2);
+  });
+});
+```
+
+The integration setup (`test/integration/setup.ts`) provides:
+- `simulateHtmxSwap(element, html)` - simulates htmx innerHTML replacement
+- `createComplexChart(html)` - creates nested chart structures
+- `queryShadow(element, selector)` - queries shadow DOM
+- `queryShadowAll(element, selector)` - queries all matching shadow DOM elements
+- `nextFrame()` - waits for animation frame
+
 ### Test Syntax Quick Reference
 
 ```typescript
@@ -320,7 +364,11 @@ test/
 ├── component/              # DOM-dependent tests (happy-dom environment)
 │   ├── setup.ts            # Test setup with mocks
 │   └── chart-palette.test.ts # Component tests for palette
-└── (future: integration/, visual/)
+├── integration/            # End-to-end chart rendering tests (happy-dom)
+│   ├── setup.ts            # Integration test setup and helpers
+│   ├── dynamic-updates.test.ts  # Dynamic element updates, value changes
+│   └── htmx-integration.test.ts # htmx-style innerHTML swaps
+└── (future: visual/)
 
 examples/                   # Example pages (use examples.css, examples.js)
 test-charts/                # Visual test matrices for legend/title positions
