@@ -8,6 +8,11 @@ dist/
 # Test coverage
 coverage/
 
+# Playwright test artifacts (keep snapshots, ignore results/reports)
+test/visual/test-results/
+test/visual/report/
+playwright-report/
+
 # Editor directories
 .vscode/*
 !.vscode/extensions.json

@@ -187,9 +187,21 @@ Always use `this.measureText(text, fontSize)` for text widths. Never estimate wi
 
 ## Testing
 
-Tests use **Vitest** (Vite-native test framework) with two environments:
+Tests use **Vitest** and **Playwright** with three environments:
 - **Unit tests** (`test/unit/`): Node environment, pure functions
 - **Component tests** (`test/component/`): happy-dom environment, DOM-dependent code
+- **Integration tests** (`test/integration/`): happy-dom environment, dynamic updates
+- **Visual tests** (`test/visual/`): Playwright + Chromium, screenshot comparison
+
+### Commands
+
+```bash
+npm test              # Run unit/component/integration tests in watch mode
+npm run test:run      # Run unit/component/integration tests once
+npm run test:coverage # Run tests with coverage report
+npm run test:visual   # Run visual regression tests
+npm run test:visual:update  # Update visual test baselines
+```
 
 ### Files with Test Coverage
 
@@ -307,6 +319,39 @@ The integration setup (`test/integration/setup.ts`) provides:
 - `queryShadowAll(element, selector)` - queries all matching shadow DOM elements
 - `nextFrame()` - waits for animation frame
 
+### Visual Regression Tests
+
+Visual tests use Playwright to capture screenshots and compare against baselines:
+
+```bash
+npm run test:visual         # Run visual tests (compare against baselines)
+npm run test:visual:update  # Update baseline snapshots
+npm run test:visual:report  # View HTML report of last run
+```
+
+Tests are in `test/visual/charts.spec.ts`. Chart fixtures are in `test/visual/fixtures/charts.html`.
+
+**Adding a new visual test:**
+1. Add the chart configuration to `fixtures/charts.html` with a unique ID
+2. Add a test case in `charts.spec.ts`:
+```typescript
+test('my new chart', async ({ page }) => {
+  await page.goto(`${FIXTURES_URL}?chart=my-chart-id`);
+  await waitForChartRender(page);
+  const container = await getChartContainer(page, 'my-chart-id');
+  await expect(container).toHaveScreenshot('my-chart-id.png');
+});
+```
+3. Run `npm run test:visual:update` to generate the baseline
+
+**Current coverage (15 tests):**
+- Bar charts: basic, horizontal, negative, grouped, stacked
+- Line charts: basic, multiple lines
+- Bubble chart: basic
+- Pie charts: basic, donut
+- Funnel charts: basic, chevron
+- Features: patterns, custom axis, legend positions
+
 ### Test Syntax Quick Reference
 
 ```typescript
@@ -368,7 +413,11 @@ test/
 │   ├── setup.ts            # Integration test setup and helpers
 │   ├── dynamic-updates.test.ts  # Dynamic element updates, value changes
 │   └── htmx-integration.test.ts # htmx-style innerHTML swaps
-└── (future: visual/)
+└── visual/                 # Visual regression tests (Playwright + Chromium)
+    ├── charts.spec.ts      # Screenshot comparison tests
+    ├── fixtures/           # HTML fixtures for visual tests
+    │   └── charts.html     # All chart configurations
+    └── charts.spec.ts-snapshots/  # Baseline images (auto-generated)
 
 examples/                   # Example pages (use examples.css, examples.js)
 test-charts/                # Visual test matrices for legend/title positions

@@ -592,14 +592,17 @@ function calculateNiceTicks(min: number, max: number, targetCount: number): numb
    - ~~Dynamic updates~~ ✓
    - ~~htmx-style innerHTML swaps~~ ✓
 
-4. **Visual Regression Tests**
-   - Screenshot comparison
-   - Detect unintended visual changes
+4. **Visual Regression Tests** ✓
+   - ~~Screenshot comparison~~ ✓
+   - ~~Detect unintended visual changes~~ ✓
+   - Playwright + Chromium configured
+   - 15 baseline snapshots covering all chart types
 
-**Proposed Test Stack:**
+**Test Stack:**
 - **Unit Tests**: Vitest (fast, Vite-native)
-- **Component Tests**: @open-wc/testing + Vitest
-- **Visual Regression**: Playwright + Percy or Chromatic
+- **Component Tests**: Vitest + happy-dom
+- **Integration Tests**: Vitest + happy-dom
+- **Visual Regression**: Playwright + Chromium
 
 **Test Structure:**
 ```
@@ -618,9 +621,10 @@ test/
 │   ├── setup.ts
 │   ├── dynamic-updates.test.ts
 │   └── htmx-integration.test.ts
-└── visual/                     # (future)
-    ├── bar-chart.spec.ts
-    └── snapshots/
+└── visual/                     # Visual regression (Playwright) ✓
+    ├── charts.spec.ts          # Screenshot comparison tests
+    ├── fixtures/charts.html    # All chart configurations
+    └── charts.spec.ts-snapshots/  # Baseline images
 ```
 
 **Future: Pipeline Automation**

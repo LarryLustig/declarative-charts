@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visual Test Fixtures</title>
+  <script type="module" src="/src/index.ts"></script>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #fff;
+    }
+    .chart-container {
+      margin-bottom: 40px;
+      padding: 20px;
+      border: 1px solid #eee;
+      background: #fff;
+    }
+    .chart-container h2 {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      color: #666;
+    }
+    /* Hide containers by default, show specific ones via URL param */
+    .chart-container {
+      display: none;
+    }
+    .chart-container.visible {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- Bar Chart - Basic -->
+  <div id="bar-basic" class="chart-container">
+    <h2>Bar Chart - Basic</h2>
+    <dc-chart width="500" height="350">
+      <dc-title>Quarterly Sales</dc-title>
+      <dc-bar value="30" label="Q1"></dc-bar>
+      <dc-bar value="50" label="Q2"></dc-bar>
+      <dc-bar value="40" label="Q3"></dc-bar>
+      <dc-bar value="60" label="Q4"></dc-bar>
+      <dc-legend position="right"></dc-legend>
+    </dc-chart>
+  </div>
+
+  <!-- Bar Chart - Horizontal -->
+  <div id="bar-horizontal" class="chart-container">
+    <h2>Bar Chart - Horizontal</h2>
+    <dc-chart width="500" height="350" orientation="horizontal">
+      <dc-title>Product Comparison</dc-title>
+      <dc-bar value="85" label="Product A" fill="#4CAF50"></dc-bar>
+      <dc-bar value="72" label="Product B" fill="#2196F3"></dc-bar>
+      <dc-bar value="93" label="Product C" fill="#FF9800"></dc-bar>
+      <dc-legend position="bottom"></dc-legend>
+    </dc-chart>
+  </div>
+
+  <!-- Bar Chart - Negative Values -->
+  <div id="bar-negative" class="chart-container">
+    <h2>Bar Chart - Negative Values</h2>
+    <dc-chart width="500" height="350">
+      <dc-title>Profit/Loss by Quarter</dc-title>
+      <dc-bar value="50" label="Q1" fill="#4CAF50"></dc-bar>
+      <dc-bar value="-30" label="Q2" fill="#F44336"></dc-bar>
+      <dc-bar value="20" label="Q3" fill="#4CAF50"></dc-bar>
+      <dc-bar value="-10" label="Q4" fill="#F44336"></dc-bar>
+    </dc-chart>
+  </div>
+
+  <!-- Bar Chart - Grouped -->
+  <div id="bar-grouped" class="chart-container">
+    <h2>Bar Chart - Grouped</h2>
+    <dc-chart width="500" height="350">
+      <dc-title>Sales by Region</dc-title>
+      <dc-bar-group label="Q1">
+        <dc-bar value="30" label="North" fill="#4CAF50"></dc-bar>
+        <dc-bar value="40" label="South" fill="#2196F3"></dc-bar>
+      </dc-bar-group>
+      <dc-bar-group label="Q2">
+        <dc-bar value="50" label="North" fill="#4CAF50"></dc-bar>
+        <dc-bar value="35" label="South" fill="#2196F3"></dc-bar>
+      </dc-bar-group>
+      <dc-legend position="right"></dc-legend>
+    </dc-chart>
+  </div>
+
+  <!-- Bar Chart - Stacked -->
+  <div id="bar-stacked" class="chart-container">
+    <h2>Bar Chart - Stacked</h2>
+    <dc-chart width="500" height="350">
+      <dc-title>Revenue Breakdown</dc-title>
+      <dc-bar label="Q1">
+        <dc-bar-segment value="30" label="Product" fill="#4CAF50"></dc-bar-segment>
+        <dc-bar-segment value="20" label="Service" fill="#2196F3"></dc-bar-segment>
+        <dc-bar-segment value="10" label="Support" fill="#FF9800"></dc-bar-segment>
+      </dc-bar>
+      <dc-bar label="Q2">
+        <dc-bar-segment value="40" label="Product" fill="#4CAF50"></dc-bar-segment>
+        <dc-bar-segment value="25" label="Service" fill="#2196F3"></dc-bar-segment>
+        <dc-bar-segment value="15" label="Support" fill="#FF9800"></dc-bar-segment>
+      </dc-bar>
+      <dc-legend position="right"></dc-legend>
+    </dc-chart>
+  </div>
+
+  <!-- Line Chart - Basic -->
+  <div id="line-basic" class="chart-container">
+    <h2>Line Chart - Basic</h2>
+    <dc-chart width="500" height="350">
+      <dc-title>Monthly Trends</dc-title>
+      <dc-line label="Revenue" stroke="#4CAF50">
+        <dc-point value="100" label="Jan"></dc-point>
+        <dc-point value="150" label="Feb"></dc-point>
+        <dc-point value="120" label="Mar"></dc-point>
+        <dc-point value="180" label="Apr"></dc-point>
+        <dc-point value="160" label="May"></dc-point>
+      </dc-line>
+      <dc-legend position="right"></dc-legend>
+    </dc-chart>
+  </div>
+
+  <!-- Line Chart - Multiple Lines -->
+  <div id="line-multiple" class="chart-container">
+    <h2>Line Chart - Multiple Lines</h2>
+    <dc-chart width="500" height="350">
+      <dc-title>Sales Comparison</dc-title>
+      <dc-line label="2023" stroke="#4CAF50">
+        <dc-point value="100" label="Q1"></dc-point>
+        <dc-point value="120" label="Q2"></dc-point>
+        <dc-point value="140" label="Q3"></dc-point>
+        <dc-point value="160" label="Q4"></dc-point>
+      </dc-line>
+      <dc-line label="2024" stroke="#2196F3">
+        <dc-point value="110" label="Q1"></dc-point>
+        <dc-point value="150" label="Q2"></dc-point>
+        <dc-point value="130" label="Q3"></dc-point>
+        <dc-point value="180" label="Q4"></dc-point>
+      </dc-line>
+      <dc-legend position="right"></dc-legend>
+    </dc-chart>
+  </div>
+
+  <!-- Bubble Chart -->
+  <div id="bubble-basic" class="chart-container">
+    <h2>Bubble Chart</h2>
+    <dc-chart width="500" height="350">
+      <dc-title>Market Analysis</dc-title>
+      <dc-bubble value="60" size="30" label="Product A" fill="#4CAF50"></dc-bubble>
+      <dc-bubble value="80" size="50" label="Product B" fill="#2196F3"></dc-bubble>
+      <dc-bubble value="40" size="20" label="Product C" fill="#FF9800"></dc-bubble>
+      <dc-bubble value="70" size="40" label="Product D" fill="#9C27B0"></dc-bubble>
+      <dc-legend position="right"></dc-legend>
+    </dc-chart>
+  </div>
+
+  <!-- Pie Chart - Basic -->
+  <div id="pie-basic" class="chart-container">
+    <h2>Pie Chart - Basic</h2>
+    <dc-pie-chart width="400" height="350">
+      <dc-title>Market Share</dc-title>
+      <dc-pie-slice value="40" label="Product A" fill="#4CAF50"></dc-pie-slice>
+      <dc-pie-slice value="30" label="Product B" fill="#2196F3"></dc-pie-slice>
+      <dc-pie-slice value="20" label="Product C" fill="#FF9800"></dc-pie-slice>
+      <dc-pie-slice value="10" label="Product D" fill="#9C27B0"></dc-pie-slice>
+      <dc-legend position="right"></dc-legend>
+    </dc-pie-chart>
+  </div>
+
+  <!-- Pie Chart - Donut -->
+  <div id="pie-donut" class="chart-container">
+    <h2>Pie Chart - Donut</h2>
+    <dc-pie-chart width="400" height="350" inner-radius="50%">
+      <dc-title>Budget Allocation</dc-title>
+      <dc-pie-slice value="35" label="Engineering" fill="#4CAF50"></dc-pie-slice>
+      <dc-pie-slice value="25" label="Marketing" fill="#2196F3"></dc-pie-slice>
+      <dc-pie-slice value="20" label="Sales" fill="#FF9800"></dc-pie-slice>
+      <dc-pie-slice value="20" label="Operations" fill="#9C27B0"></dc-pie-slice>
+      <dc-legend position="right"></dc-legend>
+    </dc-pie-chart>
+  </div>
+
+  <!-- Funnel Chart - Basic -->
+  <div id="funnel-basic" class="chart-container">
+    <h2>Funnel Chart - Basic</h2>
+    <dc-funnel-chart width="500" height="350">
+      <dc-title>Sales Funnel</dc-title>
+      <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
+      <dc-funnel-stage value="500" label="Leads"></dc-funnel-stage>
+      <dc-funnel-stage value="200" label="Qualified"></dc-funnel-stage>
+      <dc-funnel-stage value="50" label="Customers"></dc-funnel-stage>
+      <dc-legend position="right"></dc-legend>
+    </dc-funnel-chart>
+  </div>
+
+  <!-- Funnel Chart - Chevron -->
+  <div id="funnel-chevron" class="chart-container">
+    <h2>Funnel Chart - Chevron Style</h2>
+    <dc-funnel-chart width="500" height="350" chevron>
+      <dc-title>Conversion Pipeline</dc-title>
+      <dc-funnel-stage value="5000" label="Impressions" fill="#4CAF50"></dc-funnel-stage>
+      <dc-funnel-stage value="2000" label="Clicks" fill="#8BC34A"></dc-funnel-stage>
+      <dc-funnel-stage value="500" label="Signups" fill="#CDDC39"></dc-funnel-stage>
+      <dc-funnel-stage value="100" label="Purchases" fill="#FFEB3B"></dc-funnel-stage>
+    </dc-funnel-chart>
+  </div>
+
+  <!-- Chart with Patterns -->
+  <div id="patterns" class="chart-container">
+    <h2>Chart with Patterns</h2>
+    <dc-chart width="500" height="350">
+      <dc-title>Accessibility Patterns</dc-title>
+      <dc-bar value="40" label="A" fill="#4CAF50" pattern="diagonal-lines"></dc-bar>
+      <dc-bar value="60" label="B" fill="#2196F3" pattern="dots"></dc-bar>
+      <dc-bar value="50" label="C" fill="#FF9800" pattern="crosshatch"></dc-bar>
+      <dc-bar value="70" label="D" fill="#9C27B0" pattern="horizontal-lines"></dc-bar>
+      <dc-legend position="right"></dc-legend>
+    </dc-chart>
+  </div>
+
+  <!-- Chart with Custom Axis -->
+  <div id="axis-custom" class="chart-container">
+    <h2>Chart with Custom Axis</h2>
+    <dc-chart width="500" height="350">
+      <dc-title>Revenue Growth</dc-title>
+      <dc-axis position="left" value-format="currency USD compact">
+        <dc-title>Revenue</dc-title>
+      </dc-axis>
+      <dc-axis position="bottom" label-interval="1"></dc-axis>
+      <dc-bar value="1200000" label="2021"></dc-bar>
+      <dc-bar value="1800000" label="2022"></dc-bar>
+      <dc-bar value="2400000" label="2023"></dc-bar>
+      <dc-bar value="3200000" label="2024"></dc-bar>
+    </dc-chart>
+  </div>
+
+  <!-- Legend Positions -->
+  <div id="legend-positions" class="chart-container">
+    <h2>Legend - Top Position</h2>
+    <dc-chart width="500" height="350">
+      <dc-title>Sales Data</dc-title>
+      <dc-bar value="30" label="A" fill="#4CAF50"></dc-bar>
+      <dc-bar value="50" label="B" fill="#2196F3"></dc-bar>
+      <dc-bar value="40" label="C" fill="#FF9800"></dc-bar>
+      <dc-legend position="top"></dc-legend>
+    </dc-chart>
+  </div>
+
+  <script>
+    // Show specific chart based on URL parameter
+    // Usage: charts.html?chart=bar-basic
+    const params = new URLSearchParams(window.location.search);
+    const chartId = params.get('chart');
+
+    if (chartId) {
+      const container = document.getElementById(chartId);
+      if (container) {
+        container.classList.add('visible');
+      }
+    } else {
+      // Show all if no specific chart requested
+      document.querySelectorAll('.chart-container').forEach(el => {
+        el.classList.add('visible');
+      });
+    }
+  </script>
+</body>
+</html>
