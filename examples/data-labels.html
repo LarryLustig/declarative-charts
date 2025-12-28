@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Labels - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+    <style>
+        .note {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 10px 15px;
+            margin: 15px 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .note strong {
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Data Labels</h1>
+    <p>Control the display of labels, values, and percentages on chart elements with <code>show-label</code>, <code>show-value</code>, and <code>show-percent</code> attributes.</p>
+
+    <nav>
+        <div class="nav-major">
+            <a href="../index.html">Home</a>
+            <a href="barcharts.html">Bar Charts</a>
+            <a href="linecharts.html">Line Charts</a>
+            <a href="bubblecharts.html">Bubble Charts</a>
+            <a href="piecharts.html">Pie Charts</a>
+            <a href="funnelcharts.html">Funnel Charts</a>
+        </div>
+        <div class="nav-minor">
+            <a href="titles.html">Titles</a>
+            <a href="legends.html">Legends</a>
+            <a href="axes.html">Axes</a>
+            <a href="data-labels.html" class="current">Data Labels</a>
+            <a href="colors.html">Colors</a>
+            <a href="palettes.html">Palettes</a>
+            <a href="typography.html">Typography</a>
+            <a href="borders-and-padding.html">Borders & Padding</a>
+            <a href="bar-groups.html">Bar Groups</a>
+            <a href="bar-width.html">Bar Width</a>
+            <a href="gutter.html">Gutter</a>
+            <a href="interactive.html">Interactive</a>
+            <a href="popups.html">Popups</a>
+            <a href="logging.html">Logging</a>
+            <a href="htmx-integration.html">htmx</a>
+            <a href="accessibility.html">Accessibility</a>
+        </div>
+    </nav>
+
+    <div class="note">
+        <strong>Attribute Values:</strong> The <code>show-*</code> attributes accept:
+        <ul>
+            <li><code>true</code> or present without value - always show</li>
+            <li><code>false</code> - never show</li>
+            <li><code>5%</code> - show only when element's percentage >= 5%</li>
+            <li><code>100</code> - show only when element's value >= 100</li>
+        </ul>
+    </div>
+
+    <div class="example">
+        <h2>Basic Boolean Values</h2>
+        <p>Use <code>true</code> or <code>false</code> to control visibility of labels, values, and percentages.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Default (Percent Only)</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Default Display&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="45" label="Product A"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="30" label="Product B"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="25" label="Product C"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350">
+                    <dc-title>Default Display</dc-title>
+                    <dc-pie-slice value="45" label="Product A"></dc-pie-slice>
+                    <dc-pie-slice value="30" label="Product B"></dc-pie-slice>
+                    <dc-pie-slice value="25" label="Product C"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Values and Percentages</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350" show-value&gt;
+  &lt;dc-title&gt;Value and Percent&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="45" label="Product A"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="30" label="Product B"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="25" label="Product C"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350" show-value>
+                    <dc-title>Value and Percent</dc-title>
+                    <dc-pie-slice value="45" label="Product A"></dc-pie-slice>
+                    <dc-pie-slice value="30" label="Product B"></dc-pie-slice>
+                    <dc-pie-slice value="25" label="Product C"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Values Only (No Percent)</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350"
+    show-value show-percent="false"&gt;
+  &lt;dc-title&gt;Values Only&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="45" label="Product A"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="30" label="Product B"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="25" label="Product C"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350" show-value show-percent="false">
+                    <dc-title>Values Only</dc-title>
+                    <dc-pie-slice value="45" label="Product A"></dc-pie-slice>
+                    <dc-pie-slice value="30" label="Product B"></dc-pie-slice>
+                    <dc-pie-slice value="25" label="Product C"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Labels Only</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350"
+    show-percent="false"&gt;
+  &lt;dc-title&gt;Labels Only&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="45" label="Product A"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="30" label="Product B"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="25" label="Product C"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350" show-percent="false">
+                    <dc-title>Labels Only</dc-title>
+                    <dc-pie-slice value="45" label="Product A"></dc-pie-slice>
+                    <dc-pie-slice value="30" label="Product B"></dc-pie-slice>
+                    <dc-pie-slice value="25" label="Product C"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Percentage Thresholds</h2>
+        <p>Use percentage thresholds (e.g., <code>show-label="5%"</code>) to hide labels on small slices and reduce clutter.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Show All Labels (Cluttered)</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;All Labels Shown&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="60" label="Large"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="20" label="Medium"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="10" label="Small"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="5" label="Tiny"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="3" label="Mini"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="2" label="Micro"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350">
+                    <dc-title>All Labels Shown</dc-title>
+                    <dc-pie-slice value="60" label="Large"></dc-pie-slice>
+                    <dc-pie-slice value="20" label="Medium"></dc-pie-slice>
+                    <dc-pie-slice value="10" label="Small"></dc-pie-slice>
+                    <dc-pie-slice value="5" label="Tiny"></dc-pie-slice>
+                    <dc-pie-slice value="3" label="Mini"></dc-pie-slice>
+                    <dc-pie-slice value="2" label="Micro"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Labels Only for >= 10%</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350"
+    show-label="10%"&gt;
+  &lt;dc-title&gt;Labels >= 10%&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="60" label="Large"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="20" label="Medium"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="10" label="Small"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="5" label="Tiny"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="3" label="Mini"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="2" label="Micro"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350" show-label="10%">
+                    <dc-title>Labels >= 10%</dc-title>
+                    <dc-pie-slice value="60" label="Large"></dc-pie-slice>
+                    <dc-pie-slice value="20" label="Medium"></dc-pie-slice>
+                    <dc-pie-slice value="10" label="Small"></dc-pie-slice>
+                    <dc-pie-slice value="5" label="Tiny"></dc-pie-slice>
+                    <dc-pie-slice value="3" label="Mini"></dc-pie-slice>
+                    <dc-pie-slice value="2" label="Micro"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Percents Only for >= 5%</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350"
+    show-label="false" show-percent="5%"&gt;
+  &lt;dc-title&gt;Percents >= 5%&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="60" label="Large"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="20" label="Medium"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="10" label="Small"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="5" label="Tiny"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="3" label="Mini"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="2" label="Micro"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350" show-label="false" show-percent="5%">
+                    <dc-title>Percents >= 5%</dc-title>
+                    <dc-pie-slice value="60" label="Large"></dc-pie-slice>
+                    <dc-pie-slice value="20" label="Medium"></dc-pie-slice>
+                    <dc-pie-slice value="10" label="Small"></dc-pie-slice>
+                    <dc-pie-slice value="5" label="Tiny"></dc-pie-slice>
+                    <dc-pie-slice value="3" label="Mini"></dc-pie-slice>
+                    <dc-pie-slice value="2" label="Micro"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Different Thresholds</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350"
+    show-label="15%" show-percent="5%"&gt;
+  &lt;dc-title&gt;Labels >= 15%, Percents >= 5%&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="60" label="Large"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="20" label="Medium"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="10" label="Small"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="5" label="Tiny"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="3" label="Mini"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="2" label="Micro"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350" show-label="15%" show-percent="5%">
+                    <dc-title>Labels >= 15%, Percents >= 5%</dc-title>
+                    <dc-pie-slice value="60" label="Large"></dc-pie-slice>
+                    <dc-pie-slice value="20" label="Medium"></dc-pie-slice>
+                    <dc-pie-slice value="10" label="Small"></dc-pie-slice>
+                    <dc-pie-slice value="5" label="Tiny"></dc-pie-slice>
+                    <dc-pie-slice value="3" label="Mini"></dc-pie-slice>
+                    <dc-pie-slice value="2" label="Micro"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Value Thresholds</h2>
+        <p>Use absolute value thresholds (e.g., <code>show-value="100"</code>) to hide values below a specific number.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Show All Values</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;All Values Shown&lt;/dc-title&gt;
+  &lt;dc-bar value="250" label="High"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Medium"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="80" label="Low"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="30" label="Tiny"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>All Values Shown</dc-title>
+                    <dc-bar value="250" label="High"></dc-bar>
+                    <dc-bar value="150" label="Medium"></dc-bar>
+                    <dc-bar value="80" label="Low"></dc-bar>
+                    <dc-bar value="30" label="Tiny"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Values >= 100 Only</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"
+    show-value="100"&gt;
+  &lt;dc-title&gt;Values >= 100&lt;/dc-title&gt;
+  &lt;dc-bar value="250" label="High"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Medium"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="80" label="Low"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="30" label="Tiny"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" show-value="100">
+                    <dc-title>Values >= 100</dc-title>
+                    <dc-bar value="250" label="High"></dc-bar>
+                    <dc-bar value="150" label="Medium"></dc-bar>
+                    <dc-bar value="80" label="Low"></dc-bar>
+                    <dc-bar value="30" label="Tiny"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Bar Chart with Percentages</h2>
+        <p>Bar charts can also display percentages using <code>show-percent</code>.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Values and Percentages</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" show-percent&gt;
+  &lt;dc-title&gt;Sales with Percentages&lt;/dc-title&gt;
+  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" show-percent>
+                    <dc-title>Sales with Percentages</dc-title>
+                    <dc-bar value="120" label="Jan"></dc-bar>
+                    <dc-bar value="150" label="Feb"></dc-bar>
+                    <dc-bar value="180" label="Mar"></dc-bar>
+                    <dc-bar value="90" label="Apr"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Percentages Only</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"
+    show-value="false" show-percent&gt;
+  &lt;dc-title&gt;Percentage Only&lt;/dc-title&gt;
+  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" show-value="false" show-percent>
+                    <dc-title>Percentage Only</dc-title>
+                    <dc-bar value="120" label="Jan"></dc-bar>
+                    <dc-bar value="150" label="Feb"></dc-bar>
+                    <dc-bar value="180" label="Mar"></dc-bar>
+                    <dc-bar value="90" label="Apr"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Funnel Chart Labels</h2>
+        <p>Control label visibility on funnel chart stages.</p>
+
+        <div class="grid">
+            <div>
+                <h3>All Labels</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Sales Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="500" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="200" label="Qualified"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="50" label="Sales"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="350">
+                    <dc-title>Sales Funnel</dc-title>
+                    <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
+                    <dc-funnel-stage value="500" label="Leads"></dc-funnel-stage>
+                    <dc-funnel-stage value="200" label="Qualified"></dc-funnel-stage>
+                    <dc-funnel-stage value="50" label="Sales"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>With Percentages >= 10%</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="350"
+    show-percent="10%"&gt;
+  &lt;dc-title&gt;Funnel with Percentages&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="500" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="200" label="Qualified"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="50" label="Sales"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="350" show-percent="10%">
+                    <dc-title>Funnel with Percentages</dc-title>
+                    <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
+                    <dc-funnel-stage value="500" label="Leads"></dc-funnel-stage>
+                    <dc-funnel-stage value="200" label="Qualified"></dc-funnel-stage>
+                    <dc-funnel-stage value="50" label="Sales"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Line Chart Values</h2>
+        <p>Control value display on line chart points.</p>
+
+        <div class="grid">
+            <div>
+                <h3>All Values</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Temperature&lt;/dc-title&gt;
+  &lt;dc-line label="City A"&gt;
+    &lt;dc-point value="15" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="18" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="22" label="Wed"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="19" label="Thu"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="16" label="Fri"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Temperature</dc-title>
+                    <dc-line label="City A">
+                        <dc-point value="15" label="Mon"></dc-point>
+                        <dc-point value="18" label="Tue"></dc-point>
+                        <dc-point value="22" label="Wed"></dc-point>
+                        <dc-point value="19" label="Thu"></dc-point>
+                        <dc-point value="16" label="Fri"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Values >= 20 Only</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"
+    show-value="20"&gt;
+  &lt;dc-title&gt;Temperature (High Only)&lt;/dc-title&gt;
+  &lt;dc-line label="City A"&gt;
+    &lt;dc-point value="15" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="18" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="22" label="Wed"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="19" label="Thu"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="16" label="Fri"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" show-value="20">
+                    <dc-title>Temperature (High Only)</dc-title>
+                    <dc-line label="City A">
+                        <dc-point value="15" label="Mon"></dc-point>
+                        <dc-point value="18" label="Tue"></dc-point>
+                        <dc-point value="22" label="Wed"></dc-point>
+                        <dc-point value="19" label="Thu"></dc-point>
+                        <dc-point value="16" label="Fri"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Per-Element Overrides</h2>
+        <p>Override chart-level settings on individual elements.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Mixed Visibility</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350"
+    show-label="false"&gt;
+  &lt;dc-title&gt;Per-Slice Overrides&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="45" label="Important"
+      show-label&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="30" label="Normal"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="25" label="Other"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350" show-label="false">
+                    <dc-title>Per-Slice Overrides</dc-title>
+                    <dc-pie-slice value="45" label="Important" show-label></dc-pie-slice>
+                    <dc-pie-slice value="30" label="Normal"></dc-pie-slice>
+                    <dc-pie-slice value="25" label="Other"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Highlight Key Bars</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"
+    show-value="false"&gt;
+  &lt;dc-title&gt;Highlighted Bars&lt;/dc-title&gt;
+  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" label="Feb" show-value
+      fill="#4CAF50"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="200" label="Apr" show-value
+      fill="#4CAF50"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" show-value="false">
+                    <dc-title>Highlighted Bars</dc-title>
+                    <dc-bar value="120" label="Jan"></dc-bar>
+                    <dc-bar value="180" label="Feb" show-value fill="#4CAF50"></dc-bar>
+                    <dc-bar value="90" label="Mar"></dc-bar>
+                    <dc-bar value="200" label="Apr" show-value fill="#4CAF50"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Using Pop-Ups Instead</h2>
+        <p>When slices are too small to display labels clearly, you can use pop-ups to show information on hover instead.</p>
+
+        <div class="grid">
+            <div>
+                <h3>All Labels via Pop-Ups</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350"
+    show-label="false" show-percent="false"&gt;
+  &lt;dc-title&gt;Hover for Details&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="45" label="Desktop" fill="#4ECDC4"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Desktop&lt;/strong&gt;&lt;br&gt;
+      45 users (45%)
+    &lt;/dc-popup&gt;
+  &lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="30" label="Mobile" fill="#FF6B6B"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Mobile&lt;/strong&gt;&lt;br&gt;
+      30 users (30%)
+    &lt;/dc-popup&gt;
+  &lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" label="Tablet" fill="#45B7D1"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Tablet&lt;/strong&gt;&lt;br&gt;
+      15 users (15%)
+    &lt;/dc-popup&gt;
+  &lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="10" label="Other" fill="#96CEB4"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Other&lt;/strong&gt;&lt;br&gt;
+      10 users (10%)
+    &lt;/dc-popup&gt;
+  &lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350" show-label="false" show-percent="false">
+                    <dc-title>Hover for Details</dc-title>
+                    <dc-pie-slice value="45" label="Desktop" fill="#4ECDC4">
+                        <dc-popup trigger="hover">
+                            <strong>Desktop</strong><br>
+                            45 users (45%)
+                        </dc-popup>
+                    </dc-pie-slice>
+                    <dc-pie-slice value="30" label="Mobile" fill="#FF6B6B">
+                        <dc-popup trigger="hover">
+                            <strong>Mobile</strong><br>
+                            30 users (30%)
+                        </dc-popup>
+                    </dc-pie-slice>
+                    <dc-pie-slice value="15" label="Tablet" fill="#45B7D1">
+                        <dc-popup trigger="hover">
+                            <strong>Tablet</strong><br>
+                            15 users (15%)
+                        </dc-popup>
+                    </dc-pie-slice>
+                    <dc-pie-slice value="10" label="Other" fill="#96CEB4">
+                        <dc-popup trigger="hover">
+                            <strong>Other</strong><br>
+                            10 users (10%)
+                        </dc-popup>
+                    </dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Pop-Ups Only for Small Slices</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350"
+    show-label="10%" show-percent="10%"&gt;
+  &lt;dc-title&gt;Small Slices Use Pop-Ups&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="60" label="Large" fill="#4ECDC4"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="20" label="Medium" fill="#FF6B6B"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="8" label="Small" fill="#45B7D1"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Small&lt;/strong&gt;&lt;br&gt;
+      8 units (8%)
+    &lt;/dc-popup&gt;
+  &lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="5" label="Tiny" fill="#96CEB4"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Tiny&lt;/strong&gt;&lt;br&gt;
+      5 units (5%)
+    &lt;/dc-popup&gt;
+  &lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="4" label="Mini" fill="#DDA0DD"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Mini&lt;/strong&gt;&lt;br&gt;
+      4 units (4%)
+    &lt;/dc-popup&gt;
+  &lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="3" label="Micro" fill="#F0E68C"&gt;
+    &lt;dc-popup trigger="hover"&gt;
+      &lt;strong&gt;Micro&lt;/strong&gt;&lt;br&gt;
+      3 units (3%)
+    &lt;/dc-popup&gt;
+  &lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350" show-label="10%" show-percent="10%">
+                    <dc-title>Small Slices Use Pop-Ups</dc-title>
+                    <dc-pie-slice value="60" label="Large" fill="#4ECDC4"></dc-pie-slice>
+                    <dc-pie-slice value="20" label="Medium" fill="#FF6B6B"></dc-pie-slice>
+                    <dc-pie-slice value="8" label="Small" fill="#45B7D1">
+                        <dc-popup trigger="hover">
+                            <strong>Small</strong><br>
+                            8 units (8%)
+                        </dc-popup>
+                    </dc-pie-slice>
+                    <dc-pie-slice value="5" label="Tiny" fill="#96CEB4">
+                        <dc-popup trigger="hover">
+                            <strong>Tiny</strong><br>
+                            5 units (5%)
+                        </dc-popup>
+                    </dc-pie-slice>
+                    <dc-pie-slice value="4" label="Mini" fill="#DDA0DD">
+                        <dc-popup trigger="hover">
+                            <strong>Mini</strong><br>
+                            4 units (4%)
+                        </dc-popup>
+                    </dc-pie-slice>
+                    <dc-pie-slice value="3" label="Micro" fill="#F0E68C">
+                        <dc-popup trigger="hover">
+                            <strong>Micro</strong><br>
+                            3 units (3%)
+                        </dc-popup>
+                    </dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+</body>
+</html>

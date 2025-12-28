@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Axes and Labels - Declarative Chart Library</title>
+    <title>Axes and Grids - Declarative Chart Library</title>
     <link rel="stylesheet" href="examples.css">
     <style>
         .note {
@@ -20,8 +20,8 @@
     </style>
 </head>
 <body>
-    <h1>Axes and Labels</h1>
-    <p>Configure axes with <code>&lt;dc-axis&gt;</code> and control the display of labels, values, and percentages on chart elements.</p>
+    <h1>Axes and Grids</h1>
+    <p>Configure axes with <code>&lt;dc-axis&gt;</code> and grid lines with <code>&lt;dc-grid&gt;</code>. These features are only available for <code>&lt;dc-chart&gt;</code> (bar, line, and bubble charts).</p>
 
     <nav>
         <div class="nav-major">
@@ -36,6 +36,7 @@
             <a href="titles.html">Titles</a>
             <a href="legends.html">Legends</a>
             <a href="axes.html" class="current">Axes</a>
+            <a href="data-labels.html">Data Labels</a>
             <a href="colors.html">Colors</a>
             <a href="palettes.html">Palettes</a>
             <a href="typography.html">Typography</a>
@@ -50,550 +51,6 @@
             <a href="accessibility.html">Accessibility</a>
         </div>
     </nav>
-
-    <div class="note">
-        <strong>Attribute Values:</strong> The <code>show-*</code> attributes accept:
-        <ul>
-            <li><code>true</code> or present without value - always show</li>
-            <li><code>false</code> - never show</li>
-            <li><code>5%</code> - show only when element's percentage >= 5%</li>
-            <li><code>100</code> - show only when element's value >= 100</li>
-        </ul>
-    </div>
-
-    <div class="example">
-        <h2>Basic Boolean Values</h2>
-        <p>Use <code>true</code> or <code>false</code> to control visibility of labels, values, and percentages.</p>
-
-        <div class="grid">
-            <div>
-                <h3>Default (Percent Only)</h3>
-                <pre><code>&lt;dc-pie-chart width="500" height="350"&gt;
-  &lt;dc-title&gt;Default Display&lt;/dc-title&gt;
-  &lt;dc-pie-slice value="45" label="Product A"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="30" label="Product B"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="25" label="Product C"&gt;&lt;/dc-pie-slice&gt;
-&lt;/dc-pie-chart&gt;</code></pre>
-                <dc-pie-chart width="500" height="350">
-                    <dc-title>Default Display</dc-title>
-                    <dc-pie-slice value="45" label="Product A"></dc-pie-slice>
-                    <dc-pie-slice value="30" label="Product B"></dc-pie-slice>
-                    <dc-pie-slice value="25" label="Product C"></dc-pie-slice>
-                </dc-pie-chart>
-            </div>
-
-            <div>
-                <h3>Values and Percentages</h3>
-                <pre><code>&lt;dc-pie-chart width="500" height="350" show-value&gt;
-  &lt;dc-title&gt;Value and Percent&lt;/dc-title&gt;
-  &lt;dc-pie-slice value="45" label="Product A"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="30" label="Product B"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="25" label="Product C"&gt;&lt;/dc-pie-slice&gt;
-&lt;/dc-pie-chart&gt;</code></pre>
-                <dc-pie-chart width="500" height="350" show-value>
-                    <dc-title>Value and Percent</dc-title>
-                    <dc-pie-slice value="45" label="Product A"></dc-pie-slice>
-                    <dc-pie-slice value="30" label="Product B"></dc-pie-slice>
-                    <dc-pie-slice value="25" label="Product C"></dc-pie-slice>
-                </dc-pie-chart>
-            </div>
-
-            <div>
-                <h3>Values Only (No Percent)</h3>
-                <pre><code>&lt;dc-pie-chart width="500" height="350"
-    show-value show-percent="false"&gt;
-  &lt;dc-title&gt;Values Only&lt;/dc-title&gt;
-  &lt;dc-pie-slice value="45" label="Product A"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="30" label="Product B"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="25" label="Product C"&gt;&lt;/dc-pie-slice&gt;
-&lt;/dc-pie-chart&gt;</code></pre>
-                <dc-pie-chart width="500" height="350" show-value show-percent="false">
-                    <dc-title>Values Only</dc-title>
-                    <dc-pie-slice value="45" label="Product A"></dc-pie-slice>
-                    <dc-pie-slice value="30" label="Product B"></dc-pie-slice>
-                    <dc-pie-slice value="25" label="Product C"></dc-pie-slice>
-                </dc-pie-chart>
-            </div>
-
-            <div>
-                <h3>Labels Only</h3>
-                <pre><code>&lt;dc-pie-chart width="500" height="350"
-    show-percent="false"&gt;
-  &lt;dc-title&gt;Labels Only&lt;/dc-title&gt;
-  &lt;dc-pie-slice value="45" label="Product A"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="30" label="Product B"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="25" label="Product C"&gt;&lt;/dc-pie-slice&gt;
-&lt;/dc-pie-chart&gt;</code></pre>
-                <dc-pie-chart width="500" height="350" show-percent="false">
-                    <dc-title>Labels Only</dc-title>
-                    <dc-pie-slice value="45" label="Product A"></dc-pie-slice>
-                    <dc-pie-slice value="30" label="Product B"></dc-pie-slice>
-                    <dc-pie-slice value="25" label="Product C"></dc-pie-slice>
-                </dc-pie-chart>
-            </div>
-        </div>
-    </div>
-
-    <div class="example">
-        <h2>Percentage Thresholds</h2>
-        <p>Use percentage thresholds (e.g., <code>show-label="5%"</code>) to hide labels on small slices and reduce clutter.</p>
-
-        <div class="grid">
-            <div>
-                <h3>Show All Labels (Cluttered)</h3>
-                <pre><code>&lt;dc-pie-chart width="500" height="350"&gt;
-  &lt;dc-title&gt;All Labels Shown&lt;/dc-title&gt;
-  &lt;dc-pie-slice value="60" label="Large"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="20" label="Medium"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="10" label="Small"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="5" label="Tiny"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="3" label="Mini"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="2" label="Micro"&gt;&lt;/dc-pie-slice&gt;
-&lt;/dc-pie-chart&gt;</code></pre>
-                <dc-pie-chart width="500" height="350">
-                    <dc-title>All Labels Shown</dc-title>
-                    <dc-pie-slice value="60" label="Large"></dc-pie-slice>
-                    <dc-pie-slice value="20" label="Medium"></dc-pie-slice>
-                    <dc-pie-slice value="10" label="Small"></dc-pie-slice>
-                    <dc-pie-slice value="5" label="Tiny"></dc-pie-slice>
-                    <dc-pie-slice value="3" label="Mini"></dc-pie-slice>
-                    <dc-pie-slice value="2" label="Micro"></dc-pie-slice>
-                </dc-pie-chart>
-            </div>
-
-            <div>
-                <h3>Labels Only for >= 10%</h3>
-                <pre><code>&lt;dc-pie-chart width="500" height="350"
-    show-label="10%"&gt;
-  &lt;dc-title&gt;Labels >= 10%&lt;/dc-title&gt;
-  &lt;dc-pie-slice value="60" label="Large"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="20" label="Medium"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="10" label="Small"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="5" label="Tiny"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="3" label="Mini"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="2" label="Micro"&gt;&lt;/dc-pie-slice&gt;
-&lt;/dc-pie-chart&gt;</code></pre>
-                <dc-pie-chart width="500" height="350" show-label="10%">
-                    <dc-title>Labels >= 10%</dc-title>
-                    <dc-pie-slice value="60" label="Large"></dc-pie-slice>
-                    <dc-pie-slice value="20" label="Medium"></dc-pie-slice>
-                    <dc-pie-slice value="10" label="Small"></dc-pie-slice>
-                    <dc-pie-slice value="5" label="Tiny"></dc-pie-slice>
-                    <dc-pie-slice value="3" label="Mini"></dc-pie-slice>
-                    <dc-pie-slice value="2" label="Micro"></dc-pie-slice>
-                </dc-pie-chart>
-            </div>
-
-            <div>
-                <h3>Percents Only for >= 5%</h3>
-                <pre><code>&lt;dc-pie-chart width="500" height="350"
-    show-label="false" show-percent="5%"&gt;
-  &lt;dc-title&gt;Percents >= 5%&lt;/dc-title&gt;
-  &lt;dc-pie-slice value="60" label="Large"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="20" label="Medium"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="10" label="Small"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="5" label="Tiny"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="3" label="Mini"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="2" label="Micro"&gt;&lt;/dc-pie-slice&gt;
-&lt;/dc-pie-chart&gt;</code></pre>
-                <dc-pie-chart width="500" height="350" show-label="false" show-percent="5%">
-                    <dc-title>Percents >= 5%</dc-title>
-                    <dc-pie-slice value="60" label="Large"></dc-pie-slice>
-                    <dc-pie-slice value="20" label="Medium"></dc-pie-slice>
-                    <dc-pie-slice value="10" label="Small"></dc-pie-slice>
-                    <dc-pie-slice value="5" label="Tiny"></dc-pie-slice>
-                    <dc-pie-slice value="3" label="Mini"></dc-pie-slice>
-                    <dc-pie-slice value="2" label="Micro"></dc-pie-slice>
-                </dc-pie-chart>
-            </div>
-
-            <div>
-                <h3>Different Thresholds</h3>
-                <pre><code>&lt;dc-pie-chart width="500" height="350"
-    show-label="15%" show-percent="5%"&gt;
-  &lt;dc-title&gt;Labels >= 15%, Percents >= 5%&lt;/dc-title&gt;
-  &lt;dc-pie-slice value="60" label="Large"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="20" label="Medium"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="10" label="Small"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="5" label="Tiny"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="3" label="Mini"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="2" label="Micro"&gt;&lt;/dc-pie-slice&gt;
-&lt;/dc-pie-chart&gt;</code></pre>
-                <dc-pie-chart width="500" height="350" show-label="15%" show-percent="5%">
-                    <dc-title>Labels >= 15%, Percents >= 5%</dc-title>
-                    <dc-pie-slice value="60" label="Large"></dc-pie-slice>
-                    <dc-pie-slice value="20" label="Medium"></dc-pie-slice>
-                    <dc-pie-slice value="10" label="Small"></dc-pie-slice>
-                    <dc-pie-slice value="5" label="Tiny"></dc-pie-slice>
-                    <dc-pie-slice value="3" label="Mini"></dc-pie-slice>
-                    <dc-pie-slice value="2" label="Micro"></dc-pie-slice>
-                </dc-pie-chart>
-            </div>
-        </div>
-    </div>
-
-    <div class="example">
-        <h2>Value Thresholds</h2>
-        <p>Use absolute value thresholds (e.g., <code>show-value="100"</code>) to hide values below a specific number.</p>
-
-        <div class="grid">
-            <div>
-                <h3>Show All Values</h3>
-                <pre><code>&lt;dc-chart width="500" height="350"&gt;
-  &lt;dc-title&gt;All Values Shown&lt;/dc-title&gt;
-  &lt;dc-bar value="250" label="High"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="150" label="Medium"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="80" label="Low"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="30" label="Tiny"&gt;&lt;/dc-bar&gt;
-&lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350">
-                    <dc-title>All Values Shown</dc-title>
-                    <dc-bar value="250" label="High"></dc-bar>
-                    <dc-bar value="150" label="Medium"></dc-bar>
-                    <dc-bar value="80" label="Low"></dc-bar>
-                    <dc-bar value="30" label="Tiny"></dc-bar>
-                </dc-chart>
-            </div>
-
-            <div>
-                <h3>Values >= 100 Only</h3>
-                <pre><code>&lt;dc-chart width="500" height="350"
-    show-value="100"&gt;
-  &lt;dc-title&gt;Values >= 100&lt;/dc-title&gt;
-  &lt;dc-bar value="250" label="High"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="150" label="Medium"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="80" label="Low"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="30" label="Tiny"&gt;&lt;/dc-bar&gt;
-&lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350" show-value="100">
-                    <dc-title>Values >= 100</dc-title>
-                    <dc-bar value="250" label="High"></dc-bar>
-                    <dc-bar value="150" label="Medium"></dc-bar>
-                    <dc-bar value="80" label="Low"></dc-bar>
-                    <dc-bar value="30" label="Tiny"></dc-bar>
-                </dc-chart>
-            </div>
-        </div>
-    </div>
-
-    <div class="example">
-        <h2>Bar Chart with Percentages</h2>
-        <p>Bar charts can also display percentages using <code>show-percent</code>.</p>
-
-        <div class="grid">
-            <div>
-                <h3>Values and Percentages</h3>
-                <pre><code>&lt;dc-chart width="500" height="350" show-percent&gt;
-  &lt;dc-title&gt;Sales with Percentages&lt;/dc-title&gt;
-  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
-&lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350" show-percent>
-                    <dc-title>Sales with Percentages</dc-title>
-                    <dc-bar value="120" label="Jan"></dc-bar>
-                    <dc-bar value="150" label="Feb"></dc-bar>
-                    <dc-bar value="180" label="Mar"></dc-bar>
-                    <dc-bar value="90" label="Apr"></dc-bar>
-                </dc-chart>
-            </div>
-
-            <div>
-                <h3>Percentages Only</h3>
-                <pre><code>&lt;dc-chart width="500" height="350"
-    show-value="false" show-percent&gt;
-  &lt;dc-title&gt;Percentage Only&lt;/dc-title&gt;
-  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
-&lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350" show-value="false" show-percent>
-                    <dc-title>Percentage Only</dc-title>
-                    <dc-bar value="120" label="Jan"></dc-bar>
-                    <dc-bar value="150" label="Feb"></dc-bar>
-                    <dc-bar value="180" label="Mar"></dc-bar>
-                    <dc-bar value="90" label="Apr"></dc-bar>
-                </dc-chart>
-            </div>
-        </div>
-    </div>
-
-    <div class="example">
-        <h2>Funnel Chart Labels</h2>
-        <p>Control label visibility on funnel chart stages.</p>
-
-        <div class="grid">
-            <div>
-                <h3>All Labels</h3>
-                <pre><code>&lt;dc-funnel-chart width="500" height="350"&gt;
-  &lt;dc-title&gt;Sales Funnel&lt;/dc-title&gt;
-  &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
-  &lt;dc-funnel-stage value="500" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
-  &lt;dc-funnel-stage value="200" label="Qualified"&gt;&lt;/dc-funnel-stage&gt;
-  &lt;dc-funnel-stage value="50" label="Sales"&gt;&lt;/dc-funnel-stage&gt;
-&lt;/dc-funnel-chart&gt;</code></pre>
-                <dc-funnel-chart width="500" height="350">
-                    <dc-title>Sales Funnel</dc-title>
-                    <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
-                    <dc-funnel-stage value="500" label="Leads"></dc-funnel-stage>
-                    <dc-funnel-stage value="200" label="Qualified"></dc-funnel-stage>
-                    <dc-funnel-stage value="50" label="Sales"></dc-funnel-stage>
-                </dc-funnel-chart>
-            </div>
-
-            <div>
-                <h3>With Percentages >= 10%</h3>
-                <pre><code>&lt;dc-funnel-chart width="500" height="350"
-    show-percent="10%"&gt;
-  &lt;dc-title&gt;Funnel with Percentages&lt;/dc-title&gt;
-  &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
-  &lt;dc-funnel-stage value="500" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
-  &lt;dc-funnel-stage value="200" label="Qualified"&gt;&lt;/dc-funnel-stage&gt;
-  &lt;dc-funnel-stage value="50" label="Sales"&gt;&lt;/dc-funnel-stage&gt;
-&lt;/dc-funnel-chart&gt;</code></pre>
-                <dc-funnel-chart width="500" height="350" show-percent="10%">
-                    <dc-title>Funnel with Percentages</dc-title>
-                    <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
-                    <dc-funnel-stage value="500" label="Leads"></dc-funnel-stage>
-                    <dc-funnel-stage value="200" label="Qualified"></dc-funnel-stage>
-                    <dc-funnel-stage value="50" label="Sales"></dc-funnel-stage>
-                </dc-funnel-chart>
-            </div>
-        </div>
-    </div>
-
-    <div class="example">
-        <h2>Line Chart Values</h2>
-        <p>Control value display on line chart points.</p>
-
-        <div class="grid">
-            <div>
-                <h3>All Values</h3>
-                <pre><code>&lt;dc-chart width="500" height="350"&gt;
-  &lt;dc-title&gt;Temperature&lt;/dc-title&gt;
-  &lt;dc-line label="City A"&gt;
-    &lt;dc-point value="15" label="Mon"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="18" label="Tue"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="22" label="Wed"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="19" label="Thu"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="16" label="Fri"&gt;&lt;/dc-point&gt;
-  &lt;/dc-line&gt;
-&lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350">
-                    <dc-title>Temperature</dc-title>
-                    <dc-line label="City A">
-                        <dc-point value="15" label="Mon"></dc-point>
-                        <dc-point value="18" label="Tue"></dc-point>
-                        <dc-point value="22" label="Wed"></dc-point>
-                        <dc-point value="19" label="Thu"></dc-point>
-                        <dc-point value="16" label="Fri"></dc-point>
-                    </dc-line>
-                </dc-chart>
-            </div>
-
-            <div>
-                <h3>Values >= 20 Only</h3>
-                <pre><code>&lt;dc-chart width="500" height="350"
-    show-value="20"&gt;
-  &lt;dc-title&gt;Temperature (High Only)&lt;/dc-title&gt;
-  &lt;dc-line label="City A"&gt;
-    &lt;dc-point value="15" label="Mon"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="18" label="Tue"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="22" label="Wed"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="19" label="Thu"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="16" label="Fri"&gt;&lt;/dc-point&gt;
-  &lt;/dc-line&gt;
-&lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350" show-value="20">
-                    <dc-title>Temperature (High Only)</dc-title>
-                    <dc-line label="City A">
-                        <dc-point value="15" label="Mon"></dc-point>
-                        <dc-point value="18" label="Tue"></dc-point>
-                        <dc-point value="22" label="Wed"></dc-point>
-                        <dc-point value="19" label="Thu"></dc-point>
-                        <dc-point value="16" label="Fri"></dc-point>
-                    </dc-line>
-                </dc-chart>
-            </div>
-        </div>
-    </div>
-
-    <div class="example">
-        <h2>Per-Element Overrides</h2>
-        <p>Override chart-level settings on individual elements.</p>
-
-        <div class="grid">
-            <div>
-                <h3>Mixed Visibility</h3>
-                <pre><code>&lt;dc-pie-chart width="500" height="350"
-    show-label="false"&gt;
-  &lt;dc-title&gt;Per-Slice Overrides&lt;/dc-title&gt;
-  &lt;dc-pie-slice value="45" label="Important"
-      show-label&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="30" label="Normal"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="25" label="Other"&gt;&lt;/dc-pie-slice&gt;
-&lt;/dc-pie-chart&gt;</code></pre>
-                <dc-pie-chart width="500" height="350" show-label="false">
-                    <dc-title>Per-Slice Overrides</dc-title>
-                    <dc-pie-slice value="45" label="Important" show-label></dc-pie-slice>
-                    <dc-pie-slice value="30" label="Normal"></dc-pie-slice>
-                    <dc-pie-slice value="25" label="Other"></dc-pie-slice>
-                </dc-pie-chart>
-            </div>
-
-            <div>
-                <h3>Highlight Key Bars</h3>
-                <pre><code>&lt;dc-chart width="500" height="350"
-    show-value="false"&gt;
-  &lt;dc-title&gt;Highlighted Bars&lt;/dc-title&gt;
-  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="180" label="Feb" show-value
-      color="#4CAF50"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="90" label="Mar"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="200" label="Apr" show-value
-      color="#4CAF50"&gt;&lt;/dc-bar&gt;
-&lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350" show-value="false">
-                    <dc-title>Highlighted Bars</dc-title>
-                    <dc-bar value="120" label="Jan"></dc-bar>
-                    <dc-bar value="180" label="Feb" show-value fill="#4CAF50"></dc-bar>
-                    <dc-bar value="90" label="Mar"></dc-bar>
-                    <dc-bar value="200" label="Apr" show-value fill="#4CAF50"></dc-bar>
-                </dc-chart>
-            </div>
-        </div>
-    </div>
-
-    <div class="example">
-        <h2>Using Pop-Ups Instead</h2>
-        <p>When slices are too small to display labels clearly, you can use pop-ups to show information on hover instead.</p>
-
-        <div class="grid">
-            <div>
-                <h3>All Labels via Pop-Ups</h3>
-                <pre><code>&lt;dc-pie-chart width="500" height="350"
-    show-label="false" show-percent="false"&gt;
-  &lt;dc-title&gt;Hover for Details&lt;/dc-title&gt;
-  &lt;dc-pie-slice value="45" label="Desktop" color="#4ECDC4"&gt;
-    &lt;dc-popup trigger="hover"&gt;
-      &lt;strong&gt;Desktop&lt;/strong&gt;&lt;br&gt;
-      45 users (45%)
-    &lt;/dc-popup&gt;
-  &lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="30" label="Mobile" color="#FF6B6B"&gt;
-    &lt;dc-popup trigger="hover"&gt;
-      &lt;strong&gt;Mobile&lt;/strong&gt;&lt;br&gt;
-      30 users (30%)
-    &lt;/dc-popup&gt;
-  &lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="15" label="Tablet" color="#45B7D1"&gt;
-    &lt;dc-popup trigger="hover"&gt;
-      &lt;strong&gt;Tablet&lt;/strong&gt;&lt;br&gt;
-      15 users (15%)
-    &lt;/dc-popup&gt;
-  &lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="10" label="Other" color="#96CEB4"&gt;
-    &lt;dc-popup trigger="hover"&gt;
-      &lt;strong&gt;Other&lt;/strong&gt;&lt;br&gt;
-      10 users (10%)
-    &lt;/dc-popup&gt;
-  &lt;/dc-pie-slice&gt;
-&lt;/dc-pie-chart&gt;</code></pre>
-                <dc-pie-chart width="500" height="350" show-label="false" show-percent="false">
-                    <dc-title>Hover for Details</dc-title>
-                    <dc-pie-slice value="45" label="Desktop" fill="#4ECDC4">
-                        <dc-popup trigger="hover">
-                            <strong>Desktop</strong><br>
-                            45 users (45%)
-                        </dc-popup>
-                    </dc-pie-slice>
-                    <dc-pie-slice value="30" label="Mobile" fill="#FF6B6B">
-                        <dc-popup trigger="hover">
-                            <strong>Mobile</strong><br>
-                            30 users (30%)
-                        </dc-popup>
-                    </dc-pie-slice>
-                    <dc-pie-slice value="15" label="Tablet" fill="#45B7D1">
-                        <dc-popup trigger="hover">
-                            <strong>Tablet</strong><br>
-                            15 users (15%)
-                        </dc-popup>
-                    </dc-pie-slice>
-                    <dc-pie-slice value="10" label="Other" fill="#96CEB4">
-                        <dc-popup trigger="hover">
-                            <strong>Other</strong><br>
-                            10 users (10%)
-                        </dc-popup>
-                    </dc-pie-slice>
-                </dc-pie-chart>
-            </div>
-
-            <div>
-                <h3>Pop-Ups Only for Small Slices</h3>
-                <pre><code>&lt;dc-pie-chart width="500" height="350"
-    show-label="10%" show-percent="10%"&gt;
-  &lt;dc-title&gt;Small Slices Use Pop-Ups&lt;/dc-title&gt;
-  &lt;dc-pie-slice value="60" label="Large" color="#4ECDC4"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="20" label="Medium" color="#FF6B6B"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="8" label="Small" color="#45B7D1"&gt;
-    &lt;dc-popup trigger="hover"&gt;
-      &lt;strong&gt;Small&lt;/strong&gt;&lt;br&gt;
-      8 units (8%)
-    &lt;/dc-popup&gt;
-  &lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="5" label="Tiny" color="#96CEB4"&gt;
-    &lt;dc-popup trigger="hover"&gt;
-      &lt;strong&gt;Tiny&lt;/strong&gt;&lt;br&gt;
-      5 units (5%)
-    &lt;/dc-popup&gt;
-  &lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="4" label="Mini" color="#DDA0DD"&gt;
-    &lt;dc-popup trigger="hover"&gt;
-      &lt;strong&gt;Mini&lt;/strong&gt;&lt;br&gt;
-      4 units (4%)
-    &lt;/dc-popup&gt;
-  &lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="3" label="Micro" color="#F0E68C"&gt;
-    &lt;dc-popup trigger="hover"&gt;
-      &lt;strong&gt;Micro&lt;/strong&gt;&lt;br&gt;
-      3 units (3%)
-    &lt;/dc-popup&gt;
-  &lt;/dc-pie-slice&gt;
-&lt;/dc-pie-chart&gt;</code></pre>
-                <dc-pie-chart width="500" height="350" show-label="10%" show-percent="10%">
-                    <dc-title>Small Slices Use Pop-Ups</dc-title>
-                    <dc-pie-slice value="60" label="Large" fill="#4ECDC4"></dc-pie-slice>
-                    <dc-pie-slice value="20" label="Medium" fill="#FF6B6B"></dc-pie-slice>
-                    <dc-pie-slice value="8" label="Small" fill="#45B7D1">
-                        <dc-popup trigger="hover">
-                            <strong>Small</strong><br>
-                            8 units (8%)
-                        </dc-popup>
-                    </dc-pie-slice>
-                    <dc-pie-slice value="5" label="Tiny" fill="#96CEB4">
-                        <dc-popup trigger="hover">
-                            <strong>Tiny</strong><br>
-                            5 units (5%)
-                        </dc-popup>
-                    </dc-pie-slice>
-                    <dc-pie-slice value="4" label="Mini" fill="#DDA0DD">
-                        <dc-popup trigger="hover">
-                            <strong>Mini</strong><br>
-                            4 units (4%)
-                        </dc-popup>
-                    </dc-pie-slice>
-                    <dc-pie-slice value="3" label="Micro" fill="#F0E68C">
-                        <dc-popup trigger="hover">
-                            <strong>Micro</strong><br>
-                            3 units (3%)
-                        </dc-popup>
-                    </dc-pie-slice>
-                </dc-pie-chart>
-            </div>
-        </div>
-    </div>
 
     <div class="example">
         <h2>Category Label Overflow</h2>
@@ -939,6 +396,540 @@
                     <dc-bar value="150" label="Feb"></dc-bar>
                     <dc-bar value="180" label="Mar"></dc-bar>
                     <dc-bar value="90" label="Apr"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Grid Styling</h2>
+        <p>Control grid line appearance with the <code>&lt;dc-grid&gt;</code> element nested inside <code>&lt;dc-axis&gt;</code>.</p>
+
+        <div class="note">
+            <strong>Default Behavior:</strong> Value axes (left/right) show grid lines by default. Label axes (bottom/top) do not show grid lines.
+        </div>
+
+        <div class="grid">
+            <div>
+                <h3>Default Grid</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Default Grid Lines&lt;/dc-title&gt;
+  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Default Grid Lines</dc-title>
+                    <dc-bar value="120" label="Jan"></dc-bar>
+                    <dc-bar value="150" label="Feb"></dc-bar>
+                    <dc-bar value="180" label="Mar"></dc-bar>
+                    <dc-bar value="90" label="Apr"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Dashed Grid Lines</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-axis position="left"&gt;
+    &lt;dc-grid line-style="dashed"&gt;&lt;/dc-grid&gt;
+  &lt;/dc-axis&gt;
+  &lt;dc-title&gt;Dashed Grid&lt;/dc-title&gt;
+  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-axis position="left">
+                        <dc-grid line-style="dashed"></dc-grid>
+                    </dc-axis>
+                    <dc-title>Dashed Grid</dc-title>
+                    <dc-bar value="120" label="Jan"></dc-bar>
+                    <dc-bar value="150" label="Feb"></dc-bar>
+                    <dc-bar value="180" label="Mar"></dc-bar>
+                    <dc-bar value="90" label="Apr"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Dotted Grid Lines</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-axis position="left"&gt;
+    &lt;dc-grid line-style="dotted"&gt;&lt;/dc-grid&gt;
+  &lt;/dc-axis&gt;
+  &lt;dc-title&gt;Dotted Grid&lt;/dc-title&gt;
+  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-axis position="left">
+                        <dc-grid line-style="dotted"></dc-grid>
+                    </dc-axis>
+                    <dc-title>Dotted Grid</dc-title>
+                    <dc-bar value="120" label="Jan"></dc-bar>
+                    <dc-bar value="150" label="Feb"></dc-bar>
+                    <dc-bar value="180" label="Mar"></dc-bar>
+                    <dc-bar value="90" label="Apr"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Custom Grid Color</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-axis position="left"&gt;
+    &lt;dc-grid color="#b3e5fc"&gt;&lt;/dc-grid&gt;
+  &lt;/dc-axis&gt;
+  &lt;dc-title&gt;Blue Grid&lt;/dc-title&gt;
+  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-axis position="left">
+                        <dc-grid color="#b3e5fc"></dc-grid>
+                    </dc-axis>
+                    <dc-title>Blue Grid</dc-title>
+                    <dc-bar value="120" label="Jan"></dc-bar>
+                    <dc-bar value="150" label="Feb"></dc-bar>
+                    <dc-bar value="180" label="Mar"></dc-bar>
+                    <dc-bar value="90" label="Apr"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Hiding Grid Lines</h2>
+        <p>Use the <code>hidden</code> attribute on <code>&lt;dc-grid&gt;</code> to hide grid lines.</p>
+
+        <div class="grid">
+            <div>
+                <h3>No Grid Lines</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-axis position="left"&gt;
+    &lt;dc-grid hidden&gt;&lt;/dc-grid&gt;
+  &lt;/dc-axis&gt;
+  &lt;dc-title&gt;Grid Hidden&lt;/dc-title&gt;
+  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-axis position="left">
+                        <dc-grid hidden></dc-grid>
+                    </dc-axis>
+                    <dc-title>Grid Hidden</dc-title>
+                    <dc-bar value="120" label="Jan"></dc-bar>
+                    <dc-bar value="150" label="Feb"></dc-bar>
+                    <dc-bar value="180" label="Mar"></dc-bar>
+                    <dc-bar value="90" label="Apr"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Combined Grid and Title</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-axis position="left"&gt;
+    &lt;dc-grid color="#ffcdd2" line-style="dashed"&gt;&lt;/dc-grid&gt;
+    &lt;dc-title&gt;Revenue&lt;/dc-title&gt;
+  &lt;/dc-axis&gt;
+  &lt;dc-title&gt;Styled Grid with Title&lt;/dc-title&gt;
+  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-axis position="left">
+                        <dc-grid color="#ffcdd2" line-style="dashed"></dc-grid>
+                        <dc-title>Revenue</dc-title>
+                    </dc-axis>
+                    <dc-title>Styled Grid with Title</dc-title>
+                    <dc-bar value="120" label="Jan"></dc-bar>
+                    <dc-bar value="150" label="Feb"></dc-bar>
+                    <dc-bar value="180" label="Mar"></dc-bar>
+                    <dc-bar value="90" label="Apr"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Value Axis Controls</h2>
+        <p>Control the value axis range and tick marks with <code>min-value</code>, <code>max-value</code>, and <code>range-padding</code>.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Auto Range (Default)</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Auto-calculated Range&lt;/dc-title&gt;
+  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Auto-calculated Range</dc-title>
+                    <dc-bar value="120" label="Jan"></dc-bar>
+                    <dc-bar value="150" label="Feb"></dc-bar>
+                    <dc-bar value="180" label="Mar"></dc-bar>
+                    <dc-bar value="90" label="Apr"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Fixed Range (0-300)</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-axis position="left" min-value="0" max-value="300"&gt;&lt;/dc-axis&gt;
+  &lt;dc-title&gt;Fixed Range 0-300&lt;/dc-title&gt;
+  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-axis position="left" min-value="0" max-value="300"></dc-axis>
+                    <dc-title>Fixed Range 0-300</dc-title>
+                    <dc-bar value="120" label="Jan"></dc-bar>
+                    <dc-bar value="150" label="Feb"></dc-bar>
+                    <dc-bar value="180" label="Mar"></dc-bar>
+                    <dc-bar value="90" label="Apr"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Non-Zero Minimum</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-axis position="left" min-value="80"&gt;&lt;/dc-axis&gt;
+  &lt;dc-title&gt;Range Starting at 80&lt;/dc-title&gt;
+  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-axis position="left" min-value="80"></dc-axis>
+                    <dc-title>Range Starting at 80</dc-title>
+                    <dc-bar value="120" label="Jan"></dc-bar>
+                    <dc-bar value="150" label="Feb"></dc-bar>
+                    <dc-bar value="180" label="Mar"></dc-bar>
+                    <dc-bar value="90" label="Apr"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Range Padding</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-axis position="left" range-padding="20%"&gt;&lt;/dc-axis&gt;
+  &lt;dc-title&gt;20% Range Padding&lt;/dc-title&gt;
+  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-axis position="left" range-padding="20%"></dc-axis>
+                    <dc-title>20% Range Padding</dc-title>
+                    <dc-bar value="120" label="Jan"></dc-bar>
+                    <dc-bar value="150" label="Feb"></dc-bar>
+                    <dc-bar value="180" label="Mar"></dc-bar>
+                    <dc-bar value="90" label="Apr"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Tick Configuration</h2>
+        <p>Control tick marks on value axes with <code>tick-count</code>, <code>tick-interval</code>, or <code>tick-values</code>.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Default Ticks (~5)</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Default Tick Count&lt;/dc-title&gt;
+  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Default Tick Count</dc-title>
+                    <dc-bar value="120" label="Jan"></dc-bar>
+                    <dc-bar value="150" label="Feb"></dc-bar>
+                    <dc-bar value="180" label="Mar"></dc-bar>
+                    <dc-bar value="90" label="Apr"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>More Ticks (tick-count="10")</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-axis position="left" tick-count="10"&gt;&lt;/dc-axis&gt;
+  &lt;dc-title&gt;10 Ticks&lt;/dc-title&gt;
+  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-axis position="left" tick-count="10"></dc-axis>
+                    <dc-title>10 Ticks</dc-title>
+                    <dc-bar value="120" label="Jan"></dc-bar>
+                    <dc-bar value="150" label="Feb"></dc-bar>
+                    <dc-bar value="180" label="Mar"></dc-bar>
+                    <dc-bar value="90" label="Apr"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Fixed Interval (tick-interval="25")</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-axis position="left" tick-interval="25"&gt;&lt;/dc-axis&gt;
+  &lt;dc-title&gt;Ticks Every 25&lt;/dc-title&gt;
+  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-axis position="left" tick-interval="25"></dc-axis>
+                    <dc-title>Ticks Every 25</dc-title>
+                    <dc-bar value="120" label="Jan"></dc-bar>
+                    <dc-bar value="150" label="Feb"></dc-bar>
+                    <dc-bar value="180" label="Mar"></dc-bar>
+                    <dc-bar value="90" label="Apr"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Explicit Tick Values</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-axis position="left" tick-values="0,100,150,200"&gt;&lt;/dc-axis&gt;
+  &lt;dc-title&gt;Explicit Tick Positions&lt;/dc-title&gt;
+  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" label="Apr"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-axis position="left" tick-values="0,100,150,200"></dc-axis>
+                    <dc-title>Explicit Tick Positions</dc-title>
+                    <dc-bar value="120" label="Jan"></dc-bar>
+                    <dc-bar value="150" label="Feb"></dc-bar>
+                    <dc-bar value="180" label="Mar"></dc-bar>
+                    <dc-bar value="90" label="Apr"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Time Axis</h2>
+        <p>Use <code>type="time"</code> on an axis to enable time-proportional positioning. Data points are positioned based on their actual dates, not evenly spaced.</p>
+
+        <div class="note">
+            <strong>Date Formats:</strong> The <code>date-format</code> attribute specifies how to parse input dates. The <code>date-label-format</code> attribute controls how labels are displayed.
+        </div>
+
+        <div class="grid">
+            <div>
+                <h3>ISO Date Labels</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-axis position="bottom" type="time"
+      date-label-format="MMM d"&gt;&lt;/dc-axis&gt;
+  &lt;dc-title&gt;Website Traffic&lt;/dc-title&gt;
+  &lt;dc-line label="Visits" stroke="#4CAF50"&gt;
+    &lt;dc-point value="120" label="2024-01-01"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="180" label="2024-01-08"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="150" label="2024-01-15"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="220" label="2024-01-22"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="190" label="2024-01-29"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-legend position="right"&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-axis position="bottom" type="time" date-label-format="MMM d"></dc-axis>
+                    <dc-title>Website Traffic</dc-title>
+                    <dc-line label="Visits" stroke="#4CAF50">
+                        <dc-point value="120" label="2024-01-01"></dc-point>
+                        <dc-point value="180" label="2024-01-08"></dc-point>
+                        <dc-point value="150" label="2024-01-15"></dc-point>
+                        <dc-point value="220" label="2024-01-22"></dc-point>
+                        <dc-point value="190" label="2024-01-29"></dc-point>
+                    </dc-line>
+                    <dc-legend position="right"></dc-legend>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Custom Date Display Format</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-axis position="bottom" type="time"
+      date-label-format="MM/dd"&gt;&lt;/dc-axis&gt;
+  &lt;dc-title&gt;Sales Trend&lt;/dc-title&gt;
+  &lt;dc-line label="Revenue" stroke="#2196F3"&gt;
+    &lt;dc-point value="1200" label="2024-03-01"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="1800" label="2024-03-15"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="1500" label="2024-04-01"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="2200" label="2024-04-15"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="1900" label="2024-05-01"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-legend position="right"&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-axis position="bottom" type="time" date-label-format="MM/dd"></dc-axis>
+                    <dc-title>Sales Trend</dc-title>
+                    <dc-line label="Revenue" stroke="#2196F3">
+                        <dc-point value="1200" label="2024-03-01"></dc-point>
+                        <dc-point value="1800" label="2024-03-15"></dc-point>
+                        <dc-point value="1500" label="2024-04-01"></dc-point>
+                        <dc-point value="2200" label="2024-04-15"></dc-point>
+                        <dc-point value="1900" label="2024-05-01"></dc-point>
+                    </dc-line>
+                    <dc-legend position="right"></dc-legend>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Year Format for Long Ranges</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-axis position="bottom" type="time"
+      date-label-format="yyyy"&gt;&lt;/dc-axis&gt;
+  &lt;dc-title&gt;Annual Growth&lt;/dc-title&gt;
+  &lt;dc-line label="Revenue" stroke="#9C27B0"&gt;
+    &lt;dc-point value="500" label="2020-01-01"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="750" label="2021-01-01"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="1100" label="2022-01-01"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="1400" label="2023-01-01"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="1900" label="2024-01-01"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-legend position="right"&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-axis position="bottom" type="time" date-label-format="yyyy"></dc-axis>
+                    <dc-title>Annual Growth</dc-title>
+                    <dc-line label="Revenue" stroke="#9C27B0">
+                        <dc-point value="500" label="2020-01-01"></dc-point>
+                        <dc-point value="750" label="2021-01-01"></dc-point>
+                        <dc-point value="1100" label="2022-01-01"></dc-point>
+                        <dc-point value="1400" label="2023-01-01"></dc-point>
+                        <dc-point value="1900" label="2024-01-01"></dc-point>
+                    </dc-line>
+                    <dc-legend position="right"></dc-legend>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Multiple Lines with Time Axis</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-axis position="bottom" type="time"
+      date-label-format="MMM d"&gt;&lt;/dc-axis&gt;
+  &lt;dc-axis position="left"&gt;
+    &lt;dc-title&gt;Users&lt;/dc-title&gt;
+  &lt;/dc-axis&gt;
+  &lt;dc-title&gt;User Activity&lt;/dc-title&gt;
+  &lt;dc-line label="Active" stroke="#4CAF50"&gt;
+    &lt;dc-point value="100" label="2024-01-01"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="150" label="2024-01-15"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="180" label="2024-02-01"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line label="New" stroke="#FF9800"&gt;
+    &lt;dc-point value="50" label="2024-01-01"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="80" label="2024-01-15"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="65" label="2024-02-01"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-legend position="right"&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-axis position="bottom" type="time" date-label-format="MMM d"></dc-axis>
+                    <dc-axis position="left">
+                        <dc-title>Users</dc-title>
+                    </dc-axis>
+                    <dc-title>User Activity</dc-title>
+                    <dc-line label="Active" stroke="#4CAF50">
+                        <dc-point value="100" label="2024-01-01"></dc-point>
+                        <dc-point value="150" label="2024-01-15"></dc-point>
+                        <dc-point value="180" label="2024-02-01"></dc-point>
+                    </dc-line>
+                    <dc-line label="New" stroke="#FF9800">
+                        <dc-point value="50" label="2024-01-01"></dc-point>
+                        <dc-point value="80" label="2024-01-15"></dc-point>
+                        <dc-point value="65" label="2024-02-01"></dc-point>
+                    </dc-line>
+                    <dc-legend position="right"></dc-legend>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Custom Date Parsing</h2>
+        <p>Use <code>date-format</code> to specify how input dates should be parsed when they don't follow ISO 8601 format.</p>
+
+        <div class="note">
+            <strong>Format Tokens:</strong> <code>yyyy</code> (year), <code>MM</code> (month), <code>dd</code> (day), <code>HH</code> (hour), <code>mm</code> (minute), <code>MMM</code> (short month name)
+        </div>
+
+        <div class="grid">
+            <div>
+                <h3>US Date Format (MM/dd/yyyy)</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-axis position="bottom" type="time"
+      date-format="MM/dd/yyyy"
+      date-label-format="MMM d"&gt;&lt;/dc-axis&gt;
+  &lt;dc-title&gt;US Date Input&lt;/dc-title&gt;
+  &lt;dc-line label="Sales" stroke="#E91E63"&gt;
+    &lt;dc-point value="100" label="01/15/2024"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="150" label="02/20/2024"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="120" label="03/25/2024"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="180" label="04/30/2024"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-legend position="right"&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-axis position="bottom" type="time" date-format="MM/dd/yyyy" date-label-format="MMM d"></dc-axis>
+                    <dc-title>US Date Input</dc-title>
+                    <dc-line label="Sales" stroke="#E91E63">
+                        <dc-point value="100" label="01/15/2024"></dc-point>
+                        <dc-point value="150" label="02/20/2024"></dc-point>
+                        <dc-point value="120" label="03/25/2024"></dc-point>
+                        <dc-point value="180" label="04/30/2024"></dc-point>
+                    </dc-line>
+                    <dc-legend position="right"></dc-legend>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>European Date Format (dd/MM/yyyy)</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-axis position="bottom" type="time"
+      date-format="dd/MM/yyyy"
+      date-label-format="d MMM"&gt;&lt;/dc-axis&gt;
+  &lt;dc-title&gt;European Date Input&lt;/dc-title&gt;
+  &lt;dc-line label="Orders" stroke="#009688"&gt;
+    &lt;dc-point value="80" label="15/01/2024"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="120" label="20/02/2024"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="95" label="25/03/2024"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="150" label="30/04/2024"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-legend position="right"&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-axis position="bottom" type="time" date-format="dd/MM/yyyy" date-label-format="d MMM"></dc-axis>
+                    <dc-title>European Date Input</dc-title>
+                    <dc-line label="Orders" stroke="#009688">
+                        <dc-point value="80" label="15/01/2024"></dc-point>
+                        <dc-point value="120" label="20/02/2024"></dc-point>
+                        <dc-point value="95" label="25/03/2024"></dc-point>
+                        <dc-point value="150" label="30/04/2024"></dc-point>
+                    </dc-line>
+                    <dc-legend position="right"></dc-legend>
                 </dc-chart>
             </div>
         </div>
