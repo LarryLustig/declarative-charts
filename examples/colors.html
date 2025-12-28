@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Colors - Declarative Chart Library</title>
     <link rel="stylesheet" href="examples.css">
+    <style>
+        .note {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 10px 15px;
+            margin: 15px 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .note strong {
+            color: #1976d2;
+        }
+    </style>
 </head>
 <body>
     <h1>Colors</h1>
@@ -42,6 +55,10 @@
     <div class="example">
         <h2>Auto-Generated Colors</h2>
         <p>When no colors are specified, charts automatically generate distinct colors using a golden ratio algorithm:</p>
+
+        <div class="note">
+            <strong>Default behavior:</strong> Auto-generated colors are useful for quick prototyping or when you don't need brand-specific colors. The algorithm ensures good visual separation between adjacent elements.
+        </div>
 
         <div class="grid">
             <div>
@@ -205,6 +222,10 @@
         <h2>Chart-Level Color Palettes</h2>
         <p>Use <code>fill-colors</code> (bars, slices, stages) or <code>stroke-colors</code> (lines) to define color palettes. A single color applies to all elements; multiple colors cycle through elements:</p>
 
+        <div class="note">
+            <strong>When to use:</strong> Use chart-level colors when all elements should share a theme. A single color creates uniformity; multiple colors cycle through elements in order.
+        </div>
+
         <div class="grid">
             <div>
                 <h3>Single Color (All Same)</h3>
@@ -346,6 +367,10 @@
     <div class="example">
         <h2>Element-Level Colors</h2>
         <p>Set colors on individual data elements using the <code>fill</code> attribute (for bars, slices, stages) or <code>stroke</code> attribute (for lines):</p>
+
+        <div class="note">
+            <strong>When to use:</strong> Use element-level colors when you need explicit control over individual bars, slices, or lines &mdash; such as highlighting specific data points or matching brand guidelines.
+        </div>
 
         <div class="grid">
             <div>
@@ -489,6 +514,71 @@
                     <dc-pie-slice value="22" fill="#FF9800" label="Orange"></dc-pie-slice>
                     <dc-pie-slice value="15" label="Auto B"></dc-pie-slice>
                 </dc-pie-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Named Palettes (Preview)</h2>
+        <p>For reusable color definitions, use <code>&lt;dc-palette&gt;</code>. See <a href="palettes.html">Palettes</a> for full documentation.</p>
+
+        <div class="note">
+            <strong>When to use:</strong> Named palettes are ideal for consistent theming across multiple charts, label-based coloring, or value-based conditional coloring (like positive/negative values).
+        </div>
+
+        <div class="grid">
+            <div>
+                <h3>Label-Based Palette</h3>
+                <pre><code>&lt;dc-palette id="status-colors"&gt;
+  &lt;dc-fill label="Critical" fill="#fee2e2" stroke="#dc2626"&gt;&lt;/dc-fill&gt;
+  &lt;dc-fill label="Warning" fill="#fef3c7" stroke="#f59e0b"&gt;&lt;/dc-fill&gt;
+  &lt;dc-fill label="OK" fill="#d1fae5" stroke="#10b981"&gt;&lt;/dc-fill&gt;
+&lt;/dc-palette&gt;
+
+&lt;dc-chart width="500" height="300" palette="status-colors"&gt;
+  &lt;dc-title&gt;System Status&lt;/dc-title&gt;
+  &lt;dc-bar value="3" label="Critical"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="5" label="Warning"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="12" label="OK"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-palette id="status-colors">
+                    <dc-fill label="Critical" fill="#fee2e2" stroke="#dc2626"></dc-fill>
+                    <dc-fill label="Warning" fill="#fef3c7" stroke="#f59e0b"></dc-fill>
+                    <dc-fill label="OK" fill="#d1fae5" stroke="#10b981"></dc-fill>
+                </dc-palette>
+                <dc-chart width="500" height="300" palette="status-colors">
+                    <dc-title>System Status</dc-title>
+                    <dc-bar value="3" label="Critical"></dc-bar>
+                    <dc-bar value="5" label="Warning"></dc-bar>
+                    <dc-bar value="12" label="OK"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Value-Based Coloring</h3>
+                <pre><code>&lt;dc-palette id="pos-neg"&gt;
+  &lt;dc-fill min-value="-Infinity" max-value="0" fill="#ef4444"&gt;&lt;/dc-fill&gt;
+  &lt;dc-fill min-value="0" max-value="Infinity" fill="#22c55e"&gt;&lt;/dc-fill&gt;
+&lt;/dc-palette&gt;
+
+&lt;dc-chart width="500" height="300" palette="pos-neg"&gt;
+  &lt;dc-title&gt;Profit/Loss&lt;/dc-title&gt;
+  &lt;dc-bar value="50" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-20" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="80" label="Q3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-10" label="Q4"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-palette id="pos-neg">
+                    <dc-fill min-value="-Infinity" max-value="0" fill="#ef4444"></dc-fill>
+                    <dc-fill min-value="0" max-value="Infinity" fill="#22c55e"></dc-fill>
+                </dc-palette>
+                <dc-chart width="500" height="300" palette="pos-neg">
+                    <dc-title>Profit/Loss</dc-title>
+                    <dc-bar value="50" label="Q1"></dc-bar>
+                    <dc-bar value="-20" label="Q2"></dc-bar>
+                    <dc-bar value="80" label="Q3"></dc-bar>
+                    <dc-bar value="-10" label="Q4"></dc-bar>
+                </dc-chart>
             </div>
         </div>
     </div>
