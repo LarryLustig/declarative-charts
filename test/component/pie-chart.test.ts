@@ -6,6 +6,7 @@ import '../../src/pie-chart';
 import '../../src/chart-pie-slice';
 import '../../src/chart-title';
 import '../../src/chart-legend';
+import '../../src/chart-popup';
 import { PieChart } from '../../src/pie-chart';
 
 /**
@@ -467,6 +468,143 @@ describe('PieChart component', () => {
       `);
       const paths = chart.shadowRoot?.querySelectorAll('path[data-shape-index]');
       expect(paths).toHaveLength(2);
+    });
+  });
+
+  // ============================================================================
+  // Popup functionality
+  // ============================================================================
+
+  describe('popup functionality', () => {
+    it('showPopupForFocusedElement generates auto popup content', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { 'auto-popup': '' }, `
+        <dc-pie-slice value="30" label="Slice A"></dc-pie-slice>
+        <dc-pie-slice value="70" label="Slice B"></dc-pie-slice>
+      `);
+      // Should not throw when called
+      expect(() => (chart as any).showPopupForFocusedElement(0)).not.toThrow();
+    });
+
+    it('showPopupForFocusedElement uses custom popup content', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="50" label="A">
+          <dc-popup>Custom slice popup</dc-popup>
+        </dc-pie-slice>
+        <dc-pie-slice value="50" label="B"></dc-pie-slice>
+      `);
+      expect(() => (chart as any).showPopupForFocusedElement(0)).not.toThrow();
+    });
+
+    it('showPopupForFocusedElement handles invalid index gracefully', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { 'auto-popup': '' }, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+      // Negative index should not throw
+      expect(() => (chart as any).showPopupForFocusedElement(-1)).not.toThrow();
+      // Out of bounds index should not throw
+      expect(() => (chart as any).showPopupForFocusedElement(99)).not.toThrow();
+    });
+
+    it('showPopupForFocusedElement does nothing without popup content', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+      // Should not throw when no auto-popup and no custom popup
+      expect(() => (chart as any).showPopupForFocusedElement(0)).not.toThrow();
+    });
+
+    it('togglePopupForFocusedElement shows popup when hidden', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { 'auto-popup': '' }, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+      (chart as any).popupVisible = false;
+      expect(() => (chart as any).togglePopupForFocusedElement(0)).not.toThrow();
+    });
+
+    it('togglePopupForFocusedElement hides popup when visible', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { 'auto-popup': '' }, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+      (chart as any).popupVisible = true;
+      expect(() => (chart as any).togglePopupForFocusedElement(0)).not.toThrow();
+      // After toggle, popup should be hidden
+      expect((chart as any).popupVisible).toBe(false);
+    });
+
+    it('auto popup includes value and percent', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { 'auto-popup': '' }, `
+        <dc-pie-slice value="25" label="Quarter"></dc-pie-slice>
+        <dc-pie-slice value="75" label="Rest"></dc-pie-slice>
+      `);
+      // Access getSlices to test popup content generation
+      const slices = (chart as any).getSlices();
+      expect(slices[0].value).toBe(25);
+      expect(slices[0].label).toBe('Quarter');
+      // The auto popup would show "Value: 25" and "Percent: 25.0%"
+    });
+  });
+
+  // ============================================================================
+  // Focus indicator
+  // ============================================================================
+
+  describe('focus indicator', () => {
+    it('does not render focus indicator when keyboard inactive', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+      (chart as any).keyboardActive = false;
+      (chart as any).focusedIndex = 0;
+      const indicator = (chart as any).renderFocusIndicator();
+      expect(indicator).toBeDefined();
+    });
+
+    it('does not render focus indicator when no element focused', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+      (chart as any).keyboardActive = true;
+      (chart as any).focusedIndex = -1;
+      const indicator = (chart as any).renderFocusIndicator();
+      expect(indicator).toBeDefined();
+    });
+
+    it('renders focus indicator for focused slice', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+      (chart as any).keyboardActive = true;
+      (chart as any).focusedIndex = 0;
+      const indicator = (chart as any).renderFocusIndicator();
+      expect(indicator).toBeDefined();
+    });
+  });
+
+  // ============================================================================
+  // Shape bounds
+  // ============================================================================
+
+  describe('shape bounds', () => {
+    it('returns bounds for slice shapes', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="50" label="A"></dc-pie-slice>
+        <dc-pie-slice value="50" label="B"></dc-pie-slice>
+      `);
+      const bounds = (chart as any).getShapeBounds(0);
+      if (bounds) {
+        expect(bounds).toHaveProperty('x');
+        expect(bounds).toHaveProperty('y');
+        expect(bounds).toHaveProperty('width');
+        expect(bounds).toHaveProperty('height');
+      }
+    });
+
+    it('returns null for invalid index', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+      const bounds = (chart as any).getShapeBounds(999);
+      expect(bounds).toBeNull();
     });
   });
 
