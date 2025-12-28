@@ -620,4 +620,356 @@ describe('PieChart component', () => {
       expect(chart.sliceColor).toBe('#ff0000');
     });
   });
+
+  // ============================================================================
+  // Slice event handlers
+  // ============================================================================
+
+  describe('slice event handlers', () => {
+    it('handleSliceMouseEnter shows popup for slice with hover popup', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="50" label="A">
+          <dc-popup trigger="hover">Slice A popup</dc-popup>
+        </dc-pie-slice>
+        <dc-pie-slice value="50" label="B"></dc-pie-slice>
+      `);
+      const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handleSliceMouseEnter(event, 0);
+      expect((chart as any).popupVisible).toBe(true);
+    });
+
+    it('handleSliceMouseEnter shows auto popup when enabled', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { 'auto-popup': '' }, `
+        <dc-pie-slice value="50" label="A"></dc-pie-slice>
+        <dc-pie-slice value="50" label="B"></dc-pie-slice>
+      `);
+      const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handleSliceMouseEnter(event, 0);
+      expect((chart as any).popupVisible).toBe(true);
+    });
+
+    it('handleSliceMouseEnter does nothing without popup', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="50" label="A"></dc-pie-slice>
+      `);
+      const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handleSliceMouseEnter(event, 0);
+      expect((chart as any).popupVisible).toBe(false);
+    });
+
+    it('handleSliceMouseLeave hides hover popup', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { 'auto-popup': '' }, `
+        <dc-pie-slice value="50" label="A"></dc-pie-slice>
+      `);
+      const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handleSliceMouseEnter(event, 0);
+      expect((chart as any).popupVisible).toBe(true);
+
+      (chart as any).handleSliceMouseLeave(0);
+      expect((chart as any).popupVisible).toBe(false);
+    });
+
+    it('handleSliceMouseLeave keeps popup for clicked slice', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="50" label="A">
+          <dc-popup trigger="click">Click popup</dc-popup>
+        </dc-pie-slice>
+      `);
+      // Click to show popup
+      const clickEvent = new MouseEvent('click', { clientX: 100, clientY: 100 });
+      (chart as any).handleSliceClick(clickEvent, 0);
+      expect((chart as any).popupVisible).toBe(true);
+
+      // Mouse leave should not hide clicked popup
+      (chart as any).handleSliceMouseLeave(0);
+      expect((chart as any).popupVisible).toBe(true);
+    });
+
+    it('handleSliceClick shows popup for click trigger', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="50" label="A">
+          <dc-popup trigger="click">Click popup content</dc-popup>
+        </dc-pie-slice>
+      `);
+      const event = new MouseEvent('click', { clientX: 100, clientY: 100 });
+      (chart as any).handleSliceClick(event, 0);
+      expect((chart as any).popupVisible).toBe(true);
+    });
+
+    it('handleSliceClick toggles popup on same slice', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="50" label="A">
+          <dc-popup trigger="click">Click popup</dc-popup>
+        </dc-pie-slice>
+      `);
+      const event = new MouseEvent('click', { clientX: 100, clientY: 100 });
+
+      // First click shows
+      (chart as any).handleSliceClick(event, 0);
+      expect((chart as any).popupVisible).toBe(true);
+
+      // Second click hides
+      (chart as any).handleSliceClick(event, 0);
+      expect((chart as any).popupVisible).toBe(false);
+    });
+
+    it('handleSliceClick does nothing for non-click popup', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="50" label="A">
+          <dc-popup trigger="hover">Hover popup</dc-popup>
+        </dc-pie-slice>
+      `);
+      const event = new MouseEvent('click', { clientX: 100, clientY: 100 });
+      (chart as any).handleSliceClick(event, 0);
+      expect((chart as any).popupVisible).toBe(false);
+    });
+
+    it('handleSliceClick clears popup for slice without click trigger', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { 'auto-popup': '' }, `
+        <dc-pie-slice value="50" label="A"></dc-pie-slice>
+      `);
+      // First show popup via hover
+      const enterEvent = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handleSliceMouseEnter(enterEvent, 0);
+      expect((chart as any).popupVisible).toBe(true);
+
+      // Click should clear popup
+      const clickEvent = new MouseEvent('click', { clientX: 100, clientY: 100 });
+      (chart as any).handleSliceClick(clickEvent, 0);
+      expect((chart as any).popupVisible).toBe(false);
+    });
+  });
+
+  // ============================================================================
+  // Popup content generation
+  // ============================================================================
+
+  describe('popup content generation', () => {
+    it('generateSlicePopupContent includes label and value', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="50" label="Test Slice"></dc-pie-slice>
+      `);
+      const content = (chart as any).generateSlicePopupContent({ label: 'Test', value: 50 }, 100);
+      expect(content).toContain('Test');
+      expect(content).toContain('50');
+    });
+
+    it('generateSlicePopupContent includes percentage', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="25" label="Quarter"></dc-pie-slice>
+      `);
+      const content = (chart as any).generateSlicePopupContent({ label: 'Quarter', value: 25 }, 100);
+      expect(content).toContain('25.0%');
+    });
+
+    it('generateSlicePopupContent handles zero total', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="0" label="Zero"></dc-pie-slice>
+      `);
+      const content = (chart as any).generateSlicePopupContent({ label: 'Zero', value: 0 }, 0);
+      expect(content).toContain('0.0%');
+    });
+  });
+
+  // ============================================================================
+  // Auto popup
+  // ============================================================================
+
+  describe('shouldShowAutoPopup', () => {
+    it('returns chart auto-popup when element has no override', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { 'auto-popup': '' }, `
+        <dc-pie-slice value="50" label="A"></dc-pie-slice>
+      `);
+      expect((chart as any).shouldShowAutoPopup(undefined)).toBe(true);
+    });
+
+    it('element auto-popup true overrides chart setting', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="50" label="A"></dc-pie-slice>
+      `);
+      expect((chart as any).shouldShowAutoPopup(true)).toBe(true);
+    });
+
+    it('element auto-popup false overrides chart setting', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { 'auto-popup': '' }, `
+        <dc-pie-slice value="50" label="A"></dc-pie-slice>
+      `);
+      expect((chart as any).shouldShowAutoPopup(false)).toBe(false);
+    });
+  });
+
+  // ============================================================================
+  // Data summary and insights
+  // ============================================================================
+
+  describe('getDataSummary', () => {
+    it('returns slice count and total', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="30" label="A"></dc-pie-slice>
+        <dc-pie-slice value="70" label="B"></dc-pie-slice>
+      `);
+      const summary = (chart as any).getDataSummary();
+      expect(summary).toContain('2');
+      expect(summary).toContain('100');
+    });
+
+    it('returns empty string for no slices', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, ``);
+      const summary = (chart as any).getDataSummary();
+      expect(summary).toBe('');
+    });
+  });
+
+  describe('getInsights', () => {
+    it('returns empty when aria-insights is none', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { 'aria-insights': 'none' }, `
+        <dc-pie-slice value="50" label="A"></dc-pie-slice>
+        <dc-pie-slice value="50" label="B"></dc-pie-slice>
+      `);
+      const insights = (chart as any).getInsights();
+      expect(insights).toBe('');
+    });
+
+    it('returns insights for multiple slices', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="70" label="Majority"></dc-pie-slice>
+        <dc-pie-slice value="30" label="Minority"></dc-pie-slice>
+      `);
+      const insights = (chart as any).getInsights();
+      expect(insights.length).toBeGreaterThan(0);
+    });
+
+    it('returns empty for no slices', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, ``);
+      const insights = (chart as any).getInsights();
+      expect(insights).toBe('');
+    });
+  });
+
+  // ============================================================================
+  // Chart type name
+  // ============================================================================
+
+  describe('getChartTypeName', () => {
+    it('returns pie chart for regular pie', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+      const typeName = (chart as any).getChartTypeName();
+      expect(typeName).toBe('pie chart');
+    });
+
+    it('returns donut chart when inner-radius is set', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { 'inner-radius': '50' }, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+      const typeName = (chart as any).getChartTypeName();
+      expect(typeName).toBe('donut chart');
+    });
+  });
+
+  // ============================================================================
+  // Stroke width
+  // ============================================================================
+
+  describe('stroke width', () => {
+    it('uses default stroke width', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="50" label="A"></dc-pie-slice>
+        <dc-pie-slice value="50" label="B"></dc-pie-slice>
+      `);
+      const paths = chart.shadowRoot?.querySelectorAll('path');
+      expect(paths!.length).toBeGreaterThan(0);
+    });
+
+    it('supports custom stroke-width attribute', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { 'stroke-width': '4' }, `
+        <dc-pie-slice value="50" label="A"></dc-pie-slice>
+        <dc-pie-slice value="50" label="B"></dc-pie-slice>
+      `);
+      expect(chart.strokeWidth).toBe(4);
+    });
+  });
+
+  // ============================================================================
+  // Layout edge cases
+  // ============================================================================
+
+  describe('layout edge cases', () => {
+    it('calculateSliceLayout returns null for empty slices', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, ``);
+      const layout = (chart as any).calculateSliceLayout();
+      expect(layout).toBeNull();
+    });
+
+    it('calculateSliceLayout returns null for zero total value', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="0" label="A"></dc-pie-slice>
+        <dc-pie-slice value="0" label="B"></dc-pie-slice>
+      `);
+      const layout = (chart as any).calculateSliceLayout();
+      expect(layout).toBeNull();
+    });
+
+    it('getLegendItems returns empty for no slices', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, ``);
+      const items = (chart as any).getLegendItems();
+      expect(items).toEqual([]);
+    });
+  });
+
+  // ============================================================================
+  // Slice with patterns
+  // ============================================================================
+
+  describe('slice with patterns', () => {
+    it('supports pattern on slice', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="50" label="A" pattern="diagonal-lines"></dc-pie-slice>
+        <dc-pie-slice value="50" label="B"></dc-pie-slice>
+      `);
+      const layout = (chart as any).calculateSliceLayout();
+      expect(layout).not.toBeNull();
+      expect(layout.slices).toHaveLength(2);
+    });
+  });
+
+  // ============================================================================
+  // Slice stroke customization
+  // ============================================================================
+
+  describe('slice stroke customization', () => {
+    it('supports custom stroke on slice', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="50" label="A" stroke="#ff0000"></dc-pie-slice>
+        <dc-pie-slice value="50" label="B"></dc-pie-slice>
+      `);
+      const layout = (chart as any).calculateSliceLayout();
+      expect(layout).not.toBeNull();
+    });
+  });
+
+  // ============================================================================
+  // Legend items with values
+  // ============================================================================
+
+  describe('legend items', () => {
+    it('getLegendItems returns correct count', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="30" label="A"></dc-pie-slice>
+        <dc-pie-slice value="70" label="B"></dc-pie-slice>
+      `);
+      const items = (chart as any).getLegendItems();
+      expect(items).toHaveLength(2);
+    });
+
+    it('getLegendItems includes label and value', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="Test Label"></dc-pie-slice>
+      `);
+      const items = (chart as any).getLegendItems();
+      expect(items[0].label).toBe('Test Label');
+      expect(items[0].value).toBe(100);
+    });
+  });
 });
