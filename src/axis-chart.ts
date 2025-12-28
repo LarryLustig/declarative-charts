@@ -594,8 +594,9 @@ export abstract class AxisChart extends BaseChart {
 
   /**
    * Check if a label at given index should be shown based on interval.
-   * Always shows first label. Shows last label only if it won't overlap
-   * with the previous shown label.
+   * Always shows first and last labels to provide context.
+   * Intermediate labels are shown based on interval, but skipped if
+   * they would overlap with the last label.
    * @param index The label index
    * @param totalLabels Total number of labels
    * @returns True if the label should be rendered
@@ -607,18 +608,17 @@ export abstract class AxisChart extends BaseChart {
     // Always show first label
     if (index === 0) return true;
 
-    // For the last label, check if it would be too close to the previous shown label
-    if (index === totalLabels - 1) {
-      // Find the index of the last label that would be shown by interval
-      const lastShownByInterval = Math.floor((totalLabels - 2) / interval) * interval;
-      // Gap between last shown label and final label
-      const gapToEnd = index - lastShownByInterval;
-      // Only show last label if gap is at least half the interval (to avoid overlap)
-      return gapToEnd >= interval;
-    }
+    // Always show last label to provide context for the data range
+    if (index === totalLabels - 1) return true;
 
-    // Show based on interval
-    return index % interval === 0;
+    // Check if this is an interval position
+    if (index % interval !== 0) return false;
+
+    // Skip intermediate labels that are too close to the last label
+    const gapToEnd = (totalLabels - 1) - index;
+    if (gapToEnd < interval) return false;
+
+    return true;
   }
 
   /**
