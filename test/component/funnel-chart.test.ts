@@ -703,6 +703,289 @@ describe('FunnelChart component', () => {
   });
 
   // ============================================================================
+  // Stage event handlers
+  // ============================================================================
+
+  describe('stage event handlers', () => {
+    it('handleStageMouseEnter shows popup for stage with hover popup', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="1000" label="Stage A">
+          <dc-popup trigger="hover">Stage A popup</dc-popup>
+        </dc-funnel-stage>
+        <dc-funnel-stage value="500" label="Stage B"></dc-funnel-stage>
+      `);
+      const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handleStageMouseEnter(event, 0);
+      expect((chart as any).popupVisible).toBe(true);
+    });
+
+    it('handleStageMouseEnter shows auto-popup when enabled on chart', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', { 'auto-popup': '' }, `
+        <dc-funnel-stage value="1000" label="Stage A"></dc-funnel-stage>
+        <dc-funnel-stage value="500" label="Stage B"></dc-funnel-stage>
+      `);
+      const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handleStageMouseEnter(event, 0);
+      expect((chart as any).popupVisible).toBe(true);
+    });
+
+    it('handleStageMouseEnter shows auto-popup when enabled on stage', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="1000" label="Stage A" auto-popup></dc-funnel-stage>
+        <dc-funnel-stage value="500" label="Stage B"></dc-funnel-stage>
+      `);
+      const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handleStageMouseEnter(event, 0);
+      expect((chart as any).popupVisible).toBe(true);
+    });
+
+    it('handleStageMouseEnter does not show popup when click-triggered', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="1000" label="Stage A">
+          <dc-popup trigger="click">Click me</dc-popup>
+        </dc-funnel-stage>
+      `);
+      const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handleStageMouseEnter(event, 0);
+      expect((chart as any).popupVisible).toBe(false);
+    });
+
+    it('handleStageMouseEnter explicit hover popup takes precedence over auto-popup', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', { 'auto-popup': '' }, `
+        <dc-funnel-stage value="1000" label="Stage A">
+          <dc-popup trigger="hover">Custom hover popup</dc-popup>
+        </dc-funnel-stage>
+      `);
+      const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handleStageMouseEnter(event, 0);
+      expect((chart as any).popupVisible).toBe(true);
+      // Should show custom content, not auto-generated
+    });
+
+    it('handleStageMouseLeave hides hover popup', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="1000" label="Stage A">
+          <dc-popup trigger="hover">Hover popup</dc-popup>
+        </dc-funnel-stage>
+      `);
+      // First show the popup
+      const enterEvent = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handleStageMouseEnter(enterEvent, 0);
+      expect((chart as any).popupVisible).toBe(true);
+
+      // Then leave
+      (chart as any).handleStageMouseLeave(0);
+      expect((chart as any).popupVisible).toBe(false);
+    });
+
+    it('handleStageMouseLeave hides auto-popup', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', { 'auto-popup': '' }, `
+        <dc-funnel-stage value="1000" label="Stage A"></dc-funnel-stage>
+      `);
+      // Show auto-popup
+      const enterEvent = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handleStageMouseEnter(enterEvent, 0);
+      expect((chart as any).popupVisible).toBe(true);
+
+      // Leave
+      (chart as any).handleStageMouseLeave(0);
+      expect((chart as any).popupVisible).toBe(false);
+    });
+
+    it('handleStageMouseLeave does not hide clicked popup', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="1000" label="Stage A">
+          <dc-popup trigger="click">Click popup</dc-popup>
+        </dc-funnel-stage>
+      `);
+      // Simulate click to show popup
+      const clickEvent = new MouseEvent('click', { clientX: 100, clientY: 100 });
+      (chart as any).handleStageClick(clickEvent, 0);
+      expect((chart as any).popupVisible).toBe(true);
+
+      // Mouse leave should NOT hide clicked popup
+      (chart as any).handleStageMouseLeave(0);
+      expect((chart as any).popupVisible).toBe(true);
+    });
+
+    it('handleStageClick shows click-triggered popup', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="1000" label="Stage A">
+          <dc-popup trigger="click">Click popup content</dc-popup>
+        </dc-funnel-stage>
+      `);
+      const event = new MouseEvent('click', { clientX: 100, clientY: 100 });
+      (chart as any).handleStageClick(event, 0);
+      expect((chart as any).popupVisible).toBe(true);
+      expect((chart as any).clickedStageIndex).toBe(0);
+    });
+
+    it('handleStageClick toggles popup when clicking same stage', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="1000" label="Stage A">
+          <dc-popup trigger="click">Toggle me</dc-popup>
+        </dc-funnel-stage>
+      `);
+      const event = new MouseEvent('click', { clientX: 100, clientY: 100 });
+
+      // First click shows popup
+      (chart as any).handleStageClick(event, 0);
+      expect((chart as any).popupVisible).toBe(true);
+
+      // Second click hides popup
+      (chart as any).handleStageClick(event, 0);
+      expect((chart as any).popupVisible).toBe(false);
+      expect((chart as any).clickedStageIndex).toBe(-1);
+    });
+
+    it('handleStageClick on different stage switches popup', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="1000" label="Stage A">
+          <dc-popup trigger="click">Popup A</dc-popup>
+        </dc-funnel-stage>
+        <dc-funnel-stage value="500" label="Stage B">
+          <dc-popup trigger="click">Popup B</dc-popup>
+        </dc-funnel-stage>
+      `);
+      const event = new MouseEvent('click', { clientX: 100, clientY: 100 });
+
+      // Click first stage
+      (chart as any).handleStageClick(event, 0);
+      expect((chart as any).clickedStageIndex).toBe(0);
+
+      // Click second stage
+      (chart as any).handleStageClick(event, 1);
+      expect((chart as any).clickedStageIndex).toBe(1);
+      expect((chart as any).popupVisible).toBe(true);
+    });
+
+    it('handleStageClick clears popup for stage without click popup', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="1000" label="Stage A">
+          <dc-popup trigger="click">Click popup</dc-popup>
+        </dc-funnel-stage>
+        <dc-funnel-stage value="500" label="Stage B"></dc-funnel-stage>
+      `);
+      const event = new MouseEvent('click', { clientX: 100, clientY: 100 });
+
+      // Click stage with popup
+      (chart as any).handleStageClick(event, 0);
+      expect((chart as any).popupVisible).toBe(true);
+
+      // Click stage without click popup
+      (chart as any).handleStageClick(event, 1);
+      expect((chart as any).popupVisible).toBe(false);
+      expect((chart as any).clickedStageIndex).toBe(-1);
+    });
+
+    it('handleStageClick does not activate auto-popup on click', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', { 'auto-popup': '' }, `
+        <dc-funnel-stage value="1000" label="Stage A"></dc-funnel-stage>
+      `);
+      const event = new MouseEvent('click', { clientX: 100, clientY: 100 });
+
+      // Click should not show auto-popup (only hover does)
+      (chart as any).handleStageClick(event, 0);
+      // Auto-popup stages don't respond to click
+      expect((chart as any).clickedStageIndex).toBe(-1);
+    });
+  });
+
+  // ============================================================================
+  // shouldShowAutoPopup
+  // ============================================================================
+
+  describe('shouldShowAutoPopup', () => {
+    it('returns chart auto-popup value when stage value is undefined', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', { 'auto-popup': '' }, `
+        <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
+      `);
+      expect((chart as any).shouldShowAutoPopup(undefined)).toBe(true);
+    });
+
+    it('returns false when both chart and stage auto-popup are undefined', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
+      `);
+      expect((chart as any).shouldShowAutoPopup(undefined)).toBe(false);
+    });
+
+    it('stage-level true overrides chart-level false', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
+      `);
+      expect((chart as any).shouldShowAutoPopup(true)).toBe(true);
+    });
+
+    it('stage-level false overrides chart-level true', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', { 'auto-popup': '' }, `
+        <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
+      `);
+      expect((chart as any).shouldShowAutoPopup(false)).toBe(false);
+    });
+  });
+
+  // ============================================================================
+  // generateStagePopupContent
+  // ============================================================================
+
+  describe('generateStagePopupContent', () => {
+    it('generates popup content with label and value', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
+      `);
+      const content = (chart as any).generateStagePopupContent(
+        { label: 'Visitors', value: 1000 },
+        1000
+      );
+      expect(content).toContain('Visitors');
+      expect(content).toContain('1000');
+    });
+
+    it('includes percentage in popup content', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="1000" label="Start"></dc-funnel-stage>
+        <dc-funnel-stage value="500" label="Half"></dc-funnel-stage>
+      `);
+      const content = (chart as any).generateStagePopupContent(
+        { label: 'Half', value: 500 },
+        1000
+      );
+      expect(content).toContain('50.0%');
+    });
+
+    it('handles zero total value', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
+        <dc-funnel-stage value="0" label="Zero"></dc-funnel-stage>
+      `);
+      const content = (chart as any).generateStagePopupContent(
+        { label: 'Zero', value: 0 },
+        0
+      );
+      expect(content).toContain('0.0%');
+    });
+  });
+
+  // ============================================================================
+  // Auto-popup content in mouse events
+  // ============================================================================
+
+  describe('auto-popup content', () => {
+    it('auto-popup uses first stage value as total', async () => {
+      chart = await fixture<FunnelChart>('dc-funnel-chart', { 'auto-popup': '' }, `
+        <dc-funnel-stage value="1000" label="Start"></dc-funnel-stage>
+        <dc-funnel-stage value="500" label="Half"></dc-funnel-stage>
+        <dc-funnel-stage value="100" label="End"></dc-funnel-stage>
+      `);
+      // Show popup for middle stage
+      const event = new MouseEvent('mouseenter', { clientX: 100, clientY: 100 });
+      (chart as any).handleStageMouseEnter(event, 1);
+      expect((chart as any).popupVisible).toBe(true);
+    });
+
+  });
+
+  // ============================================================================
   // Edge cases
   // ============================================================================
 
