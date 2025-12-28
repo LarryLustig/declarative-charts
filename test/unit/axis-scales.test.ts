@@ -63,6 +63,45 @@ class TestAxisChart extends AxisChart {
     return this.getNiceRange();
   }
 
+  public testCalculateAutoLabelLines(): number {
+    return this.calculateAutoLabelLines();
+  }
+
+  public testCalculateAutoLabelInterval(): number {
+    return this.calculateAutoLabelInterval();
+  }
+
+  public testGetAxisLabelPadding(): { top: number; right: number; bottom: number; left: number } {
+    return this.getAxisLabelPadding();
+  }
+
+  // Allow setting width for testing
+  public setDimensions(w: number, h: number): void {
+    this.width = w;
+    this.height = h;
+  }
+
+  // Allow setting labels for testing
+  public setLabels(labels: string[]): void {
+    this.testLabels = labels;
+  }
+
+  // Override measureText to return predictable values for testing
+  protected override measureText(text: string, _fontSize: number): number {
+    // Simple approximation: 8 pixels per character
+    return text.length * 8;
+  }
+
+  // Override getChartPadding to return predictable values without DOM
+  protected override getChartPadding(): { top: number; right: number; bottom: number; left: number } {
+    return { top: 50, right: 20, bottom: 50, left: 80 };
+  }
+
+  // Override getAxisTitleDimensions to return null (no axis titles in unit tests)
+  protected override getAxisTitleDimensions(_position: string): { text: string; width: number; height: number } | null {
+    return null;
+  }
+
   // Override log to be a no-op in tests
   protected override log(): void {
     // Silent in tests
@@ -389,5 +428,160 @@ describe('ValueRange structure', () => {
     const chart4 = new TestAxisChart({ maxValue: 0, minValue: 0 });
     const range4 = chart4.testGetNiceRange();
     expect(range4.hasPositives).toBe(false); // 0 is not positive
+  });
+});
+
+// ============================================================================
+// calculateAutoLabelLines
+// ============================================================================
+
+describe('calculateAutoLabelLines', () => {
+  it('returns 1 for empty labels', () => {
+    const chart = new TestAxisChart({ labels: [] });
+    chart.setDimensions(600, 400);
+    expect(chart.testCalculateAutoLabelLines()).toBe(1);
+  });
+
+  it('returns 1 when labels fit comfortably', () => {
+    // 5 labels, each ~40px (5 chars * 8px), 600px chart with ~100px padding
+    // Chart width ~500px, space per label = 100px, fits in 1 line
+    const chart = new TestAxisChart({ labels: ['Label', 'Label', 'Label', 'Label', 'Label'] });
+    chart.setDimensions(600, 400);
+    expect(chart.testCalculateAutoLabelLines()).toBe(1);
+  });
+
+  it('returns 2 when labels need two lines', () => {
+    // 10 labels with longer names, less space per label
+    const chart = new TestAxisChart({
+      labels: ['VeryLongLabel', 'VeryLongLabel', 'VeryLongLabel', 'VeryLongLabel', 'VeryLongLabel',
+               'VeryLongLabel', 'VeryLongLabel', 'VeryLongLabel', 'VeryLongLabel', 'VeryLongLabel']
+    });
+    chart.setDimensions(400, 400);  // Narrower chart
+    const lines = chart.testCalculateAutoLabelLines();
+    expect(lines).toBeGreaterThanOrEqual(2);
+  });
+
+  it('caps at 4 lines for very crowded labels', () => {
+    // Many very long labels in a narrow chart
+    const chart = new TestAxisChart({
+      labels: Array(20).fill('VeryVeryLongLabelName')
+    });
+    chart.setDimensions(300, 400);
+    expect(chart.testCalculateAutoLabelLines()).toBe(4);
+  });
+
+  it('handles single label', () => {
+    const chart = new TestAxisChart({ labels: ['Single'] });
+    chart.setDimensions(600, 400);
+    expect(chart.testCalculateAutoLabelLines()).toBe(1);
+  });
+});
+
+// ============================================================================
+// calculateAutoLabelInterval
+// ============================================================================
+
+describe('calculateAutoLabelInterval', () => {
+  it('returns 1 for empty labels', () => {
+    const chart = new TestAxisChart({ labels: [] });
+    chart.setDimensions(600, 400);
+    expect(chart.testCalculateAutoLabelInterval()).toBe(1);
+  });
+
+  it('returns 1 when labels fit without skipping', () => {
+    // Few short labels with plenty of space
+    const chart = new TestAxisChart({ labels: ['A', 'B', 'C', 'D', 'E'] });
+    chart.setDimensions(600, 400);
+    expect(chart.testCalculateAutoLabelInterval()).toBe(1);
+  });
+
+  it('returns higher interval when labels are crowded', () => {
+    // Many labels with moderate length
+    const chart = new TestAxisChart({
+      labels: Array(20).fill('LabelText')
+    });
+    chart.setDimensions(400, 400);
+    const interval = chart.testCalculateAutoLabelInterval();
+    expect(interval).toBeGreaterThan(1);
+  });
+
+  it('returns appropriate interval for very crowded labels', () => {
+    // Many long labels in narrow chart
+    const chart = new TestAxisChart({
+      labels: Array(30).fill('VeryLongLabel')
+    });
+    chart.setDimensions(300, 400);
+    const interval = chart.testCalculateAutoLabelInterval();
+    expect(interval).toBeGreaterThanOrEqual(3);
+  });
+
+  it('handles single label', () => {
+    const chart = new TestAxisChart({ labels: ['Single'] });
+    chart.setDimensions(600, 400);
+    expect(chart.testCalculateAutoLabelInterval()).toBe(1);
+  });
+});
+
+// ============================================================================
+// getAxisLabelPadding
+// ============================================================================
+
+describe('getAxisLabelPadding', () => {
+  it('returns default padding for basic chart', () => {
+    const chart = new TestAxisChart({ maxValue: 100 });
+    chart.setDimensions(600, 400);
+    const padding = chart.testGetAxisLabelPadding();
+
+    // Should have some padding on all sides
+    expect(padding.top).toBeGreaterThan(0);
+    expect(padding.right).toBeGreaterThanOrEqual(0);
+    expect(padding.bottom).toBeGreaterThan(0);
+    expect(padding.left).toBeGreaterThan(0);
+  });
+
+  it('left padding accounts for value width', () => {
+    // Larger values need more space for axis labels
+    const chart1 = new TestAxisChart({ maxValue: 100 });
+    chart1.setDimensions(600, 400);
+    const padding1 = chart1.testGetAxisLabelPadding();
+
+    const chart2 = new TestAxisChart({ maxValue: 1000000 });
+    chart2.setDimensions(600, 400);
+    const padding2 = chart2.testGetAxisLabelPadding();
+
+    // Larger numbers need more left padding for Y-axis labels
+    expect(padding2.left).toBeGreaterThan(padding1.left);
+  });
+
+  it('considers negative values for padding', () => {
+    // Chart with negative values needs space for minus sign
+    const chart = new TestAxisChart({ maxValue: 100, minValue: -100 });
+    chart.setDimensions(600, 400);
+    const padding = chart.testGetAxisLabelPadding();
+
+    // Should account for "-100" being wider than "100"
+    expect(padding.left).toBeGreaterThan(0);
+  });
+
+  it('has consistent bottom padding for category labels', () => {
+    const chart1 = new TestAxisChart({ labels: ['A', 'B', 'C'] });
+    chart1.setDimensions(600, 400);
+    const padding1 = chart1.testGetAxisLabelPadding();
+
+    const chart2 = new TestAxisChart({ labels: ['Long', 'Labels', 'Here'] });
+    chart2.setDimensions(600, 400);
+    const padding2 = chart2.testGetAxisLabelPadding();
+
+    // Bottom padding is fixed height for labels (25px default)
+    expect(padding1.bottom).toBe(padding2.bottom);
+  });
+
+  it('includes fixed value label height in top padding', () => {
+    const chart = new TestAxisChart({ maxValue: 50 });
+    chart.setDimensions(600, 400);
+    const padding = chart.testGetAxisLabelPadding();
+
+    // Top padding includes space for value labels above bars (25px default)
+    expect(padding.top).toBe(25);
   });
 });
