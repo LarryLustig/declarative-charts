@@ -1294,10 +1294,17 @@ export class Chart extends AxisChart {
       return svg``;
     }
 
+    const isHorizontal = this.orientation.startsWith('horizontal');
+    const isReverse = this.orientation.includes('reverse');
+
+    // Get value axis config for grid lines, labels, and range calculation
+    const valueAxisPosition = isHorizontal ? 'bottom' : 'left';
+    const valueAxisConfig = this.getAxisConfig(valueAxisPosition);
+
     const padding = this.getChartPadding();
     const chartWidth = this.width - padding.left - padding.right;
     const chartHeight = this.height - padding.top - padding.bottom;
-    const range = this.getNiceRange();
+    const range = this.getNiceRange(valueAxisConfig);
     const allValues = this.getAllValues();
     const total = allValues.reduce((sum, v) => sum + Math.abs(v), 0);  // Use absolute values for total
 
@@ -1308,9 +1315,6 @@ export class Chart extends AxisChart {
     this.log('info', 'data.range', `Value range [${range.min}, ${range.max}]`, range);
     this.log('info', 'layout.chartArea', `chartWidth=${chartWidth.toFixed(1)}, chartHeight=${chartHeight.toFixed(1)}`, { width: chartWidth, height: chartHeight });
 
-    const isHorizontal = this.orientation.startsWith('horizontal');
-    const isReverse = this.orientation.includes('reverse');
-
     // Collect value labels to render them last (on top of lines)
     const deferredLabels: DeferredLabel[] = [];
 
@@ -1318,7 +1322,7 @@ export class Chart extends AxisChart {
       ${this.renderDefs()}
 
       <!-- Grid lines -->
-      ${this.renderGridLines(padding, chartWidth, chartHeight, range, isHorizontal ? 'horizontal' : 'vertical')}
+      ${this.renderGridLines(padding, chartWidth, chartHeight, range, isHorizontal ? 'horizontal' : 'vertical', valueAxisConfig)}
 
       <!-- Bars -->
       ${bars.length > 0 ? this.renderBars(bars, structure, padding, chartWidth, chartHeight, range, total, deferredLabels) : ''}
@@ -1348,7 +1352,7 @@ export class Chart extends AxisChart {
         padding, chartWidth, chartHeight, range,
         isHorizontal ? 'horizontal' : 'vertical',
         isReverse,
-        this.getAxisElement(isHorizontal ? 'bottom' : 'left')?.valueFormat
+        valueAxisConfig
       )}
 
       <!-- Category axis labels -->

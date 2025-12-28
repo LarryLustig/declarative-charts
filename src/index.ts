@@ -18,10 +18,12 @@
 export { BaseChart, booleanConverter, showConditionConverter } from './base-chart.js';
 export type { ShowCondition } from './base-chart.js';
 export { AxisChart } from './axis-chart.js';
-export type { AxisConfig } from './axis-chart.js';
+export type { AxisConfig, TickConfig, TimeScale } from './axis-chart.js';
 export { BaseChartElement } from './base-chart-element.js';
 export { ChartAxis } from './chart-axis.js';
-export type { AxisPosition, AxisName, AxisPositionOrName } from './chart-axis.js';
+export type { AxisPosition, AxisName, AxisPositionOrName, AxisType } from './chart-axis.js';
+export { ChartGrid } from './chart-grid.js';
+export type { GridConfig, GridLineStyle } from './chart-grid.js';
 
 // Export all chart components
 export { Chart } from './chart.js';
@@ -95,9 +97,25 @@ export type { FormatPreset, FormatType, ParsedFormat, FormatterConfig } from './
 
 // Export chart calculation utilities (pure functions)
 export {
+  niceNumber,
+  calculateNiceTicks,
+  calculateTicksByInterval,
+  calculateTicks,
   calculateLabelLines,
   calculateLabelInterval,
   calculatePopupPosition,
   showPopupAtBounds
 } from './chart-utils.js';
 export type { ShapeBounds, ClientRect } from './chart-utils.js';
+
+// Export date utilities (pure functions)
+export {
+  parseDate,
+  formatDate,
+  getTimeRange,
+  dateToPosition,
+  selectTickInterval,
+  calculateTimeTicks,
+  parseDateLabels
+} from './date-utils.js';
+export type { ParsedDates } from './date-utils.js';

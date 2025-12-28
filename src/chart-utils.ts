@@ -3,6 +3,145 @@
  * These functions have no DOM dependencies and are easily testable.
  */
 
+import type { TickConfig } from './axis-chart.js';
+
+// ============================================================================
+// Nice Number and Tick Calculations
+// ============================================================================
+
+/**
+ * Calculate a "nice" number for axis scaling.
+ * Nice numbers are 1, 2, 5, or 10 multiplied by a power of 10.
+ *
+ * @param value The raw value to round
+ * @param round If true, round to nearest nice number; if false, ceiling
+ * @returns A nice number >= value (or nearest if round=true)
+ */
+export function niceNumber(value: number, round: boolean = false): number {
+  if (value === 0) return 0;
+
+  const exponent = Math.floor(Math.log10(value));
+  const fraction = value / Math.pow(10, exponent);
+
+  let niceFraction: number;
+  if (round) {
+    // Round to nearest nice number
+    if (fraction < 1.5) niceFraction = 1;
+    else if (fraction < 3) niceFraction = 2;
+    else if (fraction < 7) niceFraction = 5;
+    else niceFraction = 10;
+  } else {
+    // Ceiling to next nice number
+    if (fraction <= 1) niceFraction = 1;
+    else if (fraction <= 2) niceFraction = 2;
+    else if (fraction <= 5) niceFraction = 5;
+    else niceFraction = 10;
+  }
+
+  return niceFraction * Math.pow(10, exponent);
+}
+
+/**
+ * Calculate nice tick values for an axis range.
+ * Uses the nice number algorithm to produce clean, readable tick values.
+ *
+ * @param min Minimum value
+ * @param max Maximum value
+ * @param targetCount Approximate number of ticks desired (default: 5)
+ * @returns Array of tick values
+ */
+export function calculateNiceTicks(min: number, max: number, targetCount: number = 5): number[] {
+  if (min >= max) return [min];
+  if (targetCount < 1) targetCount = 1;
+
+  const range = max - min;
+  const roughInterval = range / targetCount;
+  const niceInterval = niceNumber(roughInterval, true);
+
+  // Round min down and max up to nice interval multiples
+  const niceMin = Math.floor(min / niceInterval) * niceInterval;
+  const niceMax = Math.ceil(max / niceInterval) * niceInterval;
+
+  const ticks: number[] = [];
+  for (let v = niceMin; v <= niceMax + niceInterval * 0.5; v += niceInterval) {
+    // Round to avoid floating point precision issues
+    const roundedV = Math.round(v / niceInterval) * niceInterval;
+    if (roundedV >= min && roundedV <= max) {
+      ticks.push(roundedV);
+    }
+  }
+
+  // Ensure we have at least the endpoints
+  if (ticks.length === 0) {
+    return [min, max];
+  }
+
+  return ticks;
+}
+
+/**
+ * Calculate tick values using a specific interval.
+ *
+ * @param min Minimum value
+ * @param max Maximum value
+ * @param interval Exact interval between ticks
+ * @returns Array of tick values at the specified interval
+ */
+export function calculateTicksByInterval(min: number, max: number, interval: number): number[] {
+  if (interval <= 0 || min >= max) return [min];
+
+  // Start at a nice multiple of the interval at or below min
+  const startValue = Math.floor(min / interval) * interval;
+
+  const ticks: number[] = [];
+  for (let v = startValue; v <= max + interval * 0.001; v += interval) {
+    // Round to avoid floating point precision issues
+    const roundedV = Math.round(v / interval) * interval;
+    if (roundedV >= min && roundedV <= max) {
+      ticks.push(roundedV);
+    }
+  }
+
+  // Ensure we have at least one tick
+  if (ticks.length === 0) {
+    return [min];
+  }
+
+  return ticks;
+}
+
+/**
+ * Calculate tick values based on tick configuration.
+ * Priority: tick-values > tick-interval > tick-count > default (5 divisions)
+ *
+ * @param min Minimum value
+ * @param max Maximum value
+ * @param config Optional tick configuration
+ * @returns Array of tick values
+ */
+export function calculateTicks(
+  min: number,
+  max: number,
+  config?: TickConfig
+): number[] {
+  // Priority 1: Explicit tick values
+  if (config?.values && config.values.length > 0) {
+    // Filter to only values within range and sort
+    return config.values
+      .filter(v => v >= min && v <= max)
+      .sort((a, b) => a - b);
+  }
+
+  // Priority 2: Exact interval
+  if (config?.interval !== undefined && config.interval > 0) {
+    return calculateTicksByInterval(min, max, config.interval);
+  }
+
+  // Priority 3: Tick count (or default to 5)
+  const count = config?.count ?? 5;
+  return calculateNiceTicks(min, max, count);
+}
+
 // ============================================================================
 // Label Layout Calculations
 // ============================================================================

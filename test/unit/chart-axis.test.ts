@@ -84,6 +84,214 @@ describe('ChartAxis properties', () => {
       expect(axis.valueFormat).toBe('compact 1');
     });
   });
+
+  describe('Phase 1 value axis properties', () => {
+    it('type defaults to undefined', () => {
+      expect(axis.type).toBeUndefined();
+    });
+
+    it('can set type to value, label, or time', () => {
+      axis.type = 'value';
+      expect(axis.type).toBe('value');
+
+      axis.type = 'label';
+      expect(axis.type).toBe('label');
+
+      axis.type = 'time';
+      expect(axis.type).toBe('time');
+    });
+
+    it('minValue defaults to undefined', () => {
+      expect(axis.minValue).toBeUndefined();
+    });
+
+    it('maxValue defaults to undefined', () => {
+      expect(axis.maxValue).toBeUndefined();
+    });
+
+    it('rangePadding defaults to undefined', () => {
+      expect(axis.rangePadding).toBeUndefined();
+    });
+
+    it('tickCount defaults to undefined', () => {
+      expect(axis.tickCount).toBeUndefined();
+    });
+
+    it('tickInterval defaults to undefined', () => {
+      expect(axis.tickInterval).toBeUndefined();
+    });
+
+    it('tickValues defaults to undefined', () => {
+      expect(axis.tickValues).toBeUndefined();
+    });
+
+    it('dateFormat defaults to undefined', () => {
+      expect(axis.dateFormat).toBeUndefined();
+    });
+
+    it('dateLabelFormat defaults to undefined', () => {
+      expect(axis.dateLabelFormat).toBeUndefined();
+    });
+  });
+});
+
+// ============================================================================
+// Phase 1 getter methods
+// ============================================================================
+
+describe('Phase 1 getter methods', () => {
+  let axis: ChartAxis;
+
+  beforeEach(() => {
+    axis = new ChartAxis();
+  });
+
+  describe('getTypeValue', () => {
+    it('returns undefined when type is not set', () => {
+      expect(axis.getTypeValue()).toBeUndefined();
+    });
+
+    it('returns the type when set', () => {
+      axis.type = 'value';
+      expect(axis.getTypeValue()).toBe('value');
+
+      axis.type = 'time';
+      expect(axis.getTypeValue()).toBe('time');
+    });
+  });
+
+  describe('getMinValue', () => {
+    it('returns undefined when minValue is not set', () => {
+      expect(axis.getMinValue()).toBeUndefined();
+    });
+
+    it('returns "auto" when minValue is "auto"', () => {
+      axis.minValue = 'auto';
+      expect(axis.getMinValue()).toBe('auto');
+    });
+
+    it('parses numeric string to number', () => {
+      axis.minValue = '10';
+      expect(axis.getMinValue()).toBe(10);
+    });
+
+    it('parses negative numbers', () => {
+      axis.minValue = '-50';
+      expect(axis.getMinValue()).toBe(-50);
+    });
+
+    it('parses decimal numbers', () => {
+      axis.minValue = '0.5';
+      expect(axis.getMinValue()).toBe(0.5);
+    });
+
+    it('returns undefined for invalid strings', () => {
+      axis.minValue = 'invalid';
+      expect(axis.getMinValue()).toBeUndefined();
+    });
+  });
+
+  describe('getMaxValue', () => {
+    it('returns undefined when maxValue is not set', () => {
+      expect(axis.getMaxValue()).toBeUndefined();
+    });
+
+    it('returns "auto" when maxValue is "auto"', () => {
+      axis.maxValue = 'auto';
+      expect(axis.getMaxValue()).toBe('auto');
+    });
+
+    it('parses numeric string to number', () => {
+      axis.maxValue = '100';
+      expect(axis.getMaxValue()).toBe(100);
+    });
+  });
+
+  describe('getRangePadding', () => {
+    it('returns undefined when rangePadding is not set', () => {
+      expect(axis.getRangePadding()).toBeUndefined();
+    });
+
+    it('parses percentage to decimal', () => {
+      axis.rangePadding = '10%';
+      expect(axis.getRangePadding()).toBe(0.1);
+    });
+
+    it('parses decimal value directly', () => {
+      axis.rangePadding = '0.15';
+      expect(axis.getRangePadding()).toBe(0.15);
+    });
+
+    it('returns undefined for invalid strings', () => {
+      axis.rangePadding = 'invalid';
+      expect(axis.getRangePadding()).toBeUndefined();
+    });
+  });
+
+  describe('getTickCount', () => {
+    it('returns undefined when tickCount is not set', () => {
+      expect(axis.getTickCount()).toBeUndefined();
+    });
+
+    it('returns the value when set', () => {
+      axis.tickCount = 10;
+      expect(axis.getTickCount()).toBe(10);
+    });
+  });
+
+  describe('getTickInterval', () => {
+    it('returns undefined when tickInterval is not set', () => {
+      expect(axis.getTickInterval()).toBeUndefined();
+    });
+
+    it('returns the value when set', () => {
+      axis.tickInterval = 25;
+      expect(axis.getTickInterval()).toBe(25);
+    });
+  });
+
+  describe('getTickValues', () => {
+    it('returns undefined when tickValues is not set', () => {
+      expect(axis.getTickValues()).toBeUndefined();
+    });
+
+    it('parses comma-separated values', () => {
+      axis.tickValues = '0, 25, 50, 75, 100';
+      expect(axis.getTickValues()).toEqual([0, 25, 50, 75, 100]);
+    });
+
+    it('ignores invalid values in list', () => {
+      axis.tickValues = '0, invalid, 50, , 100';
+      expect(axis.getTickValues()).toEqual([0, 50, 100]);
+    });
+
+    it('returns undefined for empty or invalid string', () => {
+      axis.tickValues = 'invalid';
+      expect(axis.getTickValues()).toBeUndefined();
+    });
+  });
+
+  describe('getDateFormat', () => {
+    it('returns undefined when dateFormat is not set', () => {
+      expect(axis.getDateFormat()).toBeUndefined();
+    });
+
+    it('returns the value when set', () => {
+      axis.dateFormat = 'yyyy-MM-dd';
+      expect(axis.getDateFormat()).toBe('yyyy-MM-dd');
+    });
+  });
+
+  describe('getDateLabelFormat', () => {
+    it('returns undefined when dateLabelFormat is not set', () => {
+      expect(axis.getDateLabelFormat()).toBeUndefined();
+    });
+
+    it('returns the value when set', () => {
+      axis.dateLabelFormat = 'MMM d';
+      expect(axis.getDateLabelFormat()).toBe('MMM d');
+    });
+  });
 });
 
 // ============================================================================

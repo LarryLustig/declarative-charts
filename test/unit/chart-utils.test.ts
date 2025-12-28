@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import {
+  niceNumber,
+  calculateNiceTicks,
+  calculateTicksByInterval,
+  calculateTicks,
   calculateLabelLines,
   calculateLabelInterval,
   calculatePopupPosition,
@@ -12,6 +16,237 @@ import {
  * Unit tests for chart utility functions.
  * These are pure functions with no DOM dependencies.
  */
+
+// ============================================================================
+// Nice Number and Tick Calculations
+// ============================================================================
+
+describe('niceNumber', () => {
+  it('returns 0 for 0', () => {
+    expect(niceNumber(0)).toBe(0);
+    expect(niceNumber(0, true)).toBe(0);
+  });
+
+  describe('ceiling mode (round=false)', () => {
+    it('ceilings to 1 for values <= 1', () => {
+      expect(niceNumber(0.5)).toBe(0.5);  // 0.5 * 10^0 = 0.5
+      expect(niceNumber(0.8)).toBe(1);    // ceil(0.8) -> 1
+      expect(niceNumber(1)).toBe(1);
+    });
+
+    it('ceilings to 2 for values <= 2', () => {
+      expect(niceNumber(1.5)).toBe(2);
+      expect(niceNumber(2)).toBe(2);
+    });
+
+    it('ceilings to 5 for values <= 5', () => {
+      expect(niceNumber(3)).toBe(5);
+      expect(niceNumber(4)).toBe(5);
+      expect(niceNumber(5)).toBe(5);
+    });
+
+    it('ceilings to 10 for values <= 10', () => {
+      expect(niceNumber(6)).toBe(10);
+      expect(niceNumber(8)).toBe(10);
+      expect(niceNumber(10)).toBe(10);
+    });
+
+    it('scales correctly for larger values', () => {
+      expect(niceNumber(15)).toBe(20);    // 1.5 -> 2, *10 = 20
+      expect(niceNumber(45)).toBe(50);    // 4.5 -> 5, *10 = 50
+      expect(niceNumber(80)).toBe(100);   // 8 -> 10, *10 = 100
+      expect(niceNumber(350)).toBe(500);  // 3.5 -> 5, *100 = 500
+    });
+
+    it('handles fractional values', () => {
+      expect(niceNumber(0.015)).toBe(0.02);  // 1.5 -> 2, *0.01 = 0.02
+      expect(niceNumber(0.0045)).toBe(0.005);  // 4.5 -> 5, *0.001 = 0.005
+    });
+  });
+
+  describe('rounding mode (round=true)', () => {
+    it('rounds to 1 for values < 1.5', () => {
+      expect(niceNumber(1, true)).toBe(1);
+      expect(niceNumber(1.4, true)).toBe(1);
+    });
+
+    it('rounds to 2 for values >= 1.5 and < 3', () => {
+      expect(niceNumber(1.5, true)).toBe(2);
+      expect(niceNumber(2.9, true)).toBe(2);
+    });
+
+    it('rounds to 5 for values >= 3 and < 7', () => {
+      expect(niceNumber(3, true)).toBe(5);
+      expect(niceNumber(6.9, true)).toBe(5);
+    });
+
+    it('rounds to 10 for values >= 7', () => {
+      expect(niceNumber(7, true)).toBe(10);
+      expect(niceNumber(9, true)).toBe(10);
+    });
+
+    it('scales correctly for larger values', () => {
+      expect(niceNumber(18, true)).toBe(20);   // 1.8 -> 2, *10 = 20
+      expect(niceNumber(35, true)).toBe(50);   // 3.5 -> 5, *10 = 50
+      expect(niceNumber(75, true)).toBe(100);  // 7.5 -> 10, *10 = 100
+    });
+  });
+});
+
+describe('calculateNiceTicks', () => {
+  it('returns single value for equal min/max', () => {
+    expect(calculateNiceTicks(5, 5)).toEqual([5]);
+  });
+
+  it('returns single value for reversed range', () => {
+    expect(calculateNiceTicks(10, 5)).toEqual([10]);
+  });
+
+  it('generates ticks with nice intervals', () => {
+    const ticks = calculateNiceTicks(0, 100, 5);
+    expect(ticks).toEqual([0, 20, 40, 60, 80, 100]);
+  });
+
+  it('respects target count approximately', () => {
+    const ticks = calculateNiceTicks(0, 100, 4);
+    // Should generate roughly 4-5 ticks with nice intervals
+    expect(ticks.length).toBeGreaterThanOrEqual(3);
+    expect(ticks.length).toBeLessThanOrEqual(6);
+  });
+
+  it('handles ranges not starting at zero', () => {
+    const ticks = calculateNiceTicks(50, 150, 5);
+    expect(ticks[0]).toBeGreaterThanOrEqual(50);
+    expect(ticks[ticks.length - 1]).toBeLessThanOrEqual(150);
+    ticks.forEach(t => {
+      expect(t).toBeGreaterThanOrEqual(50);
+      expect(t).toBeLessThanOrEqual(150);
+    });
+  });
+
+  it('handles negative ranges', () => {
+    const ticks = calculateNiceTicks(-100, -20, 4);
+    expect(ticks[0]).toBeGreaterThanOrEqual(-100);
+    expect(ticks[ticks.length - 1]).toBeLessThanOrEqual(-20);
+  });
+
+  it('handles mixed positive/negative ranges', () => {
+    const ticks = calculateNiceTicks(-50, 50, 5);
+    expect(ticks[0]).toBeGreaterThanOrEqual(-50);
+    expect(ticks[ticks.length - 1]).toBeLessThanOrEqual(50);
+    // Should include zero or values around it
+    expect(ticks.some(t => t === 0 || Math.abs(t) < 20)).toBe(true);
+  });
+
+  it('handles small ranges', () => {
+    const ticks = calculateNiceTicks(0, 1, 5);
+    expect(ticks.length).toBeGreaterThan(0);
+    expect(ticks[0]).toBeGreaterThanOrEqual(0);
+    expect(ticks[ticks.length - 1]).toBeLessThanOrEqual(1);
+  });
+
+  it('handles target count of 1', () => {
+    const ticks = calculateNiceTicks(0, 100, 1);
+    expect(ticks.length).toBeGreaterThan(0);
+  });
+});
+
+describe('calculateTicksByInterval', () => {
+  it('returns single value for zero interval', () => {
+    expect(calculateTicksByInterval(0, 100, 0)).toEqual([0]);
+  });
+
+  it('returns single value for negative interval', () => {
+    expect(calculateTicksByInterval(0, 100, -10)).toEqual([0]);
+  });
+
+  it('returns single value for reversed range', () => {
+    expect(calculateTicksByInterval(100, 0, 10)).toEqual([100]);
+  });
+
+  it('generates ticks at exact intervals', () => {
+    const ticks = calculateTicksByInterval(0, 100, 25);
+    expect(ticks).toEqual([0, 25, 50, 75, 100]);
+  });
+
+  it('handles non-zero start', () => {
+    const ticks = calculateTicksByInterval(10, 50, 10);
+    expect(ticks).toEqual([10, 20, 30, 40, 50]);
+  });
+
+  it('aligns to interval multiples', () => {
+    const ticks = calculateTicksByInterval(5, 45, 10);
+    // Should start at 10 (first multiple of 10 >= 5)
+    expect(ticks).toEqual([10, 20, 30, 40]);
+  });
+
+  it('handles fractional intervals', () => {
+    const ticks = calculateTicksByInterval(0, 1, 0.25);
+    expect(ticks).toEqual([0, 0.25, 0.5, 0.75, 1]);
+  });
+
+  it('handles negative ranges', () => {
+    const ticks = calculateTicksByInterval(-100, -20, 20);
+    expect(ticks).toEqual([-100, -80, -60, -40, -20]);
+  });
+
+  it('handles mixed ranges', () => {
+    const ticks = calculateTicksByInterval(-20, 20, 10);
+    expect(ticks).toEqual([-20, -10, 0, 10, 20]);
+  });
+});
+
+describe('calculateTicks', () => {
+  it('uses explicit values when provided', () => {
+    const ticks = calculateTicks(0, 100, { values: [0, 25, 50, 100] });
+    expect(ticks).toEqual([0, 25, 50, 100]);
+  });
+
+  it('filters explicit values to range', () => {
+    const ticks = calculateTicks(10, 90, { values: [0, 25, 50, 75, 100] });
+    expect(ticks).toEqual([25, 50, 75]);
+  });
+
+  it('sorts explicit values', () => {
+    const ticks = calculateTicks(0, 100, { values: [75, 25, 100, 0, 50] });
+    expect(ticks).toEqual([0, 25, 50, 75, 100]);
+  });
+
+  it('uses interval when provided (priority 2)', () => {
+    const ticks = calculateTicks(0, 100, { interval: 25, count: 3 });
+    expect(ticks).toEqual([0, 25, 50, 75, 100]);
+  });
+
+  it('uses count when no interval or values (priority 3)', () => {
+    const ticks = calculateTicks(0, 100, { count: 5 });
+    expect(ticks.length).toBeGreaterThanOrEqual(4);
+    expect(ticks.length).toBeLessThanOrEqual(7);
+  });
+
+  it('uses default count of 5 when no config', () => {
+    const ticks = calculateTicks(0, 100);
+    expect(ticks.length).toBeGreaterThanOrEqual(4);
+    expect(ticks.length).toBeLessThanOrEqual(7);
+  });
+
+  it('handles empty values array gracefully', () => {
+    const ticks = calculateTicks(0, 100, { values: [] });
+    // Should fall through to count-based calculation
+    expect(ticks.length).toBeGreaterThan(0);
+  });
+
+  it('ignores zero or negative interval', () => {
+    const ticksZero = calculateTicks(0, 100, { interval: 0 });
+    const ticksNeg = calculateTicks(0, 100, { interval: -10 });
+    // Should fall through to count-based calculation
+    expect(ticksZero.length).toBeGreaterThan(0);
+    expect(ticksNeg.length).toBeGreaterThan(0);
+  });
+});
+
+// ============================================================================
+// Label Layout Calculations
+// ============================================================================
 
 describe('calculateLabelLines', () => {
   it('returns 1 for empty labels', () => {

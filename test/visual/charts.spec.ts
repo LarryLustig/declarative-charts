@@ -179,4 +179,12 @@ test.describe('Chart Features', () => {
     const container = await getChartContainer(page, 'legend-positions');
     await expect(container).toHaveScreenshot('legend-top.png');
   });
+
+  test('line chart with time axis', async ({ page }) => {
+    await page.goto(`${FIXTURES_URL}?chart=time-axis`);
+    await waitForChartRender(page);
+
+    const container = await getChartContainer(page, 'time-axis');
+    await expect(container).toHaveScreenshot('time-axis.png');
+  });
 });

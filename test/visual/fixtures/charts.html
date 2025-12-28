@@ -248,6 +248,26 @@
     </dc-chart>
   </div>
 
+  <!-- Time Axis Chart -->
+  <div id="time-axis" class="chart-container">
+    <h2>Line Chart - Time Axis</h2>
+    <dc-chart width="500" height="350">
+      <dc-title>Daily Metrics</dc-title>
+      <dc-axis position="bottom" type="time" date-label-format="MMM d"></dc-axis>
+      <dc-axis position="left">
+        <dc-title>Value</dc-title>
+      </dc-axis>
+      <dc-line label="Visits" stroke="#4CAF50">
+        <dc-point value="120" label="2024-01-01"></dc-point>
+        <dc-point value="180" label="2024-01-08"></dc-point>
+        <dc-point value="150" label="2024-01-15"></dc-point>
+        <dc-point value="220" label="2024-01-22"></dc-point>
+        <dc-point value="190" label="2024-01-29"></dc-point>
+      </dc-line>
+      <dc-legend position="right"></dc-legend>
+    </dc-chart>
+  </div>
+
   <script>
     // Show specific chart based on URL parameter
     // Usage: charts.html?chart=bar-basic

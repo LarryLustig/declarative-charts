@@ -1,7 +1,10 @@
 import { svg, SVGTemplateResult } from 'lit';
 import { BaseChart } from './base-chart.js';
-import type { ChartAxis, AxisPosition } from './chart-axis.js';
-import { calculateLabelLines, calculateLabelInterval } from './chart-utils.js';
+import type { ChartAxis, AxisPosition, AxisType } from './chart-axis.js';
+import type { GridConfig } from './chart-grid.js';
+import { calculateLabelLines, calculateLabelInterval, calculateTicks } from './chart-utils.js';
+import { parseDateLabels, calculateTimeTicks, formatDate, dateToPosition } from './date-utils.js';
+import type { ParsedDates } from './date-utils.js';
 
 /**
  * Represents a value range for axis scaling, including information about
@@ -18,6 +21,18 @@ export interface ValueRange {
   hasNegatives: boolean;
   /** Whether the range includes positive values */
   hasPositives: boolean;
+}
+
+/**
+ * Configuration for tick generation on value/time axes.
+ */
+export interface TickConfig {
+  /** Approximate number of ticks (default: 5) */
+  count?: number;
+  /** Exact interval between ticks */
+  interval?: number;
+  /** Explicit tick values */
+  values?: number[];
 }
 
 /**
@@ -38,6 +53,51 @@ export interface AxisConfig {
   labelStyles?: Record<string, string>;
   /** The dc-axis element, if present */
   element?: ChartAxis;
+
+  // === Phase 1: Value Axis Controls ===
+
+  /** Axis type (value, label, or time) - inferred if not specified */
+  type: AxisType;
+  /** Minimum axis value (undefined = auto-calculate from data) */
+  minValue?: number | 'auto';
+  /** Maximum axis value (undefined = auto-calculate from data) */
+  maxValue?: number | 'auto';
+  /** Range padding as decimal (e.g., 0.1 = 10%) */
+  rangePadding?: number;
+  /** Tick configuration */
+  ticks?: TickConfig;
+  /** Value format for axis labels */
+  valueFormat?: string;
+
+  // === Phase 2: Grid Styling ===
+
+  /** Grid configuration from dc-grid element, if present */
+  grid?: GridConfig;
+
+  // === Phase 3: Time Axis ===
+
+  /** Date parsing format (for time axes) */
+  dateFormat?: string;
+  /** Date label format (for time axes) */
+  dateLabelFormat?: string;
+}
+
+/**
+ * Time scale data for time-proportional axis positioning.
+ */
+export interface TimeScale {
+  /** Minimum date in the range */
+  min: Date;
+  /** Maximum date in the range */
+  max: Date;
+  /** Parsed date for each label (may include invalid dates) */
+  dates: Date[];
+  /** Indices of valid (parseable) dates */
+  validIndices: number[];
+  /** Tick dates for axis labels */
+  tickDates: Date[];
+  /** Format string for tick labels */
+  tickFormat: string;
 }
 
 /**
@@ -149,9 +209,19 @@ export abstract class AxisChart extends BaseChart {
    */
   protected getAxisConfig(position: AxisPosition): AxisConfig {
     const axisElement = this.getAxisElement(position);
+    // Infer axis type based on position and orientation
+    const inferredType = this.inferAxisType(position);
 
     if (axisElement) {
       const titleInfo = axisElement.getTitleInfo();
+      // Build tick configuration if any tick properties are set
+      const tickCount = axisElement.getTickCount();
+      const tickInterval = axisElement.getTickInterval();
+      const tickValues = axisElement.getTickValues();
+      const ticks = (tickCount !== undefined || tickInterval !== undefined || tickValues !== undefined)
+        ? { count: tickCount, interval: tickInterval, values: tickValues }
+        : undefined;
+
       return {
         position,
         labelInterval: axisElement.getLabelIntervalValue(),
@@ -160,6 +230,18 @@ export abstract class AxisChart extends BaseChart {
         titleStyles: titleInfo?.svgStyles,
         labelStyles: axisElement.getSvgStyleAttributes(),
         element: axisElement,
+        // Phase 1: Value axis controls
+        type: axisElement.getTypeValue() ?? inferredType,
+        minValue: axisElement.getMinValue(),
+        maxValue: axisElement.getMaxValue(),
+        rangePadding: axisElement.getRangePadding(),
+        ticks,
+        valueFormat: axisElement.valueFormat,
+        // Phase 2: Grid styling
+        grid: axisElement.getGridConfig() ?? undefined,
+        // Phase 3: Time axis
+        dateFormat: axisElement.getDateFormat(),
+        dateLabelFormat: axisElement.getDateLabelFormat(),
       };
     }
 
@@ -168,7 +250,29 @@ export abstract class AxisChart extends BaseChart {
       position,
       labelInterval: 'auto',
       labelLines: 1,
+      type: inferredType,
     };
+  }
+
+  /**
+   * Infer the axis type based on position and chart orientation.
+   * - Vertical charts: left/right = 'value', top/bottom = 'label'
+   * - Horizontal charts: left/right = 'label', top/bottom = 'value'
+   *
+   * @param position The axis position
+   * @returns The inferred axis type
+   */
+  protected inferAxisType(position: AxisPosition): AxisType {
+    const orientation = this.getChartOrientation();
+    const isVerticalAxis = position === 'left' || position === 'right';
+
+    if (orientation === 'vertical') {
+      // Vertical charts: left/right are value axes, top/bottom are label axes
+      return isVerticalAxis ? 'value' : 'label';
+    } else {
+      // Horizontal charts: left/right are label axes, top/bottom are value axes
+      return isVerticalAxis ? 'label' : 'value';
+    }
   }
 
   /**
@@ -268,39 +372,108 @@ export abstract class AxisChart extends BaseChart {
    * Returns min/max bounds that create clean tick intervals, plus information about
    * the zero line position for charts with mixed positive/negative data.
    *
+   * @param axisConfig Optional axis configuration for explicit min/max values
    * @returns ValueRange with nice bounds and zero line position info
    */
-  protected getNiceRange(): ValueRange {
+  protected getNiceRange(axisConfig?: AxisConfig): ValueRange {
     const rawMax = this.getMaxValue();
     const rawMin = this.getMinValue();
 
     this.log('info', 'valueAxis.rawRange', `Raw data range: [${rawMin}, ${rawMax}]`, { min: rawMin, max: rawMax });
 
+    // Check for explicit min/max values from axis config
+    const explicitMin = axisConfig?.minValue;
+    const explicitMax = axisConfig?.maxValue;
+    const rangePadding = axisConfig?.rangePadding ?? 0;
+
+    // Apply explicit min if specified (not 'auto')
+    let effectiveMin = rawMin;
+    if (typeof explicitMin === 'number') {
+      effectiveMin = explicitMin;
+      this.log('info', 'valueAxis.explicitMin', `Using explicit min-value`, explicitMin);
+    }
+
+    // Apply explicit max if specified (not 'auto')
+    let effectiveMax = rawMax;
+    if (typeof explicitMax === 'number') {
+      effectiveMax = explicitMax;
+      this.log('info', 'valueAxis.explicitMax', `Using explicit max-value`, explicitMax);
+    }
+
+    // Apply range padding if specified
+    if (rangePadding > 0 && (explicitMin === 'auto' || explicitMin === undefined || explicitMax === 'auto' || explicitMax === undefined)) {
+      const currentRange = effectiveMax - effectiveMin;
+      const paddingAmount = currentRange * rangePadding;
+
+      if (explicitMin === 'auto' || explicitMin === undefined) {
+        effectiveMin = effectiveMin - paddingAmount;
+        this.log('info', 'valueAxis.rangePadding', `Applied ${(rangePadding * 100).toFixed(0)}% padding to min`, effectiveMin);
+      }
+      if (explicitMax === 'auto' || explicitMax === undefined) {
+        effectiveMax = effectiveMax + paddingAmount;
+        this.log('info', 'valueAxis.rangePadding', `Applied ${(rangePadding * 100).toFixed(0)}% padding to max`, effectiveMax);
+      }
+    }
+
+    // If both explicit, use them directly (no nice rounding)
+    if (typeof explicitMin === 'number' && typeof explicitMax === 'number') {
+      const totalRange = effectiveMax - effectiveMin;
+      const hasNegatives = effectiveMin < 0;
+      const hasPositives = effectiveMax > 0;
+      let zeroPosition: number | null = null;
+
+      if (hasNegatives && hasPositives) {
+        zeroPosition = effectiveMax / totalRange;
+      } else if (hasNegatives) {
+        zeroPosition = 0;
+      } else {
+        zeroPosition = 1;
+      }
+
+      this.log('info', 'valueAxis.range', `Explicit range: [${effectiveMin}, ${effectiveMax}]`, { min: effectiveMin, max: effectiveMax });
+      return {
+        min: effectiveMin,
+        max: effectiveMax,
+        zeroPosition,
+        hasNegatives,
+        hasPositives
+      };
+    }
+
     // Case 1: All positive (or zero) - use existing behavior
-    if (rawMin >= 0) {
-      const niceMax = this.getNiceMax();
+    if (effectiveMin >= 0) {
+      // Use explicit max if provided, otherwise calculate nice max
+      let niceMax: number;
+      if (typeof explicitMax === 'number') {
+        niceMax = explicitMax;
+      } else {
+        niceMax = this.getNiceMax();
+      }
       this.log('info', 'valueAxis.range', `All positive: range [0, ${niceMax}], zero at bottom`, { min: 0, max: niceMax });
       return {
-        min: 0,
+        min: typeof explicitMin === 'number' ? explicitMin : 0,
         max: niceMax,
         zeroPosition: 1, // Zero at bottom (fraction = 1)
         hasNegatives: false,
-        hasPositives: rawMax > 0
+        hasPositives: rawMax > 0  // Use rawMax to reflect actual data, not display range
       };
     }
 
     // Case 2: All negative
-    if (rawMax <= 0) {
+    if (effectiveMax <= 0) {
       // Calculate nice minimum (negative value)
-      const absMin = Math.abs(rawMin);
+      const absMin = Math.abs(effectiveMin);
       const range = this.niceNumber(absMin, false);
       const tickSpacing = this.niceNumber(range / this.gridSteps, true);
       const niceAbsMin = Math.ceil(absMin / tickSpacing) * tickSpacing;
 
-      this.log('info', 'valueAxis.range', `All negative: range [${-niceAbsMin}, 0], zero at top`, { min: -niceAbsMin, max: 0 });
+      const niceMin = typeof explicitMin === 'number' ? explicitMin : -niceAbsMin;
+      const niceMaxVal = typeof explicitMax === 'number' ? explicitMax : 0;
+
+      this.log('info', 'valueAxis.range', `All negative: range [${niceMin}, ${niceMaxVal}], zero at top`, { min: niceMin, max: niceMaxVal });
       return {
-        min: -niceAbsMin,
-        max: 0,
+        min: niceMin,
+        max: niceMaxVal,
         zeroPosition: 0, // Zero at top (fraction = 0)
         hasNegatives: true,
         hasPositives: false
@@ -309,12 +482,12 @@ export abstract class AxisChart extends BaseChart {
 
     // Case 3: Mixed positive and negative
     // Calculate tick spacing based on the larger absolute value to get consistent intervals
-    const maxAbsValue = Math.max(rawMax, Math.abs(rawMin));
+    const maxAbsValue = Math.max(effectiveMax, Math.abs(effectiveMin));
     const tickSpacing = this.niceNumber(maxAbsValue / this.gridSteps, true);
 
     // Round max up and min down to tick spacing multiples
-    const niceMax = Math.ceil(rawMax / tickSpacing) * tickSpacing;
-    const niceMin = Math.floor(rawMin / tickSpacing) * tickSpacing;
+    const niceMax = typeof explicitMax === 'number' ? explicitMax : Math.ceil(effectiveMax / tickSpacing) * tickSpacing;
+    const niceMin = typeof explicitMin === 'number' ? explicitMin : Math.floor(effectiveMin / tickSpacing) * tickSpacing;
 
     const totalRange = niceMax - niceMin;
     // Zero position: how far from the top is zero? (as fraction 0-1)
@@ -679,6 +852,7 @@ export abstract class AxisChart extends BaseChart {
    * @param chartHeight Height of the chart content area
    * @param range Value range (min, max) for scaling, or just max for backward compatibility
    * @param orientation 'vertical' for horizontal grid lines, 'horizontal' for vertical grid lines
+   * @param axisConfig Optional axis configuration for tick customization
    * @returns SVG template result for grid lines
    */
   protected renderGridLines(
@@ -686,8 +860,14 @@ export abstract class AxisChart extends BaseChart {
     chartWidth: number,
     chartHeight: number,
     range: ValueRange | number,
-    orientation: 'vertical' | 'horizontal' = 'vertical'
+    orientation: 'vertical' | 'horizontal' = 'vertical',
+    axisConfig?: AxisConfig
   ): SVGTemplateResult {
+    // Check if grid is explicitly hidden
+    if (axisConfig?.grid && !axisConfig.grid.show) {
+      return svg``;
+    }
+
     // Support both ValueRange and legacy number (max) parameter
     const valueRange: ValueRange = typeof range === 'number'
       ? { min: 0, max: range, zeroPosition: 1, hasNegatives: false, hasPositives: true }
@@ -696,17 +876,19 @@ export abstract class AxisChart extends BaseChart {
     const { min, max, hasNegatives, hasPositives } = valueRange;
     const totalRange = max - min;
 
-    // Generate tick values from min to max
-    const tickValues: number[] = [];
-    for (let i = 0; i <= this.gridSteps; i++) {
-      tickValues.push(min + (totalRange / this.gridSteps) * i);
-    }
+    // Use calculateTicks with axis config, falling back to default tick count
+    const tickConfig = axisConfig?.ticks ?? { count: this.gridSteps };
+    const tickValues = calculateTicks(min, max, tickConfig);
 
     // Ensure zero is included when range spans both positive and negative
     if (hasNegatives && hasPositives && !tickValues.some(v => Math.abs(v) < totalRange * 0.0001)) {
       tickValues.push(0);
       tickValues.sort((a, b) => a - b);
     }
+
+    // Get grid styling from config, with defaults
+    const gridColor = axisConfig?.grid?.color ?? '#ddd';
+    const gridDasharray = this.getGridDasharray(axisConfig?.grid?.lineStyle);
 
     if (orientation === 'vertical') {
       // Horizontal grid lines (for vertical bar/line charts)
@@ -721,8 +903,9 @@ export abstract class AxisChart extends BaseChart {
               y1="${y}"
               x2="${this.width - padding.right}"
               y2="${y}"
-              stroke="${isZeroLine ? '#666' : '#ddd'}"
+              stroke="${isZeroLine ? '#666' : gridColor}"
               stroke-width="${isZeroLine ? 1.5 : 1}"
+              stroke-dasharray="${isZeroLine ? '' : gridDasharray}"
             />
           `;
         })}
@@ -740,12 +923,30 @@ export abstract class AxisChart extends BaseChart {
               y1="${padding.top}"
               x2="${x}"
               y2="${this.height - padding.bottom}"
-              stroke="${isZeroLine ? '#666' : '#ddd'}"
+              stroke="${isZeroLine ? '#666' : gridColor}"
               stroke-width="${isZeroLine ? 1.5 : 1}"
+              stroke-dasharray="${isZeroLine ? '' : gridDasharray}"
             />
           `;
         })}
       `;
+    }
+  }
+
+  /**
+   * Get the stroke-dasharray value for grid line rendering.
+   * @param lineStyle The grid line style ('solid', 'dashed', 'dotted')
+   * @returns Dasharray string for SVG stroke-dasharray attribute
+   */
+  protected getGridDasharray(lineStyle?: string): string {
+    switch (lineStyle) {
+      case 'dashed':
+        return '5,5';
+      case 'dotted':
+        return '2,4';
+      case 'solid':
+      default:
+        return '';
     }
   }
 
@@ -894,7 +1095,7 @@ export abstract class AxisChart extends BaseChart {
    * @param range Value range (min, max) for scaling, or just max for backward compatibility
    * @param orientation 'vertical' for Y-axis labels on left, 'horizontal' for X-axis labels at bottom
    * @param reverse If true, adjusts label positions for reverse orientations
-   * @param axisFormat Optional format string for axis labels
+   * @param axisConfig Optional axis configuration for tick customization and formatting
    * @returns SVG template result for value axis labels
    */
   protected renderValueAxisLabels(
@@ -904,7 +1105,7 @@ export abstract class AxisChart extends BaseChart {
     range: ValueRange | number,
     orientation: 'vertical' | 'horizontal' = 'vertical',
     reverse = false,
-    axisFormat?: string
+    axisConfig?: AxisConfig
   ): SVGTemplateResult {
     // Support both ValueRange and legacy number (max) parameter
     const valueRange: ValueRange = typeof range === 'number'
@@ -915,13 +1116,11 @@ export abstract class AxisChart extends BaseChart {
     const totalRange = max - min;
 
     // Use axis format if provided, otherwise fall back to chart's valueFormat
-    const format = axisFormat ?? this.valueFormat;
+    const format = axisConfig?.valueFormat ?? this.valueFormat;
 
-    // Generate tick values from min to max
-    const tickValues: number[] = [];
-    for (let i = 0; i <= this.gridSteps; i++) {
-      tickValues.push(min + (totalRange / this.gridSteps) * i);
-    }
+    // Use calculateTicks with axis config, falling back to default tick count
+    const tickConfig = axisConfig?.ticks ?? { count: this.gridSteps };
+    const tickValues = calculateTicks(min, max, tickConfig);
 
     if (orientation === 'vertical') {
       if (reverse) {
@@ -1000,5 +1199,110 @@ export abstract class AxisChart extends BaseChart {
         `;
       }
     }
+  }
+
+  // ============================================================================
+  // Time Axis Helpers
+  // ============================================================================
+
+  /**
+   * Parse category labels as dates and calculate time scale.
+   * Returns null if labels can't be parsed as valid dates.
+   *
+   * @param labels Array of label strings
+   * @param axisConfig Axis configuration with date format options
+   * @returns TimeScale object or null if not a time axis
+   */
+  protected parseTimeScale(labels: string[], axisConfig: AxisConfig): TimeScale | null {
+    // Only process if type is explicitly 'time'
+    if (axisConfig.type !== 'time') {
+      return null;
+    }
+
+    // Parse labels as dates
+    const parsed: ParsedDates = parseDateLabels(labels, axisConfig.dateFormat);
+
+    // Need at least 2 valid dates for a time scale
+    if (parsed.validIndices.length < 2 || !parsed.range) {
+      this.log('warning', 'timeAxis', `Type is 'time' but only ${parsed.validIndices.length} valid dates found`, labels);
+      return null;
+    }
+
+    // Calculate tick dates and format
+    const targetTicks = axisConfig.ticks?.count ?? 5;
+    const { dates: tickDates, format: autoFormat } = calculateTimeTicks(
+      parsed.range.min,
+      parsed.range.max,
+      targetTicks
+    );
+
+    // Use explicit date-label-format if provided, otherwise use auto-detected format
+    const tickFormat = axisConfig.dateLabelFormat ?? autoFormat;
+
+    this.log('info', 'timeAxis', `Time scale: ${parsed.validIndices.length} dates, range ${formatDate(parsed.range.min, 'yyyy-MM-dd')} to ${formatDate(parsed.range.max, 'yyyy-MM-dd')}`, { tickDates: tickDates.length, tickFormat });
+
+    return {
+      min: parsed.range.min,
+      max: parsed.range.max,
+      dates: parsed.dates,
+      validIndices: parsed.validIndices,
+      tickDates,
+      tickFormat,
+    };
+  }
+
+  /**
+   * Calculate the position (0-1) for a date within the time scale.
+   *
+   * @param date The date to position
+   * @param timeScale The time scale
+   * @returns Position as fraction (0 = min, 1 = max)
+   */
+  protected getTimePosition(date: Date, timeScale: TimeScale): number {
+    return dateToPosition(date, timeScale.min, timeScale.max);
+  }
+
+  /**
+   * Calculate the X coordinate for a date on a time axis.
+   *
+   * @param date The date to position
+   * @param timeScale The time scale
+   * @param chartLeft Left edge of chart area
+   * @param chartWidth Width of chart area
+   * @returns X coordinate in viewBox units
+   */
+  protected getTimeX(date: Date, timeScale: TimeScale, chartLeft: number, chartWidth: number): number {
+    const position = this.getTimePosition(date, timeScale);
+    return chartLeft + position * chartWidth;
+  }
+
+  /**
+   * Render time axis labels at calculated tick positions.
+   *
+   * @param timeScale The time scale
+   * @param padding Chart padding
+   * @param chartWidth Width of chart area
+   * @returns SVG template result for time axis labels
+   */
+  protected renderTimeAxisLabels(
+    timeScale: TimeScale,
+    padding: { top: number; right: number; bottom: number; left: number },
+    chartWidth: number
+  ): SVGTemplateResult {
+    return svg`
+      ${timeScale.tickDates.map(date => {
+        const x = this.getTimeX(date, timeScale, padding.left, chartWidth);
+        const label = formatDate(date, timeScale.tickFormat);
+        return svg`
+          <text
+            x="${x}"
+            y="${this.height - padding.bottom + 20}"
+            text-anchor="middle"
+            font-size="11"
+            fill="#666"
+          >${label}</text>
+        `;
+      })}
+    `;
   }
 }
