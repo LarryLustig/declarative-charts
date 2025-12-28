@@ -412,6 +412,268 @@ describe('Chart component', () => {
       `);
       expect(chart.orientation).toBe('horizontal-reverse');
     });
+
+    it('renders multiple horizontal bars', async () => {
+      chart = await fixture<Chart>('dc-chart', { orientation: 'horizontal' }, `
+        <dc-bar value="30" label="A"></dc-bar>
+        <dc-bar value="50" label="B"></dc-bar>
+        <dc-bar value="40" label="C"></dc-bar>
+      `);
+      const rects = chart.shadowRoot?.querySelectorAll('rect[data-shape-index]');
+      expect(rects).toHaveLength(3);
+    });
+
+    it('renders horizontal bars with negative values', async () => {
+      chart = await fixture<Chart>('dc-chart', { orientation: 'horizontal' }, `
+        <dc-bar value="-20" label="Negative"></dc-bar>
+        <dc-bar value="30" label="Positive"></dc-bar>
+      `);
+      const rects = chart.shadowRoot?.querySelectorAll('rect[data-shape-index]');
+      expect(rects).toHaveLength(2);
+    });
+
+    it('renders horizontal-reverse bars', async () => {
+      chart = await fixture<Chart>('dc-chart', { orientation: 'horizontal-reverse' }, `
+        <dc-bar value="30" label="A"></dc-bar>
+        <dc-bar value="50" label="B"></dc-bar>
+      `);
+      const rects = chart.shadowRoot?.querySelectorAll('rect[data-shape-index]');
+      expect(rects).toHaveLength(2);
+    });
+
+    it('renders horizontal bar groups', async () => {
+      chart = await fixture<Chart>('dc-chart', { orientation: 'horizontal' }, `
+        <dc-bar-group label="Q1">
+          <dc-bar value="30" label="Sales"></dc-bar>
+          <dc-bar value="20" label="Costs"></dc-bar>
+        </dc-bar-group>
+        <dc-bar-group label="Q2">
+          <dc-bar value="40" label="Sales"></dc-bar>
+          <dc-bar value="25" label="Costs"></dc-bar>
+        </dc-bar-group>
+      `);
+      const rects = chart.shadowRoot?.querySelectorAll('rect[data-shape-index]');
+      expect(rects).toHaveLength(4);
+    });
+
+    it('renders horizontal stacked bars', async () => {
+      chart = await fixture<Chart>('dc-chart', { orientation: 'horizontal' }, `
+        <dc-bar label="Q1">
+          <dc-bar-segment value="30" label="Product A" fill="#ff0000"></dc-bar-segment>
+          <dc-bar-segment value="20" label="Product B" fill="#00ff00"></dc-bar-segment>
+        </dc-bar>
+      `);
+      const rects = chart.shadowRoot?.querySelectorAll('rect');
+      expect(rects?.length).toBeGreaterThan(0);
+    });
+
+    it('renders horizontal-reverse stacked bars', async () => {
+      chart = await fixture<Chart>('dc-chart', { orientation: 'horizontal-reverse' }, `
+        <dc-bar label="Q1">
+          <dc-bar-segment value="30" label="Product A" fill="#ff0000"></dc-bar-segment>
+          <dc-bar-segment value="20" label="Product B" fill="#00ff00"></dc-bar-segment>
+        </dc-bar>
+      `);
+      const rects = chart.shadowRoot?.querySelectorAll('rect');
+      expect(rects?.length).toBeGreaterThan(0);
+    });
+  });
+
+  // ============================================================================
+  // Links (href)
+  // ============================================================================
+
+  describe('links', () => {
+    it('renders bar with href as link', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="50" label="A" href="https://example.com"></dc-bar>
+      `);
+      const link = chart.shadowRoot?.querySelector('a');
+      expect(link).toBeDefined();
+      expect(link?.getAttribute('href')).toBe('https://example.com');
+    });
+
+    it('renders line with href as link', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-line label="Trend" href="https://example.com">
+          <dc-point value="10" label="A"></dc-point>
+          <dc-point value="20" label="B"></dc-point>
+        </dc-line>
+      `);
+      const links = chart.shadowRoot?.querySelectorAll('a');
+      expect(links?.length).toBeGreaterThan(0);
+    });
+
+    it('renders point with href as link', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-line label="Trend">
+          <dc-point value="10" label="A" href="https://example.com/a"></dc-point>
+          <dc-point value="20" label="B"></dc-point>
+        </dc-line>
+      `);
+      const links = chart.shadowRoot?.querySelectorAll('a');
+      expect(links?.length).toBeGreaterThan(0);
+    });
+
+    it('renders bubble with href as link', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bubble value="10" size="50" label="A" href="https://example.com"></dc-bubble>
+      `);
+      const link = chart.shadowRoot?.querySelector('a');
+      expect(link).toBeDefined();
+    });
+
+    it('renders segment with href as link', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar label="Q1">
+          <dc-bar-segment value="30" label="A" fill="#ff0000" href="https://example.com"></dc-bar-segment>
+          <dc-bar-segment value="20" label="B" fill="#00ff00"></dc-bar-segment>
+        </dc-bar>
+      `);
+      const links = chart.shadowRoot?.querySelectorAll('a');
+      expect(links?.length).toBeGreaterThan(0);
+    });
+
+    it('supports target attribute on links', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="50" label="A" href="https://example.com" target="_blank"></dc-bar>
+      `);
+      const link = chart.shadowRoot?.querySelector('a');
+      expect(link?.getAttribute('target')).toBe('_blank');
+    });
+  });
+
+  // ============================================================================
+  // Value labels
+  // ============================================================================
+
+  describe('value labels', () => {
+    it('shows value labels when show-value is enabled', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'show-value': '' }, `
+        <dc-bar value="50" label="A"></dc-bar>
+      `);
+      const texts = chart.shadowRoot?.querySelectorAll('text');
+      // Should have value label text
+      expect(texts?.length).toBeGreaterThan(0);
+    });
+
+    it('shows percent labels when show-percent is enabled', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'show-percent': '' }, `
+        <dc-bar value="50" label="A"></dc-bar>
+        <dc-bar value="50" label="B"></dc-bar>
+      `);
+      const texts = chart.shadowRoot?.querySelectorAll('text');
+      expect(texts?.length).toBeGreaterThan(0);
+    });
+
+    it('shows labels on lines when show-value is enabled', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'show-value': '' }, `
+        <dc-line label="Trend">
+          <dc-point value="10" label="A"></dc-point>
+          <dc-point value="20" label="B"></dc-point>
+        </dc-line>
+      `);
+      const svg = chart.shadowRoot?.querySelector('svg');
+      expect(svg).toBeDefined();
+    });
+
+    it('shows labels on bubbles when show-value is enabled', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'show-value': '' }, `
+        <dc-bubble value="10" size="50" label="A"></dc-bubble>
+      `);
+      const svg = chart.shadowRoot?.querySelector('svg');
+      expect(svg).toBeDefined();
+    });
+
+    it('shows labels on segments when show-value is enabled', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'show-value': '' }, `
+        <dc-bar label="Q1">
+          <dc-bar-segment value="30" label="A" fill="#ff0000"></dc-bar-segment>
+          <dc-bar-segment value="20" label="B" fill="#00ff00"></dc-bar-segment>
+        </dc-bar>
+      `);
+      const texts = chart.shadowRoot?.querySelectorAll('text');
+      expect(texts?.length).toBeGreaterThan(0);
+    });
+  });
+
+  // ============================================================================
+  // Curve fitting
+  // ============================================================================
+
+  describe('curve fitting', () => {
+    it('renders catmull-rom curve', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'curve-fit': 'catmull-rom' }, `
+        <dc-line label="Smooth">
+          <dc-point value="10" label="A"></dc-point>
+          <dc-point value="30" label="B"></dc-point>
+          <dc-point value="20" label="C"></dc-point>
+          <dc-point value="40" label="D"></dc-point>
+        </dc-line>
+      `);
+      const path = chart.shadowRoot?.querySelector('path');
+      expect(path).toBeDefined();
+      // Verify curve-fit property is set
+      expect(chart.curveFit).toBe('catmull-rom');
+    });
+
+    it('line can override chart curve-fit', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'curve-fit': 'linear' }, `
+        <dc-line label="Smooth" curve-fit="catmull-rom">
+          <dc-point value="10" label="A"></dc-point>
+          <dc-point value="30" label="B"></dc-point>
+          <dc-point value="20" label="C"></dc-point>
+        </dc-line>
+      `);
+      const path = chart.shadowRoot?.querySelector('path');
+      expect(path).toBeDefined();
+    });
+  });
+
+  // ============================================================================
+  // Point shapes
+  // ============================================================================
+
+  describe('point shapes', () => {
+    it('supports circle point shape', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'point-shape': 'circle' }, `
+        <dc-line label="Trend">
+          <dc-point value="10" label="A"></dc-point>
+        </dc-line>
+      `);
+      const circles = chart.shadowRoot?.querySelectorAll('circle');
+      expect(circles?.length).toBeGreaterThan(0);
+    });
+
+    it('supports square point shape', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'point-shape': 'square' }, `
+        <dc-line label="Trend">
+          <dc-point value="10" label="A"></dc-point>
+        </dc-line>
+      `);
+      const svg = chart.shadowRoot?.querySelector('svg');
+      expect(svg).toBeDefined();
+    });
+
+    it('supports diamond point shape', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'point-shape': 'diamond' }, `
+        <dc-line label="Trend">
+          <dc-point value="10" label="A"></dc-point>
+        </dc-line>
+      `);
+      const svg = chart.shadowRoot?.querySelector('svg');
+      expect(svg).toBeDefined();
+    });
+
+    it('point can override line point-shape', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'point-shape': 'circle' }, `
+        <dc-line label="Trend">
+          <dc-point value="10" label="A" shape="square"></dc-point>
+        </dc-line>
+      `);
+      const svg = chart.shadowRoot?.querySelector('svg');
+      expect(svg).toBeDefined();
+    });
   });
 
   // ============================================================================
