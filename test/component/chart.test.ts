@@ -448,6 +448,126 @@ describe('Chart component', () => {
       const axisTitle = chart.querySelector('dc-axis dc-title');
       expect(axisTitle?.textContent).toBe('Revenue ($)');
     });
+
+    it('renders right axis with title', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-axis position="right">
+          <dc-title>Secondary Axis</dc-title>
+        </dc-axis>
+        <dc-bar value="50" label="A"></dc-bar>
+      `);
+      const axisTitle = chart.querySelector('dc-axis[position="right"] dc-title');
+      expect(axisTitle?.textContent).toBe('Secondary Axis');
+      // Verify the axis title dimensions are calculated
+      const dims = (chart as any).getAxisTitleDimensions('right');
+      expect(dims).toBeDefined();
+      expect(dims.text).toBe('Secondary Axis');
+    });
+
+    it('renders top axis with title', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-axis position="top">
+          <dc-title>Top Axis Title</dc-title>
+        </dc-axis>
+        <dc-bar value="50" label="A"></dc-bar>
+      `);
+      const axisTitle = chart.querySelector('dc-axis[position="top"] dc-title');
+      expect(axisTitle?.textContent).toBe('Top Axis Title');
+      // Verify the axis title dimensions are calculated (top/bottom use width/height differently)
+      const dims = (chart as any).getAxisTitleDimensions('top');
+      expect(dims).toBeDefined();
+      expect(dims.text).toBe('Top Axis Title');
+      expect(dims.width).toBeGreaterThan(0);
+      expect(dims.height).toBeGreaterThan(0);
+    });
+
+    it('renders bottom axis with title', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-axis position="bottom">
+          <dc-title>Categories</dc-title>
+        </dc-axis>
+        <dc-bar value="50" label="A"></dc-bar>
+      `);
+      const axisTitle = chart.querySelector('dc-axis[position="bottom"] dc-title');
+      expect(axisTitle?.textContent).toBe('Categories');
+      const dims = (chart as any).getAxisTitleDimensions('bottom');
+      expect(dims).toBeDefined();
+      expect(dims.text).toBe('Categories');
+    });
+
+    it('calculates axis label padding with right axis title', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-axis position="left">
+          <dc-title>Left Title</dc-title>
+        </dc-axis>
+        <dc-axis position="right">
+          <dc-title>Right Title</dc-title>
+        </dc-axis>
+        <dc-bar value="50" label="A"></dc-bar>
+      `);
+      const padding = (chart as any).getAxisLabelPadding();
+      expect(padding).toHaveProperty('left');
+      expect(padding).toHaveProperty('right');
+      expect(padding).toHaveProperty('top');
+      expect(padding).toHaveProperty('bottom');
+      // Right padding should include space for right axis title
+      expect(padding.right).toBeGreaterThan(0);
+    });
+
+    it('renders axis title SVG for all positions', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-axis position="left">
+          <dc-title>Left</dc-title>
+        </dc-axis>
+        <dc-axis position="right">
+          <dc-title>Right</dc-title>
+        </dc-axis>
+        <dc-axis position="top">
+          <dc-title>Top</dc-title>
+        </dc-axis>
+        <dc-axis position="bottom">
+          <dc-title>Bottom</dc-title>
+        </dc-axis>
+        <dc-bar value="50" label="A"></dc-bar>
+      `);
+      // All four axis titles should be defined
+      expect(chart.querySelector('dc-axis[position="left"] dc-title')).toBeDefined();
+      expect(chart.querySelector('dc-axis[position="right"] dc-title')).toBeDefined();
+      expect(chart.querySelector('dc-axis[position="top"] dc-title')).toBeDefined();
+      expect(chart.querySelector('dc-axis[position="bottom"] dc-title')).toBeDefined();
+    });
+
+    it('supports label-lines for staggered labels', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-axis position="bottom" label-lines="2"></dc-axis>
+        <dc-bar value="50" label="First Item"></dc-bar>
+        <dc-bar value="60" label="Second Item"></dc-bar>
+        <dc-bar value="70" label="Third Item"></dc-bar>
+        <dc-bar value="80" label="Fourth Item"></dc-bar>
+      `);
+      // getLabelLinesCount should return 2
+      expect((chart as any).getLabelLinesCount()).toBe(2);
+      // getLabelLineOffset should return alternating offsets
+      expect((chart as any).getLabelLineOffset(0)).toBe(0);
+      expect((chart as any).getLabelLineOffset(1)).toBeGreaterThan(0);
+    });
+
+    it('returns correct label line offset for multiple lines', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-axis position="bottom" label-lines="3"></dc-axis>
+        <dc-bar value="50" label="A"></dc-bar>
+      `);
+      // With 3 lines, offsets cycle through 0, 1, 2
+      const offset0 = (chart as any).getLabelLineOffset(0);
+      const offset1 = (chart as any).getLabelLineOffset(1);
+      const offset2 = (chart as any).getLabelLineOffset(2);
+      const offset3 = (chart as any).getLabelLineOffset(3); // Should wrap to line 0
+
+      expect(offset0).toBe(0);
+      expect(offset1).toBeGreaterThan(offset0);
+      expect(offset2).toBeGreaterThan(offset1);
+      expect(offset3).toBe(0); // Wraps back to first line
+    });
   });
 
   // ============================================================================
