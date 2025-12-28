@@ -4,6 +4,8 @@ import { fixture, elementUpdated } from './setup';
 // Import a concrete chart to test base-chart functionality
 import '../../src/pie-chart';
 import '../../src/chart-pie-slice';
+import '../../src/chart-legend';
+import '../../src/chart-title';
 import { PieChart } from '../../src/pie-chart';
 
 /**
@@ -470,6 +472,452 @@ describe('BaseChart component', () => {
       `);
       // The method should exist and not throw
       expect(() => (chart as any).togglePopupForFocusedElement(0)).not.toThrow();
+    });
+  });
+
+  // ============================================================================
+  // SVG Export - Full Path Tests
+  // ============================================================================
+
+  describe('SVG export full path', () => {
+    it('prepareSvgForExport adds xmlns attribute', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="50" label="A"></dc-pie-slice>
+        <dc-pie-slice value="50" label="B"></dc-pie-slice>
+      `);
+
+      const svg = chart.shadowRoot?.querySelector('svg');
+      expect(svg).toBeDefined();
+
+      // Clone and prepare for export
+      const svgClone = svg!.cloneNode(true) as SVGElement;
+      svgClone.removeAttribute('xmlns');
+
+      (chart as any).prepareSvgForExport(svgClone);
+
+      expect(svgClone.getAttribute('xmlns')).toBe('http://www.w3.org/2000/svg');
+    });
+
+    it('prepareSvgForExport sets width and height', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { width: '400', height: '300' }, `
+        <dc-pie-slice value="50" label="A"></dc-pie-slice>
+        <dc-pie-slice value="50" label="B"></dc-pie-slice>
+      `);
+
+      const svg = chart.shadowRoot?.querySelector('svg');
+      const svgClone = svg!.cloneNode(true) as SVGElement;
+      svgClone.removeAttribute('width');
+      svgClone.removeAttribute('height');
+
+      (chart as any).prepareSvgForExport(svgClone);
+
+      expect(svgClone.getAttribute('width')).toBe('400');
+      expect(svgClone.getAttribute('height')).toBe('300');
+    });
+
+    it('prepareSvgForExport applies font-family to text elements', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-title>Test Title</dc-title>
+        <dc-pie-slice value="50" label="A"></dc-pie-slice>
+        <dc-pie-slice value="50" label="B"></dc-pie-slice>
+      `);
+
+      const svg = chart.shadowRoot?.querySelector('svg');
+      const svgClone = svg!.cloneNode(true) as SVGElement;
+
+      // Clear font-family from text elements
+      const textElements = svgClone.querySelectorAll('text');
+      textElements.forEach(el => el.removeAttribute('font-family'));
+
+      (chart as any).prepareSvgForExport(svgClone);
+
+      // After export, text elements should have font-family
+      const textAfter = svgClone.querySelectorAll('text');
+      textAfter.forEach(el => {
+        // Text elements should have font-family set
+        expect(el.hasAttribute('font-family')).toBe(true);
+      });
+    });
+
+    it('downloadSvg creates download link', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="50" label="A"></dc-pie-slice>
+      `);
+
+      // Track the link creation
+      let downloadFilename = '';
+      const originalCreateElement = document.createElement.bind(document);
+      vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
+        const el = originalCreateElement(tag);
+        if (tag === 'a') {
+          const originalClick = el.click.bind(el);
+          el.click = () => {
+            downloadFilename = (el as HTMLAnchorElement).download;
+          };
+        }
+        return el;
+      });
+
+      vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
+      vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+
+      chart.downloadSvg('test-chart');
+
+      expect(downloadFilename).toBe('test-chart.svg');
+    });
+  });
+
+  // ============================================================================
+  // Accessibility Description Modes
+  // ============================================================================
+
+  describe('accessibility description modes', () => {
+    it('returns empty description when aria-insights is none', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { 'aria-insights': 'none' }, `
+        <dc-pie-slice value="50" label="A"></dc-pie-slice>
+        <dc-pie-slice value="50" label="B"></dc-pie-slice>
+      `);
+
+      const description = (chart as any).generateAccessibilityDescription();
+      expect(description).toBe('');
+    });
+
+    it('uses custom aria-description when provided', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { 'aria-description': 'Custom description for testing' }, `
+        <dc-pie-slice value="50" label="A"></dc-pie-slice>
+        <dc-pie-slice value="50" label="B"></dc-pie-slice>
+      `);
+
+      const description = (chart as any).generateAccessibilityDescription();
+      expect(description).toBe('Custom description for testing');
+    });
+
+    it('includes data summary in basic mode', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { 'aria-insights': 'basic' }, `
+        <dc-pie-slice value="50" label="A"></dc-pie-slice>
+        <dc-pie-slice value="50" label="B"></dc-pie-slice>
+      `);
+
+      const description = (chart as any).generateAccessibilityDescription();
+      // Basic mode should have data summary but not insights
+      expect(description.length).toBeGreaterThan(0);
+    });
+
+    it('includes insights in auto mode', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { 'aria-insights': 'auto' }, `
+        <dc-pie-slice value="50" label="A"></dc-pie-slice>
+        <dc-pie-slice value="50" label="B"></dc-pie-slice>
+      `);
+
+      const description = (chart as any).generateAccessibilityDescription();
+      expect(description.length).toBeGreaterThan(0);
+    });
+  });
+
+  // ============================================================================
+  // Padding Parsing
+  // ============================================================================
+
+  describe('padding parsing', () => {
+    it('parses 3-value padding shorthand', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { padding: '10 20 30' }, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      const parsed = (chart as any).parsePaddingShorthand();
+      expect(parsed.top).toBeDefined();
+      expect(parsed.right).toBeDefined();
+      expect(parsed.bottom).toBeDefined();
+      expect(parsed.left).toBeDefined();
+      // In 3-value: top, left/right, bottom
+      expect(parsed.right).toBe(parsed.left);
+    });
+
+    it('parses 4-value padding shorthand', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { padding: '10 20 30 40' }, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      const parsed = (chart as any).parsePaddingShorthand();
+      expect(parsed.top).toBeDefined();
+      expect(parsed.right).toBeDefined();
+      expect(parsed.bottom).toBeDefined();
+      expect(parsed.left).toBeDefined();
+    });
+
+    it('returns empty object for empty padding', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      const parsed = (chart as any).parsePaddingShorthand();
+      expect(parsed).toEqual({});
+    });
+
+    it('returns empty object for invalid padding (5+ values)', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { padding: '10 20 30 40 50' }, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      const parsed = (chart as any).parsePaddingShorthand();
+      expect(parsed).toEqual({});
+    });
+
+    it('parses percentage padding values', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { padding: '10%' }, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      const parsed = (chart as any).parsePaddingShorthand();
+      expect(parsed.top).toBeDefined();
+      expect(parsed.top).toBeGreaterThan(0);
+    });
+  });
+
+  // ============================================================================
+  // Aria Label Generation
+  // ============================================================================
+
+  describe('aria label generation', () => {
+    it('uses custom aria-label when provided', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { 'aria-label': 'My Custom Chart' }, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      const label = (chart as any).getAriaLabel();
+      expect(label).toBe('My Custom Chart');
+    });
+
+    it('uses chart type when no title', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      const label = (chart as any).getAriaLabel();
+      expect(label.toLowerCase()).toContain('pie');
+    });
+
+    it('getChartTypeName returns chart type', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      const typeName = (chart as any).getChartTypeName();
+      expect(typeName.toLowerCase()).toContain('pie');
+    });
+  });
+
+  // ============================================================================
+  // Evaluate Show Condition
+  // ============================================================================
+
+  describe('evaluateShowCondition', () => {
+    beforeEach(async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+    });
+
+    it('returns boolean condition directly', () => {
+      expect((chart as any).evaluateShowCondition(true, 50, 50)).toBe(true);
+      expect((chart as any).evaluateShowCondition(false, 50, 50)).toBe(false);
+    });
+
+    it('evaluates percent threshold condition', () => {
+      const condition = { type: 'percent', threshold: 10 };
+      expect((chart as any).evaluateShowCondition(condition, 100, 15)).toBe(true);
+      expect((chart as any).evaluateShowCondition(condition, 100, 5)).toBe(false);
+      expect((chart as any).evaluateShowCondition(condition, 100, 10)).toBe(true);
+    });
+
+    it('evaluates value threshold condition', () => {
+      const condition = { type: 'value', threshold: 50 };
+      expect((chart as any).evaluateShowCondition(condition, 100, 10)).toBe(true);
+      expect((chart as any).evaluateShowCondition(condition, 30, 10)).toBe(false);
+      expect((chart as any).evaluateShowCondition(condition, 50, 10)).toBe(true);
+    });
+  });
+
+  // ============================================================================
+  // Legend and Title Dimensions
+  // ============================================================================
+
+  describe('legend dimensions', () => {
+    it('returns null when no legend present', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      const dims = (chart as any).getLegendDimensions([]);
+      expect(dims).toBe(null);
+    });
+
+    it('getLegend returns legend element when present', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-legend position="bottom"></dc-legend>
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      const legend = (chart as any).getLegend();
+      expect(legend).not.toBe(null);
+      expect(legend.tagName.toLowerCase()).toBe('dc-legend');
+    });
+
+    it('getLegend returns null when no legend', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      const legend = (chart as any).getLegend();
+      expect(legend).toBe(null);
+    });
+  });
+
+  describe('title dimensions', () => {
+    it('returns null when no title present', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      const dims = (chart as any).getTitleDimensions();
+      expect(dims).toBe(null);
+    });
+
+    it('getTitle returns title text when present', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-title>Chart Title</dc-title>
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      const title = (chart as any).getTitle();
+      expect(title).toBe('Chart Title');
+    });
+
+    it('getTitle returns empty string when no title', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      const title = (chart as any).getTitle();
+      expect(title).toBe('');
+    });
+  });
+
+  // ============================================================================
+  // Number Formatting
+  // ============================================================================
+
+  describe('number formatting', () => {
+    it('getFormatter returns cached formatter', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      const formatter1 = chart.getFormatter();
+      const formatter2 = chart.getFormatter();
+      expect(formatter1).toBe(formatter2);
+    });
+
+    it('formatValue uses chart formatter', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', { 'value-format': 'number 0' }, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      const formatted = chart.formatValue(1234.56);
+      expect(formatted).toBe('1,235');
+    });
+
+    it('formatPercent formats as percentage', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      const formatted = chart.formatPercent(0.5);
+      expect(formatted).toContain('50');
+    });
+  });
+
+  // ============================================================================
+  // Get Legend Items
+  // ============================================================================
+
+  describe('getLegendItems', () => {
+    it('returns items based on data elements', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      // getLegendItems returns items for potential legend, even without dc-legend element
+      const items = (chart as any).getLegendItems();
+      expect(Array.isArray(items)).toBe(true);
+      expect(items.length).toBe(1);
+      expect(items[0].label).toBe('A');
+    });
+
+    it('returns multiple items for multiple slices', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="50" label="A"></dc-pie-slice>
+        <dc-pie-slice value="50" label="B"></dc-pie-slice>
+      `);
+
+      const items = (chart as any).getLegendItems();
+      expect(items.length).toBe(2);
+      expect(items[0].label).toBe('A');
+      expect(items[1].label).toBe('B');
+    });
+  });
+
+  // ============================================================================
+  // Connected Callback
+  // ============================================================================
+
+  describe('connectedCallback', () => {
+    it('sets data-chart-type attribute', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      expect(chart.getAttribute('data-chart-type')).toBe('dc-pie-chart');
+    });
+  });
+
+  // ============================================================================
+  // Slot Change Handler
+  // ============================================================================
+
+  describe('handleSlotChange', () => {
+    it('triggers requestUpdate when slot changes', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      const updateSpy = vi.spyOn(chart, 'requestUpdate');
+      (chart as any).handleSlotChange();
+      expect(updateSpy).toHaveBeenCalled();
+    });
+  });
+
+  // ============================================================================
+  // Will Update
+  // ============================================================================
+
+  describe('willUpdate', () => {
+    it('invalidates formatter when locale changes', async () => {
+      chart = await fixture<PieChart>('dc-pie-chart', {}, `
+        <dc-pie-slice value="100" label="A"></dc-pie-slice>
+      `);
+
+      // Get formatter to cache it
+      const formatter1 = chart.getFormatter();
+      expect(formatter1).toBeDefined();
+
+      // Simulate locale change
+      const changedProps = new Map([['locale', 'en-US']]);
+      (chart as any).willUpdate(changedProps);
+
+      // Formatter should be recreated
+      const formatter2 = chart.getFormatter();
+      expect(formatter2).not.toBe(formatter1);
     });
   });
 });
