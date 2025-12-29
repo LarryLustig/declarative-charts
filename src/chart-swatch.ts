@@ -1,6 +1,7 @@
 import { LitElement, html, css, svg, SVGTemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { ChartPalette } from './chart-palette.js';
+import { getBuiltinPalette, generatePaletteColors } from './builtin-palettes.js';
 
 /**
  * Standard shape names supported by dc-swatch.
@@ -76,6 +77,12 @@ export class ChartSwatch extends LitElement {
   value?: number;
 
   /**
+   * Index in the palette (0-based). Used with built-in palettes.
+   */
+  @property({ type: Number })
+  index?: number;
+
+  /**
    * Shape to render. Can be a standard shape name or a unicode character.
    * Standard shapes: circle, square, rect, line, triangle, diamond, star, cross, plus
    */
@@ -119,16 +126,47 @@ export class ChartSwatch extends LitElement {
   `;
 
   /**
+   * Wait for custom elements to be defined and upgraded, then re-render.
+   * This handles the case where swatches render before palette elements are upgraded.
+   */
+  connectedCallback() {
+    super.connectedCallback();
+
+    // Wait for dc-palette and dc-fill to be defined
+    Promise.all([
+      customElements.whenDefined('dc-palette'),
+      customElements.whenDefined('dc-fill')
+    ]).then(() => {
+      // Use requestAnimationFrame to ensure the DOM has fully upgraded
+      // The element definitions are ready, but instances need time to upgrade
+      requestAnimationFrame(() => {
+        this.requestUpdate();
+      });
+    });
+  }
+
+  /**
    * Get the palette element referenced by the palette attribute.
+   * Forces upgrade of the element if it hasn't been upgraded yet.
    */
   private getPalette(): ChartPalette | null {
     if (!this.palette) return null;
-    return document.getElementById(this.palette) as ChartPalette | null;
+    const element = document.getElementById(this.palette);
+    if (!element) return null;
+
+    // Force upgrade of the palette element and its children
+    // This ensures @property decorated properties are initialized from attributes
+    customElements.upgrade(element);
+    element.querySelectorAll('dc-fill').forEach(fill => {
+      customElements.upgrade(fill);
+    });
+
+    return element as ChartPalette;
   }
 
   /**
    * Resolve the fill and stroke colors to use.
-   * Priority: explicit attributes > palette lookup > fallback
+   * Priority: explicit attributes > DOM palette lookup > built-in palette > fallback
    */
   private resolveColors(): { fill: string; stroke: string } {
     // Explicit attributes take priority
@@ -139,7 +177,7 @@ export class ChartSwatch extends LitElement {
       };
     }
 
-    // Look up from palette
+    // Look up from DOM palette element
     const palette = this.getPalette();
     if (palette) {
       const result = palette.lookup(this.label, this.value);
@@ -147,6 +185,31 @@ export class ChartSwatch extends LitElement {
         return {
           fill: result.fill || '#888',
           stroke: result.stroke || 'none'
+        };
+      }
+    }
+
+    // Look up from built-in palette
+    if (this.palette) {
+      const builtinPalette = getBuiltinPalette(this.palette);
+      if (builtinPalette) {
+        // Use index if provided, otherwise default to 0
+        const idx = this.index ?? 0;
+        // For categorical palettes, access colors directly with wrap-around
+        if (builtinPalette.type === 'categorical') {
+          const color = builtinPalette.colors[idx % builtinPalette.colors.length];
+          return {
+            fill: color,
+            stroke: 'none'
+          };
+        }
+        // For sequential/diverging, generate colors and pick the one at index
+        // Generate enough colors to include the requested index
+        const count = Math.max(idx + 1, 10);
+        const colors = generatePaletteColors(builtinPalette, count);
+        return {
+          fill: colors[idx] || colors[0],
+          stroke: 'none'
         };
       }
     }

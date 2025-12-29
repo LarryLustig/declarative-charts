@@ -45,6 +45,8 @@ export { ChartLegend } from './chart-legend.js';
 export { ChartTitle } from './chart-title.js';
 
 // Export palette components
+// Side-effect import ensures dc-fill is always registered (required by dc-palette and dc-swatch)
+import './chart-fill.js';
 export { ChartPalette } from './chart-palette.js';
 export type { PaletteColorResult } from './chart-palette.js';
 export { ChartFill } from './chart-fill.js';

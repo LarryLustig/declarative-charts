@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Colors - Declarative Chart Library</title>
+    <title>Element Colors - Declarative Chart Library</title>
     <link rel="stylesheet" href="examples.css">
     <style>
         .note {
@@ -17,48 +17,11 @@
         .note strong {
             color: #1976d2;
         }
-
-        .palette-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .palette-card {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-            background: #fafafa;
-        }
-
-        .palette-card h4 {
-            margin: 0 0 10px 0;
-            font-size: 14px;
-            color: #333;
-        }
-
-        .palette-card .colors {
-            display: flex;
-            height: 30px;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .palette-card .colors div {
-            flex: 1;
-        }
-
-        .palette-card .type {
-            font-size: 11px;
-            color: #666;
-            margin-top: 8px;
-        }
     </style>
 </head>
 <body>
-    <h1>Colors</h1>
-    <p>Control chart colors using built-in palettes or element-level overrides. For reusable custom palettes with label/value matching, see <a href="palettes.html">Custom Palettes</a>.</p>
+    <h1>Element Colors</h1>
+    <p>Override colors on individual chart elements using <code>fill</code> and <code>stroke</code> attributes. For built-in or reusable custom palettes, see <a href="palettes.html">Palettes</a>.</p>
 
     <nav>
         <div class="nav-major">
@@ -74,8 +37,15 @@
             <a href="legends.html">Legends</a>
             <a href="axes.html">Axes</a>
             <a href="data-labels.html">Data Labels</a>
-            <a href="colors.html" class="current">Colors</a>
-            <a href="palettes.html">Custom Palettes</a>
+            <div class="nav-dropdown">
+                <a href="#" class="nav-dropdown-toggle">Chart Colors <span class="arrow">&#9662;</span></a>
+                <div class="nav-dropdown-menu">
+                    <a href="palettes.html">Palettes</a>
+                    <a href="swatches.html">Swatches</a>
+                    <a href="colors.html" class="current">Element Colors</a>
+                </div>
+            </div>
+            <a href="patterns.html">Patterns</a>
             <a href="typography.html">Typography</a>
             <a href="borders-and-padding.html">Borders & Padding</a>
             <a href="bar-groups.html">Bar Groups</a>
@@ -88,276 +58,6 @@
             <a href="accessibility.html">Accessibility</a>
         </div>
     </nav>
-
-    <div class="example">
-        <h2>Built-in Palettes</h2>
-        <p>Use the <code>palette</code> attribute with a built-in palette name for instant, professionally-designed color schemes:</p>
-
-        <h3>Available Palettes</h3>
-        <div class="palette-grid">
-            <div class="palette-card">
-                <h4>default</h4>
-                <div class="colors">
-                    <div style="background: #4e79a7"></div>
-                    <div style="background: #f28e2c"></div>
-                    <div style="background: #e15759"></div>
-                    <div style="background: #76b7b2"></div>
-                    <div style="background: #59a14f"></div>
-                </div>
-                <div class="type">Categorical</div>
-            </div>
-            <div class="palette-card">
-                <h4>category10</h4>
-                <div class="colors">
-                    <div style="background: #1f77b4"></div>
-                    <div style="background: #ff7f0e"></div>
-                    <div style="background: #2ca02c"></div>
-                    <div style="background: #d62728"></div>
-                    <div style="background: #9467bd"></div>
-                </div>
-                <div class="type">Categorical (D3)</div>
-            </div>
-            <div class="palette-card">
-                <h4>pastel</h4>
-                <div class="colors">
-                    <div style="background: #fbb4ae"></div>
-                    <div style="background: #b3cde3"></div>
-                    <div style="background: #ccebc5"></div>
-                    <div style="background: #decbe4"></div>
-                    <div style="background: #fed9a6"></div>
-                </div>
-                <div class="type">Categorical</div>
-            </div>
-            <div class="palette-card">
-                <h4>vivid</h4>
-                <div class="colors">
-                    <div style="background: #e15759"></div>
-                    <div style="background: #f28e2c"></div>
-                    <div style="background: #edc949"></div>
-                    <div style="background: #59a14f"></div>
-                    <div style="background: #4e79a7"></div>
-                </div>
-                <div class="type">Categorical</div>
-            </div>
-            <div class="palette-card">
-                <h4>colorblind-safe</h4>
-                <div class="colors">
-                    <div style="background: #0072B2"></div>
-                    <div style="background: #E69F00"></div>
-                    <div style="background: #009E73"></div>
-                    <div style="background: #CC79A7"></div>
-                    <div style="background: #F0E442"></div>
-                </div>
-                <div class="type">Categorical (Accessible)</div>
-            </div>
-            <div class="palette-card">
-                <h4>cool-to-warm</h4>
-                <div class="colors">
-                    <div style="background: #3498db"></div>
-                    <div style="background: #9b59b6"></div>
-                    <div style="background: #e74c3c"></div>
-                </div>
-                <div class="type">Sequential</div>
-            </div>
-            <div class="palette-card">
-                <h4>viridis</h4>
-                <div class="colors">
-                    <div style="background: #440154"></div>
-                    <div style="background: #21918c"></div>
-                    <div style="background: #fde725"></div>
-                </div>
-                <div class="type">Sequential</div>
-            </div>
-            <div class="palette-card">
-                <h4>red-blue</h4>
-                <div class="colors">
-                    <div style="background: #d73027"></div>
-                    <div style="background: #f7f7f7"></div>
-                    <div style="background: #4575b4"></div>
-                </div>
-                <div class="type">Diverging</div>
-            </div>
-        </div>
-
-        <div class="grid">
-            <div>
-                <h3>Categorical Palette</h3>
-                <pre><code>&lt;dc-chart width="500" height="350" palette="category10"&gt;
-  &lt;dc-title&gt;Quarterly Sales&lt;/dc-title&gt;
-  &lt;dc-bar value="10" label="Q1"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="25" label="Q2"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="15" label="Q3"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="40" label="Q4"&gt;&lt;/dc-bar&gt;
-  &lt;dc-legend&gt;&lt;/dc-legend&gt;
-&lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350" palette="category10">
-                    <dc-title>Quarterly Sales</dc-title>
-                    <dc-bar value="10" label="Q1"></dc-bar>
-                    <dc-bar value="25" label="Q2"></dc-bar>
-                    <dc-bar value="15" label="Q3"></dc-bar>
-                    <dc-bar value="40" label="Q4"></dc-bar>
-                    <dc-legend></dc-legend>
-                </dc-chart>
-            </div>
-
-            <div>
-                <h3>Pie with Pastel</h3>
-                <pre><code>&lt;dc-pie-chart width="500" height="350" palette="pastel"&gt;
-  &lt;dc-title&gt;Market Share&lt;/dc-title&gt;
-  &lt;dc-pie-slice value="35" label="Product A"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="28" label="Product B"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="22" label="Product C"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="15" label="Other"&gt;&lt;/dc-pie-slice&gt;
-&lt;/dc-pie-chart&gt;</code></pre>
-                <dc-pie-chart width="500" height="350" palette="pastel">
-                    <dc-title>Market Share</dc-title>
-                    <dc-pie-slice value="35" label="Product A"></dc-pie-slice>
-                    <dc-pie-slice value="28" label="Product B"></dc-pie-slice>
-                    <dc-pie-slice value="22" label="Product C"></dc-pie-slice>
-                    <dc-pie-slice value="15" label="Other"></dc-pie-slice>
-                </dc-pie-chart>
-            </div>
-
-            <div>
-                <h3>Sequential Palette (Gradient)</h3>
-                <pre><code>&lt;dc-funnel-chart width="500" height="350" palette="cool-to-warm"&gt;
-  &lt;dc-title&gt;Sales Funnel&lt;/dc-title&gt;
-  &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
-  &lt;dc-funnel-stage value="600" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
-  &lt;dc-funnel-stage value="200" label="Opportunities"&gt;&lt;/dc-funnel-stage&gt;
-  &lt;dc-funnel-stage value="80" label="Customers"&gt;&lt;/dc-funnel-stage&gt;
-&lt;/dc-funnel-chart&gt;</code></pre>
-                <dc-funnel-chart width="500" height="350" palette="cool-to-warm">
-                    <dc-title>Sales Funnel</dc-title>
-                    <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
-                    <dc-funnel-stage value="600" label="Leads"></dc-funnel-stage>
-                    <dc-funnel-stage value="200" label="Opportunities"></dc-funnel-stage>
-                    <dc-funnel-stage value="80" label="Customers"></dc-funnel-stage>
-                </dc-funnel-chart>
-            </div>
-
-            <div>
-                <h3>Colorblind-Safe Palette</h3>
-                <pre><code>&lt;dc-chart width="500" height="350" palette="colorblind-safe"&gt;
-  &lt;dc-title&gt;Accessible Colors&lt;/dc-title&gt;
-  &lt;dc-bar value="10" label="Q1"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="25" label="Q2"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="15" label="Q3"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="40" label="Q4"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="30" label="Q5"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="35" label="Q6"&gt;&lt;/dc-bar&gt;
-&lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350" palette="colorblind-safe">
-                    <dc-title>Accessible Colors</dc-title>
-                    <dc-bar value="10" label="Q1"></dc-bar>
-                    <dc-bar value="25" label="Q2"></dc-bar>
-                    <dc-bar value="15" label="Q3"></dc-bar>
-                    <dc-bar value="40" label="Q4"></dc-bar>
-                    <dc-bar value="30" label="Q5"></dc-bar>
-                    <dc-bar value="35" label="Q6"></dc-bar>
-                </dc-chart>
-            </div>
-
-            <div>
-                <h3>Line Chart with Palette</h3>
-                <pre><code>&lt;dc-chart width="500" height="350" palette="vivid"&gt;
-  &lt;dc-title&gt;Multi-Series Trend&lt;/dc-title&gt;
-  &lt;dc-line label="Series A"&gt;
-    &lt;dc-point value="15" label="Mon"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="22" label="Tue"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="18" label="Wed"&gt;&lt;/dc-point&gt;
-  &lt;/dc-line&gt;
-  &lt;dc-line label="Series B"&gt;
-    &lt;dc-point value="10" label="Mon"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="28" label="Tue"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="20" label="Wed"&gt;&lt;/dc-point&gt;
-  &lt;/dc-line&gt;
-  &lt;dc-legend position="top"&gt;&lt;/dc-legend&gt;
-&lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350" palette="vivid">
-                    <dc-title>Multi-Series Trend</dc-title>
-                    <dc-line label="Series A">
-                        <dc-point value="15" label="Mon"></dc-point>
-                        <dc-point value="22" label="Tue"></dc-point>
-                        <dc-point value="18" label="Wed"></dc-point>
-                    </dc-line>
-                    <dc-line label="Series B">
-                        <dc-point value="10" label="Mon"></dc-point>
-                        <dc-point value="28" label="Tue"></dc-point>
-                        <dc-point value="20" label="Wed"></dc-point>
-                    </dc-line>
-                    <dc-legend position="top"></dc-legend>
-                </dc-chart>
-            </div>
-
-            <div>
-                <h3>Viridis (Scientific)</h3>
-                <pre><code>&lt;dc-chart width="500" height="350" palette="viridis"&gt;
-  &lt;dc-title&gt;Scientific Data&lt;/dc-title&gt;
-  &lt;dc-bar value="10" label="A"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="25" label="B"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="15" label="C"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="40" label="D"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="30" label="E"&gt;&lt;/dc-bar&gt;
-&lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350" palette="viridis">
-                    <dc-title>Scientific Data</dc-title>
-                    <dc-bar value="10" label="A"></dc-bar>
-                    <dc-bar value="25" label="B"></dc-bar>
-                    <dc-bar value="15" label="C"></dc-bar>
-                    <dc-bar value="40" label="D"></dc-bar>
-                    <dc-bar value="30" label="E"></dc-bar>
-                </dc-chart>
-            </div>
-        </div>
-    </div>
-
-    <div class="example">
-        <h2>Custom Gradients (Funnel Charts)</h2>
-        <p>Funnel charts support custom two-color gradients using <code>start-color</code> and <code>end-color</code>:</p>
-
-        <div class="grid">
-            <div>
-                <h3>Blue to Red</h3>
-                <pre><code>&lt;dc-funnel-chart width="500" height="350"
-                 start-color="#3498db"
-                 end-color="#e74c3c"&gt;
-  &lt;dc-title&gt;Blue to Red Gradient&lt;/dc-title&gt;
-  &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
-  &lt;dc-funnel-stage value="600" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
-  &lt;dc-funnel-stage value="200" label="Opportunities"&gt;&lt;/dc-funnel-stage&gt;
-  &lt;dc-funnel-stage value="80" label="Customers"&gt;&lt;/dc-funnel-stage&gt;
-&lt;/dc-funnel-chart&gt;</code></pre>
-                <dc-funnel-chart width="500" height="350" start-color="#3498db" end-color="#e74c3c">
-                    <dc-title>Blue to Red Gradient</dc-title>
-                    <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
-                    <dc-funnel-stage value="600" label="Leads"></dc-funnel-stage>
-                    <dc-funnel-stage value="200" label="Opportunities"></dc-funnel-stage>
-                    <dc-funnel-stage value="80" label="Customers"></dc-funnel-stage>
-                </dc-funnel-chart>
-            </div>
-
-            <div>
-                <h3>Purple to Cyan</h3>
-                <pre><code>&lt;dc-funnel-chart width="500" height="350"
-                 start-color="#673AB7"
-                 end-color="#00BCD4"&gt;
-  &lt;dc-title&gt;Purple to Cyan&lt;/dc-title&gt;
-  &lt;dc-funnel-stage value="1000" label="Stage 1"&gt;&lt;/dc-funnel-stage&gt;
-  &lt;dc-funnel-stage value="600" label="Stage 2"&gt;&lt;/dc-funnel-stage&gt;
-  &lt;dc-funnel-stage value="200" label="Stage 3"&gt;&lt;/dc-funnel-stage&gt;
-  &lt;dc-funnel-stage value="80" label="Stage 4"&gt;&lt;/dc-funnel-stage&gt;
-&lt;/dc-funnel-chart&gt;</code></pre>
-                <dc-funnel-chart width="500" height="350" start-color="#673AB7" end-color="#00BCD4">
-                    <dc-title>Purple to Cyan</dc-title>
-                    <dc-funnel-stage value="1000" label="Stage 1"></dc-funnel-stage>
-                    <dc-funnel-stage value="600" label="Stage 2"></dc-funnel-stage>
-                    <dc-funnel-stage value="200" label="Stage 3"></dc-funnel-stage>
-                    <dc-funnel-stage value="80" label="Stage 4"></dc-funnel-stage>
-                </dc-funnel-chart>
-            </div>
-        </div>
-    </div>
 
     <div class="example">
         <h2>Element-Level Colors</h2>
@@ -458,6 +158,53 @@
         </div>
     </div>
 
+    <div class="example">
+        <h2>Custom Gradients (Funnel Charts)</h2>
+        <p>Funnel charts support custom two-color gradients using <code>start-color</code> and <code>end-color</code>:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Blue to Red</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="350"
+                 start-color="#3498db"
+                 end-color="#e74c3c"&gt;
+  &lt;dc-title&gt;Blue to Red Gradient&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="600" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="200" label="Opportunities"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="80" label="Customers"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="350" start-color="#3498db" end-color="#e74c3c">
+                    <dc-title>Blue to Red Gradient</dc-title>
+                    <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
+                    <dc-funnel-stage value="600" label="Leads"></dc-funnel-stage>
+                    <dc-funnel-stage value="200" label="Opportunities"></dc-funnel-stage>
+                    <dc-funnel-stage value="80" label="Customers"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Purple to Cyan</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="350"
+                 start-color="#673AB7"
+                 end-color="#00BCD4"&gt;
+  &lt;dc-title&gt;Purple to Cyan&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="1000" label="Stage 1"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="600" label="Stage 2"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="200" label="Stage 3"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="80" label="Stage 4"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="350" start-color="#673AB7" end-color="#00BCD4">
+                    <dc-title>Purple to Cyan</dc-title>
+                    <dc-funnel-stage value="1000" label="Stage 1"></dc-funnel-stage>
+                    <dc-funnel-stage value="600" label="Stage 2"></dc-funnel-stage>
+                    <dc-funnel-stage value="200" label="Stage 3"></dc-funnel-stage>
+                    <dc-funnel-stage value="80" label="Stage 4"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
     <div class="example" id="color-priority">
         <h2>Color Priority</h2>
         <p>Colors are resolved in this priority order (highest to lowest):</p>
@@ -469,7 +216,7 @@
         </ol>
 
         <div class="note">
-            <strong>Need more control?</strong> For label-based matching, value-range thresholds, or colors shared across multiple charts, see <a href="palettes.html">Custom Palettes</a>.
+            <strong>Need more control?</strong> For label-based matching, value-range thresholds, or colors shared across multiple charts, see <a href="palettes.html">Palettes</a>.
         </div>
     </div>
 

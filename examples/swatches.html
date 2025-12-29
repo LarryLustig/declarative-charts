@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swatches - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+    <style>
+        .swatch-demo {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin: 10px 0;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+        .swatch-demo dc-swatch {
+            margin-right: 5px;
+        }
+        .data-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        .data-table th, .data-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .data-table th {
+            background: #f3f4f6;
+        }
+        .data-table tr:nth-child(even) {
+            background: #f9fafb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Swatches</h1>
+    <p>Use <code>&lt;dc-swatch&gt;</code> to display palette colors outside of charts, creating visual associations in prose and tables.</p>
+
+    <nav>
+        <div class="nav-major">
+            <a href="../index.html">Home</a>
+            <a href="barcharts.html">Bar Charts</a>
+            <a href="linecharts.html">Line Charts</a>
+            <a href="bubblecharts.html">Bubble Charts</a>
+            <a href="piecharts.html">Pie Charts</a>
+            <a href="funnelcharts.html">Funnel Charts</a>
+        </div>
+        <div class="nav-minor">
+            <a href="titles.html">Titles</a>
+            <a href="legends.html">Legends</a>
+            <a href="axes.html">Axes</a>
+            <a href="data-labels.html">Data Labels</a>
+            <div class="nav-dropdown">
+                <a href="#" class="nav-dropdown-toggle">Chart Colors <span class="arrow">&#9662;</span></a>
+                <div class="nav-dropdown-menu">
+                    <a href="palettes.html">Palettes</a>
+                    <a href="swatches.html" class="current">Swatches</a>
+                    <a href="colors.html">Element Colors</a>
+                </div>
+            </div>
+            <a href="patterns.html">Patterns</a>
+            <a href="typography.html">Typography</a>
+            <a href="borders-and-padding.html">Borders & Padding</a>
+            <a href="bar-groups.html">Bar Groups</a>
+            <a href="bar-width.html">Bar Width</a>
+            <a href="gutter.html">Gutter</a>
+            <a href="interactive.html">Interactive</a>
+            <a href="popups.html">Popups</a>
+            <a href="logging.html">Logging</a>
+            <a href="htmx-integration.html">htmx</a>
+            <a href="accessibility.html">Accessibility</a>
+        </div>
+    </nav>
+
+    <!-- Define palettes used in examples -->
+    <dc-palette id="brand-colors">
+        <dc-fill label="Revenue" fill="#2563eb" stroke="#1e40af"></dc-fill>
+        <dc-fill label="Expenses" fill="#dc2626" stroke="#b91c1c"></dc-fill>
+        <dc-fill label="Profit" fill="#16a34a" stroke="#15803d"></dc-fill>
+    </dc-palette>
+
+    <dc-palette id="department-colors">
+        <dc-fill label="Engineering" fill="#6366f1"></dc-fill>
+        <dc-fill label="Marketing" fill="#f59e0b"></dc-fill>
+        <dc-fill label="Sales" fill="#10b981"></dc-fill>
+        <dc-fill label="Operations" fill="#8b5cf6"></dc-fill>
+    </dc-palette>
+
+    <div class="example">
+        <h2>Swatches in Prose</h2>
+        <p>Swatches can be used inline with text to create visual associations between chart colors and written content:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Inline Color References</h3>
+                <pre><code>&lt;p&gt;
+  &lt;dc-swatch palette="brand-colors" label="Revenue"&gt;&lt;/dc-swatch&gt;
+  Revenue increased 15% this quarter.
+&lt;/p&gt;
+&lt;p&gt;
+  &lt;dc-swatch palette="brand-colors" label="Expenses"&gt;&lt;/dc-swatch&gt;
+  Expenses were held flat.
+&lt;/p&gt;
+&lt;p&gt;
+  &lt;dc-swatch palette="brand-colors" label="Profit"&gt;&lt;/dc-swatch&gt;
+  Profit margins improved significantly.
+&lt;/p&gt;</code></pre>
+                <div class="swatch-demo" style="flex-direction: column; align-items: flex-start;">
+                    <p style="margin: 5px 0;">
+                        <dc-swatch palette="brand-colors" label="Revenue"></dc-swatch>
+                        Revenue increased 15% this quarter.
+                    </p>
+                    <p style="margin: 5px 0;">
+                        <dc-swatch palette="brand-colors" label="Expenses"></dc-swatch>
+                        Expenses were held flat.
+                    </p>
+                    <p style="margin: 5px 0;">
+                        <dc-swatch palette="brand-colors" label="Profit"></dc-swatch>
+                        Profit margins improved significantly.
+                    </p>
+                </div>
+            </div>
+
+            <div>
+                <h3>Swatches in Tables</h3>
+                <pre><code>&lt;table&gt;
+  &lt;tr&gt;
+    &lt;th&gt;Category&lt;/th&gt;&lt;th&gt;Q4 Value&lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td&gt;&lt;dc-swatch palette="brand-colors" label="Revenue"&gt;&lt;/dc-swatch&gt; Revenue&lt;/td&gt;
+    &lt;td&gt;$120,000&lt;/td&gt;
+  &lt;/tr&gt;
+  ...
+&lt;/table&gt;</code></pre>
+                <table class="data-table">
+                    <tr>
+                        <th>Category</th>
+                        <th>Q4 Value</th>
+                    </tr>
+                    <tr>
+                        <td><dc-swatch palette="brand-colors" label="Revenue"></dc-swatch> Revenue</td>
+                        <td>$120,000</td>
+                    </tr>
+                    <tr>
+                        <td><dc-swatch palette="brand-colors" label="Expenses"></dc-swatch> Expenses</td>
+                        <td>$80,000</td>
+                    </tr>
+                    <tr>
+                        <td><dc-swatch palette="brand-colors" label="Profit"></dc-swatch> Profit</td>
+                        <td>$40,000</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Swatch Shapes</h2>
+        <p>Use the <code>shape</code> attribute to change the swatch appearance. Standard shapes include: circle, square, rect, line, triangle, diamond, star, cross, plus. You can also use Unicode characters.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Standard Shapes</h3>
+                <pre><code>&lt;dc-swatch palette="department-colors" label="Engineering" shape="circle"&gt;&lt;/dc-swatch&gt;
+&lt;dc-swatch palette="department-colors" label="Marketing" shape="square"&gt;&lt;/dc-swatch&gt;
+&lt;dc-swatch palette="department-colors" label="Sales" shape="triangle"&gt;&lt;/dc-swatch&gt;
+&lt;dc-swatch palette="department-colors" label="Operations" shape="diamond"&gt;&lt;/dc-swatch&gt;</code></pre>
+                <div class="swatch-demo">
+                    <span><dc-swatch palette="department-colors" label="Engineering" shape="circle"></dc-swatch> Circle</span>
+                    <span><dc-swatch palette="department-colors" label="Marketing" shape="square"></dc-swatch> Square</span>
+                    <span><dc-swatch palette="department-colors" label="Sales" shape="triangle"></dc-swatch> Triangle</span>
+                    <span><dc-swatch palette="department-colors" label="Operations" shape="diamond"></dc-swatch> Diamond</span>
+                </div>
+                <div class="swatch-demo">
+                    <span><dc-swatch palette="department-colors" label="Engineering" shape="star"></dc-swatch> Star</span>
+                    <span><dc-swatch palette="department-colors" label="Marketing" shape="cross"></dc-swatch> Cross</span>
+                    <span><dc-swatch palette="department-colors" label="Sales" shape="plus"></dc-swatch> Plus</span>
+                    <span><dc-swatch palette="department-colors" label="Operations" shape="line"></dc-swatch> Line</span>
+                </div>
+            </div>
+
+            <div>
+                <h3>Unicode Characters</h3>
+                <pre><code>&lt;dc-swatch palette="brand-colors" label="Revenue" shape="&#9733;"&gt;&lt;/dc-swatch&gt;
+&lt;dc-swatch palette="brand-colors" label="Expenses" shape="&#9888;"&gt;&lt;/dc-swatch&gt;
+&lt;dc-swatch palette="brand-colors" label="Profit" shape="&#10003;"&gt;&lt;/dc-swatch&gt;</code></pre>
+                <div class="swatch-demo">
+                    <span><dc-swatch palette="brand-colors" label="Revenue" shape="&#9733;"></dc-swatch> Star</span>
+                    <span><dc-swatch palette="brand-colors" label="Expenses" shape="&#9888;"></dc-swatch> Warning</span>
+                    <span><dc-swatch palette="brand-colors" label="Profit" shape="&#10003;"></dc-swatch> Checkmark</span>
+                </div>
+                <div class="swatch-demo">
+                    <span><dc-swatch palette="brand-colors" label="Revenue" shape="&#9679;"></dc-swatch> Filled circle</span>
+                    <span><dc-swatch palette="brand-colors" label="Expenses" shape="&#9632;"></dc-swatch> Filled square</span>
+                    <span><dc-swatch palette="brand-colors" label="Profit" shape="&#9650;"></dc-swatch> Triangle up</span>
+                </div>
+                <p><em>Note: CSS color only works for monochrome Unicode symbols. Color emojis (like &#128200;) ignore the palette color.</em></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Line Chart Swatches</h2>
+        <p>Use swatches with the <code>line</code> shape to match line chart legends:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Line Shape Swatches</h3>
+                <pre><code>&lt;dc-swatch palette="brand-colors" label="Revenue" shape="line"&gt;&lt;/dc-swatch&gt;
+Revenue shows strong upward trend
+
+&lt;dc-swatch palette="brand-colors" label="Expenses" shape="line"&gt;&lt;/dc-swatch&gt;
+Expenses remain stable</code></pre>
+                <div class="swatch-demo" style="flex-direction: column; align-items: flex-start;">
+                    <p style="margin: 5px 0;">
+                        <dc-swatch palette="brand-colors" label="Revenue" shape="line"></dc-swatch>
+                        Revenue shows strong upward trend
+                    </p>
+                    <p style="margin: 5px 0;">
+                        <dc-swatch palette="brand-colors" label="Expenses" shape="line"></dc-swatch>
+                        Expenses remain stable
+                    </p>
+                </div>
+            </div>
+
+            <div>
+                <h3>Matching Chart</h3>
+                <dc-chart palette="brand-colors" width="500" height="300">
+                    <dc-title>Quarterly Trends</dc-title>
+                    <dc-line label="Revenue">
+                        <dc-point value="100" label="Q1"></dc-point>
+                        <dc-point value="120" label="Q2"></dc-point>
+                        <dc-point value="115" label="Q3"></dc-point>
+                        <dc-point value="140" label="Q4"></dc-point>
+                    </dc-line>
+                    <dc-line label="Expenses">
+                        <dc-point value="80" label="Q1"></dc-point>
+                        <dc-point value="85" label="Q2"></dc-point>
+                        <dc-point value="90" label="Q3"></dc-point>
+                        <dc-point value="88" label="Q4"></dc-point>
+                    </dc-line>
+                    <dc-legend position="top"></dc-legend>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Swatch with Built-in Palettes</h2>
+        <p>Swatches can also reference built-in palettes by index (0-based) using the <code>index</code> attribute:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Index-Based Colors</h3>
+                <pre><code>&lt;dc-swatch palette="category10" index="0"&gt;&lt;/dc-swatch&gt; First color
+&lt;dc-swatch palette="category10" index="1"&gt;&lt;/dc-swatch&gt; Second color
+&lt;dc-swatch palette="category10" index="2"&gt;&lt;/dc-swatch&gt; Third color</code></pre>
+                <div class="swatch-demo" style="flex-direction: column; align-items: flex-start;">
+                    <p style="margin: 5px 0;">
+                        <dc-swatch palette="category10" index="0"></dc-swatch> First color (index 0)
+                    </p>
+                    <p style="margin: 5px 0;">
+                        <dc-swatch palette="category10" index="1"></dc-swatch> Second color (index 1)
+                    </p>
+                    <p style="margin: 5px 0;">
+                        <dc-swatch palette="category10" index="2"></dc-swatch> Third color (index 2)
+                    </p>
+                </div>
+            </div>
+
+            <div>
+                <h3>Direct Fill Override</h3>
+                <pre><code>&lt;dc-swatch fill="#FF5722"&gt;&lt;/dc-swatch&gt; Custom orange
+&lt;dc-swatch fill="#9C27B0"&gt;&lt;/dc-swatch&gt; Custom purple</code></pre>
+                <div class="swatch-demo" style="flex-direction: column; align-items: flex-start;">
+                    <p style="margin: 5px 0;">
+                        <dc-swatch fill="#FF5722"></dc-swatch> Custom orange (direct fill)
+                    </p>
+                    <p style="margin: 5px 0;">
+                        <dc-swatch fill="#9C27B0"></dc-swatch> Custom purple (direct fill)
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../dist/declarative-charts.js"></script>
+    <script src="examples.js"></script>
+</body>
+</html>
