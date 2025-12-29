@@ -1,7 +1,7 @@
 {
-  "name": "declarative-chart-library",
+  "name": "declarative-charts",
   "version": "0.1.0",
-  "description": "A declarative chart library using nested Web Components",
+  "description": "Create beautiful charts using declarative HTML elements. Bar, line, pie, funnel charts with accessibility, palettes, and responsive design.",
   "type": "module",
   "main": "./dist/declarative-charts.umd.cjs",
   "module": "./dist/declarative-charts.js",
@@ -9,9 +9,11 @@
   "exports": {
     ".": {
       "import": "./dist/declarative-charts.js",
-      "require": "./dist/declarative-charts.umd.cjs"
+      "require": "./dist/declarative-charts.umd.cjs",
+      "types": "./dist/index.d.ts"
     }
   },
+  "sideEffects": false,
   "files": [
     "dist",
     "README.md",
@@ -19,14 +21,15 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build && tsc -p tsconfig.build.json",
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:visual": "playwright test",
     "test:visual:update": "playwright test --update-snapshots",
-    "test:visual:report": "playwright show-report test/visual/report"
+    "test:visual:report": "playwright show-report test/visual/report",
+    "prepublishOnly": "npm run test:run && npm run build"
   },
   "repository": {
     "type": "git",
