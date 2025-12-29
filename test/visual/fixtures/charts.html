@@ -268,6 +268,45 @@
     </dc-chart>
   </div>
 
+  <!-- Swatches -->
+  <div id="swatches" class="chart-container">
+    <h2>Swatches</h2>
+    <!-- Define palette for label matching -->
+    <dc-palette id="test-palette">
+      <dc-fill label="Revenue" fill="#2563eb"></dc-fill>
+      <dc-fill label="Expenses" fill="#dc2626"></dc-fill>
+      <dc-fill label="Profit" fill="#16a34a"></dc-fill>
+    </dc-palette>
+    <div style="display: flex; flex-direction: column; gap: 12px; padding: 20px; background: #f9fafb; border-radius: 8px;">
+      <!-- Custom palette with label matching -->
+      <div style="display: flex; gap: 20px; align-items: center;">
+        <span><dc-swatch palette="test-palette" label="Revenue"></dc-swatch> Revenue</span>
+        <span><dc-swatch palette="test-palette" label="Expenses"></dc-swatch> Expenses</span>
+        <span><dc-swatch palette="test-palette" label="Profit"></dc-swatch> Profit</span>
+      </div>
+      <!-- Built-in palette with index -->
+      <div style="display: flex; gap: 20px; align-items: center;">
+        <span><dc-swatch palette="category10" index="0"></dc-swatch> Index 0</span>
+        <span><dc-swatch palette="category10" index="1"></dc-swatch> Index 1</span>
+        <span><dc-swatch palette="category10" index="2"></dc-swatch> Index 2</span>
+        <span><dc-swatch palette="category10" index="3"></dc-swatch> Index 3</span>
+      </div>
+      <!-- Different shapes -->
+      <div style="display: flex; gap: 20px; align-items: center;">
+        <span><dc-swatch palette="category10" index="0" shape="circle"></dc-swatch> Circle</span>
+        <span><dc-swatch palette="category10" index="1" shape="square"></dc-swatch> Square</span>
+        <span><dc-swatch palette="category10" index="2" shape="triangle"></dc-swatch> Triangle</span>
+        <span><dc-swatch palette="category10" index="3" shape="diamond"></dc-swatch> Diamond</span>
+        <span><dc-swatch palette="category10" index="4" shape="line"></dc-swatch> Line</span>
+      </div>
+      <!-- Direct fill override -->
+      <div style="display: flex; gap: 20px; align-items: center;">
+        <span><dc-swatch fill="#FF5722"></dc-swatch> Direct fill</span>
+        <span><dc-swatch fill="#9C27B0" shape="star"></dc-swatch> Star</span>
+      </div>
+    </div>
+  </div>
+
   <script>
     // Show specific chart based on URL parameter
     // Usage: charts.html?chart=bar-basic

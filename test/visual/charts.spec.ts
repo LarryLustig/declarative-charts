@@ -155,6 +155,21 @@ test.describe('Funnel Charts', () => {
   });
 });
 
+test.describe('Swatches', () => {
+  test('swatches with palettes and shapes', async ({ page }) => {
+    await page.goto(`${FIXTURES_URL}?chart=swatches`);
+    // Wait for dc-swatch to be defined
+    await page.waitForFunction(() => {
+      return customElements.get('dc-swatch') !== undefined;
+    });
+    // Wait for swatches to render
+    await page.waitForTimeout(200);
+
+    const container = await getChartContainer(page, 'swatches');
+    await expect(container).toHaveScreenshot('swatches.png');
+  });
+});
+
 test.describe('Chart Features', () => {
   test('chart with patterns', async ({ page }) => {
     await page.goto(`${FIXTURES_URL}?chart=patterns`);
