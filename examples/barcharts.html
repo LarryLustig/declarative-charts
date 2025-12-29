@@ -25,7 +25,7 @@
             <a href="axes.html">Axes</a>
             <a href="data-labels.html">Data Labels</a>
             <a href="colors.html">Colors</a>
-            <a href="palettes.html">Palettes</a>
+            <a href="palettes.html">Custom Palettes</a>
             <a href="typography.html">Typography</a>
             <a href="borders-and-padding.html">Borders & Padding</a>
             <a href="bar-groups.html">Bar Groups</a>
@@ -88,37 +88,37 @@
 
             <div>
                 <h3>Vertical Reverse</h3>
-                <pre><code>&lt;dc-chart width="500" height="350" orientation="vertical-reverse" fill-colors="#00BCD4"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" orientation="vertical-reverse"&gt;
   &lt;dc-title&gt;Download Speed by Server (Mbps)&lt;/dc-title&gt;
-  &lt;dc-bar value="120" label="Server 1"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="95" label="Server 2"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="150" label="Server 3"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="110" label="Server 4"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="120" label="Server 1" fill="#00BCD4"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="95" label="Server 2" fill="#00BCD4"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Server 3" fill="#00BCD4"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="110" label="Server 4" fill="#00BCD4"&gt;&lt;/dc-bar&gt;
 &lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350" orientation="vertical-reverse" fill-colors="#00BCD4">
+                <dc-chart width="500" height="350" orientation="vertical-reverse">
                     <dc-title>Download Speed by Server (Mbps)</dc-title>
-                    <dc-bar value="120" label="Server 1"></dc-bar>
-                    <dc-bar value="95" label="Server 2"></dc-bar>
-                    <dc-bar value="150" label="Server 3"></dc-bar>
-                    <dc-bar value="110" label="Server 4"></dc-bar>
+                    <dc-bar value="120" label="Server 1" fill="#00BCD4"></dc-bar>
+                    <dc-bar value="95" label="Server 2" fill="#00BCD4"></dc-bar>
+                    <dc-bar value="150" label="Server 3" fill="#00BCD4"></dc-bar>
+                    <dc-bar value="110" label="Server 4" fill="#00BCD4"></dc-bar>
                 </dc-chart>
             </div>
 
             <div>
                 <h3>Horizontal Reverse</h3>
-                <pre><code>&lt;dc-chart width="500" height="350" orientation="horizontal-reverse" fill-colors="#673AB7"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" orientation="horizontal-reverse"&gt;
   &lt;dc-title&gt;Code Complexity Score&lt;/dc-title&gt;
-  &lt;dc-bar value="85" label="Module A"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="120" label="Module B"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="95" label="Module C"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="140" label="Module D"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="85" label="Module A" fill="#673AB7"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="120" label="Module B" fill="#673AB7"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="95" label="Module C" fill="#673AB7"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="140" label="Module D" fill="#673AB7"&gt;&lt;/dc-bar&gt;
 &lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350" orientation="horizontal-reverse" fill-colors="#673AB7">
+                <dc-chart width="500" height="350" orientation="horizontal-reverse">
                     <dc-title>Code Complexity Score</dc-title>
-                    <dc-bar value="85" label="Module A"></dc-bar>
-                    <dc-bar value="120" label="Module B"></dc-bar>
-                    <dc-bar value="95" label="Module C"></dc-bar>
-                    <dc-bar value="140" label="Module D"></dc-bar>
+                    <dc-bar value="85" label="Module A" fill="#673AB7"></dc-bar>
+                    <dc-bar value="120" label="Module B" fill="#673AB7"></dc-bar>
+                    <dc-bar value="95" label="Module C" fill="#673AB7"></dc-bar>
+                    <dc-bar value="140" label="Module D" fill="#673AB7"></dc-bar>
                 </dc-chart>
             </div>
         </div>
@@ -522,21 +522,21 @@
             <div>
                 <h3>All Negative Values</h3>
                 <p>When all values are negative, the zero line appears at the top:</p>
-                <pre><code>&lt;dc-chart width="500" height="350" fill-colors="#E53935"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-title&gt;Temperature Readings (Below Zero)&lt;/dc-title&gt;
-  &lt;dc-bar value="-5" label="Mon"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="-12" label="Tue"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="-8" label="Wed"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="-15" label="Thu"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="-3" label="Fri"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-5" label="Mon" fill="#E53935"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-12" label="Tue" fill="#E53935"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-8" label="Wed" fill="#E53935"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-15" label="Thu" fill="#E53935"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-3" label="Fri" fill="#E53935"&gt;&lt;/dc-bar&gt;
 &lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350" fill-colors="#E53935">
+                <dc-chart width="500" height="350">
                     <dc-title>Temperature Readings (Below Zero)</dc-title>
-                    <dc-bar value="-5" label="Mon"></dc-bar>
-                    <dc-bar value="-12" label="Tue"></dc-bar>
-                    <dc-bar value="-8" label="Wed"></dc-bar>
-                    <dc-bar value="-15" label="Thu"></dc-bar>
-                    <dc-bar value="-3" label="Fri"></dc-bar>
+                    <dc-bar value="-5" label="Mon" fill="#E53935"></dc-bar>
+                    <dc-bar value="-12" label="Tue" fill="#E53935"></dc-bar>
+                    <dc-bar value="-8" label="Wed" fill="#E53935"></dc-bar>
+                    <dc-bar value="-15" label="Thu" fill="#E53935"></dc-bar>
+                    <dc-bar value="-3" label="Fri" fill="#E53935"></dc-bar>
                 </dc-chart>
             </div>
         </div>

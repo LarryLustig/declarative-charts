@@ -541,9 +541,9 @@ describe('FunnelChart component', () => {
   // ============================================================================
 
   describe('fill colors', () => {
-    it('supports fill-colors attribute', async () => {
+    it('supports palette attribute with built-in palette', async () => {
       chart = await fixture<FunnelChart>('dc-funnel-chart', {
-        'fill-colors': '#ff0000, #00ff00, #0000ff'
+        'palette': 'category10'
       }, `
         <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
         <dc-funnel-stage value="75" label="B"></dc-funnel-stage>
@@ -551,20 +551,20 @@ describe('FunnelChart component', () => {
       `);
       const polygons = chart.shadowRoot?.querySelectorAll('polygon[data-shape-index]');
       expect(polygons).toHaveLength(3);
-      // First stage should use first color
-      expect(polygons?.[0]?.getAttribute('fill')).toBe('#ff0000');
+      // First stage should use first color from category10 palette
+      expect(polygons?.[0]?.getAttribute('fill')).toBe('#1f77b4');
     });
 
-    it('legend items use fill-colors when specified', async () => {
+    it('legend items use palette colors when specified', async () => {
       chart = await fixture<FunnelChart>('dc-funnel-chart', {
-        'fill-colors': '#ff0000, #00ff00'
+        'palette': 'category10'
       }, `
         <dc-funnel-stage value="100" label="Stage A"></dc-funnel-stage>
         <dc-funnel-stage value="50" label="Stage B"></dc-funnel-stage>
       `);
       const items = (chart as any).getLegendItems();
-      expect(items[0].color).toBe('#ff0000');
-      expect(items[1].color).toBe('#00ff00');
+      expect(items[0].color).toBe('#1f77b4');
+      expect(items[1].color).toBe('#ff7f0e');
     });
   });
 

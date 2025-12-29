@@ -17,28 +17,20 @@ import {
 } from './patterns.js';
 import { NumberFormatter } from './format.js';
 import { calculatePopupPosition, type ShapeBounds } from './chart-utils.js';
-
-/**
- * Color mode for resolving chart element colors.
- * - 'single': Use a single color for all elements
- * - 'palette': Cycle through a list of colors
- * - 'gradient': Interpolate between start and end colors
- * - 'auto': Auto-generate colors using golden ratio algorithm
- */
-export type ColorMode = 'single' | 'palette' | 'gradient' | 'auto';
+import {
+  isBuiltinPalette,
+  getBuiltinPalette,
+  generatePaletteColors as generateBuiltinPaletteColors
+} from './builtin-palettes.js';
 
 /**
  * Options for resolving colors for chart elements.
  */
 export interface ColorResolutionOptions {
-  /** Per-element color overrides (from element's fill attribute) */
+  /** Per-element color overrides (from element's fill/stroke attribute) */
   elementColors?: (string | undefined)[];
-  /** Start color for gradient mode */
-  startColor?: string;
-  /** End color for gradient mode */
-  endColor?: string;
-  /** Palette of colors (array, comma-separated string, or "auto" for auto-generation) */
-  palette?: string | string[];
+  /** Base colors from palette (user-defined or built-in) */
+  paletteColors?: string[];
   /** Default fallback color if nothing else is specified */
   defaultColor?: string;
 }
@@ -339,66 +331,35 @@ export abstract class BaseChart extends LitElement {
   // ============================================================================
 
   /**
-   * Fill colors for elements.
-   * Can be a single color (e.g., "#f00"), a comma-separated list (e.g., "#f00,#0f0,#00f"),
-   * or "auto" for algorithmic generation using golden ratio.
-   * Colors cycle if there are more elements than colors.
-   */
-  @property({ type: String, attribute: 'fill-colors' })
-  fillColors?: string;
-
-  /**
-   * Start color for gradient fill mode.
-   * When both fill-start-color and fill-end-color are set,
-   * colors are interpolated between them using HSL for vibrant intermediates.
-   * Takes precedence over fill-colors.
-   */
-  @property({ type: String, attribute: 'fill-start-color' })
-  fillStartColor?: string;
-
-  /**
-   * End color for gradient fill mode.
-   * Used with fill-start-color to create color gradients.
-   */
-  @property({ type: String, attribute: 'fill-end-color' })
-  fillEndColor?: string;
-
-  /**
-   * Stroke colors for elements.
-   * Can be a single color, a comma-separated list, or "auto".
-   * Colors cycle if there are more elements than colors.
-   */
-  @property({ type: String, attribute: 'stroke-colors' })
-  strokeColors?: string;
-
-  /**
-   * Start color for gradient stroke mode.
-   */
-  @property({ type: String, attribute: 'stroke-start-color' })
-  strokeStartColor?: string;
-
-  /**
-   * End color for gradient stroke mode.
-   */
-  @property({ type: String, attribute: 'stroke-end-color' })
-  strokeEndColor?: string;
-
-  /**
    * Stroke width for all elements (in pixels).
    */
   @property({ type: Number, attribute: 'stroke-width' })
   strokeWidth?: number;
 
   /**
-   * ID of a <dc-palette> element to use for color lookups.
-   * When specified, chart elements will have their colors resolved by matching
-   * their label and/or value against the palette's color definitions.
+   * Palette for chart colors. Can be:
+   * - ID of a user-defined <dc-palette> element in the document
+   * - Name of a built-in palette (e.g., "category10", "viridis", "cool-to-warm")
+   *
+   * User-defined palettes take precedence over built-in palettes with the same name.
+   *
+   * For user-defined palettes, colors are matched by:
+   * 1. Value range (min-value/max-value on <dc-fill> elements)
+   * 2. Label matching (label attribute on <dc-fill> elements)
+   * 3. Index order (first unmatched element gets first color, etc.)
+   *
+   * For built-in palettes, colors are assigned by index order.
+   *
+   * Available built-in palettes:
+   * - Categorical: default, category10, pastel, vivid, earth, ocean, colorblind-safe, high-contrast
+   * - Sequential: cool-to-warm, blues, greens, reds, purples, warm, cool, sunset, viridis
+   * - Diverging: red-blue, brown-teal, purple-orange
    *
    * Priority order for color resolution:
    * 1. Element's own fill/stroke attributes (explicit override)
-   * 2. Palette match by value range (if palette is specified)
-   * 3. Palette match by label (if palette is specified)
-   * 4. Chart-level color settings (fill-colors, gradient, etc.)
+   * 2. Palette match by value range (user-defined palettes only)
+   * 3. Palette match by label (user-defined palettes only)
+   * 4. Palette colors by index
    * 5. Auto-generated colors
    *
    * @attr palette
@@ -1340,9 +1301,8 @@ export abstract class BaseChart extends LitElement {
   /**
    * Resolve colors for chart elements based on the color resolution order:
    * 1. Element-level color (highest priority)
-   * 2. Gradient (if both start and end are present)
-   * 3. Palette (if present, or "auto" for generation)
-   * 4. Default/fallback (auto-generated)
+   * 2. Palette colors (from user-defined or built-in palette)
+   * 3. Default/fallback (auto-generated)
    *
    * @param count Number of colors needed
    * @param options Color resolution options
@@ -1351,9 +1311,7 @@ export abstract class BaseChart extends LitElement {
   protected resolveColors(count: number, options: ColorResolutionOptions = {}): string[] {
     const {
       elementColors = [],
-      startColor,
-      endColor,
-      palette,
+      paletteColors,
       defaultColor
     } = options;
 
@@ -1361,51 +1319,19 @@ export abstract class BaseChart extends LitElement {
     let baseColors: string[];
     let colorMode: string;
 
-    // Priority 2: Gradient (if both start and end are present)
-    if (startColor && endColor) {
-      const gradientColors = this.generateGradientColors(startColor, endColor, count);
-      if (gradientColors) {
-        baseColors = gradientColors;
-        colorMode = `gradient (${startColor} → ${endColor})`;
-      } else {
-        // Fallback to auto if gradient generation fails
-        baseColors = this.generatePaletteColors(count);
-        colorMode = 'auto (gradient failed)';
-      }
-    }
-    // Priority 3: Palette (can be single color, comma-separated list, or "auto")
-    else if (palette) {
-      if (palette === 'auto') {
-        baseColors = this.generatePaletteColors(count);
-        colorMode = 'auto (palette="auto")';
-      } else if (Array.isArray(palette)) {
-        // Use palette colors, cycling if needed
-        baseColors = Array.from({ length: count }, (_, i) => palette[i % palette.length]);
-        colorMode = `palette array [${palette.length} colors]`;
-      } else {
-        // Parse comma-separated string (single color works too - just one item in array)
-        const paletteArray = palette.split(',').map(c => c.trim()).filter(c => c);
-        if (paletteArray.length > 0) {
-          baseColors = Array.from({ length: count }, (_, i) => paletteArray[i % paletteArray.length]);
-          colorMode = paletteArray.length === 1
-            ? `single color (${paletteArray[0]})`
-            : `palette [${paletteArray.length} colors]`;
-        } else {
-          baseColors = this.generatePaletteColors(count);
-          colorMode = 'auto (empty palette)';
-        }
-      }
-    }
-    // Priority 4: Default or auto-generate
-    else if (defaultColor) {
+    if (paletteColors && paletteColors.length > 0) {
+      // Use palette colors, cycling if needed
+      baseColors = Array.from({ length: count }, (_, i) => paletteColors[i % paletteColors.length]);
+      colorMode = `palette [${paletteColors.length} colors]`;
+    } else if (defaultColor) {
       baseColors = Array(count).fill(defaultColor);
       colorMode = `default (${defaultColor})`;
     } else {
       baseColors = this.generatePaletteColors(count);
-      colorMode = 'auto (no colors specified)';
+      colorMode = 'auto';
     }
 
-    // Priority 1: Apply element-level overrides
+    // Apply element-level overrides (highest priority)
     const finalColors = baseColors.map((color, i) => elementColors[i] || color);
 
     // Count element overrides
@@ -1420,48 +1346,85 @@ export abstract class BaseChart extends LitElement {
   }
 
   /**
-   * Resolve fill colors for chart elements using the chart's fill-* properties.
-   * This is a convenience method that wraps resolveColors with the fill properties.
+   * Resolve fill colors for chart elements.
    *
    * @param count Number of colors needed
    * @param elementColors Optional per-element color overrides
+   * @param paletteColors Optional palette colors to use as base
    * @param defaultColor Optional default color if nothing else is specified
    * @returns Array of resolved fill colors
    */
   protected resolveFillColors(
     count: number,
     elementColors?: (string | undefined)[],
+    paletteColors?: string[],
     defaultColor?: string
   ): string[] {
     return this.resolveColors(count, {
       elementColors,
-      startColor: this.fillStartColor,
-      endColor: this.fillEndColor,
-      palette: this.fillColors,
+      paletteColors,
       defaultColor
     });
   }
 
   /**
-   * Resolve stroke colors for chart elements using the chart's stroke-* properties.
+   * Resolve stroke colors for chart elements.
    *
    * @param count Number of colors needed
    * @param elementColors Optional per-element color overrides
+   * @param paletteColors Optional palette colors to use as base
    * @param defaultColor Optional default color if nothing else is specified
    * @returns Array of resolved stroke colors
    */
   protected resolveStrokeColors(
     count: number,
     elementColors?: (string | undefined)[],
+    paletteColors?: string[],
     defaultColor?: string
   ): string[] {
     return this.resolveColors(count, {
       elementColors,
-      startColor: this.strokeStartColor,
-      endColor: this.strokeEndColor,
-      palette: this.strokeColors,
+      paletteColors,
       defaultColor
     });
+  }
+
+  /**
+   * Get base palette colors for the current palette setting.
+   * Checks for user-defined DOM palette first, then falls back to built-in palettes.
+   *
+   * @param count Number of colors needed
+   * @param colorType Which color to extract from user-defined palette ('fill' or 'stroke')
+   * @returns Array of palette colors, or undefined if no palette is set
+   */
+  protected getPaletteColors(count: number, colorType: 'fill' | 'stroke' = 'fill'): string[] | undefined {
+    if (!this.paletteId) return undefined;
+
+    // Check for user-defined DOM palette first
+    const domPalette = this.getPalette();
+    if (domPalette) {
+      // User-defined palette - extract colors in order from <dc-fill> children
+      const fills = domPalette.getFills();
+      if (fills.length > 0) {
+        const colors = fills.map(f => colorType === 'fill' ? f.fill : f.stroke).filter((c): c is string => !!c);
+        if (colors.length > 0) {
+          this.log('info', 'colors.palette', `Using user-defined palette "${this.paletteId}" [${colors.length} colors]`);
+          return colors;
+        }
+      }
+    }
+
+    // Fall back to built-in palette
+    if (isBuiltinPalette(this.paletteId)) {
+      const builtinPalette = getBuiltinPalette(this.paletteId)!;
+      const colors = generateBuiltinPaletteColors(builtinPalette, count);
+      this.log('info', 'colors.palette', `Using built-in palette "${this.paletteId}" (${builtinPalette.type})`);
+      return colors;
+    }
+
+    // No palette found
+    this.log('warning', 'colors.palette', `Palette "${this.paletteId}" not found (no DOM element or built-in with that name)`);
+    return undefined;
   }
 
   /**
@@ -1469,9 +1432,9 @@ export abstract class BaseChart extends LitElement {
    *
    * Priority order:
    * 1. Element's own fill attribute (explicit override)
-   * 2. Palette match by value range (if palette is specified)
-   * 3. Palette match by label (if palette is specified)
-   * 4. Chart-level color settings (fill-colors, gradient, etc.)
+   * 2. Palette match by value range (user-defined palettes only)
+   * 3. Palette match by label (user-defined palettes only)
+   * 4. Palette colors by index
    * 5. Auto-generated colors
    *
    * @param elements Array of element metadata for color resolution
@@ -1485,26 +1448,32 @@ export abstract class BaseChart extends LitElement {
     const count = elements.length;
     if (count === 0) return [];
 
-    // First, check palette for each element
-    const paletteColors: (string | undefined)[] = elements.map(el => {
+    // Check for user-defined palette matches (label/value matching)
+    const domPalette = this.getPalette();
+    const paletteMatches: (string | undefined)[] = elements.map(el => {
       // Skip palette lookup if element has explicit fill
       if (el.fill) return undefined;
+      // Only do label/value matching for user-defined palettes
+      if (!domPalette) return undefined;
 
       const result = this.lookupPaletteColor(el.label, el.value);
       return result.fill;
     });
 
-    // Combine element fills with palette fills (element > palette)
-    const effectiveFills = elements.map((el, i) => el.fill || paletteColors[i]);
+    // Combine element fills with palette matches (element > palette match)
+    const effectiveFills = elements.map((el, i) => el.fill || paletteMatches[i]);
 
-    // Log palette usage
-    const paletteMatchCount = paletteColors.filter(c => c !== undefined).length;
-    if (this.paletteId && paletteMatchCount > 0) {
-      this.log('info', 'colors.palette', `Palette "${this.paletteId}" matched ${paletteMatchCount} element(s)`, paletteMatchCount);
+    // Log palette match usage
+    const paletteMatchCount = paletteMatches.filter(c => c !== undefined).length;
+    if (domPalette && paletteMatchCount > 0) {
+      this.log('info', 'colors.palette.matches', `Palette "${this.paletteId}" matched ${paletteMatchCount} element(s) by label/value`);
     }
 
-    // Fall back to standard color resolution for elements without palette match
-    return this.resolveFillColors(count, effectiveFills, defaultColor);
+    // Get base palette colors (from user-defined or built-in palette)
+    const basePaletteColors = this.getPaletteColors(count, 'fill');
+
+    // Fall back to standard color resolution
+    return this.resolveFillColors(count, effectiveFills, basePaletteColors, defaultColor);
   }
 
   /**
@@ -1512,9 +1481,9 @@ export abstract class BaseChart extends LitElement {
    *
    * Priority order:
    * 1. Element's own stroke attribute (explicit override)
-   * 2. Palette match by value range (if palette is specified)
-   * 3. Palette match by label (if palette is specified)
-   * 4. Chart-level color settings (stroke-colors, gradient, etc.)
+   * 2. Palette match by value range (user-defined palettes only)
+   * 3. Palette match by label (user-defined palettes only)
+   * 4. Palette colors by index
    * 5. Auto-generated or default colors
    *
    * @param elements Array of element metadata for color resolution
@@ -1528,20 +1497,26 @@ export abstract class BaseChart extends LitElement {
     const count = elements.length;
     if (count === 0) return [];
 
-    // First, check palette for each element
-    const paletteColors: (string | undefined)[] = elements.map(el => {
+    // Check for user-defined palette matches (label/value matching)
+    const domPalette = this.getPalette();
+    const paletteMatches: (string | undefined)[] = elements.map(el => {
       // Skip palette lookup if element has explicit stroke
       if (el.stroke) return undefined;
+      // Only do label/value matching for user-defined palettes
+      if (!domPalette) return undefined;
 
       const result = this.lookupPaletteColor(el.label, el.value);
       return result.stroke;
     });
 
-    // Combine element strokes with palette strokes (element > palette)
-    const effectiveStrokes = elements.map((el, i) => el.stroke || paletteColors[i]);
+    // Combine element strokes with palette matches (element > palette match)
+    const effectiveStrokes = elements.map((el, i) => el.stroke || paletteMatches[i]);
 
-    // Fall back to standard color resolution for elements without palette match
-    return this.resolveStrokeColors(count, effectiveStrokes, defaultColor);
+    // Get base palette colors (from user-defined or built-in palette)
+    const basePaletteColors = this.getPaletteColors(count, 'stroke');
+
+    // Fall back to standard color resolution
+    return this.resolveStrokeColors(count, effectiveStrokes, basePaletteColors, defaultColor);
   }
 
   // ============================================================================

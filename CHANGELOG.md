@@ -82,11 +82,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `<dc-popup>` with hover and click triggers
   - Auto-popup feature for automatic tooltips
 
+- **Built-in Palettes**
+  - 25+ predefined color palettes available via `palette` attribute
+  - Categorical: `category10`, `accent`, `dark2`, `paired`, `pastel`, `set1`, `set2`, `set3`, `tableau10`
+  - Sequential: `blue`, `green`, `red`, `orange`, `purple`, `gray`, `viridis`, `plasma`, `warm`, `cool`, `turbo`
+  - Diverging: `red-blue`, `purple-green`, `brown-teal`, `pink-green`, `spectral`
+  - User-defined `<dc-palette>` elements take precedence over built-in palettes with same name
+
 - **Color System**
   - Element-level `fill` and `stroke` attributes
-  - Chart-level palettes (`fill-colors`, `stroke-colors`)
-  - Gradient support (`fill-start-color`, `fill-end-color`)
-  - Auto-generated colors using golden ratio algorithm
+  - `palette` attribute references custom or built-in palettes
+  - Auto-generated colors using golden ratio algorithm when no palette specified
 
 - **Dynamic Updates**
   - Charts update when child elements are modified
@@ -97,6 +103,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `logging` attribute for debugging calculations
   - `<dc-log-console>` element for displaying logs
   - Captures padding, colors, legend dimensions, element positions
+
+### Changed
+
+- **Funnel Chart Gradient Attributes** - `fill-start-color` and `fill-end-color` renamed to `start-color` and `end-color` for cleaner API
+
+### Removed
+
+- **BREAKING: Deprecated Color Attributes** - The following chart-level color attributes have been removed in favor of the `palette` attribute:
+  - `fill-colors` - Use `palette` attribute with a built-in or custom palette instead
+  - `stroke-colors` - Use `stroke` attribute on individual elements instead
+  - `fill-start-color` / `fill-end-color` - Use `palette` with a sequential palette, or for funnel charts use `start-color` / `end-color`
+  - `stroke-start-color` / `stroke-end-color` - Use `stroke` attribute on individual elements instead
+
+  **Migration examples:**
+  ```html
+  <!-- Before -->
+  <dc-chart fill-colors="#4CAF50, #2196F3, #FF9800">
+
+  <!-- After: Use built-in palette -->
+  <dc-chart palette="category10">
+
+  <!-- After: Use element-level fills -->
+  <dc-chart>
+    <dc-bar fill="#4CAF50" ...></dc-bar>
+    <dc-bar fill="#2196F3" ...></dc-bar>
+  </dc-chart>
+
+  <!-- Before -->
+  <dc-funnel-chart fill-start-color="#3498db" fill-end-color="#e74c3c">
+
+  <!-- After -->
+  <dc-funnel-chart start-color="#3498db" end-color="#e74c3c">
+  ```
 
 ## [0.1.0] - Initial Development
 

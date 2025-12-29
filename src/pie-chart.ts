@@ -184,7 +184,7 @@ export class PieChart extends BaseChart {
 
     // Resolve stroke colors
     const elementStrokes = sliceData.map(s => s.stroke);
-    const strokeColors = this.resolveStrokeColors(sliceData.length, elementStrokes, 'white');
+    const strokeColors = this.resolveStrokeColors(sliceData.length, elementStrokes, undefined, 'white');
 
     const defaultStrokeWidth = this.strokeWidth ?? 2;
 

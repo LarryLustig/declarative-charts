@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Palettes - Declarative Chart Library</title>
+    <title>Custom Palettes - Declarative Chart Library</title>
     <link rel="stylesheet" href="examples.css">
     <style>
         .swatch-demo {
@@ -37,8 +37,9 @@
     </style>
 </head>
 <body>
-    <h1>Palettes</h1>
-    <p>Define reusable color schemes that can be shared across multiple charts and used outside of charts. For inline color options (gradients, color lists, element-level colors), see <a href="colors.html">Colors</a>.</p>
+    <h1>Custom Palettes</h1>
+    <p>Define reusable color schemes with <code>&lt;dc-palette&gt;</code> that can be shared across multiple charts and used outside of charts with <code>&lt;dc-swatch&gt;</code>. Custom palettes support label matching and value-range matching for conditional coloring.</p>
+    <p>For built-in palettes (categorical, sequential, diverging), gradients, and inline color options, see <a href="colors.html">Colors</a>.</p>
 
     <nav>
         <div class="nav-major">
@@ -55,7 +56,7 @@
             <a href="axes.html">Axes</a>
             <a href="data-labels.html">Data Labels</a>
             <a href="colors.html">Colors</a>
-            <a href="palettes.html" class="current">Palettes</a>
+            <a href="palettes.html" class="current">Custom Palettes</a>
             <a href="typography.html">Typography</a>
             <a href="borders-and-padding.html">Borders & Padding</a>
             <a href="bar-groups.html">Bar Groups</a>
@@ -434,11 +435,12 @@
                 <p>Colors are resolved in this priority order:</p>
                 <ol>
                     <li><strong>Element's own fill/stroke</strong> (highest priority)</li>
-                    <li><strong>Palette value range match</strong> (min-value/max-value)</li>
-                    <li><strong>Palette label match</strong></li>
-                    <li><strong>Chart-level color settings</strong> (fill-colors, gradients, etc.)</li>
+                    <li><strong>Custom palette value range match</strong> (min-value/max-value)</li>
+                    <li><strong>Custom palette label match</strong></li>
+                    <li><strong>Chart-level color settings</strong> (built-in palettes, gradients, color lists)</li>
                     <li><strong>Auto-generated colors</strong> (lowest priority)</li>
                 </ol>
+                <p>See <a href="colors.html#color-priority">Colors: Color Priority</a> for a detailed example.</p>
             </div>
         </div>
     </div>

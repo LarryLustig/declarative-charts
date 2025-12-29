@@ -241,22 +241,10 @@ export class Chart extends AxisChart {
   // ============================================================================
 
   private getDefaultBarFill(): string {
-    if (this.fillColors) {
-      const colors = this.fillColors.split(',').map(c => c.trim()).filter(c => c);
-      if (colors.length > 0 && colors[0] !== 'auto') {
-        return colors[0];
-      }
-    }
     return this.barColor;
   }
 
   private getDefaultLineStroke(): string {
-    if (this.strokeColors) {
-      const colors = this.strokeColors.split(',').map(c => c.trim()).filter(c => c);
-      if (colors.length > 0 && colors[0] !== 'auto') {
-        return colors[0];
-      }
-    }
     return this.lineColor;
   }
 

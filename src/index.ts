@@ -50,6 +50,23 @@ export type { PaletteColorResult } from './chart-palette.js';
 export { ChartFill } from './chart-fill.js';
 export { ChartSwatch, STANDARD_SHAPES } from './chart-swatch.js';
 export type { StandardShape } from './chart-swatch.js';
+
+// Export built-in palettes
+export {
+  BUILTIN_PALETTES,
+  getBuiltinPalette,
+  isBuiltinPalette,
+  getBuiltinPaletteNames,
+  getBuiltinPalettesByType,
+  generatePaletteColors,
+  getDefaultPaletteForChart
+} from './builtin-palettes.js';
+export type {
+  BuiltinPalette,
+  CategoricalPalette,
+  SequentialPalette,
+  DivergingPalette
+} from './builtin-palettes.js';
 export {
   PATTERN_DEFINITIONS,
   HIGH_CONTRAST_PATTERN_SEQUENCE,

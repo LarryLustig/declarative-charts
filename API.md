@@ -74,8 +74,8 @@ The library uses an SVG-aligned color system with `fill` for shape fills and `st
 ### Color Priority (highest to lowest)
 
 1. **Element-level** - `fill` or `stroke` on individual elements
-2. **Gradient** - `fill-start-color`/`fill-end-color` (or `stroke-start-color`/`stroke-end-color`) on the chart
-3. **Palette** - `fill-colors` or `stroke-colors` on the chart
+2. **Custom palette match** - Label or value matching via `<dc-palette>`
+3. **Palette by index** - Colors from palette applied in order
 4. **Auto-generated** - Algorithmic color generation when nothing else is specified
 
 ### Element-Level Colors
@@ -101,59 +101,35 @@ Set colors directly on individual elements:
 </dc-chart>
 ```
 
-### Chart-Level Color Palettes
+### Using Palettes
 
-Use `fill-colors` or `stroke-colors` to define a palette. A single color applies to all elements; multiple colors cycle through elements:
+Reference a custom `<dc-palette>` or a built-in palette name using the `palette` attribute:
 
 ```html
-<!-- Single color for all bars -->
-<dc-chart fill-colors="#9C27B0">
+<!-- Built-in palette -->
+<dc-chart palette="category10">
   <dc-bar value="10" label="Q1"></dc-bar>
   <dc-bar value="20" label="Q2"></dc-bar>
-</dc-chart>
-
-<!-- Multiple colors cycle through bars -->
-<dc-chart fill-colors="#4CAF50, #2196F3, #FF9800, #9C27B0">
-  <dc-bar value="10" label="Q1"></dc-bar>  <!-- green -->
-  <dc-bar value="20" label="Q2"></dc-bar>  <!-- blue -->
-  <dc-bar value="15" label="Q3"></dc-bar>  <!-- orange -->
-  <dc-bar value="40" label="Q4"></dc-bar>  <!-- purple -->
-</dc-chart>
-
-<!-- Line chart with stroke palette -->
-<dc-chart stroke-colors="#9C27B0, #FF5722, #009688">
-  <dc-line label="Series A">...</dc-line>  <!-- purple -->
-  <dc-line label="Series B">...</dc-line>  <!-- deep orange -->
-  <dc-line label="Series C">...</dc-line>  <!-- teal -->
-</dc-chart>
-```
-
-### Gradient Colors
-
-Create smooth color gradients using start and end colors:
-
-```html
-<!-- Funnel with gradient fill -->
-<dc-funnel-chart fill-start-color="#3498db" fill-end-color="#e74c3c">
-  <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
-  <dc-funnel-stage value="600" label="Leads"></dc-funnel-stage>
-  <dc-funnel-stage value="200" label="Customers"></dc-funnel-stage>
-</dc-funnel-chart>
-
-<!-- Bar chart with gradient fill -->
-<dc-chart fill-start-color="#673AB7" fill-end-color="#00BCD4">
-  <dc-bar value="10" label="Q1"></dc-bar>
-  <dc-bar value="25" label="Q2"></dc-bar>
   <dc-bar value="15" label="Q3"></dc-bar>
 </dc-chart>
 
-<!-- Line chart with stroke gradient -->
-<dc-chart stroke-start-color="#E91E63" stroke-end-color="#3F51B5">
-  <dc-line label="A">...</dc-line>
-  <dc-line label="B">...</dc-line>
-  <dc-line label="C">...</dc-line>
+<!-- Custom palette with label matching -->
+<dc-palette id="brand">
+  <dc-fill label="Revenue" fill="#2563eb"></dc-fill>
+  <dc-fill label="Expenses" fill="#dc2626"></dc-fill>
+</dc-palette>
+<dc-chart palette="brand">
+  <dc-bar value="150" label="Revenue"></dc-bar>
+  <dc-bar value="80" label="Expenses"></dc-bar>
 </dc-chart>
 ```
+
+**Built-in palettes:**
+- **Categorical:** `category10`, `accent`, `dark2`, `paired`, `pastel`, `set1`, `set2`, `set3`, `tableau10`
+- **Sequential:** `blue`, `green`, `red`, `orange`, `purple`, `gray`, `viridis`, `plasma`, `warm`, `cool`, `turbo`
+- **Diverging:** `red-blue`, `purple-green`, `brown-teal`, `pink-green`, `spectral`
+
+See [Palettes and Pattern Fills](#palettes-and-pattern-fills) for more details.
 
 ### Auto-Generated Colors
 
@@ -173,10 +149,10 @@ When no colors are specified, charts automatically generate distinct colors usin
 Control borders/outlines with stroke attributes:
 
 ```html
-<!-- Pie chart with custom border -->
-<dc-pie-chart stroke-colors="#333" stroke-width="3">
-  <dc-pie-slice value="35" fill="#4CAF50" label="A"></dc-pie-slice>
-  <dc-pie-slice value="28" fill="#2196F3" label="B"></dc-pie-slice>
+<!-- Pie chart with custom border on each slice -->
+<dc-pie-chart stroke-width="2">
+  <dc-pie-slice value="35" fill="#4CAF50" stroke="#333" label="A"></dc-pie-slice>
+  <dc-pie-slice value="28" fill="#2196F3" stroke="#333" label="B"></dc-pie-slice>
 </dc-pie-chart>
 
 <!-- Funnel with shorthand stroke -->
@@ -190,9 +166,7 @@ Control borders/outlines with stroke attributes:
 | Level | Fill Attributes | Stroke Attributes |
 |-------|-----------------|-------------------|
 | Element | `fill` | `stroke` |
-| Chart (palette) | `fill-colors` | `stroke-colors` |
-| Chart (gradient) | `fill-start-color`, `fill-end-color` | `stroke-start-color`, `stroke-end-color` |
-| Chart (width) | - | `stroke-width` |
+| Chart | `palette` | `stroke-width` |
 | Chart (shorthand) | - | `stroke` (e.g., "2 #333") |
 
 See [`examples/colors.html`](examples/colors.html) for comprehensive color system examples.
@@ -598,12 +572,7 @@ Renders bar, line, or bubble charts depending on child elements.
 - `orientation` (string) - Bar orientation: "vertical", "horizontal", "vertical-reverse", or "horizontal-reverse" (default: "vertical")
 - `show-value` (boolean|string) - Whether to display numeric values on bars (default: true)
 - `show-percent` (boolean|string) - Whether to display percentages on bars (default: false)
-- `fill-colors` (string) - Color palette for bars (single color or comma-separated list)
-- `fill-start-color` (string) - Start color for gradient fills
-- `fill-end-color` (string) - End color for gradient fills
-- `stroke-colors` (string) - Color palette for lines
-- `stroke-start-color` (string) - Start color for gradient strokes
-- `stroke-end-color` (string) - End color for gradient strokes
+- `palette` (string) - Reference to a custom `<dc-palette>` ID or built-in palette name (e.g., "category10", "viridis")
 - `bar-width` (string) - Default width for bars (e.g., "50px", "2rem")
 - `gutter` (number) - Space between bars in pixels (default: 10)
 - `point-shape` (string) - Default shape for points: "circle", "square", "triangle", "diamond", "star", "cross", "plus", or unicode character (default: "circle")
@@ -757,10 +726,7 @@ Defines a bubble in a bubble chart.
 Renders a pie chart with support for donut charts.
 
 **Attributes:**
-- `fill-colors` (string) - Color palette for slices
-- `fill-start-color` (string) - Start color for gradient fills
-- `fill-end-color` (string) - End color for gradient fills
-- `stroke-colors` (string) - Border color for slices
+- `palette` (string) - Reference to a custom `<dc-palette>` ID or built-in palette name
 - `stroke-width` (number) - Border width in pixels
 - `show-value` (boolean|string) - Whether to show values on slices (default: false)
 - `show-label` (boolean|string) - Whether to show labels on slices (default: true)
@@ -809,11 +775,10 @@ Defines a single slice in a pie chart.
 Renders a funnel chart with customizable stage heights, colors, and shapes.
 
 **Attributes:**
-- `fill-colors` (string) - Color palette for stages
-- `fill-start-color` (string) - Start color for gradient fills
-- `fill-end-color` (string) - End color for gradient fills
+- `palette` (string) - Reference to a custom `<dc-palette>` ID or built-in palette name
+- `start-color` (string) - Start color for custom gradient fills (overrides palette)
+- `end-color` (string) - End color for custom gradient fills (overrides palette)
 - `stroke` (string) - Shorthand for stroke color and width (e.g., "2 #333")
-- `stroke-colors` (string) - Stroke color for stage borders
 - `stroke-width` (number) - Stroke width for stage borders in pixels (default: 0)
 - `segment-height` (string) - Height mode: omit for equal heights, "value" for proportional scaling, "log-value" for logarithmic scaling, or fixed values like "50px"/"2rem"
 - `segment-min-height` (string) - Minimum height for any segment

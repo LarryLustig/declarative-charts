@@ -25,7 +25,7 @@
             <a href="axes.html">Axes</a>
             <a href="data-labels.html">Data Labels</a>
             <a href="colors.html">Colors</a>
-            <a href="palettes.html">Palettes</a>
+            <a href="palettes.html">Custom Palettes</a>
             <a href="typography.html">Typography</a>
             <a href="borders-and-padding.html">Borders & Padding</a>
             <a href="bar-groups.html">Bar Groups</a>
@@ -46,9 +46,9 @@
         <div class="grid">
             <div>
                 <h3>Multi-Line Chart</h3>
-                <pre><code>&lt;dc-chart width="500" height="350" stroke-colors="#9C27B0"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-title&gt;Temperature Trend&lt;/dc-title&gt;
-  &lt;dc-line label="City A"&gt;
+  &lt;dc-line stroke="#9C27B0" label="City A"&gt;
     &lt;dc-point value="15" label="Mon"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="18" label="Tue"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="22" label="Wed"&gt;&lt;/dc-point&gt;
@@ -63,9 +63,9 @@
     &lt;dc-point value="21" label="Fri"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
 &lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350" stroke-colors="#9C27B0">
+                <dc-chart width="500" height="350">
                     <dc-title>Temperature Trend</dc-title>
-                    <dc-line label="City A">
+                    <dc-line stroke="#9C27B0" label="City A">
                         <dc-point value="15" label="Mon"></dc-point>
                         <dc-point value="18" label="Tue"></dc-point>
                         <dc-point value="22" label="Wed"></dc-point>
@@ -478,10 +478,10 @@
         <div class="grid">
             <div>
                 <h3>Custom Border</h3>
-                <pre><code>&lt;dc-chart width="500" height="350" stroke-colors="#FF5722"
+                <pre><code>&lt;dc-chart width="500" height="350"
           style="border: 4px solid #FF5722; border-radius: 15px"&gt;
   &lt;dc-title&gt;Styled Line Chart&lt;/dc-title&gt;
-  &lt;dc-line label="Revenue"&gt;
+  &lt;dc-line stroke="#FF5722" label="Revenue"&gt;
     &lt;dc-point value="10" label="Jan"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="15" label="Feb"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="25" label="Mar"&gt;&lt;/dc-point&gt;
@@ -489,9 +489,9 @@
     &lt;dc-point value="30" label="May"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
 &lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350" stroke-colors="#FF5722" style="border: 4px solid #FF5722; border-radius: 15px">
+                <dc-chart width="500" height="350" style="border: 4px solid #FF5722; border-radius: 15px">
                     <dc-title>Styled Line Chart</dc-title>
-                    <dc-line label="Revenue">
+                    <dc-line stroke="#FF5722" label="Revenue">
                         <dc-point value="10" label="Jan"></dc-point>
                         <dc-point value="15" label="Feb"></dc-point>
                         <dc-point value="25" label="Mar"></dc-point>

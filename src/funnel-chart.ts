@@ -18,10 +18,9 @@ import { analyzeFunnel, type StageData as InsightStageData } from './accessibili
  * @attr {string} segment-max-height - Maximum height for any segment (e.g., "300px")
  * @attr {string} chevron - Chevron depth for V-shaped segments: use values like "20px", "2rem", or "10%" (percentage of segment width). Omit or use "0" for straight edges.
  * @attr {number} funnel-factor - Percentage controlling funnel narrowing (default: 70). Positive values narrow from top to bottom (e.g., 70 = bottom is 70% of top width). Negative values narrow from bottom to top (e.g., -70 = top is 70% of bottom width).
- * @attr {string} fill-start-color - Starting color for gradient (any CSS color format). Used with fill-end-color to create custom color gradient.
- * @attr {string} fill-end-color - Ending color for gradient (any CSS color format). Used with fill-start-color to create custom color gradient.
- * @attr {string} start-color - @deprecated Use fill-start-color instead. Starting color for gradient.
- * @attr {string} end-color - @deprecated Use fill-end-color instead. Ending color for gradient.
+ * @attr {string} palette - Palette for stage colors. Can be an ID of a user-defined <dc-palette> or a built-in palette name (default: cool-to-warm gradient).
+ * @attr {string} start-color - Starting color for gradient (any CSS color format). Used with end-color for custom gradients. Overrides palette if both start-color and end-color are set.
+ * @attr {string} end-color - Ending color for gradient (any CSS color format). Used with start-color for custom gradients.
  * @attr {string} stroke - Shorthand for stroke color and width (e.g., "2 #333" or "#333 2"). Overridden by explicit stroke-color/stroke-width.
  * @attr {string} stroke-color - Stroke color for stage borders (default: #e0e0e0). Can be overridden per stage.
  * @attr {number} stroke-width - Stroke width for stage borders in pixels (default: 0). Can be overridden per stage.
@@ -68,13 +67,15 @@ export class FunnelChart extends BaseChart {
   funnelFactor?: number;
 
   /**
-   * @deprecated Use `fill-start-color` instead. Kept for backwards compatibility.
+   * Starting color for gradient. Used with end-color.
+   * Overrides the palette if both start-color and end-color are set.
    */
   @property({ type: String, attribute: 'start-color' })
   startColor?: string;
 
   /**
-   * @deprecated Use `fill-end-color` instead. Kept for backwards compatibility.
+   * Ending color for gradient. Used with start-color.
+   * Overrides the palette if both start-color and end-color are set.
    */
   @property({ type: String, attribute: 'end-color' })
   endColor?: string;
@@ -89,19 +90,6 @@ export class FunnelChart extends BaseChart {
 
   private clickedStageIndex = -1;
 
-  /**
-   * Get effective fill start color (new attribute takes precedence over legacy).
-   */
-  private getEffectiveFillStartColor(): string | undefined {
-    return this.fillStartColor || this.startColor;
-  }
-
-  /**
-   * Get effective fill end color (new attribute takes precedence over legacy).
-   */
-  private getEffectiveFillEndColor(): string | undefined {
-    return this.fillEndColor || this.endColor;
-  }
 
   private getStages(): Array<{
     value: number;
@@ -405,19 +393,22 @@ export class FunnelChart extends BaseChart {
     // Calculate total for percentage calculations
     const total = stagesData.reduce((sum, stage) => sum + stage.value, 0);
 
-    // Determine base colors (gradient or cool-to-warm)
-    const effectiveStartColor = this.getEffectiveFillStartColor();
-    const effectiveEndColor = this.getEffectiveFillEndColor();
-
+    // Determine base colors using palette system
+    // Legacy startColor/endColor creates a gradient, otherwise use palette (default: cool-to-warm)
     let baseColors: string[];
-    if (effectiveStartColor && effectiveEndColor) {
-      baseColors = this.generateGradientColors(effectiveStartColor, effectiveEndColor, stagesData.length)
+    if (this.startColor && this.endColor) {
+      // Legacy gradient mode
+      baseColors = this.generateGradientColors(this.startColor, this.endColor, stagesData.length)
         || this.generateCoolToWarmColors(stagesData.length);
-    } else if (this.fillColors) {
-      // Use fill-colors attribute as base
-      baseColors = this.resolveColors(stagesData.length, { palette: this.fillColors });
     } else {
-      baseColors = this.generateCoolToWarmColors(stagesData.length);
+      // Use palette system - get colors from user-defined or built-in palette
+      const paletteColors = this.getPaletteColors(stagesData.length, 'fill');
+      if (paletteColors) {
+        baseColors = paletteColors;
+      } else {
+        // Default to cool-to-warm gradient for funnel charts
+        baseColors = this.generateCoolToWarmColors(stagesData.length);
+      }
     }
 
     // Clear used patterns before resolving fills
@@ -444,7 +435,7 @@ export class FunnelChart extends BaseChart {
 
     // Resolve stroke colors (default to #e0e0e0)
     const elementStrokes = stagesData.map(s => s.stroke);
-    const strokeColors = this.resolveStrokeColors(stagesData.length, elementStrokes, '#e0e0e0');
+    const strokeColors = this.resolveStrokeColors(stagesData.length, elementStrokes, undefined, '#e0e0e0');
 
     // Get stroke width (element > chart > default of 0)
     const defaultStrokeWidth = this.strokeWidth ?? 0;
@@ -828,18 +819,22 @@ export class FunnelChart extends BaseChart {
     const stagesData = this.getStages();
     if (stagesData.length === 0) return [];
 
-    // Determine base colors (gradient or cool-to-warm)
-    const effectiveStartColor = this.getEffectiveFillStartColor();
-    const effectiveEndColor = this.getEffectiveFillEndColor();
-
+    // Determine base colors using palette system
+    // Legacy startColor/endColor creates a gradient, otherwise use palette (default: cool-to-warm)
     let baseColors: string[];
-    if (effectiveStartColor && effectiveEndColor) {
-      baseColors = this.generateGradientColors(effectiveStartColor, effectiveEndColor, stagesData.length)
+    if (this.startColor && this.endColor) {
+      // Legacy gradient mode
+      baseColors = this.generateGradientColors(this.startColor, this.endColor, stagesData.length)
         || this.generateCoolToWarmColors(stagesData.length);
-    } else if (this.fillColors) {
-      baseColors = this.resolveColors(stagesData.length, { palette: this.fillColors });
     } else {
-      baseColors = this.generateCoolToWarmColors(stagesData.length);
+      // Use palette system - get colors from user-defined or built-in palette
+      const paletteColors = this.getPaletteColors(stagesData.length, 'fill');
+      if (paletteColors) {
+        baseColors = paletteColors;
+      } else {
+        // Default to cool-to-warm gradient for funnel charts
+        baseColors = this.generateCoolToWarmColors(stagesData.length);
+      }
     }
 
     // Prepare elements for pattern-aware fill resolution

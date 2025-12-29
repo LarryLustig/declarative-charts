@@ -25,7 +25,7 @@
             <a href="axes.html">Axes</a>
             <a href="data-labels.html">Data Labels</a>
             <a href="colors.html">Colors</a>
-            <a href="palettes.html">Palettes</a>
+            <a href="palettes.html">Custom Palettes</a>
             <a href="typography.html">Typography</a>
             <a href="borders-and-padding.html">Borders & Padding</a>
             <a href="bar-groups.html">Bar Groups</a>
@@ -122,14 +122,14 @@
 
             <div>
                 <h3>Funnel Chart with Auto-Popup</h3>
-                <pre><code>&lt;dc-funnel-chart auto-popup width="500" height="350" fill-start-color="#3498db" fill-end-color="#e74c3c"&gt;
+                <pre><code>&lt;dc-funnel-chart auto-popup width="500" height="350" start-color="#3498db" end-color="#e74c3c"&gt;
   &lt;dc-title&gt;Conversion Funnel&lt;/dc-title&gt;
   &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="600" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="200" label="Opportunities"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="80" label="Customers"&gt;&lt;/dc-funnel-stage&gt;
 &lt;/dc-funnel-chart&gt;</code></pre>
-                <dc-funnel-chart auto-popup width="500" height="350" fill-start-color="#3498db" fill-end-color="#e74c3c">
+                <dc-funnel-chart auto-popup width="500" height="350" start-color="#3498db" end-color="#e74c3c">
                     <dc-title>Conversion Funnel</dc-title>
                     <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
                     <dc-funnel-stage value="600" label="Leads"></dc-funnel-stage>
@@ -140,16 +140,16 @@
 
             <div>
                 <h3>Line Chart with Auto-Popup</h3>
-                <pre><code>&lt;dc-chart auto-popup width="500" height="350" stroke-colors="#E91E63, #9C27B0"&gt;
+                <pre><code>&lt;dc-chart auto-popup width="500" height="350"&gt;
   &lt;dc-title&gt;Weekly Trends&lt;/dc-title&gt;
-  &lt;dc-line label="Sales"&gt;
+  &lt;dc-line stroke="#E91E63" label="Sales"&gt;
     &lt;dc-point value="25" label="Mon"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="40" label="Tue"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="35" label="Wed"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="55" label="Thu"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="45" label="Fri"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
-  &lt;dc-line label="Orders"&gt;
+  &lt;dc-line stroke="#9C27B0" label="Orders"&gt;
     &lt;dc-point value="15" label="Mon"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="30" label="Tue"&gt;&lt;/dc-point&gt;
     &lt;dc-point value="25" label="Wed"&gt;&lt;/dc-point&gt;
@@ -157,16 +157,16 @@
     &lt;dc-point value="35" label="Fri"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
 &lt;/dc-chart&gt;</code></pre>
-                <dc-chart auto-popup width="500" height="350" stroke-colors="#E91E63, #9C27B0">
+                <dc-chart auto-popup width="500" height="350">
                     <dc-title>Weekly Trends</dc-title>
-                    <dc-line label="Sales">
+                    <dc-line stroke="#E91E63" label="Sales">
                         <dc-point value="25" label="Mon"></dc-point>
                         <dc-point value="40" label="Tue"></dc-point>
                         <dc-point value="35" label="Wed"></dc-point>
                         <dc-point value="55" label="Thu"></dc-point>
                         <dc-point value="45" label="Fri"></dc-point>
                     </dc-line>
-                    <dc-line label="Orders">
+                    <dc-line stroke="#9C27B0" label="Orders">
                         <dc-point value="15" label="Mon"></dc-point>
                         <dc-point value="30" label="Tue"></dc-point>
                         <dc-point value="25" label="Wed"></dc-point>
@@ -290,14 +290,14 @@
 
             <div>
                 <h3>Auto-Popup on Key Funnel Stages</h3>
-                <pre><code>&lt;dc-funnel-chart width="500" height="350" fill-start-color="#673AB7" fill-end-color="#00BCD4"&gt;
+                <pre><code>&lt;dc-funnel-chart width="500" height="350" start-color="#673AB7" end-color="#00BCD4"&gt;
   &lt;dc-title&gt;Hiring Pipeline&lt;/dc-title&gt;
   &lt;dc-funnel-stage value="500" label="Applications"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="150" label="Screened" auto-popup&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="50" label="Interviewed"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="10" label="Hired" auto-popup&gt;&lt;/dc-funnel-stage&gt;
 &lt;/dc-funnel-chart&gt;</code></pre>
-                <dc-funnel-chart width="500" height="350" fill-start-color="#673AB7" fill-end-color="#00BCD4">
+                <dc-funnel-chart width="500" height="350" start-color="#673AB7" end-color="#00BCD4">
                     <dc-title>Hiring Pipeline (key stages)</dc-title>
                     <dc-funnel-stage value="500" label="Applications"></dc-funnel-stage>
                     <dc-funnel-stage value="150" label="Screened" auto-popup></dc-funnel-stage>
@@ -381,7 +381,7 @@
 
             <div>
                 <h3>Custom Click Popups with Links</h3>
-                <pre><code>&lt;dc-funnel-chart width="500" height="350" fill-start-color="#3498db" fill-end-color="#e74c3c"&gt;
+                <pre><code>&lt;dc-funnel-chart width="500" height="350" start-color="#3498db" end-color="#e74c3c"&gt;
   &lt;dc-title&gt;Sales Funnel - Click a Stage!&lt;/dc-title&gt;
   &lt;dc-funnel-stage value="1000" label="Visitors"&gt;
     &lt;dc-popup trigger="click"&gt;
@@ -412,7 +412,7 @@
     &lt;/dc-popup&gt;
   &lt;/dc-funnel-stage&gt;
 &lt;/dc-funnel-chart&gt;</code></pre>
-                <dc-funnel-chart width="500" height="350" fill-start-color="#3498db" fill-end-color="#e74c3c">
+                <dc-funnel-chart width="500" height="350" start-color="#3498db" end-color="#e74c3c">
                     <dc-title>Sales Funnel - Click a Stage!</dc-title>
                     <dc-funnel-stage value="1000" label="Visitors">
                         <dc-popup trigger="click">
