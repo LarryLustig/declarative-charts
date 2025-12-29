@@ -106,7 +106,7 @@ Color priority: element fill/stroke > custom palette match > palette by index > 
 - **Sequential**: `blue`, `green`, `red`, `orange`, `purple`, `gray`, `viridis`, `plasma`, `warm`, `cool`, `turbo`
 - **Diverging**: `red-blue`, `purple-green`, `brown-teal`, `pink-green`, `spectral`
 
-Use `getPaletteColors(count, colorType)` in chart code to resolve palette colors. Funnel charts support `start-color`/`end-color` for custom gradients (overrides palette).
+Use `getPaletteColors(count, colorType)` in chart code to resolve palette colors.
 
 **Pattern Fills**: Apply patterns directly (`pattern="diagonal-lines"`), by ID reference, or via palettes. Built-in: `diagonal-lines`, `diagonal-lines-reverse`, `horizontal-lines`, `vertical-lines`, `dots`, `crosshatch`, `grid`, `checkerboard`.
 

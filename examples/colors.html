@@ -159,23 +159,22 @@
     </div>
 
     <div class="example">
-        <h2>Custom Gradients (Funnel Charts)</h2>
-        <p>Funnel charts support custom two-color gradients using <code>start-color</code> and <code>end-color</code>:</p>
+        <h2>Sequential Palettes (Funnel Charts)</h2>
+        <p>Funnel charts can use built-in sequential palettes for gradient-like color progressions:</p>
 
         <div class="grid">
             <div>
-                <h3>Blue to Red</h3>
+                <h3>Blue Palette</h3>
                 <pre><code>&lt;dc-funnel-chart width="500" height="350"
-                 start-color="#3498db"
-                 end-color="#e74c3c"&gt;
-  &lt;dc-title&gt;Blue to Red Gradient&lt;/dc-title&gt;
+                 palette="blue"&gt;
+  &lt;dc-title&gt;Blue Sequence&lt;/dc-title&gt;
   &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="600" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="200" label="Opportunities"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="80" label="Customers"&gt;&lt;/dc-funnel-stage&gt;
 &lt;/dc-funnel-chart&gt;</code></pre>
-                <dc-funnel-chart width="500" height="350" start-color="#3498db" end-color="#e74c3c">
-                    <dc-title>Blue to Red Gradient</dc-title>
+                <dc-funnel-chart width="500" height="350" palette="blue">
+                    <dc-title>Blue Sequence</dc-title>
                     <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
                     <dc-funnel-stage value="600" label="Leads"></dc-funnel-stage>
                     <dc-funnel-stage value="200" label="Opportunities"></dc-funnel-stage>
@@ -184,18 +183,17 @@
             </div>
 
             <div>
-                <h3>Purple to Cyan</h3>
+                <h3>Purple Palette</h3>
                 <pre><code>&lt;dc-funnel-chart width="500" height="350"
-                 start-color="#673AB7"
-                 end-color="#00BCD4"&gt;
-  &lt;dc-title&gt;Purple to Cyan&lt;/dc-title&gt;
+                 palette="purple"&gt;
+  &lt;dc-title&gt;Purple Sequence&lt;/dc-title&gt;
   &lt;dc-funnel-stage value="1000" label="Stage 1"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="600" label="Stage 2"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="200" label="Stage 3"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="80" label="Stage 4"&gt;&lt;/dc-funnel-stage&gt;
 &lt;/dc-funnel-chart&gt;</code></pre>
-                <dc-funnel-chart width="500" height="350" start-color="#673AB7" end-color="#00BCD4">
-                    <dc-title>Purple to Cyan</dc-title>
+                <dc-funnel-chart width="500" height="350" palette="purple">
+                    <dc-title>Purple Sequence</dc-title>
                     <dc-funnel-stage value="1000" label="Stage 1"></dc-funnel-stage>
                     <dc-funnel-stage value="600" label="Stage 2"></dc-funnel-stage>
                     <dc-funnel-stage value="200" label="Stage 3"></dc-funnel-stage>

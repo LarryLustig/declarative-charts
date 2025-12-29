@@ -14,6 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Works with categorical, sequential, and diverging palettes
   - Example: `<dc-swatch palette="category10" index="2"></dc-swatch>`
 
+- **Axis & Grid Configuration**
+  - `<dc-axis>` element with `type` attribute: `'value'`, `'label'`, or `'time'` (inferred if omitted)
+  - Range control: `min-value`, `max-value`, `range-padding` attributes
+  - Tick configuration: `tick-count`, `tick-interval`, `tick-values` attributes
+  - Time axis properties: `date-format`, `date-label-format` for temporal data
+  - `<dc-grid>` child element for grid line styling (color, style, visibility)
+  - Backward compatible: type inference from position, auto-calculated ranges when omitted
+
 - **Negative Value Support**
   - Bar charts extend downward (vertical) or leftward (horizontal) for negative values
   - Line and bubble charts position points below zero when appropriate
@@ -109,16 +117,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `<dc-log-console>` element for displaying logs
   - Captures padding, colors, legend dimensions, element positions
 
-### Changed
-
-- **Funnel Chart Gradient Attributes** - `fill-start-color` and `fill-end-color` renamed to `start-color` and `end-color` for cleaner API
-
 ### Removed
 
 - **BREAKING: Deprecated Color Attributes** - The following chart-level color attributes have been removed in favor of the `palette` attribute:
   - `fill-colors` - Use `palette` attribute with a built-in or custom palette instead
   - `stroke-colors` - Use `stroke` attribute on individual elements instead
-  - `fill-start-color` / `fill-end-color` - Use `palette` with a sequential palette, or for funnel charts use `start-color` / `end-color`
+  - `fill-start-color` / `fill-end-color` / `start-color` / `end-color` - Use `palette` with a sequential palette (e.g., `palette="blue"`)
   - `stroke-start-color` / `stroke-end-color` - Use `stroke` attribute on individual elements instead
 
   **Migration examples:**
@@ -136,10 +140,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   </dc-chart>
 
   <!-- Before -->
-  <dc-funnel-chart fill-start-color="#3498db" fill-end-color="#e74c3c">
-
-  <!-- After -->
   <dc-funnel-chart start-color="#3498db" end-color="#e74c3c">
+
+  <!-- After: Use sequential palette -->
+  <dc-funnel-chart palette="blue">
+
+  <!-- After: Use custom palette -->
+  <dc-palette id="my-gradient">
+    <dc-fill fill="#3498db"></dc-fill>
+    <dc-fill fill="#8e44ad"></dc-fill>
+    <dc-fill fill="#e74c3c"></dc-fill>
+  </dc-palette>
+  <dc-funnel-chart palette="my-gradient">
   ```
 
 ### Fixed

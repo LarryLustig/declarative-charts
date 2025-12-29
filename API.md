@@ -776,8 +776,6 @@ Renders a funnel chart with customizable stage heights, colors, and shapes.
 
 **Attributes:**
 - `palette` (string) - Reference to a custom `<dc-palette>` ID or built-in palette name
-- `start-color` (string) - Start color for custom gradient fills (overrides palette)
-- `end-color` (string) - End color for custom gradient fills (overrides palette)
 - `stroke` (string) - Shorthand for stroke color and width (e.g., "2 #333")
 - `stroke-width` (number) - Stroke width for stage borders in pixels (default: 0)
 - `segment-height` (string) - Height mode: omit for equal heights, "value" for proportional scaling, "log-value" for logarithmic scaling, or fixed values like "50px"/"2rem"
@@ -850,8 +848,6 @@ Renders a stage chart with connected shapes where each stage's area is proportio
 - `connector` (string) - Connector style: "line" (default), "arrow", "none", or compound like "arrow 2 #333"
 - `zero-style` (string) - How to render value=0 stages: "ghost" (default), "hidden", "dot", "normal"
 - `palette` (string) - Reference to a custom `<dc-palette>` ID or built-in palette name
-- `start-color` (string) - Start color for custom gradient fills (overrides palette)
-- `end-color` (string) - End color for custom gradient fills (overrides palette)
 - `stroke` (string) - Shorthand for stroke color and width (e.g., "2 #333")
 - `stroke-width` (number) - Stroke width for stage borders in pixels (default: 1)
 - `show-value` (boolean|string) - Whether to display values on stages (default: true)

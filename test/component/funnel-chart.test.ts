@@ -496,27 +496,15 @@ describe('FunnelChart component', () => {
       expect(polygons?.[0]?.getAttribute('fill')).toMatch(/hsl/);
     });
 
-    it('supports fill-start-color and fill-end-color gradient', async () => {
+    it('uses palette colors when palette attribute is set', async () => {
       chart = await fixture<FunnelChart>('dc-funnel-chart', {
-        'fill-start-color': '#0000ff',
-        'fill-end-color': '#ff0000'
+        'palette': 'blue'
       }, `
         <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
         <dc-funnel-stage value="50" label="B"></dc-funnel-stage>
       `);
       const polygons = chart.shadowRoot?.querySelectorAll('polygon[data-shape-index]');
       expect(polygons).toHaveLength(2);
-    });
-
-    it('supports deprecated start-color and end-color', async () => {
-      chart = await fixture<FunnelChart>('dc-funnel-chart', {
-        'start-color': '#00ff00',
-        'end-color': '#ff0000'
-      }, `
-        <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
-      `);
-      expect(chart.startColor).toBe('#00ff00');
-      expect(chart.endColor).toBe('#ff0000');
     });
   });
 

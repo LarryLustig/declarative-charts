@@ -19,8 +19,6 @@ import { analyzeFunnel, type StageData as InsightStageData } from './accessibili
  * @attr {string} chevron - Chevron depth for V-shaped segments: use values like "20px", "2rem", or "10%" (percentage of segment width). Omit or use "0" for straight edges.
  * @attr {number} funnel-factor - Percentage controlling funnel narrowing (default: 70). Positive values narrow from top to bottom (e.g., 70 = bottom is 70% of top width). Negative values narrow from bottom to top (e.g., -70 = top is 70% of bottom width).
  * @attr {string} palette - Palette for stage colors. Can be an ID of a user-defined <dc-palette> or a built-in palette name (default: cool-to-warm gradient).
- * @attr {string} start-color - Starting color for gradient (any CSS color format). Used with end-color for custom gradients. Overrides palette if both start-color and end-color are set.
- * @attr {string} end-color - Ending color for gradient (any CSS color format). Used with start-color for custom gradients.
  * @attr {string} stroke - Shorthand for stroke color and width (e.g., "2 #333" or "#333 2"). Overridden by explicit stroke-color/stroke-width.
  * @attr {string} stroke-color - Stroke color for stage borders (default: #e0e0e0). Can be overridden per stage.
  * @attr {number} stroke-width - Stroke width for stage borders in pixels (default: 0). Can be overridden per stage.
@@ -65,20 +63,6 @@ export class FunnelChart extends BaseChart {
 
   @property({ type: Number, attribute: 'funnel-factor' })
   funnelFactor?: number;
-
-  /**
-   * Starting color for gradient. Used with end-color.
-   * Overrides the palette if both start-color and end-color are set.
-   */
-  @property({ type: String, attribute: 'start-color' })
-  startColor?: string;
-
-  /**
-   * Ending color for gradient. Used with start-color.
-   * Overrides the palette if both start-color and end-color are set.
-   */
-  @property({ type: String, attribute: 'end-color' })
-  endColor?: string;
 
   // Note: stroke-color and stroke-width are inherited from BaseChart.
 
@@ -394,21 +378,13 @@ export class FunnelChart extends BaseChart {
     const total = stagesData.reduce((sum, stage) => sum + stage.value, 0);
 
     // Determine base colors using palette system
-    // Legacy startColor/endColor creates a gradient, otherwise use palette (default: cool-to-warm)
     let baseColors: string[];
-    if (this.startColor && this.endColor) {
-      // Legacy gradient mode
-      baseColors = this.generateGradientColors(this.startColor, this.endColor, stagesData.length)
-        || this.generateCoolToWarmColors(stagesData.length);
+    const paletteColors = this.getPaletteColors(stagesData.length, 'fill');
+    if (paletteColors) {
+      baseColors = paletteColors;
     } else {
-      // Use palette system - get colors from user-defined or built-in palette
-      const paletteColors = this.getPaletteColors(stagesData.length, 'fill');
-      if (paletteColors) {
-        baseColors = paletteColors;
-      } else {
-        // Default to cool-to-warm gradient for funnel charts
-        baseColors = this.generateCoolToWarmColors(stagesData.length);
-      }
+      // Default to cool-to-warm gradient for funnel charts
+      baseColors = this.generateCoolToWarmColors(stagesData.length);
     }
 
     // Clear used patterns before resolving fills
@@ -821,21 +797,13 @@ export class FunnelChart extends BaseChart {
     if (stagesData.length === 0) return [];
 
     // Determine base colors using palette system
-    // Legacy startColor/endColor creates a gradient, otherwise use palette (default: cool-to-warm)
     let baseColors: string[];
-    if (this.startColor && this.endColor) {
-      // Legacy gradient mode
-      baseColors = this.generateGradientColors(this.startColor, this.endColor, stagesData.length)
-        || this.generateCoolToWarmColors(stagesData.length);
+    const paletteColors = this.getPaletteColors(stagesData.length, 'fill');
+    if (paletteColors) {
+      baseColors = paletteColors;
     } else {
-      // Use palette system - get colors from user-defined or built-in palette
-      const paletteColors = this.getPaletteColors(stagesData.length, 'fill');
-      if (paletteColors) {
-        baseColors = paletteColors;
-      } else {
-        // Default to cool-to-warm gradient for funnel charts
-        baseColors = this.generateCoolToWarmColors(stagesData.length);
-      }
+      // Default to cool-to-warm gradient for funnel charts
+      baseColors = this.generateCoolToWarmColors(stagesData.length);
     }
 
     // Prepare elements for pattern-aware fill resolution

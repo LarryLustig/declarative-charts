@@ -44,8 +44,6 @@ interface ConnectorConfig {
  * @attr {string} connector - Connector style: "line", "arrow", "none", or compound like "arrow 2 #333"
  * @attr {ZeroStyle} zero-style - How to render value=0: "ghost", "hidden", "dot", "normal"
  * @attr {string} palette - Palette for stage colors
- * @attr {string} start-color - Starting color for gradient
- * @attr {string} end-color - Ending color for gradient
  * @attr {string} stroke - Shorthand for stroke color and width
  * @attr {string} stroke-color - Stroke color for stage borders (default: #e0e0e0)
  * @attr {number} stroke-width - Stroke width for stage borders (default: 1)
@@ -99,18 +97,6 @@ export class StageChart extends BaseChart {
 
   @property({ type: String, attribute: 'zero-style' })
   zeroStyle: ZeroStyle = 'ghost';
-
-  /**
-   * Starting color for gradient. Used with end-color.
-   */
-  @property({ type: String, attribute: 'start-color' })
-  startColor?: string;
-
-  /**
-   * Ending color for gradient. Used with start-color.
-   */
-  @property({ type: String, attribute: 'end-color' })
-  endColor?: string;
 
   private clickedStageIndex = -1;
 
@@ -490,15 +476,10 @@ export class StageChart extends BaseChart {
       stageShapes
     );
 
-    // Determine colors
+    // Determine colors using palette system
     let baseColors: string[];
-    if (this.startColor && this.endColor) {
-      baseColors = this.generateGradientColors(this.startColor, this.endColor, stagesData.length)
-        || this.generateDefaultColors(stagesData.length);
-    } else {
-      const paletteColors = this.getPaletteColors(stagesData.length, 'fill');
-      baseColors = paletteColors || this.generateDefaultColors(stagesData.length);
-    }
+    const paletteColors = this.getPaletteColors(stagesData.length, 'fill');
+    baseColors = paletteColors || this.generateDefaultColors(stagesData.length);
 
     // Clear used patterns before resolving fills
     this.clearUsedPatterns();
@@ -977,13 +958,8 @@ export class StageChart extends BaseChart {
     if (stagesData.length === 0) return [];
 
     let baseColors: string[];
-    if (this.startColor && this.endColor) {
-      baseColors = this.generateGradientColors(this.startColor, this.endColor, stagesData.length)
-        || this.generateDefaultColors(stagesData.length);
-    } else {
-      const paletteColors = this.getPaletteColors(stagesData.length, 'fill');
-      baseColors = paletteColors || this.generateDefaultColors(stagesData.length);
-    }
+    const paletteColors = this.getPaletteColors(stagesData.length, 'fill');
+    baseColors = paletteColors || this.generateDefaultColors(stagesData.length);
 
     const elementsForResolution = stagesData.map((s, i) => ({
       fill: s.fill,
