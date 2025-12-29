@@ -1056,6 +1056,45 @@ Defines a fill style (solid color and/or pattern) within a palette.
 3. Solid fills with value match
 4. Solid fills with label match
 
+### `<dc-swatch>`
+
+Displays a colored shape from a palette outside of charts, useful for annotating prose, tables, or legends.
+
+**Attributes:**
+- `palette` (string) - Reference to a custom `<dc-palette>` ID or built-in palette name
+- `label` (string) - Label to match in the palette (for custom palettes with `<dc-fill>` elements)
+- `index` (number) - Zero-based index for selecting colors from built-in palettes
+- `value` (number) - Value to match in the palette (for value-range matching)
+- `fill` (string) - Direct fill color override (bypasses palette lookup)
+- `stroke` (string) - Direct stroke color override (bypasses palette lookup)
+- `shape` (string) - Shape to render (default: "circle")
+- `size` (number) - Size in pixels (default: 16)
+
+**Available shapes:** `circle`, `square`, `rect`, `line`, `triangle`, `diamond`, `star`, `cross`, `plus`, or any Unicode character
+
+**Examples:**
+```html
+<!-- Match by label in custom palette -->
+<dc-palette id="brand">
+  <dc-fill label="Revenue" fill="#2563eb"></dc-fill>
+</dc-palette>
+<p><dc-swatch palette="brand" label="Revenue"></dc-swatch> Revenue grew 15%</p>
+
+<!-- Use built-in palette by index -->
+<dc-swatch palette="category10" index="0"></dc-swatch> First color
+<dc-swatch palette="category10" index="1"></dc-swatch> Second color
+
+<!-- Different shapes -->
+<dc-swatch palette="brand" label="Sales" shape="square"></dc-swatch>
+<dc-swatch palette="brand" label="Trend" shape="line"></dc-swatch>
+
+<!-- Unicode shapes -->
+<dc-swatch palette="brand" label="Warning" shape="⚠"></dc-swatch>
+
+<!-- Direct color override -->
+<dc-swatch fill="#FF5722" shape="circle"></dc-swatch>
+```
+
 ---
 
 ## Dynamic Updates
