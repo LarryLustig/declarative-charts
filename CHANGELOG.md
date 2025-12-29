@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Swatch Built-in Palette Support**
+  - `index` attribute for selecting colors from built-in palettes by position
+  - Works with categorical, sequential, and diverging palettes
+  - Example: `<dc-swatch palette="category10" index="2"></dc-swatch>`
+
 - **Negative Value Support**
   - Bar charts extend downward (vertical) or leftward (horizontal) for negative values
   - Line and bubble charts position points below zero when appropriate
@@ -136,6 +141,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   <!-- After -->
   <dc-funnel-chart start-color="#3498db" end-color="#e74c3c">
   ```
+
+### Fixed
+
+- **dc-fill Custom Element Registration** - The `<dc-fill>` element was not being registered due to tree-shaking removing the module (only type-only imports existed). Added side-effect import in library entry point to ensure the element is always available.
 
 ## [0.1.0] - Initial Development
 
