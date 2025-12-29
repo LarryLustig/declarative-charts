@@ -18,7 +18,33 @@ A modern Web Components-based chart library built with Lit that allows you to cr
 
 ### Installation
 
+**Via npm:**
+
 ```bash
+npm install declarative-charts
+```
+
+```javascript
+import 'declarative-charts';
+```
+
+**Via CDN:**
+
+```html
+<script type="module" src="https://unpkg.com/declarative-charts"></script>
+```
+
+Or with jsdelivr:
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/declarative-charts"></script>
+```
+
+**Local development:**
+
+```bash
+git clone https://github.com/YOUR_USERNAME/decl-charts.git
+cd decl-charts
 npm install
 npm run dev
 ```
@@ -81,6 +107,34 @@ Open your browser to `http://localhost:5173`
   <dc-bubble label="Q3" value="60" size-value="300"></dc-bubble>
 </dc-chart>
 ```
+
+## Browser Compatibility
+
+| Browser | Supported Versions |
+|---------|-------------------|
+| Chrome | 90+ |
+| Firefox | 90+ |
+| Safari | 14+ |
+| Edge | 90+ |
+
+Requires native support for Web Components (Custom Elements, Shadow DOM) and ES2020. No polyfills needed for modern browsers.
+
+## Bundle Size
+
+| Format | Size | Gzipped |
+|--------|------|---------|
+| ES Module | 302 KB | 71 KB |
+| UMD | 190 KB | 50 KB |
+
+Includes Lit (~45 KB gzipped). No additional dependencies required.
+
+## Performance Guidelines
+
+- **Large datasets**: For very large datasets, consider aggregating data before rendering.
+- **Dynamic updates**: Use `chart.requestUpdate()` after modifying child elements. Batch multiple changes before calling update.
+- **Hidden elements**: Use the `hidden` attribute on data elements to temporarily hide them without removing from DOM.
+- **Popups**: Use `auto-popup` for automatic tooltips instead of manually managing popup state.
+- **SVG rendering**: Charts render to SVG, which scales cleanly but can slow down with thousands of elements.
 
 ## Documentation
 
