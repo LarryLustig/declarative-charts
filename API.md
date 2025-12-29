@@ -20,7 +20,7 @@ Complete documentation for all elements and attributes in the Declarative Chart 
 
 ## Common Chart Attributes
 
-All chart components (`<dc-chart>`, `<dc-pie-chart>`, `<dc-funnel-chart>`) share these common attributes:
+All chart components (`<dc-chart>`, `<dc-pie-chart>`, `<dc-funnel-chart>`, `<dc-stage-chart>`) share these common attributes:
 
 ### Dimensions
 - `width` (number) - Chart width in pixels (default: 600)
@@ -826,6 +826,86 @@ Defines a single stage in a funnel chart.
 **Attributes:**
 - `value` (number) - The stage's value (required)
 - `label` (string) - Label for this stage
+- `fill` (string) - CSS color for this stage
+- `stroke` (string) - Shorthand for stroke color and width
+- `stroke-color` (string) - Optional stroke color for this stage
+- `stroke-width` (number) - Optional stroke width for this stage
+- `show-value` (boolean|string) - Whether to show the value on this stage
+- `show-label` (boolean|string) - Whether to show the label on this stage
+- `show-percent` (boolean|string) - Whether to show the percentage on this stage
+
+### `<dc-stage-chart>`
+
+Renders a stage chart with connected shapes where each stage's area is proportional to its value. Unlike funnel charts, values can increase or decrease between stages.
+
+**Attributes:**
+- `orientation` (string) - Chart orientation: "vertical" (default) or "horizontal"
+- `shape` (string) - Default shape type: "rectangle" (default), "square", "circle", "oval"
+- `corner-radius` (string) - Corner radius for rectangles (e.g., "8px", "10%", "0.5rem")
+- `aspect-ratio` (number) - Width:height ratio for rectangles/ovals (default: 2)
+- `stage-size` (string) - Size mode: omit for equal sizes, "value" for area proportional to value, "log-value" for logarithmic scaling, or fixed values like "80px"
+- `stage-min-size` (string) - Minimum stage dimension
+- `stage-max-size` (string) - Maximum stage dimension
+- `gap` (string) - Space between stages (e.g., "20px", "5%", "0")
+- `connector` (string) - Connector style: "line" (default), "arrow", "none", or compound like "arrow 2 #333"
+- `zero-style` (string) - How to render value=0 stages: "ghost" (default), "hidden", "dot", "normal"
+- `palette` (string) - Reference to a custom `<dc-palette>` ID or built-in palette name
+- `start-color` (string) - Start color for custom gradient fills (overrides palette)
+- `end-color` (string) - End color for custom gradient fills (overrides palette)
+- `stroke` (string) - Shorthand for stroke color and width (e.g., "2 #333")
+- `stroke-width` (number) - Stroke width for stage borders in pixels (default: 1)
+- `show-value` (boolean|string) - Whether to display values on stages (default: true)
+- `show-label` (boolean|string) - Whether to display labels on stages (default: true)
+- `show-percent` (boolean|string) - Whether to display percentages on stages (default: false)
+- Plus all [common chart attributes](#common-chart-attributes)
+
+**Child Elements:**
+- `<dc-title>` - Optional title
+- `<dc-stage>` - Individual stages (one or more)
+- `<dc-legend>` - Optional legend
+
+**Examples:**
+
+Basic stage chart with value-proportional sizing:
+```html
+<dc-stage-chart width="500" height="450" stage-size="value">
+  <dc-title>Project Pipeline</dc-title>
+  <dc-stage value="50" label="Backlog"></dc-stage>
+  <dc-stage value="120" label="In Progress"></dc-stage>
+  <dc-stage value="80" label="Review"></dc-stage>
+  <dc-stage value="200" label="Done"></dc-stage>
+</dc-stage-chart>
+```
+
+Horizontal with arrows:
+```html
+<dc-stage-chart orientation="horizontal" stage-size="value" connector="arrow">
+  <dc-stage value="100" label="Q1"></dc-stage>
+  <dc-stage value="150" label="Q2"></dc-stage>
+  <dc-stage value="130" label="Q3"></dc-stage>
+  <dc-stage value="200" label="Q4"></dc-stage>
+</dc-stage-chart>
+```
+
+Circle shapes:
+```html
+<dc-stage-chart shape="circle" stage-size="value" connector="arrow 2 #666">
+  <dc-stage value="200" label="Awareness"></dc-stage>
+  <dc-stage value="350" label="Interest"></dc-stage>
+  <dc-stage value="150" label="Decision"></dc-stage>
+  <dc-stage value="100" label="Action"></dc-stage>
+</dc-stage-chart>
+```
+
+### `<dc-stage>`
+
+Defines a single stage in a stage chart.
+
+**Attributes:**
+- `value` (number) - The stage's value (required)
+- `label` (string) - Label for this stage
+- `shape` (string) - Override chart's shape for this stage ("rectangle", "square", "circle", "oval")
+- `corner-radius` (string) - Override corner radius for rectangles
 - `fill` (string) - CSS color for this stage
 - `stroke` (string) - Shorthand for stroke color and width
 - `stroke-color` (string) - Optional stroke color for this stage

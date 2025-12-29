@@ -1,0 +1,83 @@
+import { customElement, property } from 'lit/decorators.js';
+import { BaseShape } from './base-shape.js';
+import { showConditionConverter, type ShowCondition } from './base-chart.js';
+
+/**
+ * Shape types supported by stage charts
+ */
+export type StageShape = 'rectangle' | 'square' | 'oval' | 'circle';
+
+/**
+ * Individual stage element for stage charts
+ *
+ * Supports attribute passthrough for integration with htmx and other libraries.
+ * Any attributes not explicitly defined (like hx-get, hx-target, data-*, etc.)
+ * will be passed through to the rendered SVG element.
+ *
+ * @element dc-stage
+ *
+ * @attr {number} value - The numeric value for this stage
+ * @attr {string} label - The label for this stage (inherited from BaseChartElement)
+ * @attr {string} fill - Fill color for this stage (inherited from BaseChartElement)
+ * @attr {string} color - @deprecated Use fill instead. Optional color for this stage (inherited from BaseChartElement)
+ * @attr {string} stroke - Stroke shorthand (e.g., "2 #333")
+ * @attr {number} stroke-width - Stroke width for this stage (inherited from BaseChartElement)
+ * @attr {StageShape} shape - Override chart's shape for this stage
+ * @attr {string} corner-radius - Override corner radius for rectangles
+ * @attr {boolean} show-value - Whether to show the value on this stage (inherits from chart)
+ * @attr {boolean} show-label - Whether to show the label on this stage (inherits from chart)
+ * @attr {boolean} show-percent - Whether to show the percentage on this stage (inherits from chart)
+ *
+ * @example
+ * <dc-stage value="100" label="Step 1"></dc-stage>
+ *
+ * @example
+ * <dc-stage value="200" label="Peak" fill="#4285f4" shape="circle"></dc-stage>
+ *
+ * @example
+ * <!-- Override chart defaults for this stage -->
+ * <dc-stage value="50" label="End" show-value="false" shape="oval"></dc-stage>
+ *
+ * @example
+ * <!-- With htmx attributes -->
+ * <dc-stage value="150" label="Active"
+ *           hx-get="/api/stage/active"
+ *           hx-target="#details"
+ *           hx-swap="innerHTML"></dc-stage>
+ */
+@customElement('dc-stage')
+export class ChartStage extends BaseShape {
+  @property({ type: Number })
+  value = 0;
+
+  /**
+   * Override shape for this stage.
+   * If not set, inherits from chart's shape attribute.
+   */
+  @property({ type: String })
+  shape?: StageShape;
+
+  /**
+   * Override corner radius for this stage (only applies to rectangle shape).
+   * If not set, inherits from chart's corner-radius attribute.
+   */
+  @property({ type: String, attribute: 'corner-radius' })
+  cornerRadius?: string;
+
+  // stroke and strokeWidth are inherited from BaseChartElement
+
+  @property({ attribute: 'show-value', converter: showConditionConverter })
+  showValue?: ShowCondition;
+
+  @property({ attribute: 'show-label', converter: showConditionConverter })
+  showLabel?: ShowCondition;
+
+  @property({ attribute: 'show-percent', converter: showConditionConverter })
+  showPercent?: ShowCondition;
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'dc-stage': ChartStage;
+  }
+}

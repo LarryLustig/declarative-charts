@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stage Charts - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+</head>
+<body>
+    <h1>Stage Chart Examples</h1>
+    <p>Visualize pipelines and workflows with variable-sized stages</p>
+
+    <nav>
+        <div class="nav-major">
+            <a href="../index.html">Home</a>
+            <a href="barcharts.html">Bar Charts</a>
+            <a href="linecharts.html">Line Charts</a>
+            <a href="bubblecharts.html">Bubble Charts</a>
+            <a href="piecharts.html">Pie Charts</a>
+            <a href="funnelcharts.html">Funnel Charts</a>
+            <a href="stagecharts.html" class="current">Stage Charts</a>
+        </div>
+        <div class="nav-minor">
+            <a href="titles.html">Titles</a>
+            <a href="legends.html">Legends</a>
+            <a href="axes.html">Axes</a>
+            <a href="data-labels.html">Data Labels</a>
+            <div class="nav-dropdown">
+                <a href="#" class="nav-dropdown-toggle">Chart Colors <span class="arrow">&#9662;</span></a>
+                <div class="nav-dropdown-menu">
+                    <a href="palettes.html">Palettes</a>
+                    <a href="swatches.html">Swatches</a>
+                    <a href="colors.html">Element Colors</a>
+                </div>
+            </div>
+            <a href="typography.html">Typography</a>
+            <a href="borders-and-padding.html">Borders & Padding</a>
+            <a href="bar-groups.html">Bar Groups</a>
+            <a href="bar-width.html">Bar Width</a>
+            <a href="gutter.html">Gutter</a>
+            <a href="interactive.html">Interactive</a>
+            <a href="popups.html">Popups</a>
+            <a href="logging.html">Logging</a>
+            <a href="htmx-integration.html">htmx</a>
+            <a href="accessibility.html">Accessibility</a>
+        </div>
+    </nav>
+
+    <div class="example">
+        <h2>Basic Stage Charts</h2>
+        <p>Stage charts show connected shapes where each stage's area is proportional to its value. Unlike funnel charts, values can go up and down:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Project Pipeline (Values Vary)</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="450" stage-size="value"&gt;
+  &lt;dc-title&gt;Project Pipeline&lt;/dc-title&gt;
+  &lt;dc-stage value="50" label="Backlog"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="120" label="In Progress"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="80" label="Review"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="200" label="Done"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="450" stage-size="value">
+                    <dc-title>Project Pipeline</dc-title>
+                    <dc-stage value="50" label="Backlog"></dc-stage>
+                    <dc-stage value="120" label="In Progress"></dc-stage>
+                    <dc-stage value="80" label="Review"></dc-stage>
+                    <dc-stage value="200" label="Done"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>Equal Sizes (Default)</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="450"&gt;
+  &lt;dc-title&gt;Workflow Stages&lt;/dc-title&gt;
+  &lt;dc-stage value="100" label="Draft"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="250" label="Review"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="180" label="Approved"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="320" label="Published"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="450">
+                    <dc-title>Workflow Stages</dc-title>
+                    <dc-stage value="100" label="Draft"></dc-stage>
+                    <dc-stage value="250" label="Review"></dc-stage>
+                    <dc-stage value="180" label="Approved"></dc-stage>
+                    <dc-stage value="320" label="Published"></dc-stage>
+                </dc-stage-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Shape Types</h2>
+        <p>Choose from different shape types: rectangle (default), square, circle, or oval:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Rectangle (Default)</h3>
+                <pre><code>&lt;dc-stage-chart width="450" height="400"
+                stage-size="value"
+                shape="rectangle"&gt;
+  &lt;dc-stage value="100" label="Step 1"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="180" label="Step 2"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="120" label="Step 3"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="450" height="400" stage-size="value" shape="rectangle">
+                    <dc-stage value="100" label="Step 1"></dc-stage>
+                    <dc-stage value="180" label="Step 2"></dc-stage>
+                    <dc-stage value="120" label="Step 3"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>Circle</h3>
+                <pre><code>&lt;dc-stage-chart width="450" height="400"
+                stage-size="value"
+                shape="circle"&gt;
+  &lt;dc-stage value="100" label="Step 1"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="180" label="Step 2"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="120" label="Step 3"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="450" height="400" stage-size="value" shape="circle">
+                    <dc-stage value="100" label="Step 1"></dc-stage>
+                    <dc-stage value="180" label="Step 2"></dc-stage>
+                    <dc-stage value="120" label="Step 3"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>Square</h3>
+                <pre><code>&lt;dc-stage-chart width="450" height="400"
+                stage-size="value"
+                shape="square"&gt;
+  &lt;dc-stage value="100" label="Step 1"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="180" label="Step 2"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="120" label="Step 3"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="450" height="400" stage-size="value" shape="square">
+                    <dc-stage value="100" label="Step 1"></dc-stage>
+                    <dc-stage value="180" label="Step 2"></dc-stage>
+                    <dc-stage value="120" label="Step 3"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>Oval</h3>
+                <pre><code>&lt;dc-stage-chart width="450" height="400"
+                stage-size="value"
+                shape="oval"&gt;
+  &lt;dc-stage value="100" label="Step 1"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="180" label="Step 2"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="120" label="Step 3"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="450" height="400" stage-size="value" shape="oval">
+                    <dc-stage value="100" label="Step 1"></dc-stage>
+                    <dc-stage value="180" label="Step 2"></dc-stage>
+                    <dc-stage value="120" label="Step 3"></dc-stage>
+                </dc-stage-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Rounded Corners</h2>
+        <p>Add rounded corners to rectangle shapes using the corner-radius attribute:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Rounded Rectangles</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="400"
+                stage-size="value"
+                corner-radius="12px"&gt;
+  &lt;dc-stage value="80" label="Idea"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="150" label="Development"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="100" label="Testing"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="200" label="Release"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="400" stage-size="value" corner-radius="12px">
+                    <dc-stage value="80" label="Idea"></dc-stage>
+                    <dc-stage value="150" label="Development"></dc-stage>
+                    <dc-stage value="100" label="Testing"></dc-stage>
+                    <dc-stage value="200" label="Release"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>Pill Shapes (Large Radius)</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="400"
+                stage-size="value"
+                corner-radius="50%"&gt;
+  &lt;dc-stage value="80" label="Idea"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="150" label="Development"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="100" label="Testing"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="200" label="Release"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="400" stage-size="value" corner-radius="50%">
+                    <dc-stage value="80" label="Idea"></dc-stage>
+                    <dc-stage value="150" label="Development"></dc-stage>
+                    <dc-stage value="100" label="Testing"></dc-stage>
+                    <dc-stage value="200" label="Release"></dc-stage>
+                </dc-stage-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Connectors</h2>
+        <p>Customize the lines connecting stages using the connector attribute:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Line Connectors (Default)</h3>
+                <pre><code>&lt;dc-stage-chart width="450" height="400"
+                stage-size="value"
+                connector="line"&gt;
+  &lt;dc-stage value="100" label="Start"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="200" label="Middle"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="150" label="End"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="450" height="400" stage-size="value" connector="line">
+                    <dc-stage value="100" label="Start"></dc-stage>
+                    <dc-stage value="200" label="Middle"></dc-stage>
+                    <dc-stage value="150" label="End"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>Arrow Connectors</h3>
+                <pre><code>&lt;dc-stage-chart width="450" height="400"
+                stage-size="value"
+                connector="arrow"&gt;
+  &lt;dc-stage value="100" label="Start"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="200" label="Middle"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="150" label="End"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="450" height="400" stage-size="value" connector="arrow">
+                    <dc-stage value="100" label="Start"></dc-stage>
+                    <dc-stage value="200" label="Middle"></dc-stage>
+                    <dc-stage value="150" label="End"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>Custom Arrow Style</h3>
+                <pre><code>&lt;dc-stage-chart width="450" height="400"
+                stage-size="value"
+                connector="arrow 3 #2196F3 12px"&gt;
+  &lt;dc-stage value="100" label="Start"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="200" label="Middle"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="150" label="End"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="450" height="400" stage-size="value" connector="arrow 3 #2196F3 12px">
+                    <dc-stage value="100" label="Start"></dc-stage>
+                    <dc-stage value="200" label="Middle"></dc-stage>
+                    <dc-stage value="150" label="End"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>No Connectors</h3>
+                <pre><code>&lt;dc-stage-chart width="450" height="400"
+                stage-size="value"
+                connector="none"&gt;
+  &lt;dc-stage value="100" label="Start"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="200" label="Middle"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="150" label="End"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="450" height="400" stage-size="value" connector="none">
+                    <dc-stage value="100" label="Start"></dc-stage>
+                    <dc-stage value="200" label="Middle"></dc-stage>
+                    <dc-stage value="150" label="End"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>No Gap (Touching Rectangles)</h3>
+                <pre><code>&lt;dc-stage-chart width="450" height="400"
+                stage-size="value"
+                gap="0"
+                stroke="1 white"&gt;
+  &lt;dc-stage value="50" label="Backlog"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="120" label="In Progress"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="80" label="Review"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="200" label="Done"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="450" height="400" stage-size="value" gap="0" stroke="1 white">
+                    <dc-stage value="50" label="Backlog"></dc-stage>
+                    <dc-stage value="120" label="In Progress"></dc-stage>
+                    <dc-stage value="80" label="Review"></dc-stage>
+                    <dc-stage value="200" label="Done"></dc-stage>
+                </dc-stage-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Horizontal Orientation</h2>
+        <p>Display stages horizontally using the orientation attribute:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Horizontal with Arrows</h3>
+                <pre><code>&lt;dc-stage-chart width="600" height="250"
+                orientation="horizontal"
+                stage-size="value"
+                connector="arrow"&gt;
+  &lt;dc-stage value="100" label="Q1"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="150" label="Q2"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="130" label="Q3"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="200" label="Q4"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="600" height="250" orientation="horizontal" stage-size="value" connector="arrow">
+                    <dc-stage value="100" label="Q1"></dc-stage>
+                    <dc-stage value="150" label="Q2"></dc-stage>
+                    <dc-stage value="130" label="Q3"></dc-stage>
+                    <dc-stage value="200" label="Q4"></dc-stage>
+                </dc-stage-chart>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div>
+                <h3>Horizontal Circles</h3>
+                <pre><code>&lt;dc-stage-chart width="600" height="300"
+                orientation="horizontal"
+                stage-size="value"
+                shape="circle"
+                connector="arrow 2 #666"&gt;
+  &lt;dc-stage value="200" label="Awareness"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="350" label="Interest"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="150" label="Decision"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="100" label="Action"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="600" height="300" orientation="horizontal" stage-size="value" shape="circle" connector="arrow 2 #666">
+                    <dc-stage value="200" label="Awareness"></dc-stage>
+                    <dc-stage value="350" label="Interest"></dc-stage>
+                    <dc-stage value="150" label="Decision"></dc-stage>
+                    <dc-stage value="100" label="Action"></dc-stage>
+                </dc-stage-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Zero Value Handling</h2>
+        <p>Control how stages with value=0 are displayed using the zero-style attribute:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Ghost Style (Default)</h3>
+                <pre><code>&lt;dc-stage-chart width="450" height="400"
+                zero-style="ghost"
+                connector="arrow"&gt;
+  &lt;dc-stage value="100" label="Started"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="0" label="Blocked"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="75" label="Completed"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="450" height="400" zero-style="ghost" connector="arrow">
+                    <dc-stage value="100" label="Started"></dc-stage>
+                    <dc-stage value="0" label="Blocked"></dc-stage>
+                    <dc-stage value="75" label="Completed"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>Hidden Style</h3>
+                <pre><code>&lt;dc-stage-chart width="450" height="400"
+                zero-style="hidden"
+                connector="arrow"&gt;
+  &lt;dc-stage value="100" label="Started"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="0" label="Blocked"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="75" label="Completed"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="450" height="400" zero-style="hidden" connector="arrow">
+                    <dc-stage value="100" label="Started"></dc-stage>
+                    <dc-stage value="0" label="Blocked"></dc-stage>
+                    <dc-stage value="75" label="Completed"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>Dot Style</h3>
+                <pre><code>&lt;dc-stage-chart width="450" height="400"
+                zero-style="dot"
+                connector="arrow"&gt;
+  &lt;dc-stage value="100" label="Started"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="0" label="Blocked"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="75" label="Completed"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="450" height="400" zero-style="dot" connector="arrow">
+                    <dc-stage value="100" label="Started"></dc-stage>
+                    <dc-stage value="0" label="Blocked"></dc-stage>
+                    <dc-stage value="75" label="Completed"></dc-stage>
+                </dc-stage-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Custom Colors</h2>
+        <p>Style stages with gradients, per-stage colors, or palettes:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Per-Stage Colors</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="400" stage-size="value"&gt;
+  &lt;dc-stage value="80" label="Draft" fill="#e3f2fd"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="150" label="Review" fill="#bbdefb"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="100" label="Approved" fill="#90caf9"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="200" label="Published" fill="#42a5f5"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="400" stage-size="value">
+                    <dc-stage value="80" label="Draft" fill="#e3f2fd"></dc-stage>
+                    <dc-stage value="150" label="Review" fill="#bbdefb"></dc-stage>
+                    <dc-stage value="100" label="Approved" fill="#90caf9"></dc-stage>
+                    <dc-stage value="200" label="Published" fill="#42a5f5"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>Gradient Colors</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="400"
+                stage-size="value"
+                start-color="#4CAF50"
+                end-color="#2196F3"&gt;
+  &lt;dc-stage value="80" label="Draft"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="150" label="Review"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="100" label="Approved"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="200" label="Published"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="400" stage-size="value" start-color="#4CAF50" end-color="#2196F3">
+                    <dc-stage value="80" label="Draft"></dc-stage>
+                    <dc-stage value="150" label="Review"></dc-stage>
+                    <dc-stage value="100" label="Approved"></dc-stage>
+                    <dc-stage value="200" label="Published"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>Using a Palette</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="400"
+                stage-size="value"
+                palette="category10"&gt;
+  &lt;dc-stage value="80" label="Draft"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="150" label="Review"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="100" label="Approved"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="200" label="Published"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="400" stage-size="value" palette="category10">
+                    <dc-stage value="80" label="Draft"></dc-stage>
+                    <dc-stage value="150" label="Review"></dc-stage>
+                    <dc-stage value="100" label="Approved"></dc-stage>
+                    <dc-stage value="200" label="Published"></dc-stage>
+                </dc-stage-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Mixed Shapes Per Stage</h2>
+        <p>Override the shape for individual stages to create visual emphasis:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Highlight Key Stages</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="450"
+                stage-size="value"
+                connector="arrow"&gt;
+  &lt;dc-stage value="100" label="Start" shape="circle" fill="#4caf50"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="250" label="Peak" shape="rectangle" fill="#2196f3"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="150" label="Decline" shape="rectangle" fill="#ff9800"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="75" label="End" shape="circle" fill="#f44336"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="450" stage-size="value" connector="arrow">
+                    <dc-stage value="100" label="Start" shape="circle" fill="#4caf50"></dc-stage>
+                    <dc-stage value="250" label="Peak" shape="rectangle" fill="#2196f3"></dc-stage>
+                    <dc-stage value="150" label="Decline" shape="rectangle" fill="#ff9800"></dc-stage>
+                    <dc-stage value="75" label="End" shape="circle" fill="#f44336"></dc-stage>
+                </dc-stage-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Borders and Styling</h2>
+        <p>Add borders to stages using stroke attributes:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Basic Borders</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="400"
+                stage-size="value"
+                stroke="2 #333"&gt;
+  &lt;dc-stage value="100" label="Step 1"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="180" label="Step 2"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="120" label="Step 3"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="400" stage-size="value" stroke="2 #333">
+                    <dc-stage value="100" label="Step 1"></dc-stage>
+                    <dc-stage value="180" label="Step 2"></dc-stage>
+                    <dc-stage value="120" label="Step 3"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>Colored Borders with Shapes</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="400"
+                stage-size="value"
+                shape="circle"
+                stroke="3 #2196F3"
+                start-color="#e3f2fd"
+                end-color="#bbdefb"&gt;
+  &lt;dc-stage value="100" label="Step 1"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="180" label="Step 2"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="120" label="Step 3"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="400" stage-size="value" shape="circle" stroke="3 #2196F3" start-color="#e3f2fd" end-color="#bbdefb">
+                    <dc-stage value="100" label="Step 1"></dc-stage>
+                    <dc-stage value="180" label="Step 2"></dc-stage>
+                    <dc-stage value="120" label="Step 3"></dc-stage>
+                </dc-stage-chart>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+</body>
+</html>

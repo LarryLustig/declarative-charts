@@ -29,6 +29,8 @@ export type { GridConfig, GridLineStyle } from './chart-grid.js';
 export { Chart } from './chart.js';
 export { FunnelChart } from './funnel-chart.js';
 export { PieChart } from './pie-chart.js';
+export { StageChart } from './stage-chart.js';
+export type { ZeroStyle, ConnectorType } from './stage-chart.js';
 
 // Export child element components
 export { ChartBar } from './chart-bar.js';
@@ -40,6 +42,8 @@ export type { CurveFit } from './chart-line.js';
 export { ChartPoint } from './chart-point.js';
 export { ChartPopup } from './chart-popup.js';
 export { ChartFunnelStage } from './chart-funnel-stage.js';
+export { ChartStage } from './chart-stage.js';
+export type { StageShape } from './chart-stage.js';
 export { ChartPieSlice } from './chart-pie-slice.js';
 export { ChartLegend } from './chart-legend.js';
 export { ChartTitle } from './chart-title.js';
