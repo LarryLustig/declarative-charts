@@ -81,15 +81,32 @@ Text elements (`<dc-title>`, `<dc-legend>`) use SVG attributes, not CSS:
 **SVG Rendering Order** (z-index, later = on top):
 1. Grid lines → 2. Data elements → 3. Axes → 4. Labels → 5. Legend
 
-**Palette System**: `<dc-palette>` contains `<dc-fill>` elements for reusable color/pattern schemes. Charts reference via `palette` attribute. Priority: element fill/stroke > palette match > chart-level colors > auto.
+**Palette System**: Charts use the `palette` attribute to reference either a custom `<dc-palette>` element or a built-in palette name. User-defined palettes take precedence over built-in palettes with the same name.
+
+Color priority: element fill/stroke > custom palette match > palette by index > auto-generated.
 
 ```html
+<!-- Built-in palette -->
+<dc-chart palette="category10">
+  <dc-bar value="10" label="A"></dc-bar>
+  <dc-bar value="20" label="B"></dc-bar>
+</dc-chart>
+
+<!-- Custom palette with label matching -->
 <dc-palette id="status">
   <dc-fill label="Critical" fill="#fee2e2" stroke="#dc2626" pattern="crosshatch"></dc-fill>
   <dc-fill label="Warning" fill="#fef3c7" stroke="#f59e0b" pattern="diagonal-lines"></dc-fill>
   <dc-fill label="OK" fill="#10b981"></dc-fill>
 </dc-palette>
+<dc-chart palette="status">...</dc-chart>
 ```
+
+**Built-in Palettes** (in `src/builtin-palettes.ts`):
+- **Categorical**: `category10`, `accent`, `dark2`, `paired`, `pastel`, `set1`, `set2`, `set3`, `tableau10`
+- **Sequential**: `blue`, `green`, `red`, `orange`, `purple`, `gray`, `viridis`, `plasma`, `warm`, `cool`, `turbo`
+- **Diverging**: `red-blue`, `purple-green`, `brown-teal`, `pink-green`, `spectral`
+
+Use `getPaletteColors(count, colorType)` in chart code to resolve palette colors. Funnel charts support `start-color`/`end-color` for custom gradients (overrides palette).
 
 **Pattern Fills**: Apply patterns directly (`pattern="diagonal-lines"`), by ID reference, or via palettes. Built-in: `diagonal-lines`, `diagonal-lines-reverse`, `horizontal-lines`, `vertical-lines`, `dots`, `crosshatch`, `grid`, `checkerboard`.
 
@@ -223,6 +240,7 @@ npm run test:visual:update  # Update visual test baselines
 | `src/format.ts` | `test/unit/format.test.ts` | 92% |
 | `src/accessibility/insights.ts` | `test/unit/insights.test.ts` | 97% |
 | `src/patterns.ts` | `test/unit/patterns.test.ts` | 100% |
+| `src/builtin-palettes.ts` | `test/unit/builtin-palettes.test.ts` | 100% |
 | `src/axis-chart.ts` (scale functions) | `test/unit/axis-scales.test.ts` | 22% (scale calcs only) |
 | `src/chart-fill.ts` | `test/unit/chart-fill.test.ts` | 96% |
 | `src/chart-legend.ts` (utilities) | `test/unit/chart-legend.test.ts` | 11% (type guard, warnings) |
@@ -398,10 +416,11 @@ src/
 ├── base-chart.ts           # Abstract base (logging, accessibility, keyboard nav, formatting)
 ├── axis-chart.ts           # Abstract base for axis charts
 ├── base-chart-element.ts   # Abstract base for data elements
-├── base-shape.ts           # Abstract base for shapes (passthrough, valueFormat)
+├── base-shape.ts           # Abstract base for shapes (passthrough, valueFormat) [TESTED]
 ├── chart.ts                # <dc-chart> - bars/lines/bubbles
 ├── pie-chart.ts            # <dc-pie-chart>
 ├── funnel-chart.ts         # <dc-funnel-chart>
+├── builtin-palettes.ts     # Built-in color palettes (category10, viridis, etc.) [TESTED]
 ├── format.ts               # NumberFormatter, presets, d3-format parsing [TESTED]
 ├── accessibility/          # Insight analysis utilities [TESTED]
 ├── chart-axis.ts           # <dc-axis> configuration [TESTED]
@@ -410,7 +429,6 @@ src/
 ├── chart-legend.ts         # <dc-legend> legend rendering [TESTED]
 ├── chart-swatch.ts         # <dc-swatch> for displaying colors [TESTED]
 ├── chart-title.ts          # <dc-title> title rendering [TESTED]
-├── base-shape.ts           # Abstract base for shapes [TESTED]
 ├── patterns.ts             # SVG pattern definitions [TESTED]
 ├── chart-*.ts              # Other data elements
 └── index.ts                # Exports
@@ -420,6 +438,7 @@ test/
 │   ├── format.test.ts      # Tests for src/format.ts
 │   ├── insights.test.ts    # Tests for src/accessibility/insights.ts
 │   ├── patterns.test.ts    # Tests for src/patterns.ts
+│   ├── builtin-palettes.test.ts # Tests for src/builtin-palettes.ts
 │   ├── axis-scales.test.ts # Tests for axis scale calculations
 │   ├── chart-fill.test.ts  # Tests for src/chart-fill.ts
 │   ├── chart-legend.test.ts # Tests for src/chart-legend.ts
@@ -449,6 +468,7 @@ examples/                   # Example pages (use examples.css, examples.js)
 ## Examples
 
 See `examples/*.html`. Key examples:
+- `colors.html` - Built-in palettes, custom palettes, element-level colors
 - `formatting.html` - Number formatting presets, d3-format, locale, element-level overrides
 - `accessibility.html` - ARIA, insights, keyboard navigation
 - `patterns.html` - Pattern fills, high contrast mode
