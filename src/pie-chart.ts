@@ -182,11 +182,13 @@ export class PieChart extends BaseChart {
     }));
     const resolvedFills = this.resolveFillsWithPatterns(elements, this.sliceColor);
 
-    // Resolve stroke colors
-    const elementStrokes = sliceData.map(s => s.stroke);
-    const strokeColors = this.resolveStrokeColors(sliceData.length, elementStrokes, undefined, 'white');
+    // Get effective stroke from shorthand or explicit attributes (default: white, 2px)
+    const effectiveStroke = this.getEffectiveStroke('white', 2);
 
-    const defaultStrokeWidth = this.strokeWidth ?? 2;
+    // Resolve stroke colors for each slice
+    const elementStrokes = sliceData.map(s => s.stroke);
+    const strokeColors = this.resolveStrokeColors(sliceData.length, elementStrokes, undefined, effectiveStroke.color);
+    const defaultStrokeWidth = effectiveStroke.width;
 
     const totalValue = sliceData.reduce((sum, slice) => sum + slice.value, 0);
     if (totalValue === 0) return null;

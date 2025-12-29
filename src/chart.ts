@@ -31,6 +31,8 @@ interface DeferredLabel {
 interface SegmentData {
   value: number;
   fill: string;
+  stroke?: string;
+  strokeWidth?: number;
   label: string;
   href?: string;
   target?: string;
@@ -47,6 +49,8 @@ interface BarData {
   value: number;
   fill: string;
   elementFill?: string;
+  stroke?: string;
+  strokeWidth?: number;
   label: string;
   href?: string;
   target?: string;
@@ -396,6 +400,8 @@ export class Chart extends AxisChart {
     return {
       value: segment.value,
       fill: segmentFill,
+      stroke: segment.stroke || undefined,
+      strokeWidth: segment.strokeWidth,
       label: segment.label,
       href: segment.href || undefined,
       target: segment.target || undefined,
@@ -442,6 +448,8 @@ export class Chart extends AxisChart {
       value: totalValue,
       fill: barFill,
       elementFill: elementFill || undefined,
+      stroke: bar.stroke || undefined,
+      strokeWidth: bar.strokeWidth,
       label: bar.label,
       href: bar.href || undefined,
       target: bar.target || undefined,
@@ -529,9 +537,16 @@ export class Chart extends AxisChart {
         defaultColor: this.getDefaultBarFill()
       }));
       const resolvedFills = this.resolveFillsWithPatterns(elements);
+
+      // Get effective stroke from chart-level shorthand (default: no stroke for bars)
+      const effectiveStroke = this.getEffectiveStroke('none', 0);
+
       flattened.forEach((bar, index) => {
         bar.fill = resolvedFills[index].fill;
         bar.originalFill = resolvedFills[index].originalFill;
+        // Apply stroke: element > chart-level shorthand > default (none)
+        bar.stroke = bar.stroke || effectiveStroke.color;
+        bar.strokeWidth = bar.strokeWidth ?? effectiveStroke.width;
       });
     }
 
@@ -1137,6 +1152,8 @@ export class Chart extends AxisChart {
         x="${rect.x}" y="${rect.y}"
         width="${rect.width}" height="${rect.height}"
         fill="${bar.fill}"
+        stroke="${bar.stroke || 'none'}"
+        stroke-width="${bar.strokeWidth || 0}"
         style="cursor: ${hasPopup ? 'pointer' : 'default'}"
         data-shape-index="${index}"
         @mouseenter="${(e: MouseEvent) => this.handleBarMouseEnter(e, index)}"
@@ -1176,11 +1193,16 @@ export class Chart extends AxisChart {
           }
 
           const hasSegmentPopup = segment.href || segment.popup || this.shouldShowAutoPopup(segment.autoPopup);
+          // Segment stroke: element > bar-level > chart-level
+          const segStroke = segment.stroke || bar.stroke || 'none';
+          const segStrokeWidth = segment.strokeWidth ?? bar.strokeWidth ?? 0;
           const segRect = svg`
             <rect
               x="${rect.x}" y="${currentY}"
               width="${rect.width}" height="${segmentHeight}"
               fill="${segment.fill}"
+              stroke="${segStroke}"
+              stroke-width="${segStrokeWidth}"
               style="cursor: ${hasSegmentPopup ? 'pointer' : 'default'}"
               data-shape-index="${index}"
               data-segment-index="${segIndex}"
@@ -1222,11 +1244,16 @@ export class Chart extends AxisChart {
           }
 
           const hasSegmentPopup = segment.href || segment.popup || this.shouldShowAutoPopup(segment.autoPopup);
+          // Segment stroke: element > bar-level > chart-level
+          const segStroke = segment.stroke || bar.stroke || 'none';
+          const segStrokeWidth = segment.strokeWidth ?? bar.strokeWidth ?? 0;
           const segRect = svg`
             <rect
               x="${currentX}" y="${rect.y}"
               width="${segmentWidth}" height="${rect.height}"
               fill="${segment.fill}"
+              stroke="${segStroke}"
+              stroke-width="${segStrokeWidth}"
               style="cursor: ${hasSegmentPopup ? 'pointer' : 'default'}"
               data-shape-index="${index}"
               data-segment-index="${segIndex}"

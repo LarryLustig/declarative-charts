@@ -332,9 +332,18 @@ export abstract class BaseChart extends LitElement {
 
   /**
    * Stroke width for all elements (in pixels).
+   * Can also be set via the stroke shorthand (e.g., stroke="2 #333").
    */
   @property({ type: Number, attribute: 'stroke-width' })
   strokeWidth?: number;
+
+  /**
+   * Shorthand for stroke color and width (e.g., "2 #333" or "#333 2").
+   * Parses to extract stroke-width and stroke-color.
+   * Individual stroke-width and stroke-color attributes take precedence.
+   */
+  @property({ type: String })
+  stroke?: string;
 
   /**
    * Palette for chart colors. Can be:
@@ -1365,6 +1374,51 @@ export abstract class BaseChart extends LitElement {
       paletteColors,
       defaultColor
     });
+  }
+
+  /**
+   * Parse the stroke shorthand attribute to extract color and width.
+   * Supports formats like "2 #333", "#333 2", "2", "#333", "red 3".
+   *
+   * @returns Object with optional color and width properties
+   */
+  protected parseStroke(): { color?: string; width?: number } {
+    if (!this.stroke) return {};
+
+    const parts = this.stroke.trim().split(/\s+/);
+    const result: { color?: string; width?: number } = {};
+
+    for (const part of parts) {
+      // Check if it looks like a color (hex, rgb, hsl, or named color)
+      if (part.startsWith('#') || part.startsWith('rgb') || part.startsWith('hsl') ||
+          /^[a-z]+$/i.test(part)) {
+        result.color = part;
+      } else {
+        // Try to parse as a number (stroke width)
+        const value = parseFloat(part);
+        if (!isNaN(value)) {
+          result.width = value;
+        }
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Get the effective stroke color and width, combining shorthand parsing
+   * with explicit stroke-width attribute. Explicit attributes take precedence.
+   *
+   * @param defaultColor Default color if not specified (default: '#e0e0e0')
+   * @param defaultWidth Default width if not specified (default: 1)
+   * @returns Object with resolved color and width
+   */
+  protected getEffectiveStroke(defaultColor = '#e0e0e0', defaultWidth = 1): { color: string; width: number } {
+    const parsed = this.parseStroke();
+    return {
+      color: parsed.color || defaultColor,
+      width: this.strokeWidth ?? parsed.width ?? defaultWidth
+    };
   }
 
   /**

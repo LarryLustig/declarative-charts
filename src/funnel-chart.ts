@@ -433,12 +433,13 @@ export class FunnelChart extends BaseChart {
     const fillColors = resolvedFills.map(r => r.fill);
     const originalColors = resolvedFills.map(r => r.originalFill);
 
-    // Resolve stroke colors (default to #e0e0e0)
-    const elementStrokes = stagesData.map(s => s.stroke);
-    const strokeColors = this.resolveStrokeColors(stagesData.length, elementStrokes, undefined, '#e0e0e0');
+    // Get effective stroke from shorthand or explicit attributes (default: no border)
+    const effectiveStroke = this.getEffectiveStroke('#e0e0e0', 0);
 
-    // Get stroke width (element > chart > default of 0)
-    const defaultStrokeWidth = this.strokeWidth ?? 0;
+    // Resolve stroke colors for each element
+    const elementStrokes = stagesData.map(s => s.stroke);
+    const strokeColors = this.resolveStrokeColors(stagesData.length, elementStrokes, undefined, effectiveStroke.color);
+    const defaultStrokeWidth = effectiveStroke.width;
 
     // Parse height mode
     let heightMode = 'equal';
