@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Shared Navigation for Examples**
+  - Navigation is now dynamically generated from `examples/examples.js`
+  - All example pages use a single `NAV_CONFIG` object for consistent navigation
+  - Adding new pages only requires editing `examples.js` instead of all HTML files
+
+### Fixed
+
+- **Stale Attributes in Examples**
+  - Replaced non-existent `fill-colors` attribute with `bar-color` or `palette`
+  - Replaced non-existent `stroke-colors` attribute with `line-color`
+  - Fixed `slice-color` documentation reference to use `palette`
+
 ### Added
 
 - **Swatch Built-in Palette Support**
