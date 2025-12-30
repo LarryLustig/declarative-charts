@@ -3,7 +3,15 @@
 const NAV_CONFIG = {
     major: [
         { href: 'index.html', label: 'Home' },
-        { href: 'barcharts.html', label: 'Bar Charts' },
+        {
+            label: 'Bar Charts',
+            dropdown: [
+                { href: 'barcharts.html', label: 'Basics' },
+                { href: 'bar-groups.html', label: 'Groups & Stacks' },
+                { href: 'bar-sizing.html', label: 'Sizing & Spacing' },
+                { href: 'bar-negatives.html', label: 'Negative Values' },
+            ]
+        },
         { href: 'linecharts.html', label: 'Line Charts' },
         { href: 'bubblecharts.html', label: 'Bubble Charts' },
         { href: 'piecharts.html', label: 'Pie Charts' },
@@ -32,9 +40,6 @@ const NAV_CONFIG = {
             ]
         },
         { href: 'borders-and-padding.html', label: 'Borders & Padding' },
-        { href: 'bar-groups.html', label: 'Bar Groups' },
-        { href: 'bar-width.html', label: 'Bar Width' },
-        { href: 'gutter.html', label: 'Gutter' },
         { href: 'combo-charts.html', label: 'Combo Charts' },
         { href: 'interactive.html', label: 'Interactive' },
         { href: 'popups.html', label: 'Popups' },
@@ -91,8 +96,10 @@ function generateNav() {
             </div>`;
     };
 
-    // Build major nav
-    const majorHtml = NAV_CONFIG.major.map(linkHtml).join('\n            ');
+    // Build major nav (supports dropdowns)
+    const majorHtml = NAV_CONFIG.major.map(item => {
+        return item.dropdown ? dropdownHtml(item) : linkHtml(item);
+    }).join('\n            ');
 
     // Build minor nav
     const minorHtml = NAV_CONFIG.minor.map(item => {

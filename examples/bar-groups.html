@@ -3,136 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bar Groups - Declarative Chart Library</title>
+    <title>Bar Groups & Stacks - Declarative Chart Library</title>
     <link rel="stylesheet" href="examples.css">
 </head>
 <body>
-    <h1>Bar Groups</h1>
-    <p>Group multiple bars together to compare related data points</p>
+    <h1>Bar Groups &amp; Stacks</h1>
+    <p>Group related bars together or stack segments within bars</p>
 
     <nav></nav>
 
     <div class="example">
-        <h2>Basic Grouped Bars</h2>
-        <p>Multiple groups of bars with group labels displayed on the axis.</p>
+        <h2>Grouped Bar Charts</h2>
+        <p>Group related bars together using <code>&lt;dc-bar-group&gt;</code> elements. Group labels appear on the axis, while individual bar labels appear on/near each bar.</p>
 
         <div class="grid">
             <div>
-                <h3>Grouped Bars Only</h3>
-                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+                <h3>Vertical Grouped Bars</h3>
+                <pre><code>&lt;dc-chart width="550" height="350"&gt;
   &lt;dc-title&gt;Quarterly Sales by Product&lt;/dc-title&gt;
   &lt;dc-bar-group label="Q1"&gt;
-    &lt;dc-bar value="45" label="Product A" color="#2196F3"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="38" label="Product B" color="#4CAF50"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="52" label="Product C" color="#FF9800"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="45" label="A" fill="#2196F3"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="38" label="B" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="52" label="C" fill="#FF9800"&gt;&lt;/dc-bar&gt;
   &lt;/dc-bar-group&gt;
   &lt;dc-bar-group label="Q2"&gt;
-    &lt;dc-bar value="55" label="Product A" color="#2196F3"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="42" label="Product B" color="#4CAF50"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="48" label="Product C" color="#FF9800"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="55" label="A" fill="#2196F3"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="42" label="B" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="48" label="C" fill="#FF9800"&gt;&lt;/dc-bar&gt;
   &lt;/dc-bar-group&gt;
   &lt;dc-bar-group label="Q3"&gt;
-    &lt;dc-bar value="62" label="Product A" color="#2196F3"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="50" label="Product B" color="#4CAF50"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="55" label="Product C" color="#FF9800"&gt;&lt;/dc-bar&gt;
-  &lt;/dc-bar-group&gt;
-  &lt;dc-bar-group label="Q4"&gt;
-    &lt;dc-bar value="58" label="Product A" color="#2196F3"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="47" label="Product B" color="#4CAF50"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="60" label="Product C" color="#FF9800"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="62" label="A" fill="#2196F3"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="50" label="B" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="55" label="C" fill="#FF9800"&gt;&lt;/dc-bar&gt;
   &lt;/dc-bar-group&gt;
 &lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350">
+                <dc-chart width="550" height="350">
                     <dc-title>Quarterly Sales by Product</dc-title>
                     <dc-bar-group label="Q1">
-                        <dc-bar value="45" label="Product A" fill="#2196F3"></dc-bar>
-                        <dc-bar value="38" label="Product B" fill="#4CAF50"></dc-bar>
-                        <dc-bar value="52" label="Product C" fill="#FF9800"></dc-bar>
+                        <dc-bar value="45" label="A" fill="#2196F3"></dc-bar>
+                        <dc-bar value="38" label="B" fill="#4CAF50"></dc-bar>
+                        <dc-bar value="52" label="C" fill="#FF9800"></dc-bar>
                     </dc-bar-group>
                     <dc-bar-group label="Q2">
-                        <dc-bar value="55" label="Product A" fill="#2196F3"></dc-bar>
-                        <dc-bar value="42" label="Product B" fill="#4CAF50"></dc-bar>
-                        <dc-bar value="48" label="Product C" fill="#FF9800"></dc-bar>
+                        <dc-bar value="55" label="A" fill="#2196F3"></dc-bar>
+                        <dc-bar value="42" label="B" fill="#4CAF50"></dc-bar>
+                        <dc-bar value="48" label="C" fill="#FF9800"></dc-bar>
                     </dc-bar-group>
                     <dc-bar-group label="Q3">
-                        <dc-bar value="62" label="Product A" fill="#2196F3"></dc-bar>
-                        <dc-bar value="50" label="Product B" fill="#4CAF50"></dc-bar>
-                        <dc-bar value="55" label="Product C" fill="#FF9800"></dc-bar>
-                    </dc-bar-group>
-                    <dc-bar-group label="Q4">
-                        <dc-bar value="58" label="Product A" fill="#2196F3"></dc-bar>
-                        <dc-bar value="47" label="Product B" fill="#4CAF50"></dc-bar>
-                        <dc-bar value="60" label="Product C" fill="#FF9800"></dc-bar>
+                        <dc-bar value="62" label="A" fill="#2196F3"></dc-bar>
+                        <dc-bar value="50" label="B" fill="#4CAF50"></dc-bar>
+                        <dc-bar value="55" label="C" fill="#FF9800"></dc-bar>
                     </dc-bar-group>
                 </dc-chart>
             </div>
 
             <div>
-                <h3>Mixed Grouped and Ungrouped Bars</h3>
-                <pre><code>&lt;dc-chart width="500" height="350"&gt;
-  &lt;dc-title&gt;Sales Performance&lt;/dc-title&gt;
-  &lt;dc-bar value="30" label="Solo" color="#E91E63"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar-group label="Group A"&gt;
-    &lt;dc-bar value="40" label="A1" color="#2196F3"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="50" label="A2" color="#2196F3"&gt;&lt;/dc-bar&gt;
-  &lt;/dc-bar-group&gt;
-  &lt;dc-bar value="35" label="Another" color="#9C27B0"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar-group label="Group B"&gt;
-    &lt;dc-bar value="45" label="B1" color="#4CAF50"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="55" label="B2" color="#4CAF50"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="48" label="B3" color="#4CAF50"&gt;&lt;/dc-bar&gt;
-  &lt;/dc-bar-group&gt;
-&lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350">
-                    <dc-title>Sales Performance</dc-title>
-                    <dc-bar value="30" label="Solo" fill="#E91E63"></dc-bar>
-                    <dc-bar-group label="Group A">
-                        <dc-bar value="40" label="A1" fill="#2196F3"></dc-bar>
-                        <dc-bar value="50" label="A2" fill="#2196F3"></dc-bar>
-                    </dc-bar-group>
-                    <dc-bar value="35" label="Another" fill="#9C27B0"></dc-bar>
-                    <dc-bar-group label="Group B">
-                        <dc-bar value="45" label="B1" fill="#4CAF50"></dc-bar>
-                        <dc-bar value="55" label="B2" fill="#4CAF50"></dc-bar>
-                        <dc-bar value="48" label="B3" fill="#4CAF50"></dc-bar>
-                    </dc-bar-group>
-                </dc-chart>
-            </div>
-        </div>
-    </div>
-
-    <div class="example">
-        <h2>Horizontal Grouped Bars</h2>
-        <p>Bar groups in horizontal orientation with group labels on the left.</p>
-
-        <div class="grid">
-            <div>
-                <h3>Horizontal Groups</h3>
-                <pre><code>&lt;dc-chart width="500" height="400" orientation="horizontal"&gt;
-  &lt;dc-title&gt;Revenue by Region and Category&lt;/dc-title&gt;
+                <h3>Horizontal Grouped Bars</h3>
+                <pre><code>&lt;dc-chart width="550" height="400" orientation="horizontal"&gt;
+  &lt;dc-title&gt;Revenue by Region&lt;/dc-title&gt;
   &lt;dc-bar-group label="North"&gt;
-    &lt;dc-bar value="65" label="Electronics" color="#2196F3"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="48" label="Clothing" color="#4CAF50"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="55" label="Food" color="#FF9800"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="65" label="Electronics" fill="#2196F3"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="48" label="Clothing" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="55" label="Food" fill="#FF9800"&gt;&lt;/dc-bar&gt;
   &lt;/dc-bar-group&gt;
   &lt;dc-bar-group label="South"&gt;
-    &lt;dc-bar value="58" label="Electronics" color="#2196F3"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="62" label="Clothing" color="#4CAF50"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="45" label="Food" color="#FF9800"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="58" label="Electronics" fill="#2196F3"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="62" label="Clothing" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="45" label="Food" fill="#FF9800"&gt;&lt;/dc-bar&gt;
   &lt;/dc-bar-group&gt;
   &lt;dc-bar-group label="East"&gt;
-    &lt;dc-bar value="70" label="Electronics" color="#2196F3"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="52" label="Clothing" color="#4CAF50"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="60" label="Food" color="#FF9800"&gt;&lt;/dc-bar&gt;
-  &lt;/dc-bar-group&gt;
-  &lt;dc-bar-group label="West"&gt;
-    &lt;dc-bar value="55" label="Electronics" color="#2196F3"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="58" label="Clothing" color="#4CAF50"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="50" label="Food" color="#FF9800"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="70" label="Electronics" fill="#2196F3"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="52" label="Clothing" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="60" label="Food" fill="#FF9800"&gt;&lt;/dc-bar&gt;
   &lt;/dc-bar-group&gt;
 &lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="400" orientation="horizontal">
-                    <dc-title>Revenue by Region and Category</dc-title>
+                <dc-chart width="550" height="400" orientation="horizontal">
+                    <dc-title>Revenue by Region</dc-title>
                     <dc-bar-group label="North">
                         <dc-bar value="65" label="Electronics" fill="#2196F3"></dc-bar>
                         <dc-bar value="48" label="Clothing" fill="#4CAF50"></dc-bar>
@@ -148,10 +94,38 @@
                         <dc-bar value="52" label="Clothing" fill="#4CAF50"></dc-bar>
                         <dc-bar value="60" label="Food" fill="#FF9800"></dc-bar>
                     </dc-bar-group>
-                    <dc-bar-group label="West">
-                        <dc-bar value="55" label="Electronics" fill="#2196F3"></dc-bar>
-                        <dc-bar value="58" label="Clothing" fill="#4CAF50"></dc-bar>
-                        <dc-bar value="50" label="Food" fill="#FF9800"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Mixed Grouped and Ungrouped</h3>
+                <p>You can mix bar groups with individual bars in the same chart:</p>
+                <pre><code>&lt;dc-chart width="550" height="350"&gt;
+  &lt;dc-title&gt;Team Performance&lt;/dc-title&gt;
+  &lt;dc-bar value="30" label="Solo" fill="#E91E63"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar-group label="Team A"&gt;
+    &lt;dc-bar value="40" label="M1" fill="#2196F3"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="50" label="M2" fill="#2196F3"&gt;&lt;/dc-bar&gt;
+  &lt;/dc-bar-group&gt;
+  &lt;dc-bar value="35" label="Another" fill="#9C27B0"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar-group label="Team B"&gt;
+    &lt;dc-bar value="45" label="M1" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="55" label="M2" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="48" label="M3" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
+  &lt;/dc-bar-group&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="550" height="350">
+                    <dc-title>Team Performance</dc-title>
+                    <dc-bar value="30" label="Solo" fill="#E91E63"></dc-bar>
+                    <dc-bar-group label="Team A">
+                        <dc-bar value="40" label="M1" fill="#2196F3"></dc-bar>
+                        <dc-bar value="50" label="M2" fill="#2196F3"></dc-bar>
+                    </dc-bar-group>
+                    <dc-bar value="35" label="Another" fill="#9C27B0"></dc-bar>
+                    <dc-bar-group label="Team B">
+                        <dc-bar value="45" label="M1" fill="#4CAF50"></dc-bar>
+                        <dc-bar value="55" label="M2" fill="#4CAF50"></dc-bar>
+                        <dc-bar value="48" label="M3" fill="#4CAF50"></dc-bar>
                     </dc-bar-group>
                 </dc-chart>
             </div>
@@ -159,8 +133,161 @@
     </div>
 
     <div class="example">
-        <h2>Reverse Orientations with Groups</h2>
-        <p>Bar groups can also work with reverse orientations.</p>
+        <h2>Stacked Bar Charts</h2>
+        <p>Break a bar into segments using <code>&lt;dc-bar-segment&gt;</code> elements inside a <code>&lt;dc-bar&gt;</code>. Colors are automatically assigned based on segment labels &mdash; all segments with the same label get the same color.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Basic Stacked Bars</h3>
+                <pre><code>&lt;dc-chart width="550" height="350"&gt;
+  &lt;dc-title&gt;Quarterly Revenue by Product&lt;/dc-title&gt;
+  &lt;dc-bar label="Q1"&gt;
+    &lt;dc-bar-segment value="100" label="Product A"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="75" label="Product B"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="50" label="Product C"&gt;&lt;/dc-bar-segment&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-bar label="Q2"&gt;
+    &lt;dc-bar-segment value="120" label="Product A"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="90" label="Product B"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="60" label="Product C"&gt;&lt;/dc-bar-segment&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-bar label="Q3"&gt;
+    &lt;dc-bar-segment value="140" label="Product A"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="100" label="Product B"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="80" label="Product C"&gt;&lt;/dc-bar-segment&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-legend position="right"&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="550" height="350">
+                    <dc-title>Quarterly Revenue by Product</dc-title>
+                    <dc-bar label="Q1">
+                        <dc-bar-segment value="100" label="Product A"></dc-bar-segment>
+                        <dc-bar-segment value="75" label="Product B"></dc-bar-segment>
+                        <dc-bar-segment value="50" label="Product C"></dc-bar-segment>
+                    </dc-bar>
+                    <dc-bar label="Q2">
+                        <dc-bar-segment value="120" label="Product A"></dc-bar-segment>
+                        <dc-bar-segment value="90" label="Product B"></dc-bar-segment>
+                        <dc-bar-segment value="60" label="Product C"></dc-bar-segment>
+                    </dc-bar>
+                    <dc-bar label="Q3">
+                        <dc-bar-segment value="140" label="Product A"></dc-bar-segment>
+                        <dc-bar-segment value="100" label="Product B"></dc-bar-segment>
+                        <dc-bar-segment value="80" label="Product C"></dc-bar-segment>
+                    </dc-bar>
+                    <dc-legend position="right"></dc-legend>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Stacked Bars Without Labels</h3>
+                <p>Hide segment values using <code>show-value="false"</code>:</p>
+                <pre><code>&lt;dc-chart width="550" height="350" show-value="false"&gt;
+  &lt;dc-title&gt;Website Traffic Sources&lt;/dc-title&gt;
+  &lt;dc-bar label="Jan"&gt;
+    &lt;dc-bar-segment value="5000" label="Organic"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="3000" label="Referral"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="2000" label="Direct"&gt;&lt;/dc-bar-segment&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-bar label="Feb"&gt;
+    &lt;dc-bar-segment value="5500" label="Organic"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="3200" label="Referral"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="2500" label="Direct"&gt;&lt;/dc-bar-segment&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-bar label="Mar"&gt;
+    &lt;dc-bar-segment value="6000" label="Organic"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="3800" label="Referral"&gt;&lt;/dc-bar-segment&gt;
+    &lt;dc-bar-segment value="2800" label="Direct"&gt;&lt;/dc-bar-segment&gt;
+  &lt;/dc-bar&gt;
+  &lt;dc-legend position="right"&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="550" height="350" show-value="false">
+                    <dc-title>Website Traffic Sources</dc-title>
+                    <dc-bar label="Jan">
+                        <dc-bar-segment value="5000" label="Organic"></dc-bar-segment>
+                        <dc-bar-segment value="3000" label="Referral"></dc-bar-segment>
+                        <dc-bar-segment value="2000" label="Direct"></dc-bar-segment>
+                    </dc-bar>
+                    <dc-bar label="Feb">
+                        <dc-bar-segment value="5500" label="Organic"></dc-bar-segment>
+                        <dc-bar-segment value="3200" label="Referral"></dc-bar-segment>
+                        <dc-bar-segment value="2500" label="Direct"></dc-bar-segment>
+                    </dc-bar>
+                    <dc-bar label="Mar">
+                        <dc-bar-segment value="6000" label="Organic"></dc-bar-segment>
+                        <dc-bar-segment value="3800" label="Referral"></dc-bar-segment>
+                        <dc-bar-segment value="2800" label="Direct"></dc-bar-segment>
+                    </dc-bar>
+                    <dc-legend position="right"></dc-legend>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Stacked Bars in Groups</h3>
+                <p>Combine stacked bars with groups for multi-dimensional data:</p>
+                <pre><code>&lt;dc-chart width="650" height="400"&gt;
+  &lt;dc-title&gt;Sales by Year and Region&lt;/dc-title&gt;
+  &lt;dc-bar-group label="2022"&gt;
+    &lt;dc-bar label="North"&gt;
+      &lt;dc-bar-segment value="80" label="Online"&gt;&lt;/dc-bar-segment&gt;
+      &lt;dc-bar-segment value="60" label="Retail"&gt;&lt;/dc-bar-segment&gt;
+      &lt;dc-bar-segment value="40" label="Wholesale"&gt;&lt;/dc-bar-segment&gt;
+    &lt;/dc-bar&gt;
+    &lt;dc-bar label="South"&gt;
+      &lt;dc-bar-segment value="70" label="Online"&gt;&lt;/dc-bar-segment&gt;
+      &lt;dc-bar-segment value="50" label="Retail"&gt;&lt;/dc-bar-segment&gt;
+      &lt;dc-bar-segment value="35" label="Wholesale"&gt;&lt;/dc-bar-segment&gt;
+    &lt;/dc-bar&gt;
+  &lt;/dc-bar-group&gt;
+  &lt;dc-bar-group label="2023"&gt;
+    &lt;dc-bar label="North"&gt;
+      &lt;dc-bar-segment value="95" label="Online"&gt;&lt;/dc-bar-segment&gt;
+      &lt;dc-bar-segment value="75" label="Retail"&gt;&lt;/dc-bar-segment&gt;
+      &lt;dc-bar-segment value="55" label="Wholesale"&gt;&lt;/dc-bar-segment&gt;
+    &lt;/dc-bar&gt;
+    &lt;dc-bar label="South"&gt;
+      &lt;dc-bar-segment value="85" label="Online"&gt;&lt;/dc-bar-segment&gt;
+      &lt;dc-bar-segment value="65" label="Retail"&gt;&lt;/dc-bar-segment&gt;
+      &lt;dc-bar-segment value="45" label="Wholesale"&gt;&lt;/dc-bar-segment&gt;
+    &lt;/dc-bar&gt;
+  &lt;/dc-bar-group&gt;
+  &lt;dc-legend position="right"&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="650" height="400">
+                    <dc-title>Sales by Year and Region</dc-title>
+                    <dc-bar-group label="2022">
+                        <dc-bar label="North">
+                            <dc-bar-segment value="80" label="Online"></dc-bar-segment>
+                            <dc-bar-segment value="60" label="Retail"></dc-bar-segment>
+                            <dc-bar-segment value="40" label="Wholesale"></dc-bar-segment>
+                        </dc-bar>
+                        <dc-bar label="South">
+                            <dc-bar-segment value="70" label="Online"></dc-bar-segment>
+                            <dc-bar-segment value="50" label="Retail"></dc-bar-segment>
+                            <dc-bar-segment value="35" label="Wholesale"></dc-bar-segment>
+                        </dc-bar>
+                    </dc-bar-group>
+                    <dc-bar-group label="2023">
+                        <dc-bar label="North">
+                            <dc-bar-segment value="95" label="Online"></dc-bar-segment>
+                            <dc-bar-segment value="75" label="Retail"></dc-bar-segment>
+                            <dc-bar-segment value="55" label="Wholesale"></dc-bar-segment>
+                        </dc-bar>
+                        <dc-bar label="South">
+                            <dc-bar-segment value="85" label="Online"></dc-bar-segment>
+                            <dc-bar-segment value="65" label="Retail"></dc-bar-segment>
+                            <dc-bar-segment value="45" label="Wholesale"></dc-bar-segment>
+                        </dc-bar>
+                    </dc-bar-group>
+                    <dc-legend position="right"></dc-legend>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Groups with Reverse Orientations</h2>
+        <p>Bar groups work with all orientation variants.</p>
 
         <div class="grid">
             <div>
@@ -168,16 +295,16 @@
                 <pre><code>&lt;dc-chart width="500" height="350" orientation="vertical-reverse"&gt;
   &lt;dc-title&gt;Project Completion&lt;/dc-title&gt;
   &lt;dc-bar-group label="Sprint 1"&gt;
-    &lt;dc-bar value="12" label="Team A" color="#2196F3"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="10" label="Team B" color="#4CAF50"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="12" label="Team A" fill="#2196F3"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="10" label="Team B" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
   &lt;/dc-bar-group&gt;
   &lt;dc-bar-group label="Sprint 2"&gt;
-    &lt;dc-bar value="15" label="Team A" color="#2196F3"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="13" label="Team B" color="#4CAF50"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="15" label="Team A" fill="#2196F3"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="13" label="Team B" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
   &lt;/dc-bar-group&gt;
   &lt;dc-bar-group label="Sprint 3"&gt;
-    &lt;dc-bar value="18" label="Team A" color="#2196F3"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="16" label="Team B" color="#4CAF50"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="18" label="Team A" fill="#2196F3"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="16" label="Team B" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
   &lt;/dc-bar-group&gt;
 &lt;/dc-chart&gt;</code></pre>
                 <dc-chart width="500" height="350" orientation="vertical-reverse">
@@ -202,16 +329,16 @@
                 <pre><code>&lt;dc-chart width="500" height="350" orientation="horizontal-reverse"&gt;
   &lt;dc-title&gt;Budget Allocation&lt;/dc-title&gt;
   &lt;dc-bar-group label="Marketing"&gt;
-    &lt;dc-bar value="35" label="Digital" color="#E91E63"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="28" label="Print" color="#9C27B0"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="35" label="Digital" fill="#E91E63"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="28" label="Print" fill="#9C27B0"&gt;&lt;/dc-bar&gt;
   &lt;/dc-bar-group&gt;
   &lt;dc-bar-group label="Operations"&gt;
-    &lt;dc-bar value="42" label="Infrastructure" color="#2196F3"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="38" label="Personnel" color="#4CAF50"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="42" label="Infrastructure" fill="#2196F3"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="38" label="Personnel" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
   &lt;/dc-bar-group&gt;
   &lt;dc-bar-group label="Research"&gt;
-    &lt;dc-bar value="32" label="Lab" color="#FF9800"&gt;&lt;/dc-bar&gt;
-    &lt;dc-bar value="25" label="Field" color="#795548"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="32" label="Lab" fill="#FF9800"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="25" label="Field" fill="#795548"&gt;&lt;/dc-bar&gt;
   &lt;/dc-bar-group&gt;
 &lt;/dc-chart&gt;</code></pre>
                 <dc-chart width="500" height="350" orientation="horizontal-reverse">

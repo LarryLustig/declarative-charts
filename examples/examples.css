@@ -20,6 +20,8 @@ nav {
     background: white;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 100;
 }
 
 /* Major links (chart types) - displayed as badges/buttons */
@@ -32,7 +34,8 @@ nav .nav-major {
     border-bottom: 1px solid #e0e0e0;
 }
 
-nav .nav-major a {
+nav .nav-major > a,
+nav .nav-major .nav-dropdown-toggle {
     display: inline-block;
     padding: 6px 14px;
     background: #2196F3;
@@ -44,12 +47,13 @@ nav .nav-major a {
     transition: background 0.2s;
 }
 
-nav .nav-major a:hover {
+nav .nav-major > a:hover,
+nav .nav-major .nav-dropdown-toggle:hover {
     background: #1976D2;
     text-decoration: none;
 }
 
-nav .nav-major a.current {
+nav .nav-major > a.current {
     background: #1565C0;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
 }
@@ -83,16 +87,21 @@ nav .nav-dropdown {
     display: inline-block;
 }
 
-nav .nav-dropdown-toggle {
+/* Minor nav dropdown toggles - link style */
+nav .nav-minor .nav-dropdown-toggle {
     color: #2196F3;
     text-decoration: none;
     font-weight: 400;
     font-size: 14px;
     cursor: pointer;
+    background: none;
+    padding: 0;
+    border-radius: 0;
 }
 
-nav .nav-dropdown-toggle:hover {
+nav .nav-minor .nav-dropdown-toggle:hover {
     text-decoration: underline;
+    background: none;
 }
 
 nav .nav-dropdown-toggle .arrow {
