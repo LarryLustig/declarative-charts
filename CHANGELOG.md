@@ -51,6 +51,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Space is now correctly allocated for zero-value stages before size calculation
   - Zero-value stages properly sized to match smallest non-zero value in auto mode
 
+- **Stage Chart Label Suppression Too Aggressive**
+  - Labels were being suppressed in small shapes even when there was visual room
+  - Scaled padding down for smaller shapes: uses `min(16, dimension * 0.1)`
+  - Small shapes now show both label and value when they visually fit
+
 - **Stale Attributes in Examples**
   - Replaced non-existent `fill-colors` attribute with `bar-color` or `palette`
   - Replaced non-existent `stroke-colors` attribute with `line-color`
