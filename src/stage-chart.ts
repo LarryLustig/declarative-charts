@@ -4,12 +4,8 @@ import { BaseChart, type ShowCondition, type FocusableElement } from './base-cha
 import type { LegendItem } from './chart-legend.js';
 import type { ChartStage, StageShape } from './chart-stage.js';
 import type { ChartPopup } from './chart-popup.js';
+import type { ChartFill } from './chart-fill.js';
 import { analyzeFunnel, type StageData as InsightStageData } from './accessibility/index.js';
-
-/**
- * Zero value display styles
- */
-export type ZeroStyle = 'ghost' | 'hidden' | 'dot' | 'normal';
 
 /**
  * Connector types for stage connections
@@ -42,7 +38,11 @@ interface ConnectorConfig {
  * @attr {string} stage-max-size - Maximum stage dimension (e.g., "200px")
  * @attr {string} gap - Space between stages (e.g., "20px", "5%", "0")
  * @attr {string} connector - Connector style: "line", "arrow", "none", or compound like "arrow 2 #333"
- * @attr {ZeroStyle} zero-style - How to render value=0: "ghost", "hidden", "dot", "normal"
+ * @attr {string} zero - Compound shorthand for zero-value handling (e.g., "auto", "hidden", "100 circle")
+ * @attr {string} zero-value - Size value for zero-value shapes: number (e.g., "100"), "auto", or omit for actual size
+ * @attr {string} zero-fill - ID of a dc-fill element for styling zero-value shapes
+ * @attr {string} zero-shape - Override shape for zero-value elements: "circle", "square", "rectangle", "oval"
+ * @attr {boolean} zero-hidden - Hide zero-value elements entirely
  * @attr {string} palette - Palette for stage colors
  * @attr {string} stroke - Shorthand for stroke color and width
  * @attr {string} stroke-color - Stroke color for stage borders (default: #e0e0e0)
@@ -95,8 +95,45 @@ export class StageChart extends BaseChart {
   @property({ type: String })
   connector = 'line';
 
-  @property({ type: String, attribute: 'zero-style' })
-  zeroStyle: ZeroStyle = 'ghost';
+  /**
+   * Compound shorthand for zero-value handling.
+   * Examples:
+   * - "hidden" → hide zero-value elements
+   * - "auto" → use auto-calculated size for zero-value elements
+   * - "100" → use 100 as the sizing value for zero-value elements
+   * - "auto circle" → auto-size with circle shape
+   * - "50 #my-fill" → size 50 with fill from dc-fill#my-fill
+   */
+  @property({ type: String })
+  zero?: string;
+
+  /**
+   * Size value for zero-value shapes.
+   * - Number (e.g., "100"): render as if the shape had this value for size calculation
+   * - "auto": use smallest non-zero value as reference
+   * - Omit: use actual value (0) for size calculation
+   */
+  @property({ type: String, attribute: 'zero-value' })
+  zeroValue?: string;
+
+  /**
+   * ID of a dc-fill element for styling zero-value shapes.
+   * The referenced dc-fill provides fill, stroke, and pattern styling.
+   */
+  @property({ type: String, attribute: 'zero-fill' })
+  zeroFill?: string;
+
+  /**
+   * Override shape for zero-value elements.
+   */
+  @property({ type: String, attribute: 'zero-shape' })
+  zeroShape?: StageShape;
+
+  /**
+   * Hide zero-value elements entirely.
+   */
+  @property({ type: Boolean, attribute: 'zero-hidden' })
+  zeroHidden = false;
 
   private clickedStageIndex = -1;
 
@@ -261,6 +298,95 @@ export class StageChart extends BaseChart {
     }
 
     return config;
+  }
+
+  /**
+   * Parse the zero compound shorthand and return resolved settings.
+   * Precedence: individual attributes > shorthand > defaults
+   */
+  private resolveZeroSettings(): {
+    hidden: boolean;
+    sizeValue: number | 'auto' | undefined;
+    shape: StageShape | undefined;
+    fillId: string | undefined;
+  } {
+    // Start with defaults
+    let hidden = this.zeroHidden;
+    let sizeValue: number | 'auto' | undefined = undefined;
+    let shape: StageShape | undefined = this.zeroShape;
+    let fillId: string | undefined = this.zeroFill;
+
+    // Parse zeroValue attribute
+    if (this.zeroValue !== undefined) {
+      const trimmed = this.zeroValue.trim().toLowerCase();
+      if (trimmed === 'auto') {
+        sizeValue = 'auto';
+      } else {
+        const parsed = parseFloat(this.zeroValue);
+        if (!isNaN(parsed)) {
+          sizeValue = parsed;
+        }
+      }
+    }
+
+    // Parse zero compound shorthand (lower precedence than individual attributes)
+    if (this.zero) {
+      const parts = this.zero.trim().split(/\s+/);
+
+      for (const part of parts) {
+        const lower = part.toLowerCase();
+
+        // Check for "hidden" keyword
+        if (lower === 'hidden') {
+          if (!this.hasAttribute('zero-hidden')) {
+            hidden = true;
+          }
+          continue;
+        }
+
+        // Check for "auto" keyword
+        if (lower === 'auto') {
+          if (this.zeroValue === undefined) {
+            sizeValue = 'auto';
+          }
+          continue;
+        }
+
+        // Check for shape names
+        if (['circle', 'square', 'rectangle', 'oval'].includes(lower)) {
+          if (this.zeroShape === undefined) {
+            shape = lower as StageShape;
+          }
+          continue;
+        }
+
+        // Check for ID reference (starts with #)
+        if (part.startsWith('#')) {
+          if (this.zeroFill === undefined) {
+            fillId = part.substring(1);
+          }
+          continue;
+        }
+
+        // Check for numeric value
+        const numVal = parseFloat(part);
+        if (!isNaN(numVal)) {
+          if (this.zeroValue === undefined) {
+            sizeValue = numVal;
+          }
+          continue;
+        }
+      }
+    }
+
+    return { hidden, sizeValue, shape, fillId };
+  }
+
+  /**
+   * Get the dc-fill element by ID for zero-value styling.
+   */
+  private getZeroFillElement(fillId: string): ChartFill | null {
+    return document.getElementById(fillId) as ChartFill | null;
   }
 
   /**
@@ -447,6 +573,15 @@ export class StageChart extends BaseChart {
       valueFormat?: string;
       isZero: boolean;
       isHidden: boolean;
+      zeroFillOverride?: {
+        fill?: string;
+        stroke?: string;
+        strokeWidth?: number;
+        strokeDasharray?: string;
+        fillOpacity?: number;
+        strokeOpacity?: number;
+        pattern?: string;
+      };
     }>;
     connectorConfig: ConnectorConfig;
     padding: { top: number; right: number; bottom: number; left: number };
@@ -454,11 +589,29 @@ export class StageChart extends BaseChart {
     chartHeight: number;
     total: number;
     orientation: 'vertical' | 'horizontal';
+    zeroSettings: {
+      hidden: boolean;
+      sizeValue: number | 'auto' | undefined;
+      shape: StageShape | undefined;
+      fillId: string | undefined;
+    };
   } | null {
     const stagesData = this.getStages();
     if (stagesData.length === 0) {
       this.log('warning', 'data.empty', 'Stage chart has no dc-stage children - nothing to render');
       return null;
+    }
+
+    // Resolve zero-value settings from attributes
+    const zeroSettings = this.resolveZeroSettings();
+
+    // Get zero-fill element if specified
+    let zeroFillElement: ChartFill | null = null;
+    if (zeroSettings.fillId) {
+      zeroFillElement = this.getZeroFillElement(zeroSettings.fillId);
+      if (!zeroFillElement) {
+        this.log('warning', 'zero.fillNotFound', `Zero-fill element with id "${zeroSettings.fillId}" not found`);
+      }
     }
 
     const padding = this.getChartPadding();
@@ -519,13 +672,13 @@ export class StageChart extends BaseChart {
     const defaultStrokeWidth = effectiveStroke.width;
 
     // Calculate positions
-    const visibleStages = stagesData.filter(s => !(s.value === 0 && this.zeroStyle === 'hidden'));
+    const visibleStages = stagesData.filter(s => !(s.value === 0 && zeroSettings.hidden));
     const totalGaps = Math.max(0, visibleStages.length - 1) * gapSize;
 
     // Calculate total space needed for shapes
     let totalShapeSpace = 0;
     for (let i = 0; i < stagesData.length; i++) {
-      if (stagesData[i].value === 0 && this.zeroStyle === 'hidden') continue;
+      if (stagesData[i].value === 0 && zeroSettings.hidden) continue;
       const size = stageSizes[i];
       const effectiveShape = stagesData[i].shape || this.shape;
       if (isVertical) {
@@ -545,18 +698,40 @@ export class StageChart extends BaseChart {
     const centerX = padding.left + chartWidth / 2;
     const centerY = padding.top + chartHeight / 2;
 
+    // Calculate auto size for zero values if needed
+    let autoZeroSize: number | undefined;
+    if (zeroSettings.sizeValue === 'auto') {
+      const nonZeroValues = stagesData.filter(s => s.value > 0).map(s => s.value);
+      if (nonZeroValues.length > 0) {
+        autoZeroSize = Math.min(...nonZeroValues);
+        this.log('info', 'zero.autoSize', `Auto-calculated zero-value size from smallest non-zero value`, autoZeroSize);
+      } else {
+        // All values are zero, use a default
+        autoZeroSize = 50;
+        this.log('info', 'zero.autoSize', `All values are zero, using default size`, autoZeroSize);
+      }
+    }
+
     const stages = stagesData.map((stage, index) => {
       const isZero = stage.value === 0;
-      const isHidden = isZero && this.zeroStyle === 'hidden';
-      const effectiveShape = stage.shape || this.shape;
+      const isHidden = isZero && zeroSettings.hidden;
+
+      // Determine effective shape for this stage
+      let effectiveShape = stage.shape || this.shape;
+      if (isZero && zeroSettings.shape) {
+        effectiveShape = zeroSettings.shape;
+      }
 
       let size = stageSizes[index];
 
-      // Handle zero value styling
-      if (isZero) {
-        if (this.zeroStyle === 'ghost' || this.zeroStyle === 'dot') {
-          size = 30; // Fixed size for ghost/dot
+      // Handle zero value sizing
+      if (isZero && !isHidden) {
+        if (zeroSettings.sizeValue === 'auto' && autoZeroSize !== undefined) {
+          size = autoZeroSize;
+        } else if (typeof zeroSettings.sizeValue === 'number') {
+          size = zeroSettings.sizeValue;
         }
+        // If no zeroSettings.sizeValue, keep the calculated size (which will be small or constrained by min-size)
       }
 
       const shapeWidth = this.getShapeWidth(size, effectiveShape);
@@ -581,6 +756,29 @@ export class StageChart extends BaseChart {
       const cornerRadiusStr = stage.cornerRadius || this.cornerRadius;
       const cornerRadius = this.parseCornerRadius(cornerRadiusStr, shapeWidth);
 
+      // Build zero-fill override if applicable
+      let zeroFillOverride: {
+        fill?: string;
+        stroke?: string;
+        strokeWidth?: number;
+        strokeDasharray?: string;
+        fillOpacity?: number;
+        strokeOpacity?: number;
+        pattern?: string;
+      } | undefined;
+
+      if (isZero && zeroFillElement) {
+        zeroFillOverride = {
+          fill: zeroFillElement.fill,
+          stroke: zeroFillElement.stroke,
+          strokeWidth: zeroFillElement.strokeWidth,
+          strokeDasharray: zeroFillElement.getResolvedDasharray(),
+          fillOpacity: zeroFillElement.fillOpacity,
+          strokeOpacity: zeroFillElement.strokeOpacity,
+          pattern: zeroFillElement.pattern
+        };
+      }
+
       return {
         index,
         label: stage.label,
@@ -589,7 +787,7 @@ export class StageChart extends BaseChart {
         y,
         width: shapeWidth,
         height: shapeHeight,
-        shape: isZero && this.zeroStyle === 'dot' ? 'circle' as StageShape : effectiveShape,
+        shape: effectiveShape,
         cornerRadius,
         fillColor: fillColors[index],
         originalColor: originalColors[index],
@@ -603,7 +801,8 @@ export class StageChart extends BaseChart {
         passthroughAttrs: stage.passthroughAttrs,
         valueFormat: stage.valueFormat,
         isZero,
-        isHidden
+        isHidden,
+        zeroFillOverride
       };
     });
 
@@ -619,10 +818,23 @@ export class StageChart extends BaseChart {
     if (negativeStages.length > 0) {
       this.log('warning', 'data.negativeValues', `${negativeStages.length} stage(s) have negative values which may not display correctly`, negativeStages.map(s => s.label));
     }
-    if (zeroStages.length > 0 && this.zeroStyle === 'hidden') {
-      this.log('info', 'data.zeroValues', `${zeroStages.length} stage(s) have value=0 and are hidden (zero-style="${this.zeroStyle}")`, zeroStages.map(s => s.label));
-    } else if (zeroStages.length > 0) {
-      this.log('info', 'data.zeroValues', `${zeroStages.length} stage(s) have value=0, displayed as ${this.zeroStyle}`, zeroStages.map(s => s.label));
+    if (zeroStages.length > 0) {
+      if (zeroSettings.hidden) {
+        this.log('info', 'data.zeroValues', `${zeroStages.length} stage(s) have value=0 and are hidden`, zeroStages.map(s => s.label));
+      } else {
+        const zeroDesc: string[] = [];
+        if (zeroSettings.sizeValue !== undefined) {
+          zeroDesc.push(`size=${zeroSettings.sizeValue}`);
+        }
+        if (zeroSettings.shape) {
+          zeroDesc.push(`shape=${zeroSettings.shape}`);
+        }
+        if (zeroSettings.fillId) {
+          zeroDesc.push(`fill=#${zeroSettings.fillId}`);
+        }
+        const displayInfo = zeroDesc.length > 0 ? zeroDesc.join(', ') : 'default';
+        this.log('info', 'data.zeroValues', `${zeroStages.length} stage(s) have value=0, displayed with: ${displayInfo}`, zeroStages.map(s => s.label));
+      }
     }
 
     // Check for uniform colors (potential config issue)
@@ -638,7 +850,8 @@ export class StageChart extends BaseChart {
       chartWidth,
       chartHeight,
       total,
-      orientation: this.orientation
+      orientation: this.orientation,
+      zeroSettings
     };
   }
 
@@ -859,12 +1072,26 @@ export class StageChart extends BaseChart {
         // popup is already set on stage (including auto-fit popups) during layout computation
         const hasPopup = !!(stage.popup || this.shouldShowAutoPopup(stage.autoPopup));
 
-        // Ghost styling for zero values
-        const isGhost = stage.isZero && this.zeroStyle === 'ghost';
-        const fillColor = isGhost ? 'rgba(200, 200, 200, 0.2)' : stage.fillColor;
-        const strokeColor = isGhost ? '#ccc' : stage.strokeColor;
-        const strokeDasharray = isGhost ? '4 2' : undefined;
-        const opacity = isGhost ? 0.6 : 1;
+        // Apply zero-fill override if present, otherwise use stage colors
+        let fillColor = stage.fillColor;
+        let strokeColor = stage.strokeColor;
+        let strokeDasharray: string | undefined;
+        let strokeWidth = stage.strokeWidth;
+        let fillOpacity: number | undefined;
+        let strokeOpacity: number | undefined;
+
+        if (stage.isZero && stage.zeroFillOverride) {
+          const zfo = stage.zeroFillOverride;
+          if (zfo.fill) fillColor = zfo.fill;
+          if (zfo.stroke) strokeColor = zfo.stroke;
+          if (zfo.strokeWidth !== undefined) strokeWidth = zfo.strokeWidth;
+          if (zfo.strokeDasharray) strokeDasharray = zfo.strokeDasharray;
+          if (zfo.fillOpacity !== undefined) fillOpacity = zfo.fillOpacity;
+          if (zfo.strokeOpacity !== undefined) strokeOpacity = zfo.strokeOpacity;
+          // TODO: pattern support for zero-fill
+        }
+
+        const opacity = 1;
 
         const centerX = stage.x + stage.width / 2;
         const centerY = stage.y + stage.height / 2;
@@ -880,11 +1107,13 @@ export class StageChart extends BaseChart {
             stage.cornerRadius,
             fillColor,
             strokeColor,
-            stage.strokeWidth,
+            strokeWidth,
             strokeDasharray,
             opacity,
             stage.index,
-            hasPopup
+            hasPopup,
+            fillOpacity,
+            strokeOpacity
           )}
 
           ${textFit.canShowLabel ? svg`
@@ -949,7 +1178,9 @@ export class StageChart extends BaseChart {
     strokeDasharray: string | undefined,
     opacity: number,
     index: number,
-    hasPopup: boolean
+    hasPopup: boolean,
+    fillOpacity?: number,
+    strokeOpacity?: number
   ): SVGTemplateResult {
     const handlers = {
       mouseenter: (e: MouseEvent) => this.handleStageMouseEnter(e, index),
@@ -969,8 +1200,10 @@ export class StageChart extends BaseChart {
             rx="${cornerRadius}"
             ry="${cornerRadius}"
             fill="${fill}"
+            fill-opacity="${fillOpacity ?? 1}"
             stroke="${stroke}"
             stroke-width="${strokeWidth}"
+            stroke-opacity="${strokeOpacity ?? 1}"
             stroke-dasharray="${strokeDasharray || ''}"
             opacity="${opacity}"
             style="cursor: ${hasPopup ? 'pointer' : 'default'}"
@@ -988,8 +1221,10 @@ export class StageChart extends BaseChart {
             cy="${y + height / 2}"
             r="${radius}"
             fill="${fill}"
+            fill-opacity="${fillOpacity ?? 1}"
             stroke="${stroke}"
             stroke-width="${strokeWidth}"
+            stroke-opacity="${strokeOpacity ?? 1}"
             stroke-dasharray="${strokeDasharray || ''}"
             opacity="${opacity}"
             style="cursor: ${hasPopup ? 'pointer' : 'default'}"
@@ -1007,8 +1242,10 @@ export class StageChart extends BaseChart {
             rx="${width / 2}"
             ry="${height / 2}"
             fill="${fill}"
+            fill-opacity="${fillOpacity ?? 1}"
             stroke="${stroke}"
             stroke-width="${strokeWidth}"
+            stroke-opacity="${strokeOpacity ?? 1}"
             stroke-dasharray="${strokeDasharray || ''}"
             opacity="${opacity}"
             style="cursor: ${hasPopup ? 'pointer' : 'default'}"
@@ -1140,6 +1377,8 @@ export class StageChart extends BaseChart {
     const stagesData = this.getStages();
     if (stagesData.length === 0) return [];
 
+    const zeroSettings = this.resolveZeroSettings();
+
     let baseColors: string[];
     const paletteColors = this.getPaletteColors(stagesData.length, 'fill');
     baseColors = paletteColors || this.generateDefaultColors(stagesData.length);
@@ -1158,7 +1397,7 @@ export class StageChart extends BaseChart {
     const resolvedFills = this.resolveFillsWithPatterns(elementsForResolution);
 
     return stagesData
-      .filter(stage => !(stage.value === 0 && this.zeroStyle === 'hidden'))
+      .filter(stage => !(stage.value === 0 && zeroSettings.hidden))
       .map((stage, index) => ({
         label: stage.label,
         color: resolvedFills[index].originalFill,
@@ -1208,9 +1447,10 @@ export class StageChart extends BaseChart {
   protected override getFocusableElements(): FocusableElement[] {
     const stages = this.getStages();
     const total = stages.reduce((sum, s) => sum + s.value, 0);
+    const zeroSettings = this.resolveZeroSettings();
 
     return stages
-      .filter(stage => !(stage.value === 0 && this.zeroStyle === 'hidden'))
+      .filter(stage => !(stage.value === 0 && zeroSettings.hidden))
       .map((stage, index) => {
         const hasAction = !!(stage.popup || this.shouldShowAutoPopup(stage.autoPopup));
         const percentage = total > 0 ? (stage.value / total) * 100 : 0;

@@ -3,6 +3,42 @@ import { customElement, property } from 'lit/decorators.js';
 import { PatternType, isPatternType } from './patterns.js';
 
 /**
+ * SVG stroke-linecap values
+ */
+export type StrokeLinecap = 'butt' | 'round' | 'square';
+
+/**
+ * SVG stroke-linejoin values
+ */
+export type StrokeLinejoin = 'miter' | 'round' | 'bevel';
+
+/**
+ * SVG fill-rule values
+ */
+export type FillRule = 'nonzero' | 'evenodd';
+
+/**
+ * Named stroke dash patterns for convenience
+ */
+export const NAMED_DASH_PATTERNS: Record<string, string> = {
+  'solid': 'none',
+  'dashed': '5 5',
+  'dotted': '1 3',
+  'dash-dot': '5 3 1 3',
+  'long-dash': '10 5',
+};
+
+/**
+ * Resolve a stroke-dasharray value, converting named patterns to numeric values.
+ */
+export function resolveDasharray(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const trimmed = value.trim().toLowerCase();
+  if (!trimmed) return undefined;
+  return NAMED_DASH_PATTERNS[trimmed] ?? value;
+}
+
+/**
  * Fill definition element for specifying how chart elements should be filled.
  *
  * This unified element handles both solid fills and pattern fills:
@@ -27,7 +63,16 @@ import { PatternType, isPatternType } from './patterns.js';
  * @element dc-fill
  *
  * @attr {string} fill - Fill color (solid fill, or pattern background)
+ * @attr {number} fill-opacity - Fill opacity (0-1)
+ * @attr {FillRule} fill-rule - Fill rule: "nonzero" or "evenodd"
  * @attr {string} stroke - Stroke color (solid stroke, or pattern element color)
+ * @attr {number} stroke-width - Stroke width in pixels
+ * @attr {number} stroke-opacity - Stroke opacity (0-1)
+ * @attr {string} stroke-dasharray - Dash pattern: numeric (e.g., "5 3") or named ("dashed", "dotted", "solid", "dash-dot", "long-dash")
+ * @attr {number} stroke-dashoffset - Dash pattern offset
+ * @attr {StrokeLinecap} stroke-linecap - Line cap style: "butt", "round", "square"
+ * @attr {StrokeLinejoin} stroke-linejoin - Line join style: "miter", "round", "bevel"
+ * @attr {number} stroke-miterlimit - Miter limit for stroke-linejoin="miter"
  * @attr {PatternType} pattern - Pattern type (if set, creates a pattern fill)
  * @attr {number} scale - Pattern size multiplier (default: 1, only applies with pattern)
  * @attr {string} label - Label to match (for use in palettes)
@@ -75,6 +120,18 @@ export class ChartFill extends LitElement {
   fill?: string;
 
   /**
+   * Fill opacity (0-1).
+   */
+  @property({ type: Number, attribute: 'fill-opacity' })
+  fillOpacity?: number;
+
+  /**
+   * Fill rule for complex paths: "nonzero" or "evenodd".
+   */
+  @property({ type: String, attribute: 'fill-rule' })
+  fillRule?: FillRule;
+
+  /**
    * Stroke color for the element.
    *
    * For solid fills, this is the stroke/border color.
@@ -86,6 +143,54 @@ export class ChartFill extends LitElement {
    */
   @property({ type: String })
   stroke?: string;
+
+  /**
+   * Stroke width in pixels.
+   */
+  @property({ type: Number, attribute: 'stroke-width' })
+  strokeWidth?: number;
+
+  /**
+   * Stroke opacity (0-1).
+   */
+  @property({ type: Number, attribute: 'stroke-opacity' })
+  strokeOpacity?: number;
+
+  /**
+   * Stroke dash pattern.
+   * Can be a numeric pattern (e.g., "5 3") or a named pattern:
+   * - "solid" - no dashes
+   * - "dashed" - standard dashes (5 5)
+   * - "dotted" - dots (1 3)
+   * - "dash-dot" - dash-dot pattern (5 3 1 3)
+   * - "long-dash" - long dashes (10 5)
+   */
+  @property({ type: String, attribute: 'stroke-dasharray' })
+  strokeDasharray?: string;
+
+  /**
+   * Stroke dash offset for animating or adjusting dash patterns.
+   */
+  @property({ type: Number, attribute: 'stroke-dashoffset' })
+  strokeDashoffset?: number;
+
+  /**
+   * Stroke line cap style: "butt", "round", or "square".
+   */
+  @property({ type: String, attribute: 'stroke-linecap' })
+  strokeLinecap?: StrokeLinecap;
+
+  /**
+   * Stroke line join style: "miter", "round", or "bevel".
+   */
+  @property({ type: String, attribute: 'stroke-linejoin' })
+  strokeLinejoin?: StrokeLinejoin;
+
+  /**
+   * Miter limit for stroke-linejoin="miter".
+   */
+  @property({ type: Number, attribute: 'stroke-miterlimit' })
+  strokeMiterlimit?: number;
 
   /**
    * Pattern type to apply.
@@ -146,6 +251,15 @@ export class ChartFill extends LitElement {
    */
   hasPattern(): boolean {
     return this.pattern !== undefined && isPatternType(this.pattern);
+  }
+
+  /**
+   * Get the resolved stroke-dasharray value.
+   * Converts named patterns (e.g., "dashed") to numeric values.
+   * @returns The resolved dasharray value, or undefined if not set
+   */
+  getResolvedDasharray(): string | undefined {
+    return resolveDasharray(this.strokeDasharray);
   }
 
   /**

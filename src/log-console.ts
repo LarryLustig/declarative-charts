@@ -9,9 +9,16 @@ import type { BaseChart, LogEntry } from './base-chart.js';
  * their log entries in a tabular format. When multiple charts match the selector,
  * a tab bar is shown to select which chart's logs to display.
  *
+ * NOTE: Unlike other reference attributes in this library (e.g., zero-fill, pattern)
+ * which accept element IDs, the `chart` attribute takes a full CSS selector.
+ * This is intentional because dc-log-console is designed to monitor multiple charts
+ * simultaneously and display them in a tabbed interface.
+ *
  * @element dc-log-console
  *
- * @attr {string} chart - CSS selector identifying the chart(s) to monitor (required)
+ * @attr {string} chart - CSS selector identifying the chart(s) to monitor (required).
+ *       Unlike other reference attributes, this takes a full CSS selector (not just an ID).
+ *       Examples: "#my-chart", "dc-chart", ".chart-class"
  *
  * @example
  * <dc-chart id="my-chart" logging="info" width="500" height="300">
@@ -195,7 +202,13 @@ export class LogConsole extends LitElement {
   `;
 
   /**
-   * CSS selector identifying the chart(s) to monitor
+   * CSS selector identifying the chart(s) to monitor.
+   *
+   * Unlike other reference attributes in this library (e.g., zero-fill, pattern)
+   * which accept element IDs, this attribute takes a full CSS selector because
+   * dc-log-console is designed to monitor multiple charts simultaneously.
+   *
+   * Examples: "#my-chart", "dc-chart", ".chart-class"
    */
   @property({ type: String })
   chart = '';

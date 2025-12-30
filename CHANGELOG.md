@@ -17,6 +17,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Uses per-render caching for efficient event handler access to layout data
   - Examples updated with new "Small Values and Zero Handling" section
 
+- **Stage Chart Zero-Value Handling**
+  - New composable attributes for controlling zero-value display:
+    - `zero-value`: Size value for zero-value shapes (number or "auto")
+    - `zero-fill`: ID reference to a `<dc-fill>` element for styling
+    - `zero-shape`: Override shape type for zero-value stages
+    - `zero-hidden`: Boolean to hide zero-value stages entirely
+  - `zero` compound shorthand combines settings (e.g., `zero="auto circle #my-fill"`)
+  - "auto" calculates size from smallest non-zero value
+  - Replaces the old `zero-style` attribute with more flexible options
+
+- **Enhanced dc-fill SVG Attributes**
+  - Full SVG stroke-* specification support:
+    - `stroke-width`, `stroke-opacity`, `stroke-dasharray`, `stroke-dashoffset`
+    - `stroke-linecap` ("butt", "round", "square")
+    - `stroke-linejoin` ("miter", "round", "bevel")
+    - `stroke-miterlimit`
+  - Fill attributes: `fill-opacity`, `fill-rule`
+  - Named dash patterns: "solid", "dashed", "dotted", "dash-dot", "long-dash"
+  - `<dc-fill>` can now be referenced standalone via ID (e.g., from `zero-fill`)
+
 ### Changed
 
 - **Shared Navigation for Examples**

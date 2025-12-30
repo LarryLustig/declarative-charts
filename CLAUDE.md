@@ -151,6 +151,13 @@ Use `getPaletteColors(count, colorType)` in chart code to resolve palette colors
 
 **Pattern Fills**: Apply patterns directly (`pattern="diagonal-lines"`), by ID reference, or via palettes. Built-in: `diagonal-lines`, `diagonal-lines-reverse`, `horizontal-lines`, `vertical-lines`, `dots`, `crosshatch`, `grid`, `checkerboard`.
 
+**Element References**: Attributes that reference other elements by ID should accept the ID directly without a `#` prefix:
+- `zero-fill="my-zero-style"` → references `<dc-fill id="my-zero-style">`
+- `pattern="danger"` → references `<dc-fill id="danger">`
+- `palette="status"` → references `<dc-palette id="status">`
+
+**Exception**: The `chart` attribute on `<dc-log-console>` takes a CSS selector (e.g., `chart="#my-chart"` or `chart="dc-chart"`) because that component is designed to monitor multiple charts via tabbed display.
+
 **High Contrast Mode**: Enable with `high-contrast` attribute or auto-detect via `prefers-contrast: high`. Override colors with `<dc-palette high-contrast>` child.
 
 **Hidden Attribute**: Standard HTML `hidden` on data elements (`<dc-line>`, `<dc-bar>`, etc.) hides them. Call `chart.requestUpdate()` after toggling.

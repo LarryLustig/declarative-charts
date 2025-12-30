@@ -847,7 +847,11 @@ Renders a stage chart with connected shapes where each stage's area is proportio
 - `stage-max-size` (string) - Maximum stage dimension
 - `gap` (string) - Space between stages (e.g., "20px", "5%", "0")
 - `connector` (string) - Connector style: "line" (default), "arrow", "none", or compound like "arrow 2 #333"
-- `zero-style` (string) - How to render value=0 stages: "ghost" (default), "hidden", "dot", "normal"
+- `zero` (string) - Compound shorthand for zero-value handling (e.g., "auto", "hidden", "100 circle", "auto #my-fill")
+- `zero-value` (string) - Size value for zero-value shapes: number (e.g., "100"), "auto" (uses smallest non-zero), or omit
+- `zero-fill` (string) - ID of a `<dc-fill>` element for styling zero-value shapes
+- `zero-shape` (string) - Override shape for zero-value elements: "circle", "square", "rectangle", "oval"
+- `zero-hidden` (boolean) - Hide zero-value elements entirely
 - `palette` (string) - Reference to a custom `<dc-palette>` ID or built-in palette name
 - `stroke` (string) - Shorthand for stroke color and width (e.g., "2 #333")
 - `stroke-width` (number) - Stroke width for stage borders in pixels (default: 1)
@@ -920,6 +924,43 @@ For data with extreme value ranges, consider:
   <dc-stage value="1000" label="Large"></dc-stage>
   <dc-stage value="10" label="Small"></dc-stage>
   <dc-stage value="1" label="Tiny"></dc-stage>
+</dc-stage-chart>
+```
+
+**Zero Value Handling:**
+
+Use the `zero-*` attributes to control how stages with value=0 are displayed:
+
+```html
+<!-- Hide zero-value stages -->
+<dc-stage-chart zero-hidden>
+  <dc-stage value="100" label="Active"></dc-stage>
+  <dc-stage value="0" label="Inactive"></dc-stage>
+</dc-stage-chart>
+
+<!-- Auto-size zero values (uses smallest non-zero value as reference) -->
+<dc-stage-chart stage-size="value" zero-value="auto">
+  <dc-stage value="100" label="Active"></dc-stage>
+  <dc-stage value="0" label="Empty"></dc-stage>
+</dc-stage-chart>
+
+<!-- Fixed size for zero values -->
+<dc-stage-chart stage-size="value" zero-value="50">
+  <dc-stage value="200" label="Full"></dc-stage>
+  <dc-stage value="0" label="Empty"></dc-stage>
+</dc-stage-chart>
+
+<!-- Custom styling with dc-fill reference -->
+<dc-fill id="zero-style" fill="rgba(200,200,200,0.2)" stroke="#ccc" stroke-dasharray="dashed"></dc-fill>
+<dc-stage-chart stage-size="value" zero-value="auto" zero-fill="zero-style" zero-shape="circle">
+  <dc-stage value="100" label="Active"></dc-stage>
+  <dc-stage value="0" label="Empty"></dc-stage>
+</dc-stage-chart>
+
+<!-- Compound shorthand combines multiple settings -->
+<dc-stage-chart stage-size="value" zero="auto circle #zero-style">
+  <dc-stage value="100" label="Active"></dc-stage>
+  <dc-stage value="0" label="Empty"></dc-stage>
 </dc-stage-chart>
 ```
 
@@ -1142,17 +1183,33 @@ Container for reusable fill definitions.
 
 ### `<dc-fill>`
 
-Defines a fill style (solid color and/or pattern) within a palette.
+Defines a fill style (solid color and/or pattern) within a palette, or standalone with an ID for reference (e.g., from `zero-fill`).
 
 **Attributes:**
-- `id` (string) - Optional ID for direct reference via `pattern="id"`
+- `id` (string) - Optional ID for direct reference via `pattern="id"` or `zero-fill="id"`
 - `label` (string) - Match elements with this label
 - `fill` (string) - CSS color for the fill
+- `fill-opacity` (number) - Fill opacity (0-1)
+- `fill-rule` (string) - Fill rule for complex paths: "nonzero" or "evenodd"
 - `stroke` (string) - CSS color for the stroke/border
+- `stroke-width` (number) - Stroke width in pixels
+- `stroke-opacity` (number) - Stroke opacity (0-1)
+- `stroke-dasharray` (string) - Dash pattern: numeric (e.g., "5 3") or named ("solid", "dashed", "dotted", "dash-dot", "long-dash")
+- `stroke-dashoffset` (number) - Dash pattern offset
+- `stroke-linecap` (string) - Line cap style: "butt", "round", "square"
+- `stroke-linejoin` (string) - Line join style: "miter", "round", "bevel"
+- `stroke-miterlimit` (number) - Miter limit for stroke-linejoin="miter"
 - `pattern` (string) - Pattern type
 - `scale` (number) - Pattern scale multiplier (default: 1)
 - `min-value` (number) - Minimum value for range matching (inclusive)
 - `max-value` (number) - Maximum value for range matching (exclusive)
+
+**Named dash patterns:**
+- `solid` - No dashes (equivalent to "none")
+- `dashed` - Standard dashes (5 5)
+- `dotted` - Dots (1 3)
+- `dash-dot` - Dash-dot pattern (5 3 1 3)
+- `long-dash` - Long dashes (10 5)
 
 **Available patterns:** `diagonal-lines`, `diagonal-lines-reverse`, `horizontal-lines`, `vertical-lines`, `dots`, `crosshatch`, `grid`, `checkerboard`
 

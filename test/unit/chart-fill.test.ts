@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ChartFill } from '../../src/chart-fill';
+import { ChartFill, resolveDasharray, NAMED_DASH_PATTERNS } from '../../src/chart-fill';
 import { PATTERN_TYPES } from '../../src/patterns';
 
 /**
@@ -439,5 +439,170 @@ describe('ChartFill properties', () => {
     expect(fill.value).toBeUndefined();
     expect(fill.minValue).toBeUndefined();
     expect(fill.maxValue).toBeUndefined();
+  });
+
+  it('has all SVG stroke/fill properties accessible', () => {
+    const fill = new ChartFill();
+
+    // Set all new SVG properties
+    fill.fillOpacity = 0.5;
+    fill.fillRule = 'evenodd';
+    fill.strokeWidth = 2;
+    fill.strokeOpacity = 0.8;
+    fill.strokeDasharray = 'dashed';
+    fill.strokeDashoffset = 5;
+    fill.strokeLinecap = 'round';
+    fill.strokeLinejoin = 'bevel';
+    fill.strokeMiterlimit = 10;
+
+    // Verify they're all accessible
+    expect(fill.fillOpacity).toBe(0.5);
+    expect(fill.fillRule).toBe('evenodd');
+    expect(fill.strokeWidth).toBe(2);
+    expect(fill.strokeOpacity).toBe(0.8);
+    expect(fill.strokeDasharray).toBe('dashed');
+    expect(fill.strokeDashoffset).toBe(5);
+    expect(fill.strokeLinecap).toBe('round');
+    expect(fill.strokeLinejoin).toBe('bevel');
+    expect(fill.strokeMiterlimit).toBe(10);
+  });
+
+  it('SVG stroke/fill properties default to undefined', () => {
+    const fill = new ChartFill();
+
+    expect(fill.fillOpacity).toBeUndefined();
+    expect(fill.fillRule).toBeUndefined();
+    expect(fill.strokeWidth).toBeUndefined();
+    expect(fill.strokeOpacity).toBeUndefined();
+    expect(fill.strokeDasharray).toBeUndefined();
+    expect(fill.strokeDashoffset).toBeUndefined();
+    expect(fill.strokeLinecap).toBeUndefined();
+    expect(fill.strokeLinejoin).toBeUndefined();
+    expect(fill.strokeMiterlimit).toBeUndefined();
+  });
+});
+
+// ============================================================================
+// NAMED_DASH_PATTERNS constant
+// ============================================================================
+
+describe('NAMED_DASH_PATTERNS', () => {
+  it('contains all expected named patterns', () => {
+    expect(NAMED_DASH_PATTERNS).toHaveProperty('solid');
+    expect(NAMED_DASH_PATTERNS).toHaveProperty('dashed');
+    expect(NAMED_DASH_PATTERNS).toHaveProperty('dotted');
+    expect(NAMED_DASH_PATTERNS).toHaveProperty('dash-dot');
+    expect(NAMED_DASH_PATTERNS).toHaveProperty('long-dash');
+  });
+
+  it('solid maps to none', () => {
+    expect(NAMED_DASH_PATTERNS['solid']).toBe('none');
+  });
+
+  it('dashed maps to 5 5', () => {
+    expect(NAMED_DASH_PATTERNS['dashed']).toBe('5 5');
+  });
+
+  it('dotted maps to 1 3', () => {
+    expect(NAMED_DASH_PATTERNS['dotted']).toBe('1 3');
+  });
+
+  it('dash-dot maps to 5 3 1 3', () => {
+    expect(NAMED_DASH_PATTERNS['dash-dot']).toBe('5 3 1 3');
+  });
+
+  it('long-dash maps to 10 5', () => {
+    expect(NAMED_DASH_PATTERNS['long-dash']).toBe('10 5');
+  });
+});
+
+// ============================================================================
+// resolveDasharray function
+// ============================================================================
+
+describe('resolveDasharray', () => {
+  it('returns undefined for undefined input', () => {
+    expect(resolveDasharray(undefined)).toBeUndefined();
+  });
+
+  it('returns undefined for empty string', () => {
+    expect(resolveDasharray('')).toBeUndefined();
+  });
+
+  it('returns undefined for whitespace-only string', () => {
+    expect(resolveDasharray('   ')).toBeUndefined();
+  });
+
+  it('resolves named pattern "solid" to "none"', () => {
+    expect(resolveDasharray('solid')).toBe('none');
+  });
+
+  it('resolves named pattern "dashed" to "5 5"', () => {
+    expect(resolveDasharray('dashed')).toBe('5 5');
+  });
+
+  it('resolves named pattern "dotted" to "1 3"', () => {
+    expect(resolveDasharray('dotted')).toBe('1 3');
+  });
+
+  it('resolves named pattern "dash-dot" to "5 3 1 3"', () => {
+    expect(resolveDasharray('dash-dot')).toBe('5 3 1 3');
+  });
+
+  it('resolves named pattern "long-dash" to "10 5"', () => {
+    expect(resolveDasharray('long-dash')).toBe('10 5');
+  });
+
+  it('is case-insensitive for named patterns', () => {
+    expect(resolveDasharray('DASHED')).toBe('5 5');
+    expect(resolveDasharray('Dotted')).toBe('1 3');
+    expect(resolveDasharray('LONG-DASH')).toBe('10 5');
+  });
+
+  it('trims whitespace before matching', () => {
+    expect(resolveDasharray('  dashed  ')).toBe('5 5');
+    expect(resolveDasharray('\tdotted\n')).toBe('1 3');
+  });
+
+  it('passes through numeric dasharray values unchanged', () => {
+    expect(resolveDasharray('5 3')).toBe('5 3');
+    expect(resolveDasharray('10 5 2 5')).toBe('10 5 2 5');
+    expect(resolveDasharray('1')).toBe('1');
+  });
+
+  it('passes through unknown patterns unchanged', () => {
+    expect(resolveDasharray('custom-pattern')).toBe('custom-pattern');
+    expect(resolveDasharray('invalid')).toBe('invalid');
+  });
+});
+
+// ============================================================================
+// getResolvedDasharray method
+// ============================================================================
+
+describe('getResolvedDasharray', () => {
+  let fill: ChartFill;
+
+  beforeEach(() => {
+    fill = new ChartFill();
+  });
+
+  it('returns undefined when strokeDasharray is not set', () => {
+    expect(fill.getResolvedDasharray()).toBeUndefined();
+  });
+
+  it('resolves named patterns', () => {
+    fill.strokeDasharray = 'dashed';
+    expect(fill.getResolvedDasharray()).toBe('5 5');
+  });
+
+  it('passes through numeric values', () => {
+    fill.strokeDasharray = '10 5 2 5';
+    expect(fill.getResolvedDasharray()).toBe('10 5 2 5');
+  });
+
+  it('handles case-insensitive named patterns', () => {
+    fill.strokeDasharray = 'DOTTED';
+    expect(fill.getResolvedDasharray()).toBe('1 3');
   });
 });

@@ -268,6 +268,45 @@
     </dc-chart>
   </div>
 
+  <!-- Stage Chart - Basic -->
+  <div id="stage-basic" class="chart-container">
+    <h2>Stage Chart - Basic</h2>
+    <dc-stage-chart width="500" height="350">
+      <dc-title>Process Flow</dc-title>
+      <dc-stage value="100" label="Start"></dc-stage>
+      <dc-stage value="80" label="Process"></dc-stage>
+      <dc-stage value="60" label="Review"></dc-stage>
+      <dc-stage value="40" label="Complete"></dc-stage>
+      <dc-legend position="right"></dc-legend>
+    </dc-stage-chart>
+  </div>
+
+  <!-- Stage Chart - Value-based Sizing -->
+  <div id="stage-value-sizing" class="chart-container">
+    <h2>Stage Chart - Value-based Sizing</h2>
+    <dc-stage-chart width="500" height="350" stage-size="value" shape="circle">
+      <dc-title>Market Segments</dc-title>
+      <dc-stage value="1000" label="Enterprise" fill="#4CAF50"></dc-stage>
+      <dc-stage value="500" label="SMB" fill="#2196F3"></dc-stage>
+      <dc-stage value="200" label="Startup" fill="#FF9800"></dc-stage>
+      <dc-legend position="right"></dc-legend>
+    </dc-stage-chart>
+  </div>
+
+  <!-- Stage Chart - Zero Value Handling -->
+  <div id="stage-zero-handling" class="chart-container">
+    <h2>Stage Chart - Zero Value Handling</h2>
+    <dc-fill id="zero-style" fill="#e5e7eb" stroke="#9ca3af" stroke-dasharray="dashed"></dc-fill>
+    <dc-stage-chart width="500" height="350" stage-size="value" zero="auto circle" zero-fill="zero-style">
+      <dc-title>Pipeline Status</dc-title>
+      <dc-stage value="500" label="Active" fill="#4CAF50"></dc-stage>
+      <dc-stage value="0" label="Pending" fill="#2196F3"></dc-stage>
+      <dc-stage value="300" label="Complete" fill="#FF9800"></dc-stage>
+      <dc-stage value="0" label="Cancelled" fill="#9C27B0"></dc-stage>
+      <dc-legend position="right"></dc-legend>
+    </dc-stage-chart>
+  </div>
+
   <!-- Swatches -->
   <div id="swatches" class="chart-container">
     <h2>Swatches</h2>

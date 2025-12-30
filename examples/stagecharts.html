@@ -396,20 +396,20 @@
             </div>
         </div>
 
-        <h3>Zero Value Styles</h3>
-        <p>Control how stages with value=0 are displayed using the zero-style attribute:</p>
+        <h3>Zero Value Handling</h3>
+        <p>Control how stages with value=0 are displayed using the zero-* attributes:</p>
 
         <div class="grid">
             <div>
-                <h3>Ghost Style (Default)</h3>
+                <h3>Hidden (zero-hidden)</h3>
                 <pre><code>&lt;dc-stage-chart width="450" height="400"
-                zero-style="ghost"
+                zero-hidden
                 connector="arrow"&gt;
   &lt;dc-stage value="100" label="Started"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="0" label="Blocked"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="75" label="Completed"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="450" height="400" zero-style="ghost" connector="arrow">
+                <dc-stage-chart width="450" height="400" zero-hidden connector="arrow">
                     <dc-stage value="100" label="Started"></dc-stage>
                     <dc-stage value="0" label="Blocked"></dc-stage>
                     <dc-stage value="75" label="Completed"></dc-stage>
@@ -417,34 +417,59 @@
             </div>
 
             <div>
-                <h3>Hidden Style</h3>
+                <h3>Auto Size (zero-value="auto")</h3>
                 <pre><code>&lt;dc-stage-chart width="450" height="400"
-                zero-style="hidden"
+                stage-size="value"
+                zero-value="auto"
                 connector="arrow"&gt;
   &lt;dc-stage value="100" label="Started"&gt;&lt;/dc-stage&gt;
-  &lt;dc-stage value="0" label="Blocked"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="0" label="Empty"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="75" label="Completed"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="450" height="400" zero-style="hidden" connector="arrow">
+                <dc-stage-chart width="450" height="400" stage-size="value" zero-value="auto" connector="arrow">
                     <dc-stage value="100" label="Started"></dc-stage>
-                    <dc-stage value="0" label="Blocked"></dc-stage>
+                    <dc-stage value="0" label="Empty"></dc-stage>
                     <dc-stage value="75" label="Completed"></dc-stage>
                 </dc-stage-chart>
             </div>
 
             <div>
-                <h3>Dot Style</h3>
+                <h3>Circle Shape (zero-shape="circle")</h3>
                 <pre><code>&lt;dc-stage-chart width="450" height="400"
-                zero-style="dot"
+                stage-size="value"
+                zero-value="50"
+                zero-shape="circle"
                 connector="arrow"&gt;
   &lt;dc-stage value="100" label="Started"&gt;&lt;/dc-stage&gt;
-  &lt;dc-stage value="0" label="Blocked"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="0" label="Empty"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="75" label="Completed"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="450" height="400" zero-style="dot" connector="arrow">
+                <dc-stage-chart width="450" height="400" stage-size="value" zero-value="50" zero-shape="circle" connector="arrow">
                     <dc-stage value="100" label="Started"></dc-stage>
-                    <dc-stage value="0" label="Blocked"></dc-stage>
+                    <dc-stage value="0" label="Empty"></dc-stage>
                     <dc-stage value="75" label="Completed"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>Custom Fill (zero-fill)</h3>
+                <pre><code>&lt;dc-fill id="ghost-fill" fill="rgba(200,200,200,0.2)"
+         stroke="#ccc" stroke-dasharray="dashed"&gt;&lt;/dc-fill&gt;
+
+&lt;dc-stage-chart width="450" height="400"
+                stage-size="value"
+                zero-value="auto"
+                zero-fill="ghost-fill"
+                connector="arrow"&gt;
+  &lt;dc-stage value="100" label="Active"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="0" label="Blocked"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="75" label="Done"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-fill id="ghost-fill" fill="rgba(200,200,200,0.2)" stroke="#ccc" stroke-dasharray="dashed"></dc-fill>
+                <dc-stage-chart width="450" height="400" stage-size="value" zero-value="auto" zero-fill="ghost-fill" connector="arrow">
+                    <dc-stage value="100" label="Active"></dc-stage>
+                    <dc-stage value="0" label="Blocked"></dc-stage>
+                    <dc-stage value="75" label="Done"></dc-stage>
                 </dc-stage-chart>
             </div>
         </div>

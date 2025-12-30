@@ -23,14 +23,15 @@ async function waitForChartRender(page: ReturnType<typeof test['page']>) {
     return (
       customElements.get('dc-chart') !== undefined &&
       customElements.get('dc-pie-chart') !== undefined &&
-      customElements.get('dc-funnel-chart') !== undefined
+      customElements.get('dc-funnel-chart') !== undefined &&
+      customElements.get('dc-stage-chart') !== undefined
     );
   });
 
   // Wait for Lit updates to complete
   await page.waitForFunction(() => {
     const charts = document.querySelectorAll(
-      'dc-chart, dc-pie-chart, dc-funnel-chart'
+      'dc-chart, dc-pie-chart, dc-funnel-chart, dc-stage-chart'
     );
     return Array.from(charts).every(
       (chart) => (chart as any).updateComplete !== undefined
@@ -152,6 +153,32 @@ test.describe('Funnel Charts', () => {
 
     const container = await getChartContainer(page, 'funnel-chevron');
     await expect(container).toHaveScreenshot('funnel-chevron.png');
+  });
+});
+
+test.describe('Stage Charts', () => {
+  test('basic stage chart', async ({ page }) => {
+    await page.goto(`${FIXTURES_URL}?chart=stage-basic`);
+    await waitForChartRender(page);
+
+    const container = await getChartContainer(page, 'stage-basic');
+    await expect(container).toHaveScreenshot('stage-basic.png');
+  });
+
+  test('stage chart with value-based sizing', async ({ page }) => {
+    await page.goto(`${FIXTURES_URL}?chart=stage-value-sizing`);
+    await waitForChartRender(page);
+
+    const container = await getChartContainer(page, 'stage-value-sizing');
+    await expect(container).toHaveScreenshot('stage-value-sizing.png');
+  });
+
+  test('stage chart with zero value handling', async ({ page }) => {
+    await page.goto(`${FIXTURES_URL}?chart=stage-zero-handling`);
+    await waitForChartRender(page);
+
+    const container = await getChartContainer(page, 'stage-zero-handling');
+    await expect(container).toHaveScreenshot('stage-zero-handling.png');
   });
 });
 

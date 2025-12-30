@@ -31,7 +31,7 @@ export { Chart } from './chart.js';
 export { FunnelChart } from './funnel-chart.js';
 export { PieChart } from './pie-chart.js';
 export { StageChart } from './stage-chart.js';
-export type { ZeroStyle, ConnectorType } from './stage-chart.js';
+export type { ConnectorType } from './stage-chart.js';
 
 // Export child element components
 export { ChartBar } from './chart-bar.js';

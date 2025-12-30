@@ -11,8 +11,6 @@ const NAV_CONFIG = {
         { href: 'stagecharts.html', label: 'Stage Charts' },
     ],
     minor: [
-        { href: 'titles.html', label: 'Titles' },
-        { href: 'legends.html', label: 'Legends' },
         { href: 'axes.html', label: 'Axes' },
         { href: 'data-labels.html', label: 'Data Labels' },
         {
@@ -24,8 +22,15 @@ const NAV_CONFIG = {
                 { href: 'patterns.html', label: 'Patterns' },
             ]
         },
-        { href: 'typography.html', label: 'Typography' },
-        { href: 'formatting.html', label: 'Formatting' },
+        {
+            label: 'Text & Annotations',
+            dropdown: [
+                { href: 'titles.html', label: 'Titles' },
+                { href: 'legends.html', label: 'Legends' },
+                { href: 'typography.html', label: 'Typography' },
+                { href: 'formatting.html', label: 'Formatting' },
+            ]
+        },
         { href: 'borders-and-padding.html', label: 'Borders & Padding' },
         { href: 'bar-groups.html', label: 'Bar Groups' },
         { href: 'bar-width.html', label: 'Bar Width' },
