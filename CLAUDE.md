@@ -54,8 +54,30 @@ Text elements (`<dc-title>`, `<dc-legend>`) use SVG attributes, not CSS:
 **Base Classes:**
 - `BaseChart`: Common properties, padding, popups, title/legend rendering, accessibility, keyboard navigation
 - `AxisChart` (extends BaseChart): Axis/grid rendering, axis configuration via `<dc-axis>`
-- `BaseChartElement`: Data containers that don't render visually
-- `BaseShape`: Shape elements with attribute passthrough support
+- `BaseChartElement`: Base for data elements with stroke support, passthrough attributes, showValue/showPercent
+- `BaseFilledShape` (extends BaseChartElement): Adds fill, pattern, value, showLabel for area-based shapes
+
+**Data Element Hierarchy:**
+```
+BaseChartElement
+│   - label, color, stroke, strokeWidth, href, target
+│   - autoPopup, valueFormat, showValue, showPercent
+│   - getEffectiveStroke(), getPassthroughAttributes()
+│
+├── ChartLine (stroke-only, override showValue = true)
+│
+└── BaseFilledShape
+    │   - value, fill, pattern*, showLabel
+    │   - getEffectiveFill()
+    │
+    ├── ChartBar (override showValue = true)
+    ├── ChartPoint (override showValue = true)
+    ├── ChartBubble (override showValue = true, + sizeValue)
+    ├── ChartPieSlice
+    ├── ChartBarSegment
+    ├── ChartFunnelStage
+    └── ChartStage (+ shape, cornerRadius)
+```
 
 **Chart Components:**
 - `Chart` (src/chart.ts): `<dc-chart>` - renders bars/lines/bubbles based on children
@@ -173,12 +195,12 @@ When rendering labels, always use `formatValueString()` which handles show-value
 
 ### Adding a New Data Element
 
-1. Extend `BaseShape` (renders to SVG) or `BaseChartElement` (container)
+1. Extend `BaseFilledShape` (fill-based shapes) or `BaseChartElement` (stroke-only like lines)
 2. Add `@property()` decorated properties
-3. Include `valueFormat` property if element supports per-element formatting (inherited from `BaseShape`)
+3. Common properties inherited: `value`, `showValue`, `showPercent`, `showLabel`, `valueFormat`
 4. Export from `src/index.ts`
 
-For `BaseShape`: parent chart must capture passthrough attrs (including `valueFormat`), add `data-shape-index`, call `applyPassthroughAttributes()`.
+For shapes: parent chart must capture passthrough attrs, add `data-shape-index`, call `applyPassthroughAttributes()`.
 
 ### Legend Items
 
@@ -248,7 +270,7 @@ npm run test:visual:update  # Update visual test baselines
 | `src/chart-palette.ts` | `test/unit/chart-palette.test.ts` | 8% (properties only) |
 | `src/chart-title.ts` | `test/unit/chart-title.test.ts` | 44% (constants, warnings) |
 | `src/chart-swatch.ts` | `test/unit/chart-swatch.test.ts` | 25% (constants, properties) |
-| `src/base-shape.ts` | `test/unit/base-shape.test.ts` | 100% |
+| `src/base-filled-shape.ts` | `test/unit/base-shape.test.ts` | 100% |
 
 ### ⚠️ REQUIRED: Update Tests When Modifying Covered Files
 
@@ -415,8 +437,8 @@ LICENSE                     # MIT license
 src/
 ├── base-chart.ts           # Abstract base (logging, accessibility, keyboard nav, formatting)
 ├── axis-chart.ts           # Abstract base for axis charts
-├── base-chart-element.ts   # Abstract base for data elements
-├── base-shape.ts           # Abstract base for shapes (passthrough, valueFormat) [TESTED]
+├── base-chart-element.ts   # Abstract base for data elements (stroke, passthrough) [TESTED]
+├── base-filled-shape.ts    # Abstract base for filled shapes (fill, pattern, value) [TESTED]
 ├── chart.ts                # <dc-chart> - bars/lines/bubbles
 ├── pie-chart.ts            # <dc-pie-chart>
 ├── funnel-chart.ts         # <dc-funnel-chart>
