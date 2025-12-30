@@ -117,6 +117,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `<dc-log-console>` element for displaying logs
   - Captures padding, colors, legend dimensions, element positions
 
+### Changed
+
+- **Refactored Chart Element Class Hierarchy**
+  - Renamed `BaseShape` to `BaseFilledShape` to clarify its purpose (backward-compatible alias provided)
+  - `ChartLine` now extends `BaseChartElement` directly (stroke-only element)
+  - All filled shapes (`dc-bar`, `dc-point`, `dc-bubble`, `dc-pie-slice`, `dc-bar-segment`, `dc-funnel-stage`, `dc-stage`) extend `BaseFilledShape`
+  - Lifted common properties to base classes for better code reuse:
+    - `showValue`, `showPercent` → `BaseChartElement`
+    - `value`, `showLabel` → `BaseFilledShape`
+  - Moved `getPassthroughAttributes()` and `autoPopup` to `BaseChartElement`
+
 ### Removed
 
 - **BREAKING: Deprecated Color Attributes** - The following chart-level color attributes have been removed in favor of the `palette` attribute:
