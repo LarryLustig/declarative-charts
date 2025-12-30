@@ -25,6 +25,7 @@
   &lt;dc-stage value="120" label="In Progress"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="80" label="Review"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="200" label="Done"&gt;&lt;/dc-stage&gt;
+  &lt;dc-legend position="right"&gt;&lt;/dc-legend&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
                 <dc-stage-chart width="500" height="450" stage-size="value">
                     <dc-title>Project Pipeline</dc-title>
@@ -32,6 +33,29 @@
                     <dc-stage value="120" label="In Progress"></dc-stage>
                     <dc-stage value="80" label="Review"></dc-stage>
                     <dc-stage value="200" label="Done"></dc-stage>
+                    <dc-legend position="right"></dc-legend>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>Fundraising Pipeline (Currency)</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="450"
+                stage-size="value"
+                value-format="currency USD compact"&gt;
+  &lt;dc-title&gt;Fundraising Pipeline&lt;/dc-title&gt;
+  &lt;dc-stage value="2500000" label="Requested"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="1200000" label="Meeting"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="800000" label="Committed"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="450000" label="Closed"&gt;&lt;/dc-stage&gt;
+  &lt;dc-legend position="right"&gt;&lt;/dc-legend&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="450" stage-size="value" value-format="currency USD compact">
+                    <dc-title>Fundraising Pipeline</dc-title>
+                    <dc-stage value="2500000" label="Requested"></dc-stage>
+                    <dc-stage value="1200000" label="Meeting"></dc-stage>
+                    <dc-stage value="800000" label="Committed"></dc-stage>
+                    <dc-stage value="450000" label="Closed"></dc-stage>
+                    <dc-legend position="right"></dc-legend>
                 </dc-stage-chart>
             </div>
 
@@ -64,12 +88,13 @@
                 <h3>Rectangle (Default)</h3>
                 <pre><code>&lt;dc-stage-chart width="450" height="400"
                 stage-size="value"
+                value-format="number 0"
                 shape="rectangle"&gt;
   &lt;dc-stage value="100" label="Step 1"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="180" label="Step 2"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="120" label="Step 3"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="450" height="400" stage-size="value" shape="rectangle">
+                <dc-stage-chart width="450" height="400" stage-size="value" value-format="number 0" shape="rectangle">
                     <dc-stage value="100" label="Step 1"></dc-stage>
                     <dc-stage value="180" label="Step 2"></dc-stage>
                     <dc-stage value="120" label="Step 3"></dc-stage>
@@ -80,12 +105,13 @@
                 <h3>Circle</h3>
                 <pre><code>&lt;dc-stage-chart width="450" height="400"
                 stage-size="value"
+                value-format="number 0"
                 shape="circle"&gt;
   &lt;dc-stage value="100" label="Step 1"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="180" label="Step 2"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="120" label="Step 3"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="450" height="400" stage-size="value" shape="circle">
+                <dc-stage-chart width="450" height="400" stage-size="value" value-format="number 0" shape="circle">
                     <dc-stage value="100" label="Step 1"></dc-stage>
                     <dc-stage value="180" label="Step 2"></dc-stage>
                     <dc-stage value="120" label="Step 3"></dc-stage>
@@ -96,12 +122,13 @@
                 <h3>Square</h3>
                 <pre><code>&lt;dc-stage-chart width="450" height="400"
                 stage-size="value"
+                value-format="number 0"
                 shape="square"&gt;
   &lt;dc-stage value="100" label="Step 1"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="180" label="Step 2"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="120" label="Step 3"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="450" height="400" stage-size="value" shape="square">
+                <dc-stage-chart width="450" height="400" stage-size="value" value-format="number 0" shape="square">
                     <dc-stage value="100" label="Step 1"></dc-stage>
                     <dc-stage value="180" label="Step 2"></dc-stage>
                     <dc-stage value="120" label="Step 3"></dc-stage>
@@ -112,12 +139,13 @@
                 <h3>Oval</h3>
                 <pre><code>&lt;dc-stage-chart width="450" height="400"
                 stage-size="value"
+                value-format="number 0"
                 shape="oval"&gt;
   &lt;dc-stage value="100" label="Step 1"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="180" label="Step 2"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="120" label="Step 3"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="450" height="400" stage-size="value" shape="oval">
+                <dc-stage-chart width="450" height="400" stage-size="value" value-format="number 0" shape="oval">
                     <dc-stage value="100" label="Step 1"></dc-stage>
                     <dc-stage value="180" label="Step 2"></dc-stage>
                     <dc-stage value="120" label="Step 3"></dc-stage>
@@ -135,13 +163,14 @@
                 <h3>Rounded Rectangles</h3>
                 <pre><code>&lt;dc-stage-chart width="500" height="400"
                 stage-size="value"
+                value-format="number 0"
                 corner-radius="12px"&gt;
   &lt;dc-stage value="80" label="Idea"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="150" label="Development"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="100" label="Testing"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="200" label="Release"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="500" height="400" stage-size="value" corner-radius="12px">
+                <dc-stage-chart width="500" height="400" stage-size="value" value-format="number 0" corner-radius="12px">
                     <dc-stage value="80" label="Idea"></dc-stage>
                     <dc-stage value="150" label="Development"></dc-stage>
                     <dc-stage value="100" label="Testing"></dc-stage>
@@ -153,13 +182,14 @@
                 <h3>Pill Shapes (Large Radius)</h3>
                 <pre><code>&lt;dc-stage-chart width="500" height="400"
                 stage-size="value"
+                value-format="number 0"
                 corner-radius="50%"&gt;
   &lt;dc-stage value="80" label="Idea"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="150" label="Development"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="100" label="Testing"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="200" label="Release"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="500" height="400" stage-size="value" corner-radius="50%">
+                <dc-stage-chart width="500" height="400" stage-size="value" value-format="number 0" corner-radius="50%">
                     <dc-stage value="80" label="Idea"></dc-stage>
                     <dc-stage value="150" label="Development"></dc-stage>
                     <dc-stage value="100" label="Testing"></dc-stage>
@@ -178,12 +208,13 @@
                 <h3>Line Connectors (Default)</h3>
                 <pre><code>&lt;dc-stage-chart width="450" height="400"
                 stage-size="value"
+                value-format="number 0"
                 connector="line"&gt;
   &lt;dc-stage value="100" label="Start"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="200" label="Middle"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="150" label="End"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="450" height="400" stage-size="value" connector="line">
+                <dc-stage-chart width="450" height="400" stage-size="value" value-format="number 0" connector="line">
                     <dc-stage value="100" label="Start"></dc-stage>
                     <dc-stage value="200" label="Middle"></dc-stage>
                     <dc-stage value="150" label="End"></dc-stage>
@@ -194,12 +225,13 @@
                 <h3>Arrow Connectors</h3>
                 <pre><code>&lt;dc-stage-chart width="450" height="400"
                 stage-size="value"
+                value-format="number 0"
                 connector="arrow"&gt;
   &lt;dc-stage value="100" label="Start"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="200" label="Middle"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="150" label="End"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="450" height="400" stage-size="value" connector="arrow">
+                <dc-stage-chart width="450" height="400" stage-size="value" value-format="number 0" connector="arrow">
                     <dc-stage value="100" label="Start"></dc-stage>
                     <dc-stage value="200" label="Middle"></dc-stage>
                     <dc-stage value="150" label="End"></dc-stage>
@@ -210,12 +242,13 @@
                 <h3>Custom Arrow Style</h3>
                 <pre><code>&lt;dc-stage-chart width="450" height="400"
                 stage-size="value"
+                value-format="number 0"
                 connector="arrow 3 #2196F3 12px"&gt;
   &lt;dc-stage value="100" label="Start"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="200" label="Middle"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="150" label="End"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="450" height="400" stage-size="value" connector="arrow 3 #2196F3 12px">
+                <dc-stage-chart width="450" height="400" stage-size="value" value-format="number 0" connector="arrow 3 #2196F3 12px">
                     <dc-stage value="100" label="Start"></dc-stage>
                     <dc-stage value="200" label="Middle"></dc-stage>
                     <dc-stage value="150" label="End"></dc-stage>
@@ -226,12 +259,13 @@
                 <h3>No Connectors</h3>
                 <pre><code>&lt;dc-stage-chart width="450" height="400"
                 stage-size="value"
+                value-format="number 0"
                 connector="none"&gt;
   &lt;dc-stage value="100" label="Start"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="200" label="Middle"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="150" label="End"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="450" height="400" stage-size="value" connector="none">
+                <dc-stage-chart width="450" height="400" stage-size="value" value-format="number 0" connector="none">
                     <dc-stage value="100" label="Start"></dc-stage>
                     <dc-stage value="200" label="Middle"></dc-stage>
                     <dc-stage value="150" label="End"></dc-stage>
@@ -242,6 +276,7 @@
                 <h3>No Gap (Touching Rectangles)</h3>
                 <pre><code>&lt;dc-stage-chart width="450" height="400"
                 stage-size="value"
+                value-format="number 0"
                 gap="0"
                 stroke="1 white"&gt;
   &lt;dc-stage value="50" label="Backlog"&gt;&lt;/dc-stage&gt;
@@ -249,7 +284,7 @@
   &lt;dc-stage value="80" label="Review"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="200" label="Done"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="450" height="400" stage-size="value" gap="0" stroke="1 white">
+                <dc-stage-chart width="450" height="400" stage-size="value" value-format="number 0" gap="0" stroke="1 white">
                     <dc-stage value="50" label="Backlog"></dc-stage>
                     <dc-stage value="120" label="In Progress"></dc-stage>
                     <dc-stage value="80" label="Review"></dc-stage>
@@ -269,13 +304,14 @@
                 <pre><code>&lt;dc-stage-chart width="600" height="250"
                 orientation="horizontal"
                 stage-size="value"
+                value-format="number 0"
                 connector="arrow"&gt;
   &lt;dc-stage value="100" label="Q1"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="150" label="Q2"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="130" label="Q3"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="200" label="Q4"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="600" height="250" orientation="horizontal" stage-size="value" connector="arrow">
+                <dc-stage-chart width="600" height="250" orientation="horizontal" stage-size="value" value-format="number 0" connector="arrow">
                     <dc-stage value="100" label="Q1"></dc-stage>
                     <dc-stage value="150" label="Q2"></dc-stage>
                     <dc-stage value="130" label="Q3"></dc-stage>
@@ -290,6 +326,7 @@
                 <pre><code>&lt;dc-stage-chart width="600" height="300"
                 orientation="horizontal"
                 stage-size="value"
+                value-format="number 0"
                 shape="circle"
                 connector="arrow 2 #666"&gt;
   &lt;dc-stage value="200" label="Awareness"&gt;&lt;/dc-stage&gt;
@@ -297,7 +334,7 @@
   &lt;dc-stage value="150" label="Decision"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="100" label="Action"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="600" height="300" orientation="horizontal" stage-size="value" shape="circle" connector="arrow 2 #666">
+                <dc-stage-chart width="600" height="300" orientation="horizontal" stage-size="value" value-format="number 0" shape="circle" connector="arrow 2 #666">
                     <dc-stage value="200" label="Awareness"></dc-stage>
                     <dc-stage value="350" label="Interest"></dc-stage>
                     <dc-stage value="150" label="Decision"></dc-stage>
@@ -319,13 +356,14 @@
                 <h3>Mixed Large and Small Values</h3>
                 <pre><code>&lt;dc-stage-chart width="500" height="450"
                 stage-size="value"
+                value-format="number 0"
                 connector="arrow"&gt;
   &lt;dc-stage value="1000" label="Major"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="50" label="Medium"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="5" label="Small"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="800" label="Large"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="500" height="450" stage-size="value" connector="arrow">
+                <dc-stage-chart width="500" height="450" stage-size="value" value-format="number 0" connector="arrow">
                     <dc-stage value="1000" label="Major"></dc-stage>
                     <dc-stage value="50" label="Medium"></dc-stage>
                     <dc-stage value="5" label="Small"></dc-stage>
@@ -338,6 +376,7 @@
                 <h3>Extreme Value Differences</h3>
                 <pre><code>&lt;dc-stage-chart width="500" height="450"
                 stage-size="value"
+                value-format="number 0"
                 shape="circle"
                 connector="arrow"&gt;
   &lt;dc-stage value="500" label="Leads"&gt;&lt;/dc-stage&gt;
@@ -345,7 +384,7 @@
   &lt;dc-stage value="10" label="Proposals"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="2" label="Closed Won"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="500" height="450" stage-size="value" shape="circle" connector="arrow">
+                <dc-stage-chart width="500" height="450" stage-size="value" value-format="number 0" shape="circle" connector="arrow">
                     <dc-stage value="500" label="Leads"></dc-stage>
                     <dc-stage value="100" label="Qualified"></dc-stage>
                     <dc-stage value="10" label="Proposals"></dc-stage>
@@ -363,13 +402,14 @@
                 <h3>Linear Scale (Large Differences)</h3>
                 <pre><code>&lt;dc-stage-chart width="500" height="450"
                 stage-size="value"
+                value-format="compact"
                 connector="arrow"&gt;
   &lt;dc-stage value="10000" label="Website Visits"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="500" label="Sign Ups"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="50" label="Trials"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="5" label="Customers"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="500" height="450" stage-size="value" connector="arrow">
+                <dc-stage-chart width="500" height="450" stage-size="value" value-format="compact" connector="arrow">
                     <dc-stage value="10000" label="Website Visits"></dc-stage>
                     <dc-stage value="500" label="Sign Ups"></dc-stage>
                     <dc-stage value="50" label="Trials"></dc-stage>
@@ -381,13 +421,14 @@
                 <h3>Log Scale (Same Data)</h3>
                 <pre><code>&lt;dc-stage-chart width="500" height="450"
                 stage-size="log-value"
+                value-format="compact"
                 connector="arrow"&gt;
   &lt;dc-stage value="10000" label="Website Visits"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="500" label="Sign Ups"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="50" label="Trials"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="5" label="Customers"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="500" height="450" stage-size="log-value" connector="arrow">
+                <dc-stage-chart width="500" height="450" stage-size="log-value" value-format="compact" connector="arrow">
                     <dc-stage value="10000" label="Website Visits"></dc-stage>
                     <dc-stage value="500" label="Sign Ups"></dc-stage>
                     <dc-stage value="50" label="Trials"></dc-stage>
@@ -403,13 +444,14 @@
             <div>
                 <h3>Hidden (zero-hidden)</h3>
                 <pre><code>&lt;dc-stage-chart width="450" height="400"
+                value-format="number 0"
                 zero-hidden
                 connector="arrow"&gt;
   &lt;dc-stage value="100" label="Started"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="0" label="Blocked"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="75" label="Completed"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="450" height="400" zero-hidden connector="arrow">
+                <dc-stage-chart width="450" height="400" value-format="number 0" zero-hidden connector="arrow">
                     <dc-stage value="100" label="Started"></dc-stage>
                     <dc-stage value="0" label="Blocked"></dc-stage>
                     <dc-stage value="75" label="Completed"></dc-stage>
@@ -420,13 +462,14 @@
                 <h3>Auto Size (zero-value="auto")</h3>
                 <pre><code>&lt;dc-stage-chart width="450" height="400"
                 stage-size="value"
+                value-format="number 0"
                 zero-value="auto"
                 connector="arrow"&gt;
   &lt;dc-stage value="100" label="Started"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="0" label="Empty"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="75" label="Completed"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="450" height="400" stage-size="value" zero-value="auto" connector="arrow">
+                <dc-stage-chart width="450" height="400" stage-size="value" value-format="number 0" zero-value="auto" connector="arrow">
                     <dc-stage value="100" label="Started"></dc-stage>
                     <dc-stage value="0" label="Empty"></dc-stage>
                     <dc-stage value="75" label="Completed"></dc-stage>
@@ -437,14 +480,15 @@
                 <h3>Circle Shape (zero-shape="circle")</h3>
                 <pre><code>&lt;dc-stage-chart width="450" height="400"
                 stage-size="value"
-                zero-value="50"
+                value-format="number 0"
+                zero-value="auto"
                 zero-shape="circle"
                 connector="arrow"&gt;
   &lt;dc-stage value="100" label="Started"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="0" label="Empty"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="75" label="Completed"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="450" height="400" stage-size="value" zero-value="50" zero-shape="circle" connector="arrow">
+                <dc-stage-chart width="450" height="400" stage-size="value" value-format="number 0" zero-value="auto" zero-shape="circle" connector="arrow">
                     <dc-stage value="100" label="Started"></dc-stage>
                     <dc-stage value="0" label="Empty"></dc-stage>
                     <dc-stage value="75" label="Completed"></dc-stage>
@@ -458,6 +502,7 @@
 
 &lt;dc-stage-chart width="450" height="400"
                 stage-size="value"
+                value-format="number 0"
                 zero-value="auto"
                 zero-fill="ghost-fill"
                 connector="arrow"&gt;
@@ -466,7 +511,7 @@
   &lt;dc-stage value="75" label="Done"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
                 <dc-fill id="ghost-fill" fill="rgba(200,200,200,0.2)" stroke="#ccc" stroke-dasharray="dashed"></dc-fill>
-                <dc-stage-chart width="450" height="400" stage-size="value" zero-value="auto" zero-fill="ghost-fill" connector="arrow">
+                <dc-stage-chart width="450" height="400" stage-size="value" value-format="number 0" zero-value="auto" zero-fill="ghost-fill" connector="arrow">
                     <dc-stage value="100" label="Active"></dc-stage>
                     <dc-stage value="0" label="Blocked"></dc-stage>
                     <dc-stage value="75" label="Done"></dc-stage>
@@ -482,13 +527,14 @@
                 <h3>Without Minimum Size</h3>
                 <pre><code>&lt;dc-stage-chart width="500" height="450"
                 stage-size="value"
+                value-format="number 0"
                 connector="arrow"&gt;
   &lt;dc-stage value="1000" label="Large"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="100" label="Medium"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="10" label="Small"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="1" label="Tiny"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="500" height="450" stage-size="value" connector="arrow">
+                <dc-stage-chart width="500" height="450" stage-size="value" value-format="number 0" connector="arrow">
                     <dc-stage value="1000" label="Large"></dc-stage>
                     <dc-stage value="100" label="Medium"></dc-stage>
                     <dc-stage value="10" label="Small"></dc-stage>
@@ -500,6 +546,7 @@
                 <h3>With stage-min-size="50px"</h3>
                 <pre><code>&lt;dc-stage-chart width="500" height="450"
                 stage-size="value"
+                value-format="number 0"
                 stage-min-size="50px"
                 connector="arrow"&gt;
   &lt;dc-stage value="1000" label="Large"&gt;&lt;/dc-stage&gt;
@@ -507,7 +554,7 @@
   &lt;dc-stage value="10" label="Small"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="1" label="Tiny"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="500" height="450" stage-size="value" stage-min-size="50px" connector="arrow">
+                <dc-stage-chart width="500" height="450" stage-size="value" value-format="number 0" stage-min-size="50px" connector="arrow">
                     <dc-stage value="1000" label="Large"></dc-stage>
                     <dc-stage value="100" label="Medium"></dc-stage>
                     <dc-stage value="10" label="Small"></dc-stage>
@@ -524,13 +571,15 @@
         <div class="grid">
             <div>
                 <h3>Per-Stage Colors</h3>
-                <pre><code>&lt;dc-stage-chart width="500" height="400" stage-size="value"&gt;
+                <pre><code>&lt;dc-stage-chart width="500" height="400"
+                stage-size="value"
+                value-format="number 0"&gt;
   &lt;dc-stage value="80" label="Draft" fill="#e3f2fd"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="150" label="Review" fill="#bbdefb"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="100" label="Approved" fill="#90caf9"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="200" label="Published" fill="#42a5f5"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="500" height="400" stage-size="value">
+                <dc-stage-chart width="500" height="400" stage-size="value" value-format="number 0">
                     <dc-stage value="80" label="Draft" fill="#e3f2fd"></dc-stage>
                     <dc-stage value="150" label="Review" fill="#bbdefb"></dc-stage>
                     <dc-stage value="100" label="Approved" fill="#90caf9"></dc-stage>
@@ -542,13 +591,14 @@
                 <h3>Green Palette</h3>
                 <pre><code>&lt;dc-stage-chart width="500" height="400"
                 stage-size="value"
+                value-format="number 0"
                 palette="green"&gt;
   &lt;dc-stage value="80" label="Draft"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="150" label="Review"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="100" label="Approved"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="200" label="Published"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="500" height="400" stage-size="value" palette="green">
+                <dc-stage-chart width="500" height="400" stage-size="value" value-format="number 0" palette="green">
                     <dc-stage value="80" label="Draft"></dc-stage>
                     <dc-stage value="150" label="Review"></dc-stage>
                     <dc-stage value="100" label="Approved"></dc-stage>
@@ -560,13 +610,14 @@
                 <h3>Using a Palette</h3>
                 <pre><code>&lt;dc-stage-chart width="500" height="400"
                 stage-size="value"
+                value-format="number 0"
                 palette="category10"&gt;
   &lt;dc-stage value="80" label="Draft"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="150" label="Review"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="100" label="Approved"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="200" label="Published"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="500" height="400" stage-size="value" palette="category10">
+                <dc-stage-chart width="500" height="400" stage-size="value" value-format="number 0" palette="category10">
                     <dc-stage value="80" label="Draft"></dc-stage>
                     <dc-stage value="150" label="Review"></dc-stage>
                     <dc-stage value="100" label="Approved"></dc-stage>
@@ -585,13 +636,14 @@
                 <h3>Highlight Key Stages</h3>
                 <pre><code>&lt;dc-stage-chart width="500" height="450"
                 stage-size="value"
+                value-format="number 0"
                 connector="arrow"&gt;
   &lt;dc-stage value="100" label="Start" shape="circle" fill="#4caf50"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="250" label="Peak" shape="rectangle" fill="#2196f3"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="150" label="Decline" shape="rectangle" fill="#ff9800"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="75" label="End" shape="circle" fill="#f44336"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="500" height="450" stage-size="value" connector="arrow">
+                <dc-stage-chart width="500" height="450" stage-size="value" value-format="number 0" connector="arrow">
                     <dc-stage value="100" label="Start" shape="circle" fill="#4caf50"></dc-stage>
                     <dc-stage value="250" label="Peak" shape="rectangle" fill="#2196f3"></dc-stage>
                     <dc-stage value="150" label="Decline" shape="rectangle" fill="#ff9800"></dc-stage>
@@ -610,12 +662,13 @@
                 <h3>Basic Borders</h3>
                 <pre><code>&lt;dc-stage-chart width="500" height="400"
                 stage-size="value"
+                value-format="number 0"
                 stroke="2 #333"&gt;
   &lt;dc-stage value="100" label="Step 1"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="180" label="Step 2"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="120" label="Step 3"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="500" height="400" stage-size="value" stroke="2 #333">
+                <dc-stage-chart width="500" height="400" stage-size="value" value-format="number 0" stroke="2 #333">
                     <dc-stage value="100" label="Step 1"></dc-stage>
                     <dc-stage value="180" label="Step 2"></dc-stage>
                     <dc-stage value="120" label="Step 3"></dc-stage>
@@ -626,6 +679,7 @@
                 <h3>Colored Borders with Shapes</h3>
                 <pre><code>&lt;dc-stage-chart width="500" height="400"
                 stage-size="value"
+                value-format="number 0"
                 shape="circle"
                 stroke="3 #2196F3"
                 palette="blue"&gt;
@@ -633,7 +687,7 @@
   &lt;dc-stage value="180" label="Step 2"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="120" label="Step 3"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="500" height="400" stage-size="value" shape="circle" stroke="3 #2196F3" palette="blue">
+                <dc-stage-chart width="500" height="400" stage-size="value" value-format="number 0" shape="circle" stroke="3 #2196F3" palette="blue">
                     <dc-stage value="100" label="Step 1"></dc-stage>
                     <dc-stage value="180" label="Step 2"></dc-stage>
                     <dc-stage value="120" label="Step 3"></dc-stage>
