@@ -46,6 +46,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Stage Chart Zero-Value Sizing**
+  - Fixed clipping and label centering issues when using `zero-value="auto"`
+  - Space is now correctly allocated for zero-value stages before size calculation
+  - Zero-value stages properly sized to match smallest non-zero value in auto mode
+
 - **Stale Attributes in Examples**
   - Replaced non-existent `fill-colors` attribute with `bar-color` or `palette`
   - Replaced non-existent `stroke-colors` attribute with `line-color`
