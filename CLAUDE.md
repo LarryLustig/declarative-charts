@@ -8,7 +8,7 @@ A declarative chart library built with Lit (Web Components) and TypeScript. User
 
 **Chart types:**
 - **Axis-based** (use `<dc-chart>`): Bar, Line, Bubble - chart type determined by child elements
-- **Non-axis** (own elements): Pie (`<dc-pie-chart>`), Funnel (`<dc-funnel-chart>`)
+- **Non-axis** (own elements): Pie (`<dc-pie-chart>`), Funnel (`<dc-funnel-chart>`), Stage (`<dc-stage-chart>`)
 
 ## Commands
 
@@ -81,8 +81,9 @@ BaseChartElement
 
 **Chart Components:**
 - `Chart` (src/chart.ts): `<dc-chart>` - renders bars/lines/bubbles based on children
-- `PieChart`: `<dc-pie-chart>` - radial charts, donut via `inner-radius`
-- `FunnelChart`: `<dc-funnel-chart>` - stage rendering with chevrons
+- `PieChart` (src/pie-chart.ts): `<dc-pie-chart>` - radial charts, donut via `inner-radius`
+- `FunnelChart` (src/funnel-chart.ts): `<dc-funnel-chart>` - chevron-shaped stages for conversion flows
+- `StageChart` (src/stage-chart.ts): `<dc-stage-chart>` - stages as shapes with proportional areas
 
 ### ⚠️ CRITICAL: Element Naming
 
@@ -90,7 +91,8 @@ BaseChartElement
 |------------|---------|-----|
 | Bar/Line/Bubble | `<dc-chart>` | Share axis rendering |
 | Pie | `<dc-pie-chart>` | No axes, radial rendering |
-| Funnel | `<dc-funnel-chart>` | No axes, stage rendering |
+| Funnel | `<dc-funnel-chart>` | No axes, chevron rendering |
+| Stage | `<dc-stage-chart>` | No axes, shape-based rendering |
 
 **NEVER change `<dc-pie-chart>` to `<dc-chart>` or vice versa.**
 

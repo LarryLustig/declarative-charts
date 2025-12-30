@@ -449,7 +449,10 @@ export class StageChart extends BaseChart {
     orientation: 'vertical' | 'horizontal';
   } | null {
     const stagesData = this.getStages();
-    if (stagesData.length === 0) return null;
+    if (stagesData.length === 0) {
+      this.log('warning', 'data.empty', 'Stage chart has no dc-stage children - nothing to render');
+      return null;
+    }
 
     const padding = this.getChartPadding();
     const chartWidth = this.width - padding.left - padding.right;
@@ -601,6 +604,25 @@ export class StageChart extends BaseChart {
     this.log('info', 'data.totalValue', `Sum of all stage values`, total);
     this.log('info', 'layout.orientation', `Chart orientation`, this.orientation);
     this.log('info', 'layout.gap', `Gap between stages`, gapSize);
+
+    // High-value warnings for common issues
+    // Check for zero or negative values
+    const zeroStages = stagesData.filter(s => s.value === 0);
+    const negativeStages = stagesData.filter(s => s.value < 0);
+    if (negativeStages.length > 0) {
+      this.log('warning', 'data.negativeValues', `${negativeStages.length} stage(s) have negative values which may not display correctly`, negativeStages.map(s => s.label));
+    }
+    if (zeroStages.length > 0 && this.zeroStyle === 'hidden') {
+      this.log('info', 'data.zeroValues', `${zeroStages.length} stage(s) have value=0 and are hidden (zero-style="${this.zeroStyle}")`, zeroStages.map(s => s.label));
+    } else if (zeroStages.length > 0) {
+      this.log('info', 'data.zeroValues', `${zeroStages.length} stage(s) have value=0, displayed as ${this.zeroStyle}`, zeroStages.map(s => s.label));
+    }
+
+    // Check for uniform colors (potential config issue)
+    const uniqueColors = new Set(fillColors);
+    if (uniqueColors.size === 1 && stagesData.length > 1) {
+      this.log('warning', 'colors.uniform', `All ${stagesData.length} stages have the same fill color - consider using a palette for visual distinction`, fillColors[0]);
+    }
 
     return {
       stages,
