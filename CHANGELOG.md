@@ -44,6 +44,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - All example pages use a single `NAV_CONFIG` object for consistent navigation
   - Adding new pages only requires editing `examples.js` instead of all HTML files
 
+- **Bar Chart Examples Reorganization**
+  - Bar Charts now uses a dropdown in major nav with 4 focused pages:
+    - **Basics** (`barcharts.html`): Orientations and default colors
+    - **Groups & Stacks** (`bar-groups.html`): Grouped bars, stacked bars, reverse orientations
+    - **Sizing & Spacing** (`bar-sizing.html`): Bar widths and gutter spacing (merged from bar-width.html and gutter.html)
+    - **Negative Values** (`bar-negatives.html`): New page with negative value examples
+  - Removed `bar-width.html` and `gutter.html` (content merged into bar-sizing.html)
+  - Bar-specific items removed from minor nav
+
 ### Fixed
 
 - **Stage Chart Zero-Value Sizing**
