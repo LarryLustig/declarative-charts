@@ -53,6 +53,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Removed `bar-width.html` and `gutter.html` (content merged into bar-sizing.html)
   - Bar-specific items removed from minor nav
 
+- **Pie Chart Examples Reorganization**
+  - Pie Charts now uses a dropdown in major nav with 2 pages:
+    - **Basics** (`piecharts.html`): Basic pie charts, custom colors, labels/values display, palettes
+    - **Donuts** (`donuts.html`): Donut charts with inner-radius variations, legends, palettes
+  - Expanded donut examples with inner radius comparisons (25%, 50%, 65%, 80%)
+
 ### Fixed
 
 - **Stage Chart Zero-Value Sizing**

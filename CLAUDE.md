@@ -34,6 +34,8 @@ When adding new features:
 2. Add examples to appropriate files in **examples/**
 3. Update **CHANGELOG.md** under `[Unreleased]` section
 
+**Important:** Always update **CHANGELOG.md** prior to each commit. Include the changelog update in the same commit as the related changes.
+
 ## Design Principles
 
 ### Follow Web Standards
