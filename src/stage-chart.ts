@@ -625,14 +625,44 @@ export class StageChart extends BaseChart {
     // Calculate gap
     const gapSize = this.parseGap(isVertical ? chartHeight : chartWidth);
 
-    // Get shape types for each stage
-    const stageShapes = stagesData.map(s => s.shape || this.shape);
+    // Get shape types for each stage (accounting for zero-shape override)
+    const stageShapes = stagesData.map(s => {
+      if (s.value === 0 && zeroSettings.shape) {
+        return zeroSettings.shape;
+      }
+      return s.shape || this.shape;
+    });
+
+    // For zero-value handling, determine what "effective value" zero stages should use
+    // This must happen BEFORE calculateStageSizes so space is allocated correctly
+    let zeroEffectiveValue: number | undefined;
+    if (!zeroSettings.hidden) {
+      if (zeroSettings.sizeValue === 'auto') {
+        const nonZeroValues = stagesData.filter(s => s.value > 0).map(s => s.value);
+        if (nonZeroValues.length > 0) {
+          zeroEffectiveValue = Math.min(...nonZeroValues);
+          this.log('info', 'zero.autoSize', `Zero stages will use effective value from smallest non-zero`, zeroEffectiveValue);
+        }
+      } else if (typeof zeroSettings.sizeValue === 'number') {
+        zeroEffectiveValue = zeroSettings.sizeValue;
+        this.log('info', 'zero.explicitSize', `Zero stages will use explicit value`, zeroEffectiveValue);
+      }
+    }
+
+    // Create modified values array where zero values are replaced with their effective value
+    // This ensures calculateStageSizes allocates the correct space
+    const valuesForSizing = stagesData.map(s => {
+      if (s.value === 0 && !zeroSettings.hidden && zeroEffectiveValue !== undefined) {
+        return { value: zeroEffectiveValue };
+      }
+      return { value: s.value };
+    });
 
     // Calculate sizes with proper space constraints
     const maxCrossDimension = isVertical ? chartWidth : chartHeight;
     const availableFlowSpace = isVertical ? chartHeight : chartWidth;
     const stageSizes = this.calculateStageSizes(
-      stagesData,
+      valuesForSizing,
       maxCrossDimension,
       availableFlowSpace,
       gapSize,
