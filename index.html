@@ -55,31 +55,7 @@
         <p>This library provides a declarative API for building interactive charts with SVG rendering, popup support, and clickable elements.</p>
     </div>
 
-    <nav>
-        <div class="nav-major">
-            <a href="index.html" class="current">Home</a>
-            <a href="examples/barcharts.html">Bar Charts</a>
-            <a href="examples/linecharts.html">Line Charts</a>
-            <a href="examples/piecharts.html">Pie Charts</a>
-            <a href="examples/funnelcharts.html">Funnel Charts</a>
-        </div>
-        <div class="nav-minor">
-            <a href="examples/titles.html">Titles</a>
-            <a href="examples/legends.html">Legends</a>
-            <a href="examples/axes.html">Axes</a>
-            <a href="examples/colors.html">Colors</a>
-            <a href="examples/palettes.html">Palettes</a>
-            <a href="examples/typography.html">Typography</a>
-            <a href="examples/borders-and-padding.html">Borders & Padding</a>
-            <a href="examples/bar-groups.html">Bar Groups</a>
-            <a href="examples/bar-width.html">Bar Width</a>
-            <a href="examples/gutter.html">Gutter</a>
-            <a href="examples/interactive.html">Interactive</a>
-            <a href="examples/popups.html">Popups</a>
-            <a href="examples/logging.html">Logging</a>
-            <a href="examples/htmx-integration.html">htmx</a>
-        </div>
-    </nav>
+    <nav></nav>
 
     <div class="example">
         <h2>Basic Chart Types</h2>
@@ -110,7 +86,7 @@
 
             <div>
                 <h3>Line Chart</h3>
-                <pre><code>&lt;dc-chart width="500" height="350" stroke-colors="#9C27B0"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" line-color="#9C27B0"&gt;
   &lt;dc-title&gt;Temperature Trend&lt;/dc-title&gt;
   &lt;dc-line label="City A"&gt;
     &lt;dc-point value="15" label="Mon"&gt;&lt;/dc-point&gt;
@@ -124,7 +100,7 @@
     &lt;dc-point value="21" label="Fri"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
 &lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350" stroke-colors="#9C27B0">
+                <dc-chart width="500" height="350" line-color="#9C27B0">
                     <dc-title>Temperature Trend</dc-title>
                     <dc-line label="City A">
                         <dc-point value="15" label="Mon"></dc-point>
@@ -190,14 +166,14 @@
 
             <div>
                 <h3>Bubble Chart</h3>
-                <pre><code>&lt;dc-chart width="500" height="350" fill-colors="auto"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" palette="auto"&gt;
   &lt;dc-title&gt;Quarterly Performance&lt;/dc-title&gt;
   &lt;dc-bubble label="Q1" value="30" size-value="100"&gt;&lt;/dc-bubble&gt;
   &lt;dc-bubble label="Q2" value="45" size-value="200"&gt;&lt;/dc-bubble&gt;
   &lt;dc-bubble label="Q3" value="35" size-value="150"&gt;&lt;/dc-bubble&gt;
   &lt;dc-bubble label="Q4" value="60" size-value="300"&gt;&lt;/dc-bubble&gt;
 &lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350" fill-colors="auto">
+                <dc-chart width="500" height="350" palette="auto">
                     <dc-title>Quarterly Performance</dc-title>
                     <dc-bubble label="Q1" value="30" size-value="100"></dc-bubble>
                     <dc-bubble label="Q2" value="45" size-value="200"></dc-bubble>
@@ -213,12 +189,12 @@
 
     <div class="example">
         <h2>Use CSS Styling</h2>
-        <p>Customize charts with inline CSS styles for borders, backgrounds, shadows, and more. Use <code>fill-colors</code> to set a default color for all shapes:</p>
+        <p>Customize charts with inline CSS styles for borders, backgrounds, shadows, and more. Use <code>bar-color</code> to set a default fill color for bars:</p>
 
         <div class="grid">
             <div>
                 <h3>Styled Bar Chart</h3>
-                <pre><code>&lt;dc-chart width="500" height="350" fill-colors="#FF9800"
+                <pre><code>&lt;dc-chart width="500" height="350" bar-color="#FF9800"
               style="border: 4px solid #FF9800;
                      background: #FFF3E0;
                      border-radius: 12px;"&gt;
@@ -228,7 +204,7 @@
   &lt;dc-bar value="82" label="Q3"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="91" label="Q4"&gt;&lt;/dc-bar&gt;
 &lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="350" fill-colors="#FF9800" style="border: 4px solid #FF9800; background: #FFF3E0; border-radius: 12px;">
+                <dc-chart width="500" height="350" bar-color="#FF9800" style="border: 4px solid #FF9800; background: #FFF3E0; border-radius: 12px;">
                     <dc-title>Quarterly Performance</dc-title>
                     <dc-bar value="65" label="Q1"></dc-bar>
                     <dc-bar value="78" label="Q2"></dc-bar>
@@ -248,14 +224,14 @@
                 <h3>Serif Container</h3>
                 <p>This grid has <code>font-family: Georgia, serif</code>. All charts inside inherit the font:</p>
                 <pre><code>&lt;div style="font-family: Georgia, 'Times New Roman', serif;"&gt;
-  &lt;dc-chart width="500" height="300" fill-colors="#4CAF50"&gt;
+  &lt;dc-chart width="500" height="300" bar-color="#4CAF50"&gt;
     &lt;dc-title&gt;Inherits Georgia Font&lt;/dc-title&gt;
     &lt;dc-bar value="30" label="Category A"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="45" label="Category B"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="25" label="Category C"&gt;&lt;/dc-bar&gt;
   &lt;/dc-chart&gt;
 &lt;/div&gt;</code></pre>
-                <dc-chart width="500" height="300" fill-colors="#4CAF50">
+                <dc-chart width="500" height="300" bar-color="#4CAF50">
                     <dc-title>Inherits Georgia Font</dc-title>
                     <dc-bar value="30" label="Category A"></dc-bar>
                     <dc-bar value="45" label="Category B"></dc-bar>
@@ -287,7 +263,7 @@
         <div class="grid" style="font-family: 'Courier New', Consolas, monospace;">
             <div>
                 <pre><code>&lt;div style="font-family: 'Courier New', Consolas, monospace;"&gt;
-  &lt;dc-chart width="500" height="300" stroke-colors="#00BCD4"&gt;
+  &lt;dc-chart width="500" height="300" line-color="#00BCD4"&gt;
     &lt;dc-title&gt;Monospace Labels&lt;/dc-title&gt;
     &lt;dc-line&gt;
       &lt;dc-point value="20" label="2024-01"&gt;&lt;/dc-point&gt;
@@ -297,7 +273,7 @@
     &lt;/dc-line&gt;
   &lt;/dc-chart&gt;
 &lt;/div&gt;</code></pre>
-                <dc-chart width="500" height="300" stroke-colors="#00BCD4">
+                <dc-chart width="500" height="300" line-color="#00BCD4">
                     <dc-title>Monospace Labels</dc-title>
                     <dc-line>
                         <dc-point value="20" label="2024-01"></dc-point>
@@ -335,7 +311,7 @@
                 <h3>Constrained Container (300px wide)</h3>
                 <p>This chart is placed in a 300px wide container. It scales down to fit while maintaining the 500:350 aspect ratio:</p>
                 <pre><code>&lt;div style="width: 300px; border: 2px dashed #999;"&gt;
-  &lt;dc-chart width="500" height="350" fill-colors="#2196F3"&gt;
+  &lt;dc-chart width="500" height="350" bar-color="#2196F3"&gt;
     &lt;dc-bar value="30" label="A"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="50" label="B"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="40" label="C"&gt;&lt;/dc-bar&gt;
@@ -343,7 +319,7 @@
 &lt;/div&gt;</code></pre>
                 <div style="display: flex; gap: 20px;">
                     <div style="width: 300px; border: 2px dashed #999; padding: 5px; background: #fafafa;">
-                        <dc-chart width="500" height="350" fill-colors="#2196F3">
+                        <dc-chart width="500" height="350" bar-color="#2196F3">
                             <dc-bar value="30" label="A"></dc-bar>
                             <dc-bar value="50" label="B"></dc-bar>
                             <dc-bar value="40" label="C"></dc-bar>
@@ -361,7 +337,7 @@
     &lt;dc-pie-slice value="35" label="Mobile" fill="#2196F3"&gt;&lt;/dc-pie-slice&gt;
     &lt;dc-pie-slice value="25" label="Tablet" fill="#FF9800"&gt;&lt;/dc-pie-slice&gt;
   &lt;/dc-pie-chart&gt;
-  &lt;dc-chart width="400" height="300" fill-colors="#9C27B0"&gt;
+  &lt;dc-chart width="400" height="300" bar-color="#9C27B0"&gt;
     &lt;dc-bar value="25" label="Q1"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="40" label="Q2"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="35" label="Q3"&gt;&lt;/dc-bar&gt;
@@ -374,7 +350,7 @@
                         <dc-pie-slice value="35" label="Mobile" fill="#2196F3"></dc-pie-slice>
                         <dc-pie-slice value="25" label="Tablet" fill="#FF9800"></dc-pie-slice>
                     </dc-pie-chart>
-                    <dc-chart width="400" height="300" fill-colors="#9C27B0">
+                    <dc-chart width="400" height="300" bar-color="#9C27B0">
                         <dc-bar value="25" label="Q1"></dc-bar>
                         <dc-bar value="40" label="Q2"></dc-bar>
                         <dc-bar value="35" label="Q3"></dc-bar>
@@ -438,7 +414,7 @@
                 <h3>With Custom Font</h3>
                 <p>The downloaded SVG includes the inherited font-family, so it renders correctly in image editors:</p>
                 <pre><code>&lt;div style="font-family: Georgia, serif;"&gt;
-  &lt;dc-chart id="font-demo" width="500" height="350" fill-colors="#9C27B0"&gt;
+  &lt;dc-chart id="font-demo" width="500" height="350" bar-color="#9C27B0"&gt;
     &lt;dc-title&gt;Quarterly Results&lt;/dc-title&gt;
     &lt;dc-bar value="85" label="Q1"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="92" label="Q2"&gt;&lt;/dc-bar&gt;
@@ -451,7 +427,7 @@
   Download SVG
 &lt;/button&gt;</code></pre>
                 <div style="font-family: Georgia, serif;">
-                    <dc-chart id="font-demo" width="500" height="350" fill-colors="#9C27B0">
+                    <dc-chart id="font-demo" width="500" height="350" bar-color="#9C27B0">
                         <dc-title>Quarterly Results</dc-title>
                         <dc-bar value="85" label="Q1"></dc-bar>
                         <dc-bar value="92" label="Q2"></dc-bar>
