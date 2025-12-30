@@ -14,7 +14,13 @@ const NAV_CONFIG = {
         },
         { href: 'linecharts.html', label: 'Line Charts' },
         { href: 'bubblecharts.html', label: 'Bubble Charts' },
-        { href: 'piecharts.html', label: 'Pie Charts' },
+        {
+            label: 'Pie Charts',
+            dropdown: [
+                { href: 'piecharts.html', label: 'Basics' },
+                { href: 'donuts.html', label: 'Donuts' },
+            ]
+        },
         { href: 'funnelcharts.html', label: 'Funnel Charts' },
         { href: 'stagecharts.html', label: 'Stage Charts' },
     ],

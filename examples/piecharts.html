@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pie Charts - Declarative Chart Library</title>
+    <title>Pie Chart Basics - Declarative Chart Library</title>
     <link rel="stylesheet" href="examples.css">
 </head>
 <body>
-    <h1>Pie Chart Examples</h1>
+    <h1>Pie Chart Basics</h1>
     <p>Visualize proportions and distributions with circular charts</p>
 
     <nav></nav>
@@ -46,10 +46,10 @@
                 <h3>Market Share</h3>
                 <pre><code>&lt;dc-pie-chart width="600" height="400"&gt;
   &lt;dc-title&gt;Market Share&lt;/dc-title&gt;
-  &lt;dc-pie-slice value="35" label="Company A" color="#4CAF50"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="28" label="Company B" color="#2196F3"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="22" label="Company C" color="#FF9800"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="15" label="Others" color="#9E9E9E"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="35" label="Company A" fill="#4CAF50"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="28" label="Company B" fill="#2196F3"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="22" label="Company C" fill="#FF9800"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" label="Others" fill="#9E9E9E"&gt;&lt;/dc-pie-slice&gt;
 &lt;/dc-pie-chart&gt;</code></pre>
                 <dc-pie-chart width="600" height="400">
                     <dc-title>Market Share</dc-title>
@@ -57,51 +57,6 @@
                     <dc-pie-slice value="28" label="Company B" fill="#2196F3"></dc-pie-slice>
                     <dc-pie-slice value="22" label="Company C" fill="#FF9800"></dc-pie-slice>
                     <dc-pie-slice value="15" label="Others" fill="#9E9E9E"></dc-pie-slice>
-                </dc-pie-chart>
-            </div>
-        </div>
-    </div>
-
-    <div class="example">
-        <h2>Donut Charts</h2>
-        <p>Use inner-radius to create a donut chart (0-100 percentage):</p>
-
-        <div class="grid">
-            <div>
-                <h3>Budget Allocation</h3>
-                <pre><code>&lt;dc-pie-chart width="600" height="400" inner-radius="50"&gt;
-  &lt;dc-title&gt;Budget Allocation&lt;/dc-title&gt;
-  &lt;dc-pie-slice value="40" label="Development"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="25" label="Marketing"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="20" label="Operations"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="15" label="Research"&gt;&lt;/dc-pie-slice&gt;
-&lt;/dc-pie-chart&gt;</code></pre>
-                <dc-pie-chart width="600" height="400" inner-radius="50">
-                    <dc-title>Budget Allocation</dc-title>
-                    <dc-pie-slice value="40" label="Development"></dc-pie-slice>
-                    <dc-pie-slice value="25" label="Marketing"></dc-pie-slice>
-                    <dc-pie-slice value="20" label="Operations"></dc-pie-slice>
-                    <dc-pie-slice value="15" label="Research"></dc-pie-slice>
-                </dc-pie-chart>
-            </div>
-
-            <div>
-                <h3>Large Inner Radius</h3>
-                <pre><code>&lt;dc-pie-chart width="600" height="400" inner-radius="65"&gt;
-  &lt;dc-title&gt;Traffic Sources&lt;/dc-title&gt;
-  &lt;dc-pie-slice value="45" label="Organic Search" color="#4CAF50"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="25" label="Direct" color="#2196F3"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="15" label="Social Media" color="#FF5722"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="10" label="Referral" color="#FFC107"&gt;&lt;/dc-pie-slice&gt;
-  &lt;dc-pie-slice value="5" label="Email" color="#9C27B0"&gt;&lt;/dc-pie-slice&gt;
-&lt;/dc-pie-chart&gt;</code></pre>
-                <dc-pie-chart width="600" height="400" inner-radius="65">
-                    <dc-title>Traffic Sources</dc-title>
-                    <dc-pie-slice value="45" label="Organic Search" fill="#4CAF50"></dc-pie-slice>
-                    <dc-pie-slice value="25" label="Direct" fill="#2196F3"></dc-pie-slice>
-                    <dc-pie-slice value="15" label="Social Media" fill="#FF5722"></dc-pie-slice>
-                    <dc-pie-slice value="10" label="Referral" fill="#FFC107"></dc-pie-slice>
-                    <dc-pie-slice value="5" label="Email" fill="#9C27B0"></dc-pie-slice>
                 </dc-pie-chart>
             </div>
         </div>
@@ -151,12 +106,12 @@
     </div>
 
     <div class="example">
-        <h2>Default Slice Color</h2>
-        <p>Use <code>palette</code> to set a default color scheme for all slices:</p>
+        <h2>Using Palettes</h2>
+        <p>Use <code>palette</code> to set a color scheme for all slices:</p>
 
         <div class="grid">
             <div>
-                <h3>Single Color Theme</h3>
+                <h3>Sequential Palette</h3>
                 <pre><code>&lt;dc-pie-chart width="600" height="400" palette="purple"&gt;
   &lt;dc-title&gt;Task Breakdown&lt;/dc-title&gt;
   &lt;dc-pie-slice value="20" label="Planning"&gt;&lt;/dc-pie-slice&gt;
@@ -170,6 +125,26 @@
                     <dc-pie-slice value="35" label="Development"></dc-pie-slice>
                     <dc-pie-slice value="25" label="Testing"></dc-pie-slice>
                     <dc-pie-slice value="20" label="Deployment"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Categorical Palette</h3>
+                <pre><code>&lt;dc-pie-chart width="600" height="400" palette="category10"&gt;
+  &lt;dc-title&gt;Browser Usage&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="65" label="Chrome"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="19" label="Safari"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="4" label="Firefox"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="4" label="Edge"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="8" label="Other"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="600" height="400" palette="category10">
+                    <dc-title>Browser Usage</dc-title>
+                    <dc-pie-slice value="65" label="Chrome"></dc-pie-slice>
+                    <dc-pie-slice value="19" label="Safari"></dc-pie-slice>
+                    <dc-pie-slice value="4" label="Firefox"></dc-pie-slice>
+                    <dc-pie-slice value="4" label="Edge"></dc-pie-slice>
+                    <dc-pie-slice value="8" label="Other"></dc-pie-slice>
                 </dc-pie-chart>
             </div>
         </div>
