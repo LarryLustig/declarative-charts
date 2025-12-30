@@ -1,6 +1,7 @@
 /* Shared navigation for example pages */
 
 const NAV_CONFIG = {
+    // Major nav: Chart types, ordered by complexity (axis-based first, then radial/process)
     major: [
         { href: 'index.html', label: 'Home' },
         {
@@ -20,6 +21,7 @@ const NAV_CONFIG = {
             ]
         },
         { href: 'bubblecharts.html', label: 'Bubble Charts' },
+        { href: 'combo-charts.html', label: 'Combo Charts' },
         {
             label: 'Pie Charts',
             dropdown: [
@@ -30,9 +32,22 @@ const NAV_CONFIG = {
         { href: 'funnelcharts.html', label: 'Funnel Charts' },
         { href: 'stagecharts.html', label: 'Stage Charts' },
     ],
+    // Minor nav: Features and configuration options
     minor: [
-        { href: 'axes.html', label: 'Axes' },
-        { href: 'data-labels.html', label: 'Data Labels' },
+        {
+            label: 'Chart Layout',
+            dropdown: [
+                { href: 'axes.html', label: 'Axes' },
+                { href: 'borders-and-padding.html', label: 'Borders & Padding' },
+            ]
+        },
+        {
+            label: 'Data Display',
+            dropdown: [
+                { href: 'data-labels.html', label: 'Labels & Values' },
+                { href: 'formatting.html', label: 'Number Formatting' },
+            ]
+        },
         {
             label: 'Chart Colors',
             dropdown: [
@@ -43,21 +58,28 @@ const NAV_CONFIG = {
             ]
         },
         {
-            label: 'Text & Annotations',
+            label: 'Text Elements',
             dropdown: [
                 { href: 'titles.html', label: 'Titles' },
                 { href: 'legends.html', label: 'Legends' },
                 { href: 'typography.html', label: 'Typography' },
-                { href: 'formatting.html', label: 'Formatting' },
             ]
         },
-        { href: 'borders-and-padding.html', label: 'Borders & Padding' },
-        { href: 'combo-charts.html', label: 'Combo Charts' },
-        { href: 'interactive.html', label: 'Interactive' },
-        { href: 'popups.html', label: 'Popups' },
-        { href: 'logging.html', label: 'Logging' },
-        { href: 'htmx-integration.html', label: 'htmx' },
-        { href: 'accessibility.html', label: 'Accessibility' },
+        {
+            label: 'Interactivity',
+            dropdown: [
+                { href: 'popups.html', label: 'Popups' },
+                { href: 'interactive.html', label: 'Links & Updates' },
+            ]
+        },
+        {
+            label: 'Developer',
+            dropdown: [
+                { href: 'logging.html', label: 'Logging' },
+                { href: 'htmx-integration.html', label: 'htmx Integration' },
+                { href: 'accessibility.html', label: 'Accessibility' },
+            ]
+        },
     ]
 };
 

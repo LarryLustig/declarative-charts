@@ -64,6 +64,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - **Basics** (`linecharts.html`): Basic lines, multiple series, point customization, styling, negative values
     - **Curves** (`line-curves.html`): Curve fitting options (linear, smooth, monotone, step) and comparisons
 
+- **Navigation Reorganization**
+  - Major nav reordered: axis-based charts first (Bar, Line, Bubble, Combo), then radial/process charts (Pie, Funnel, Stage)
+  - Combo Charts moved from minor nav to major nav (it's a chart type)
+  - Minor nav reorganized into 6 logical dropdown groups:
+    - **Chart Layout**: Axes, Borders & Padding
+    - **Data Display**: Labels & Values, Number Formatting
+    - **Chart Colors**: Palettes, Swatches, Element Colors, Patterns (unchanged)
+    - **Text Elements**: Titles, Legends, Typography (Formatting moved out)
+    - **Interactivity**: Popups, Links & Updates
+    - **Developer**: Logging, htmx Integration, Accessibility
+
 ### Fixed
 
 - **Stage Chart Zero-Value Sizing**
