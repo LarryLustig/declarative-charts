@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { BaseShape } from '../../src/base-shape';
+import { BaseFilledShape } from '../../src/base-filled-shape';
+
+// Use BaseFilledShape (BaseShape is deprecated alias)
+const BaseShape = BaseFilledShape;
 
 /**
  * Tests for BaseShape abstract class.

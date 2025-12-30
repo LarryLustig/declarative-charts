@@ -1,6 +1,6 @@
 import { customElement, property } from 'lit/decorators.js';
-import { BaseShape } from './base-shape.js';
-import { showConditionConverter, type ShowCondition } from './base-chart.js';
+import { BaseFilledShape } from './base-filled-shape.js';
+import { showConditionConverter, type ShowCondition } from './base-chart.js';  // for showValue override
 
 /**
  * Individual point element for line charts
@@ -36,15 +36,14 @@ import { showConditionConverter, type ShowCondition } from './base-chart.js';
  * <dc-point value="25" label="Monday" shape="★"></dc-point>
  */
 @customElement('dc-point')
-export class ChartPoint extends BaseShape {
-  @property({ type: Number })
-  value = 0;
+export class ChartPoint extends BaseFilledShape {
+  // value is inherited from BaseFilledShape
 
+  // Override showValue to default to true for points (inherited from BaseChartElement)
   @property({ attribute: 'show-value', converter: showConditionConverter })
-  showValue: ShowCondition = true;
+  override showValue: ShowCondition = true;
 
-  @property({ attribute: 'show-percent', converter: showConditionConverter })
-  showPercent?: ShowCondition;
+  // showPercent is inherited from BaseChartElement
 
   @property({ type: String })
   shape = 'circle';

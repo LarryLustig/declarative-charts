@@ -1,6 +1,5 @@
-import { customElement, property } from 'lit/decorators.js';
-import { BaseShape } from './base-shape.js';
-import { showConditionConverter, type ShowCondition } from './base-chart.js';
+import { customElement } from 'lit/decorators.js';
+import { BaseFilledShape } from './base-filled-shape.js';
 
 /**
  * Segment element for segmented/stacked bars within a dc-bar
@@ -45,15 +44,9 @@ import { showConditionConverter, type ShowCondition } from './base-chart.js';
  * </dc-bar>
  */
 @customElement('dc-bar-segment')
-export class ChartBarSegment extends BaseShape {
-  @property({ type: Number })
-  value = 0;
-
-  @property({ attribute: 'show-value', converter: showConditionConverter })
-  showValue?: ShowCondition;
-
-  @property({ attribute: 'show-percent', converter: showConditionConverter })
-  showPercent?: ShowCondition;
+export class ChartBarSegment extends BaseFilledShape {
+  // value is inherited from BaseFilledShape
+  // showValue and showPercent are inherited from BaseChartElement
 }
 
 declare global {

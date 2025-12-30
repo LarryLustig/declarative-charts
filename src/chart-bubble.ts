@@ -1,6 +1,6 @@
 import { customElement, property } from 'lit/decorators.js';
-import { BaseShape } from './base-shape.js';
-import { showConditionConverter, type ShowCondition } from './base-chart.js';
+import { BaseFilledShape } from './base-filled-shape.js';
+import { showConditionConverter, type ShowCondition } from './base-chart.js';  // for showValue override
 
 /**
  * Individual bubble element for bubble charts
@@ -31,12 +31,8 @@ import { showConditionConverter, type ShowCondition } from './base-chart.js';
  * <dc-bubble label="Q4" value="60" size-value="300" show-value="false"></dc-bubble>
  */
 @customElement('dc-bubble')
-export class ChartBubble extends BaseShape {
-  /**
-   * The Y-axis value for this bubble
-   */
-  @property({ type: Number })
-  value = 0;
+export class ChartBubble extends BaseFilledShape {
+  // value is inherited from BaseFilledShape (Y-axis value for this bubble)
 
   /**
    * The size value for this bubble.
@@ -45,19 +41,11 @@ export class ChartBubble extends BaseShape {
   @property({ type: Number, attribute: 'size-value' })
   sizeValue = 10;
 
-  /**
-   * Whether to display the numeric value for this bubble.
-   * Can be true, false, a percentage threshold (e.g., "5%"), or a value threshold (e.g., "100").
-   */
+  // Override showValue to default to true for bubbles (inherited from BaseChartElement)
   @property({ attribute: 'show-value', converter: showConditionConverter })
-  showValue: ShowCondition = true;
+  override showValue: ShowCondition = true;
 
-  /**
-   * Whether to display the percentage for this bubble.
-   * If not set, inherits from chart-level setting.
-   */
-  @property({ attribute: 'show-percent', converter: showConditionConverter })
-  showPercent?: ShowCondition;
+  // showPercent is inherited from BaseChartElement
 }
 
 declare global {

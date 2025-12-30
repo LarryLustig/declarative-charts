@@ -1,6 +1,5 @@
-import { customElement, property } from 'lit/decorators.js';
-import { BaseShape } from './base-shape.js';
-import { showConditionConverter, type ShowCondition } from './base-chart.js';
+import { customElement } from 'lit/decorators.js';
+import { BaseFilledShape } from './base-filled-shape.js';
 
 /**
  * Individual stage element for funnel charts
@@ -42,20 +41,10 @@ import { showConditionConverter, type ShowCondition } from './base-chart.js';
  *                  hx-swap="innerHTML"></dc-funnel-stage>
  */
 @customElement('dc-funnel-stage')
-export class ChartFunnelStage extends BaseShape {
-  @property({ type: Number })
-  value = 0;
-
+export class ChartFunnelStage extends BaseFilledShape {
+  // value and showLabel are inherited from BaseFilledShape
   // stroke and strokeWidth are inherited from BaseChartElement
-
-  @property({ attribute: 'show-value', converter: showConditionConverter })
-  showValue?: ShowCondition;
-
-  @property({ attribute: 'show-label', converter: showConditionConverter })
-  showLabel?: ShowCondition;
-
-  @property({ attribute: 'show-percent', converter: showConditionConverter })
-  showPercent?: ShowCondition;
+  // showValue and showPercent are inherited from BaseChartElement
 }
 
 declare global {

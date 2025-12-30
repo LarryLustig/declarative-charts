@@ -1,6 +1,6 @@
 import { customElement, property } from 'lit/decorators.js';
-import { BaseShape } from './base-shape.js';
-import { showConditionConverter, type ShowCondition } from './base-chart.js';
+import { BaseChartElement } from './base-chart-element.js';
+import { showConditionConverter, type ShowCondition } from './base-chart.js';  // for showValue override
 
 /**
  * Type for curve fitting methods
@@ -10,9 +10,8 @@ export type CurveFit = 'linear' | 'smooth' | 'monotone' | 'step';
 /**
  * Individual line element for line charts
  *
- * Supports attribute passthrough for integration with htmx and other libraries.
- * Any attributes not explicitly defined (like hx-get, hx-target, data-*, etc.)
- * will be passed through to the rendered SVG element.
+ * Lines are stroke-based elements (no fill), so they extend BaseChartElement directly
+ * rather than BaseFilledShape.
  *
  * @element dc-line
  *
@@ -57,34 +56,17 @@ export type CurveFit = 'linear' | 'smooth' | 'monotone' | 'step';
  *   <dc-point value="22" label="Tue"></dc-point>
  *   <dc-point value="18" label="Wed"></dc-point>
  * </dc-line>
- *
- * @example
- * <!-- With htmx attributes -->
- * <dc-line stroke="#9C27B0" label="Series A"
- *          hx-get="/api/series/a"
- *          hx-target="#details"
- *          hx-swap="innerHTML">
- *   <dc-point value="15" label="Mon"></dc-point>
- * </dc-line>
  */
 @customElement('dc-line')
-export class ChartLine extends BaseShape {
+export class ChartLine extends BaseChartElement {
   // stroke and color are inherited from BaseChartElement
-  // For lines, stroke is the preferred attribute (SVG standard for line color)
+  // getEffectiveStroke() is inherited from BaseChartElement
 
-  /**
-   * Get the effective stroke color for this line.
-   * Prefers 'stroke' over deprecated 'color'.
-   */
-  getEffectiveStroke(): string {
-    return this.stroke || this.color;
-  }
-
+  // Override showValue to default to true for lines (inherited from BaseChartElement)
   @property({ attribute: 'show-value', converter: showConditionConverter })
-  showValue: ShowCondition = true;
+  override showValue: ShowCondition = true;
 
-  @property({ attribute: 'show-percent', converter: showConditionConverter })
-  showPercent?: ShowCondition;
+  // showPercent is inherited from BaseChartElement
 
   @property({ type: String, attribute: 'point-shape' })
   pointShape = 'circle';

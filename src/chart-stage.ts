@@ -1,6 +1,5 @@
 import { customElement, property } from 'lit/decorators.js';
-import { BaseShape } from './base-shape.js';
-import { showConditionConverter, type ShowCondition } from './base-chart.js';
+import { BaseFilledShape } from './base-filled-shape.js';
 
 /**
  * Shape types supported by stage charts
@@ -46,9 +45,10 @@ export type StageShape = 'rectangle' | 'square' | 'oval' | 'circle';
  *           hx-swap="innerHTML"></dc-stage>
  */
 @customElement('dc-stage')
-export class ChartStage extends BaseShape {
-  @property({ type: Number })
-  value = 0;
+export class ChartStage extends BaseFilledShape {
+  // value and showLabel are inherited from BaseFilledShape
+  // stroke and strokeWidth are inherited from BaseChartElement
+  // showValue and showPercent are inherited from BaseChartElement
 
   /**
    * Override shape for this stage.
@@ -63,17 +63,6 @@ export class ChartStage extends BaseShape {
    */
   @property({ type: String, attribute: 'corner-radius' })
   cornerRadius?: string;
-
-  // stroke and strokeWidth are inherited from BaseChartElement
-
-  @property({ attribute: 'show-value', converter: showConditionConverter })
-  showValue?: ShowCondition;
-
-  @property({ attribute: 'show-label', converter: showConditionConverter })
-  showLabel?: ShowCondition;
-
-  @property({ attribute: 'show-percent', converter: showConditionConverter })
-  showPercent?: ShowCondition;
 }
 
 declare global {

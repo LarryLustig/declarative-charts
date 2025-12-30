@@ -1,6 +1,5 @@
-import { customElement, property } from 'lit/decorators.js';
-import { BaseShape } from './base-shape.js';
-import { showConditionConverter, type ShowCondition } from './base-chart.js';
+import { customElement } from 'lit/decorators.js';
+import { BaseFilledShape } from './base-filled-shape.js';
 
 /**
  * Individual slice element for pie charts
@@ -41,18 +40,9 @@ import { showConditionConverter, type ShowCondition } from './base-chart.js';
  * <dc-pie-slice value="45" label="Category B" show-label="5%"></dc-pie-slice>
  */
 @customElement('dc-pie-slice')
-export class ChartPieSlice extends BaseShape {
-  @property({ type: Number })
-  value = 0;
-
-  @property({ attribute: 'show-value', converter: showConditionConverter })
-  showValue?: ShowCondition;
-
-  @property({ attribute: 'show-label', converter: showConditionConverter })
-  showLabel?: ShowCondition;
-
-  @property({ attribute: 'show-percent', converter: showConditionConverter })
-  showPercent?: ShowCondition;
+export class ChartPieSlice extends BaseFilledShape {
+  // value and showLabel are inherited from BaseFilledShape
+  // showValue and showPercent are inherited from BaseChartElement
 }
 
 declare global {

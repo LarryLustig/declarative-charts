@@ -20,6 +20,7 @@ export type { ShowCondition } from './base-chart.js';
 export { AxisChart } from './axis-chart.js';
 export type { AxisConfig, TickConfig, TimeScale } from './axis-chart.js';
 export { BaseChartElement } from './base-chart-element.js';
+export { BaseFilledShape, BaseShape } from './base-filled-shape.js';
 export { ChartAxis } from './chart-axis.js';
 export type { AxisPosition, AxisName, AxisPositionOrName, AxisType } from './chart-axis.js';
 export { ChartGrid } from './chart-grid.js';

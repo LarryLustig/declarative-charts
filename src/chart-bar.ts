@@ -1,6 +1,6 @@
 import { customElement, property } from 'lit/decorators.js';
-import { BaseShape } from './base-shape.js';
-import { showConditionConverter, type ShowCondition } from './base-chart.js';
+import { BaseFilledShape } from './base-filled-shape.js';
+import { showConditionConverter, type ShowCondition } from './base-chart.js';  // for showValue override
 
 /**
  * Individual bar element for bar charts
@@ -37,18 +37,16 @@ import { showConditionConverter, type ShowCondition } from './base-chart.js';
  *         hx-swap="innerHTML"></dc-bar>
  */
 @customElement('dc-bar')
-export class ChartBar extends BaseShape {
-  @property({ type: Number })
-  value = 0;
-
+export class ChartBar extends BaseFilledShape {
+  // value is inherited from BaseFilledShape
   // fill and stroke are inherited from BaseChartElement
   // color is inherited but deprecated in favor of fill
 
+  // Override showValue to default to true for bars (inherited from BaseChartElement)
   @property({ attribute: 'show-value', converter: showConditionConverter })
-  showValue: ShowCondition = true;
+  override showValue: ShowCondition = true;
 
-  @property({ attribute: 'show-percent', converter: showConditionConverter })
-  showPercent?: ShowCondition;
+  // showPercent is inherited from BaseChartElement
 
   @property({ type: String })
   width?: string;
