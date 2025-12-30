@@ -101,6 +101,13 @@ export class StageChart extends BaseChart {
   private clickedStageIndex = -1;
 
   /**
+   * Cached layout computed during render.
+   * Event handlers use this cached data rather than re-reading from DOM.
+   * Cache is refreshed on each render cycle.
+   */
+  private cachedLayout: ReturnType<StageChart['calculateStageLayout']> = null;
+
+  /**
    * Get all stage elements from the DOM
    */
   private getStages(): Array<{
@@ -663,6 +670,73 @@ export class StageChart extends BaseChart {
     }
   }
 
+  /**
+   * Calculate if label and value text can fit in a shape.
+   * Returns which elements can be displayed and whether labels were suppressed.
+   */
+  private calculateTextFit(
+    label: string,
+    valueString: string | null,
+    shapeWidth: number,
+    shapeHeight: number,
+    shouldShowLabel: boolean,
+    shouldShowValue: boolean
+  ): { canShowLabel: boolean; canShowValue: boolean; labelsSuppressed: boolean } {
+    const labelFontSize = 14;
+    const valueFontSize = 12;
+    const padding = 8;
+    const verticalGap = 4; // Gap between label and value
+
+    const availableWidth = shapeWidth - padding * 2;
+    const availableHeight = shapeHeight - padding * 2;
+
+    let canShowLabel = shouldShowLabel;
+    let canShowValue = shouldShowValue && !!valueString;
+
+    // Check if label fits
+    if (canShowLabel && label) {
+      const labelWidth = this.measureText(label, labelFontSize);
+      const labelHeight = labelFontSize * 1.2;
+
+      if (labelWidth > availableWidth || labelHeight > availableHeight) {
+        canShowLabel = false;
+      }
+    }
+
+    // Check if value fits (considering label if both are shown)
+    if (canShowValue && valueString) {
+      const valueWidth = this.measureText(valueString, valueFontSize);
+      const valueHeight = valueFontSize * 1.2;
+
+      // Calculate total height needed
+      let neededHeight = valueHeight;
+      if (canShowLabel) {
+        neededHeight = (labelFontSize * 1.2) + verticalGap + valueHeight;
+      }
+
+      if (valueWidth > availableWidth || neededHeight > availableHeight) {
+        canShowValue = false;
+
+        // If value doesn't fit with label, try without label
+        if (canShowLabel && !canShowValue) {
+          // Re-check value alone
+          if (valueWidth <= availableWidth && valueHeight <= availableHeight) {
+            // Value fits alone but not with label - suppress label, show value
+            canShowLabel = false;
+            canShowValue = true;
+          }
+        }
+      }
+    }
+
+    // Track if any labels were suppressed (user wanted to show but we can't)
+    const labelsSuppressed =
+      (shouldShowLabel && !canShowLabel) ||
+      (shouldShowValue && !!valueString && !canShowValue);
+
+    return { canShowLabel, canShowValue, labelsSuppressed };
+  }
+
   protected updated(changedProperties: Map<string, unknown>): void {
     super.updated(changedProperties);
     this.applyPassthroughAttributes(this.getStages());
@@ -670,10 +744,58 @@ export class StageChart extends BaseChart {
 
   protected renderChart(): SVGTemplateResult {
     const layout = this.calculateStageLayout();
-    if (!layout) return svg``;
+    if (!layout) {
+      this.cachedLayout = null;
+      return svg``;
+    }
 
     const { stages, connectorConfig, total, orientation } = layout;
     const isVertical = orientation === 'vertical';
+
+    // Compute auto-fit popup for each stage and update the layout
+    // This sets popup on stages where labels are suppressed due to size constraints
+    for (const stage of stages) {
+      if (stage.isHidden) continue;
+
+      const percent = total > 0 ? (stage.value / total) * 100 : 0;
+      const shouldShowValue = this.evaluateShowCondition(stage.showValue, stage.value, percent);
+      const shouldShowLabel = this.evaluateShowCondition(stage.showLabel, stage.value, percent);
+      const shouldShowPercent = this.evaluateShowCondition(stage.showPercent, stage.value, percent);
+      const valueString = this.formatValueString(stage.value, percent, shouldShowValue, shouldShowPercent, stage.valueFormat);
+
+      const textFit = this.calculateTextFit(
+        stage.label,
+        valueString,
+        stage.width,
+        stage.height,
+        shouldShowLabel,
+        shouldShowValue || shouldShowPercent
+      );
+
+      // If labels are suppressed and no explicit popup exists, add auto-fit popup
+      if (textFit.labelsSuppressed && !stage.popup) {
+        stage.popup = {
+          content: this.generateStagePopupContent(stage, total, shouldShowValue, shouldShowPercent),
+          trigger: 'hover'
+        };
+
+        // Log the auto-fit decision
+        const suppressedItems: string[] = [];
+        if (shouldShowLabel && !textFit.canShowLabel) {
+          suppressedItems.push('label');
+        }
+        if ((shouldShowValue || shouldShowPercent) && valueString && !textFit.canShowValue) {
+          suppressedItems.push('value');
+        }
+        this.log('info', `stages[${stage.index}].autoFit`,
+          `Stage "${stage.label}" (${stage.width.toFixed(0)}×${stage.height.toFixed(0)}px): suppressed ${suppressedItems.join(' and ')}, auto-enabled popup`,
+          { suppressed: suppressedItems, shapeSize: { width: stage.width, height: stage.height } }
+        );
+      }
+    }
+
+    // Cache the layout for use by event handlers
+    this.cachedLayout = layout;
 
     // Filter visible stages for connector rendering
     const visibleStages = stages.filter(s => !s.isHidden);
@@ -724,6 +846,17 @@ export class StageChart extends BaseChart {
         const shouldShowPercent = this.evaluateShowCondition(stage.showPercent, stage.value, percent);
         const valueString = this.formatValueString(stage.value, percent, shouldShowValue, shouldShowPercent, stage.valueFormat);
 
+        // Check if text fits in shape - suppress labels that don't fit
+        const textFit = this.calculateTextFit(
+          stage.label,
+          valueString,
+          stage.width,
+          stage.height,
+          shouldShowLabel,
+          shouldShowValue || shouldShowPercent
+        );
+
+        // popup is already set on stage (including auto-fit popups) during layout computation
         const hasPopup = !!(stage.popup || this.shouldShowAutoPopup(stage.autoPopup));
 
         // Ghost styling for zero values
@@ -754,10 +887,10 @@ export class StageChart extends BaseChart {
             hasPopup
           )}
 
-          ${shouldShowLabel ? svg`
+          ${textFit.canShowLabel ? svg`
             <text
               x="${centerX}"
-              y="${centerY - (valueString ? 8 : 0)}"
+              y="${centerY - (textFit.canShowValue ? 8 : 0)}"
               text-anchor="middle"
               dominant-baseline="middle"
               font-size="14"
@@ -770,10 +903,10 @@ export class StageChart extends BaseChart {
             </text>
           ` : ''}
 
-          ${valueString ? svg`
+          ${textFit.canShowValue && valueString ? svg`
             <text
               x="${centerX}"
-              y="${centerY + (shouldShowLabel ? 10 : 0)}"
+              y="${centerY + (textFit.canShowLabel ? 10 : 0)}"
               text-anchor="middle"
               dominant-baseline="middle"
               font-size="12"
@@ -926,27 +1059,52 @@ export class StageChart extends BaseChart {
 
   /**
    * Generate default popup content for a stage.
+   * Respects chart-level show-value and show-percent settings.
    */
-  private generateStagePopupContent(stage: { label: string; value: number }, totalValue: number): string {
-    const percentage = totalValue > 0 ? ((stage.value / totalValue) * 100).toFixed(1) : '0.0';
-    return `<strong>${stage.label}</strong><br>Value: ${stage.value}<br>${percentage}%`;
+  private generateStagePopupContent(
+    stage: { label: string; value: number; valueFormat?: string },
+    totalValue: number,
+    showValue: boolean = true,
+    showPercent: boolean = true
+  ): string {
+    let content = `<strong>${stage.label}</strong>`;
+    if (showValue) {
+      const formattedValue = this.formatValue(stage.value, stage.valueFormat);
+      content += `<br>Value: ${formattedValue}`;
+    }
+    if (showPercent) {
+      const percentage = totalValue > 0 ? ((stage.value / totalValue) * 100).toFixed(1) : '0.0';
+      content += `<br>${percentage}%`;
+    }
+    return content;
   }
 
   private handleStageMouseEnter(e: MouseEvent, index: number) {
-    const stages = this.getStages();
-    const stage = stages[index];
-    const total = stages.reduce((sum, s) => sum + s.value, 0);
+    if (!this.cachedLayout) return;
+
+    const stage = this.cachedLayout.stages[index];
+    if (!stage) return;
+
+    const total = this.cachedLayout.total;
 
     if (stage.popup?.trigger === 'hover') {
       this.showPopup(stage.popup.content, e.clientX, e.clientY);
     } else if (!stage.popup && this.shouldShowAutoPopup(stage.autoPopup)) {
-      const content = this.generateStagePopupContent(stage, total);
+      // Evaluate show conditions for popup content
+      const percent = total > 0 ? (stage.value / total) * 100 : 0;
+      const showValue = this.evaluateShowCondition(stage.showValue, stage.value, percent);
+      const showPercent = this.evaluateShowCondition(stage.showPercent, stage.value, percent);
+      const content = this.generateStagePopupContent(stage, total, showValue, showPercent);
       this.showPopup(content, e.clientX, e.clientY);
     }
   }
 
   private handleStageMouseLeave(index: number) {
-    const stage = this.getStages()[index];
+    if (!this.cachedLayout) return;
+
+    const stage = this.cachedLayout.stages[index];
+    if (!stage) return;
+
     const isHoverPopup = stage.popup?.trigger === 'hover' ||
       (!stage.popup && this.shouldShowAutoPopup(stage.autoPopup));
 
@@ -956,7 +1114,10 @@ export class StageChart extends BaseChart {
   }
 
   private handleStageClick(e: MouseEvent, index: number) {
-    const stage = this.getStages()[index];
+    if (!this.cachedLayout) return;
+
+    const stage = this.cachedLayout.stages[index];
+    if (!stage) return;
 
     if (stage.popup?.trigger === 'click') {
       if (this.clickedStageIndex === index) {

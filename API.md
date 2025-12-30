@@ -894,6 +894,35 @@ Circle shapes:
 </dc-stage-chart>
 ```
 
+**Small Values and Auto-Fit:**
+
+When using `stage-size="value"`, stages with small values relative to others may have shapes too small to fit their labels. The chart automatically handles this:
+
+1. **Auto-fit label suppression**: Labels that don't fit inside a shape are automatically suppressed
+2. **Popup fallback**: When labels are suppressed, hover popups are automatically enabled to show the label, value, and percentage
+3. **Prioritization**: When only one text element fits, values are prioritized over labels
+
+For data with extreme value ranges, consider:
+- `stage-size="log-value"` - Logarithmic scaling compresses the range, making small values more visible
+- `stage-min-size` - Sets a minimum stage size to ensure readability
+
+```html
+<!-- Log scale for extreme differences -->
+<dc-stage-chart stage-size="log-value" connector="arrow">
+  <dc-stage value="10000" label="Website Visits"></dc-stage>
+  <dc-stage value="500" label="Sign Ups"></dc-stage>
+  <dc-stage value="50" label="Trials"></dc-stage>
+  <dc-stage value="5" label="Customers"></dc-stage>
+</dc-stage-chart>
+
+<!-- Minimum size constraint -->
+<dc-stage-chart stage-size="value" stage-min-size="50px">
+  <dc-stage value="1000" label="Large"></dc-stage>
+  <dc-stage value="10" label="Small"></dc-stage>
+  <dc-stage value="1" label="Tiny"></dc-stage>
+</dc-stage-chart>
+```
+
 ### `<dc-stage>`
 
 Defines a single stage in a stage chart.
@@ -1176,11 +1205,28 @@ Displays a colored shape from a palette outside of charts, useful for annotating
 
 ## Dynamic Updates
 
-Charts automatically update when you modify their child elements.
+Charts can be updated dynamically via JavaScript. When you modify chart content (child elements, attributes, or values), you must call `requestUpdate()` on the chart element to trigger a re-render.
+
+### When to Call `requestUpdate()`
+
+**Always call `requestUpdate()` after:**
+- Adding, removing, or reordering child elements (e.g., `<dc-bar>`, `<dc-stage>`)
+- Modifying element attributes (e.g., `value`, `label`, `fill`)
+- Toggling the `hidden` attribute
+- Replacing innerHTML (htmx-style updates)
+
+```javascript
+const chart = document.querySelector('dc-chart');
+
+// After any modification...
+chart.requestUpdate();
+```
+
+**Why this is required:** Charts cache computed layout data during render for efficiency. This cached data is used by event handlers (for popups, hover effects, etc.) and must match the displayed content. Calling `requestUpdate()` refreshes both the visual display and the internal cache.
 
 ### Hiding and Showing Elements
 
-Use the standard HTML `hidden` attribute to dynamically show or hide chart elements. Supported on `<dc-line>`, `<dc-bar>`, `<dc-bar-group>`, and `<dc-bubble>`.
+Use the standard HTML `hidden` attribute to dynamically show or hide chart elements. Supported on `<dc-line>`, `<dc-bar>`, `<dc-bar-group>`, `<dc-bubble>`, and `<dc-stage>`.
 
 ```html
 <dc-chart id="my-chart" width="600" height="400">
@@ -1198,25 +1244,27 @@ line.toggleAttribute('hidden');
 document.querySelector('#my-chart').requestUpdate();
 ```
 
-**Important:** After toggling the `hidden` attribute, call `requestUpdate()` on the chart to trigger a re-render.
-
 ### Modifying Elements
 
 ```javascript
-// Add a bar
 const chart = document.querySelector('dc-chart');
+
+// Add a bar
 const bar = document.createElement('dc-bar');
 bar.setAttribute('value', '25');
 bar.setAttribute('fill', 'purple');
 bar.setAttribute('label', 'April');
 chart.appendChild(bar);
+chart.requestUpdate();
 
-// Update a bar
+// Update a bar's value
 const firstBar = chart.querySelector('dc-bar');
 firstBar.setAttribute('value', '50');
+chart.requestUpdate();
 
 // Remove a bar
 chart.removeChild(firstBar);
+chart.requestUpdate();
 ```
 
 ---

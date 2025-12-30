@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Stage Chart Auto-Fit Label Suppression**
+  - Labels that don't fit inside small shapes are automatically suppressed
+  - Hover popups are automatically enabled when labels are suppressed
+  - Values are prioritized over labels when only one text element fits
+  - Helps with extreme value differences in `stage-size="value"` mode
+  - Uses per-render caching for efficient event handler access to layout data
+  - Examples updated with new "Small Values and Zero Handling" section
+
 ### Changed
 
 - **Shared Navigation for Examples**

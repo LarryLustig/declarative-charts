@@ -308,7 +308,95 @@
     </div>
 
     <div class="example">
-        <h2>Zero Value Handling</h2>
+        <h2>Small Values and Zero Handling</h2>
+        <p>Stage charts automatically handle small and zero values. Labels that don't fit inside small shapes are suppressed and shown via popup on hover instead.</p>
+
+        <h3>Auto-Fit Label Suppression</h3>
+        <p>When stage-size="value" and a stage has a very small value relative to others, its shape may be too small for labels. The chart automatically suppresses labels that don't fit and enables hover popups:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Mixed Large and Small Values</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="450"
+                stage-size="value"
+                connector="arrow"&gt;
+  &lt;dc-stage value="1000" label="Major"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="50" label="Medium"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="5" label="Small"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="800" label="Large"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="450" stage-size="value" connector="arrow">
+                    <dc-stage value="1000" label="Major"></dc-stage>
+                    <dc-stage value="50" label="Medium"></dc-stage>
+                    <dc-stage value="5" label="Small"></dc-stage>
+                    <dc-stage value="800" label="Large"></dc-stage>
+                </dc-stage-chart>
+                <p><em>Hover over the small stage to see its label in a popup.</em></p>
+            </div>
+
+            <div>
+                <h3>Extreme Value Differences</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="450"
+                stage-size="value"
+                shape="circle"
+                connector="arrow"&gt;
+  &lt;dc-stage value="500" label="Leads"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="100" label="Qualified"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="10" label="Proposals"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="2" label="Closed Won"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="450" stage-size="value" shape="circle" connector="arrow">
+                    <dc-stage value="500" label="Leads"></dc-stage>
+                    <dc-stage value="100" label="Qualified"></dc-stage>
+                    <dc-stage value="10" label="Proposals"></dc-stage>
+                    <dc-stage value="2" label="Closed Won"></dc-stage>
+                </dc-stage-chart>
+                <p><em>Small circles automatically show popups on hover.</em></p>
+            </div>
+        </div>
+
+        <h3>Using Log Scale for Large Differences</h3>
+        <p>For data with extreme value ranges, use stage-size="log-value" to make small values more visible while maintaining proportional representation:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Linear Scale (Large Differences)</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="450"
+                stage-size="value"
+                connector="arrow"&gt;
+  &lt;dc-stage value="10000" label="Website Visits"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="500" label="Sign Ups"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="50" label="Trials"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="5" label="Customers"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="450" stage-size="value" connector="arrow">
+                    <dc-stage value="10000" label="Website Visits"></dc-stage>
+                    <dc-stage value="500" label="Sign Ups"></dc-stage>
+                    <dc-stage value="50" label="Trials"></dc-stage>
+                    <dc-stage value="5" label="Customers"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>Log Scale (Same Data)</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="450"
+                stage-size="log-value"
+                connector="arrow"&gt;
+  &lt;dc-stage value="10000" label="Website Visits"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="500" label="Sign Ups"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="50" label="Trials"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="5" label="Customers"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="450" stage-size="log-value" connector="arrow">
+                    <dc-stage value="10000" label="Website Visits"></dc-stage>
+                    <dc-stage value="500" label="Sign Ups"></dc-stage>
+                    <dc-stage value="50" label="Trials"></dc-stage>
+                    <dc-stage value="5" label="Customers"></dc-stage>
+                </dc-stage-chart>
+            </div>
+        </div>
+
+        <h3>Zero Value Styles</h3>
         <p>Control how stages with value=0 are displayed using the zero-style attribute:</p>
 
         <div class="grid">
@@ -357,6 +445,48 @@
                     <dc-stage value="100" label="Started"></dc-stage>
                     <dc-stage value="0" label="Blocked"></dc-stage>
                     <dc-stage value="75" label="Completed"></dc-stage>
+                </dc-stage-chart>
+            </div>
+        </div>
+
+        <h3>Minimum Size Constraint</h3>
+        <p>Use stage-min-size to ensure small stages remain visible and readable:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Without Minimum Size</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="450"
+                stage-size="value"
+                connector="arrow"&gt;
+  &lt;dc-stage value="1000" label="Large"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="100" label="Medium"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="10" label="Small"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="1" label="Tiny"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="450" stage-size="value" connector="arrow">
+                    <dc-stage value="1000" label="Large"></dc-stage>
+                    <dc-stage value="100" label="Medium"></dc-stage>
+                    <dc-stage value="10" label="Small"></dc-stage>
+                    <dc-stage value="1" label="Tiny"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>With stage-min-size="50px"</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="450"
+                stage-size="value"
+                stage-min-size="50px"
+                connector="arrow"&gt;
+  &lt;dc-stage value="1000" label="Large"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="100" label="Medium"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="10" label="Small"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="1" label="Tiny"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="450" stage-size="value" stage-min-size="50px" connector="arrow">
+                    <dc-stage value="1000" label="Large"></dc-stage>
+                    <dc-stage value="100" label="Medium"></dc-stage>
+                    <dc-stage value="10" label="Small"></dc-stage>
+                    <dc-stage value="1" label="Tiny"></dc-stage>
                 </dc-stage-chart>
             </div>
         </div>

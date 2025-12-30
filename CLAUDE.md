@@ -100,6 +100,23 @@ BaseChartElement
 
 **Data Extraction**: Charts query child elements via `querySelector`/`querySelectorAll`.
 
+**Per-Render Caching**: Expensive computations (layout, text fitting, color resolution) should run once per render and be cached for use by event handlers. This pattern:
+- Avoids redundant DOM queries and calculations within a single render cycle
+- Ensures event handlers (popups, hover effects) use data matching the displayed content
+- Cache is naturally refreshed on the next render (triggered by `requestUpdate()`)
+
+Example from `stage-chart.ts`:
+```typescript
+// In renderChart():
+const layout = this.calculateStageLayout();  // Compute once
+this.cachedLayout = layout;  // Cache for event handlers
+
+// In handleStageMouseEnter():
+const stage = this.cachedLayout.stages[index];  // Use cached data
+```
+
+When implementing a new chart type, cache computed layout data if event handlers need access to it.
+
 **No Shadow DOM for Data Elements**: Data elements return `this` from `createRenderRoot()`.
 
 **SVG Rendering Order** (z-index, later = on top):
