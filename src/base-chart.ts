@@ -251,10 +251,31 @@ export abstract class BaseChart extends LitElement {
   logging: 'false' | 'error' | 'warning' | 'info' | 'true' = 'false';
 
   /**
+   * Controls which log messages are also echoed to the browser console.
+   * This is independent of the `logging` attribute which controls capture.
+   * - 'none' (default): No console output
+   * - 'error': Echo errors to console.error()
+   * - 'warning': Echo warnings and errors to console.warn()/error()
+   * - 'info': Echo all messages to console.log()/warn()/error()
+   *
+   * Note: A message must first pass the `logging` level filter before
+   * the `console-log` filter is applied. Set `logging="info"` to capture
+   * all messages, then use `console-log` to control which appear in DevTools.
+   */
+  @property({ type: String, attribute: 'console-log' })
+  consoleLog: 'none' | 'error' | 'warning' | 'info' = 'none';
+
+  /**
    * Log entries captured during the last render cycle.
    * Cleared at the start of each render.
    */
   protected logEntries: LogEntry[] = [];
+
+  /**
+   * Whether a console group is currently open for this render cycle.
+   * Used to group related log messages in the browser console.
+   */
+  private consoleGroupOpen = false;
 
   /**
    * Whether to show numeric values on chart elements.
@@ -741,9 +762,89 @@ export abstract class BaseChart extends LitElement {
   }
 
   /**
+   * Check if a log message at the given level should be echoed to browser console.
+   * @param level The level of the message to check
+   * @returns true if the message should be echoed to console
+   */
+  private shouldEchoToConsole(level: LogLevel): boolean {
+    if (this.consoleLog === 'none') return false;
+    if (this.consoleLog === 'info') return true;
+    if (this.consoleLog === 'warning') return level === 'warning' || level === 'error';
+    if (this.consoleLog === 'error') return level === 'error';
+    return false;
+  }
+
+  /**
+   * Get a human-readable identifier for this chart for console output.
+   * Priority: id attribute > title text > tag name only
+   * @returns Identifier string like "dc-chart#my-id" or "dc-chart \"Sales\""
+   */
+  private getConsoleIdentifier(): string {
+    const tagName = this.tagName.toLowerCase();
+    if (this.id) {
+      return `${tagName}#${this.id}`;
+    }
+    const title = this.getTitle();
+    if (title) {
+      // Truncate long titles for console readability
+      const truncatedTitle = title.length > 30 ? title.substring(0, 27) + '...' : title;
+      return `${tagName} "${truncatedTitle}"`;
+    }
+    return tagName;
+  }
+
+  /**
+   * Start a console group for this render cycle if not already open.
+   * Groups all log messages together under a collapsible header.
+   */
+  private startConsoleGroup(): void {
+    if (!this.consoleGroupOpen && this.consoleLog !== 'none') {
+      const identifier = this.getConsoleIdentifier();
+      console.groupCollapsed(`${identifier} render`);
+      this.consoleGroupOpen = true;
+    }
+  }
+
+  /**
+   * End the console group for this render cycle if open.
+   */
+  private endConsoleGroup(): void {
+    if (this.consoleGroupOpen) {
+      console.groupEnd();
+      this.consoleGroupOpen = false;
+    }
+  }
+
+  /**
+   * Echo a log message to the browser console with appropriate formatting.
+   * Messages are grouped by render cycle under a collapsible header.
+   * @param level The log level
+   * @param path The path identifier
+   * @param message The log message
+   * @param value Optional value
+   */
+  private echoToConsole(level: LogLevel, path: string, message: string, value?: unknown): void {
+    // Start a group for this render cycle if not already open
+    this.startConsoleGroup();
+
+    const fullMessage = `${path}: ${message}`;
+
+    const consoleFn = level === 'error' ? console.error
+                    : level === 'warning' ? console.warn
+                    : console.log;
+
+    if (value !== undefined) {
+      consoleFn(fullMessage, value);
+    } else {
+      consoleFn(fullMessage);
+    }
+  }
+
+  /**
    * Log a message during chart rendering.
    * Messages are captured in logEntries and can be retrieved via getLogEntries().
    * Only logs if the logging attribute is set to an appropriate level.
+   * Optionally echoes to browser console based on console-log attribute.
    *
    * @param level Severity level: 'info', 'warning', or 'error'
    * @param path Dotted path identifying what was calculated (e.g., "padding.left", "slices[0].angle")
@@ -753,6 +854,11 @@ export abstract class BaseChart extends LitElement {
   protected log(level: LogLevel, path: string, message: string, value?: unknown): void {
     if (this.shouldLog(level)) {
       this.logEntries.push({ level, path, message, value });
+
+      // Also echo to browser console if configured
+      if (this.shouldEchoToConsole(level)) {
+        this.echoToConsole(level, path, message, value);
+      }
     }
   }
 
@@ -767,8 +873,11 @@ export abstract class BaseChart extends LitElement {
 
   /**
    * Clear all log entries. Called automatically at the start of each render.
+   * Also closes any open console group from the previous render cycle.
    */
   protected clearLog(): void {
+    // Close any open console group from previous render
+    this.endConsoleGroup();
     this.logEntries = [];
   }
 

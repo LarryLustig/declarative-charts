@@ -165,6 +165,101 @@
     </div>
 
     <div class="example">
+        <h2>Browser Console Output</h2>
+        <p>Use the <code>console-log</code> attribute to echo log messages to the browser's developer console. This is useful for debugging without adding a <code>&lt;dc-log-console&gt;</code> element.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Echo Warnings to Console</h3>
+                <pre><code>&lt;dc-chart id="console-demo" logging="info" console-log="warning" width="500" height="350"&gt;
+  &lt;dc-title&gt;Chart with Issues&lt;/dc-title&gt;
+  &lt;dc-bar value="30" label="Normal"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="0" label="Zero Value"&gt;&lt;/dc-bar&gt;
+  &lt;dc-line label="Empty Line"&gt;
+    &lt;!-- No points - will trigger warning --&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart id="console-demo" logging="info" console-log="warning" width="500" height="350">
+                    <dc-title>Chart with Issues</dc-title>
+                    <dc-bar value="30" label="Normal"></dc-bar>
+                    <dc-bar value="0" label="Zero Value"></dc-bar>
+                    <dc-line label="Empty Line">
+                        <!-- No points - will trigger warning -->
+                    </dc-line>
+                </dc-chart>
+                <p><strong>Open your browser's DevTools console</strong> to see warnings about the zero-value bar and empty line.</p>
+                <dc-log-console chart="#console-demo"></dc-log-console>
+            </div>
+        </div>
+
+        <h3>Console Log Levels</h3>
+        <p>The <code>console-log</code> attribute controls which messages are echoed to the browser console:</p>
+        <ul>
+            <li><code>console-log="none"</code> - No console output (default)</li>
+            <li><code>console-log="error"</code> - Errors → <code>console.error()</code></li>
+            <li><code>console-log="warning"</code> - Warnings → <code>console.warn()</code>, Errors → <code>console.error()</code></li>
+            <li><code>console-log="info"</code> - All messages → <code>console.log()</code> / <code>warn()</code> / <code>error()</code></li>
+        </ul>
+        <p><strong>Note:</strong> Messages must first pass the <code>logging</code> level filter before the <code>console-log</code> filter is applied. Set <code>logging="info"</code> to capture all messages, then use <code>console-log</code> to control which appear in DevTools.</p>
+
+        <h3>Console Grouping</h3>
+        <p>Messages from each render cycle are grouped under a collapsible header in the console. Charts are identified by:</p>
+        <ol>
+            <li><strong>ID attribute:</strong> <code>dc-chart#console-demo render</code></li>
+            <li><strong>Title text:</strong> <code>dc-chart "Chart with Issues" render</code></li>
+            <li><strong>Tag name only:</strong> <code>dc-chart render</code> (if no id or title)</li>
+        </ol>
+        <p>This makes it easy to identify which chart generated each group of messages, especially when multiple charts are on the page.</p>
+    </div>
+
+    <div class="example">
+        <h2>Debugging Common Issues</h2>
+        <p>The logging system now includes high-value warnings that help identify common chart configuration problems:</p>
+
+        <div class="grid">
+            <div>
+                <h3>Pie Chart with Small Slices</h3>
+                <pre><code>&lt;dc-pie-chart id="small-slices" logging="info" width="500" height="350"&gt;
+  &lt;dc-pie-slice value="80" label="Large"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="2" label="Tiny A"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="1" label="Tiny B"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart id="small-slices" logging="info" width="500" height="350">
+                    <dc-pie-slice value="80" label="Large"></dc-pie-slice>
+                    <dc-pie-slice value="2" label="Tiny A"></dc-pie-slice>
+                    <dc-pie-slice value="1" label="Tiny B"></dc-pie-slice>
+                </dc-pie-chart>
+                <dc-log-console chart="#small-slices"></dc-log-console>
+            </div>
+            <div>
+                <h3>Funnel with Increasing Values</h3>
+                <pre><code>&lt;dc-funnel-chart id="increasing-funnel" logging="info" width="500" height="350"&gt;
+  &lt;dc-funnel-stage value="100" label="Start"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="200" label="Growth"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="150" label="End"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart id="increasing-funnel" logging="info" width="500" height="350">
+                    <dc-funnel-stage value="100" label="Start"></dc-funnel-stage>
+                    <dc-funnel-stage value="200" label="Growth"></dc-funnel-stage>
+                    <dc-funnel-stage value="150" label="End"></dc-funnel-stage>
+                </dc-funnel-chart>
+                <dc-log-console chart="#increasing-funnel"></dc-log-console>
+            </div>
+        </div>
+
+        <h3>What Issues Are Detected</h3>
+        <ul>
+            <li><strong>Empty charts</strong> - No data elements, or all elements hidden</li>
+            <li><strong>Zero/negative values</strong> - Bars or slices that won't be visible</li>
+            <li><strong>Lines without points</strong> - <code>&lt;dc-line&gt;</code> with no <code>&lt;dc-point&gt;</code> children</li>
+            <li><strong>Small pie slices</strong> - Slices under 3% that are hard to see or click</li>
+            <li><strong>Invalid donut radius</strong> - <code>inner-radius</code> values that break rendering</li>
+            <li><strong>Uniform colors</strong> - All elements have the same color (possible config issue)</li>
+            <li><strong>Increasing funnel values</strong> - Later stages larger than earlier (unusual pattern)</li>
+        </ul>
+    </div>
+
+    <div class="example">
         <h2>What Gets Logged</h2>
         <p>The logging system captures calculations including:</p>
         <ul>

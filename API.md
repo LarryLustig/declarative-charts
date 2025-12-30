@@ -31,6 +31,7 @@ All chart components (`<dc-chart>`, `<dc-pie-chart>`, `<dc-funnel-chart>`, `<dc-
 
 ### Logging
 - `logging` (string) - Controls log capture level: `'false'` (default, no logging), `'error'`, `'warning'`, `'info'`, or `'true'` (same as `'info'`). See [Logging & Debugging](#logging--debugging) for details.
+- `console-log` (string) - Controls which captured logs are echoed to browser console: `'none'` (default), `'error'`, `'warning'`, or `'info'`. See [Browser Console Output](#browser-console-output) for details.
 
 ### Padding
 
@@ -1302,6 +1303,39 @@ Add the `logging` attribute to any chart:
 | `error` | Only errors |
 | `warning` | Warnings and errors |
 | `info` or `true` | All messages (info, warning, and error) |
+
+### Browser Console Output
+
+By default, log messages are only captured internally and displayed via `<dc-log-console>`. To also echo messages to the browser's developer console, use the `console-log` attribute:
+
+```html
+<dc-chart logging="info" console-log="warning" width="600" height="400">
+  <dc-bar value="10" label="Q1"></dc-bar>
+</dc-chart>
+```
+
+| Value | Console Output |
+|-------|----------------|
+| `none` | No console output (default) |
+| `error` | Errors → `console.error()` |
+| `warning` | Warnings → `console.warn()`, Errors → `console.error()` |
+| `info` | Info → `console.log()`, Warnings → `console.warn()`, Errors → `console.error()` |
+
+**Note:** Messages must first pass the `logging` level filter before the `console-log` filter is applied. To see all messages in the console, set both `logging="info"` and `console-log="info"`.
+
+**Grouping:** Console messages from each render cycle are grouped under a collapsible header using `console.groupCollapsed()`. This keeps the console organized when multiple charts log messages.
+
+**Chart Identification:** The group header identifies charts by (in priority order):
+1. ID attribute: `dc-chart#my-chart render`
+2. Title text: `dc-chart "Sales by Quarter" render`
+3. Tag name only: `dc-chart render`
+
+Example console output:
+```
+▶ dc-chart#sales-chart render
+    padding.calculated: Final padding { top: 60, right: 20, bottom: 40, left: 50 }
+    bars.summary: 4 bars { maxValue: 50 }
+```
 
 ### Displaying Logs with `<dc-log-console>`
 

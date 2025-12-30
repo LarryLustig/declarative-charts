@@ -154,7 +154,17 @@ export class PieChart extends BaseChart {
     chartHeight: number;
   } | null {
     const sliceData = this.getSlices();
-    if (sliceData.length === 0) return null;
+    if (sliceData.length === 0) {
+      this.log('warning', 'data.empty', 'Pie chart has no dc-pie-slice children. Add slices to display data.');
+      return null;
+    }
+
+    // Check for zero/negative values
+    const invalidSlices = sliceData.filter(s => s.value <= 0);
+    if (invalidSlices.length > 0) {
+      const labels = invalidSlices.map(s => `${s.label || '(unlabeled)'} (${s.value})`).join(', ');
+      this.log('warning', 'slices.invalidValues', `${invalidSlices.length} slice(s) have zero or negative values and will not be visible: ${labels}. Pie charts require positive values.`);
+    }
 
     const padding = this.getChartPadding();
     const chartWidth = this.width - padding.left - padding.right;
@@ -168,6 +178,15 @@ export class PieChart extends BaseChart {
     const innerRadiusPixels = (this.innerRadius / 100) * radius;
     this.log('info', 'layout.radius', `min(chartWidth(${chartWidth.toFixed(1)}), chartHeight(${chartHeight.toFixed(1)})) / 2 = ${radius.toFixed(1)}`, radius);
     this.log('info', 'layout.innerRadius', `${this.innerRadius}% of radius(${radius.toFixed(1)}) = ${innerRadiusPixels.toFixed(1)}`, innerRadiusPixels);
+
+    // Warn about invalid inner radius
+    if (this.innerRadius < 0) {
+      this.log('warning', 'donut.invalidInnerRadius', `inner-radius="${this.innerRadius}" is negative. Using 0 (solid pie).`);
+    } else if (this.innerRadius >= 100) {
+      this.log('warning', 'donut.invalidInnerRadius', `inner-radius="${this.innerRadius}" is >= 100%. Pie will not be visible. Use a value between 0-99.`);
+    } else if (this.innerRadius >= 90) {
+      this.log('info', 'donut.thinRing', `inner-radius="${this.innerRadius}" creates a very thin ring. Labels may not fit inside slices.`);
+    }
 
     // Resolve fill colors and patterns with high contrast support
     // Pass sliceColor as default for backwards compatibility
@@ -191,7 +210,10 @@ export class PieChart extends BaseChart {
     const defaultStrokeWidth = effectiveStroke.width;
 
     const totalValue = sliceData.reduce((sum, slice) => sum + slice.value, 0);
-    if (totalValue === 0) return null;
+    if (totalValue === 0) {
+      this.log('warning', 'data.zeroTotal', 'All slice values sum to 0. Pie chart cannot be rendered. Check that slices have positive values.');
+      return null;
+    }
     this.log('info', 'data.totalValue', `Sum of all slice values`, totalValue);
     this.log('info', 'data.sliceCount', `Number of slices`, sliceData.length);
 
@@ -244,6 +266,22 @@ export class PieChart extends BaseChart {
         valueFormat: slice.valueFormat
       };
     });
+
+    // Warn about very small slices (< 3%) that may be hard to see or interact with
+    const smallSlices = slices.filter(s => s.percentage < 3);
+    if (smallSlices.length > 0) {
+      const labels = smallSlices.map(s => `${s.label || '(unlabeled)'} (${s.percentage.toFixed(1)}%)`).join(', ');
+      this.log('info', 'slices.small', `${smallSlices.length} slice(s) are < 3% and may be hard to see or click: ${labels}. Consider grouping small values into an "Other" category.`);
+    }
+
+    // Warn if all slices have the same color
+    if (slices.length > 1) {
+      const uniqueColors = new Set(slices.map(s => s.originalColor));
+      if (uniqueColors.size === 1) {
+        const color = slices[0].originalColor;
+        this.log('info', 'slices.sameColor', `All ${slices.length} slices have the same color (${color}). Set fill on slices or configure a palette for distinct colors.`);
+      }
+    }
 
     return {
       slices,

@@ -368,7 +368,34 @@ export class FunnelChart extends BaseChart {
     heightMode: string;
   } | null {
     const stagesData = this.getStages();
-    if (stagesData.length === 0) return null;
+    if (stagesData.length === 0) {
+      this.log('warning', 'data.empty', 'Funnel chart has no dc-funnel-stage children. Add stages to display data.');
+      return null;
+    }
+
+    // Check for zero/negative values
+    const invalidStages = stagesData.filter(s => s.value <= 0);
+    if (invalidStages.length > 0) {
+      const labels = invalidStages.map(s => `${s.label || '(unlabeled)'} (${s.value})`).join(', ');
+      this.log('warning', 'stages.invalidValues', `${invalidStages.length} stage(s) have zero or negative values: ${labels}. These stages will have minimal or no width.`);
+    }
+
+    // Check for increasing values (anti-pattern for funnels)
+    let increasingCount = 0;
+    for (let i = 1; i < stagesData.length; i++) {
+      if (stagesData[i].value > stagesData[i - 1].value) {
+        increasingCount++;
+      }
+    }
+    if (increasingCount > 0) {
+      this.log('info', 'stages.increasing', `${increasingCount} stage transition(s) have increasing values (later stage > earlier stage). This is unusual for funnels but may be intentional.`);
+    }
+
+    // Check if all stages have the same value
+    const uniqueValues = new Set(stagesData.map(s => s.value));
+    if (uniqueValues.size === 1 && stagesData.length > 1) {
+      this.log('info', 'stages.uniformValues', `All ${stagesData.length} stages have the same value (${stagesData[0].value}). Funnel widths will be uniform.`);
+    }
 
     const padding = this.getChartPadding();
     const chartWidth = this.width - padding.left - padding.right;
@@ -522,6 +549,15 @@ export class FunnelChart extends BaseChart {
         valueFormat: stage.valueFormat
       };
     });
+
+    // Warn if all stages have the same color
+    if (stages.length > 1) {
+      const uniqueColors = new Set(stages.map(s => s.originalColor));
+      if (uniqueColors.size === 1) {
+        const color = stages[0].originalColor;
+        this.log('info', 'stages.sameColor', `All ${stages.length} stages have the same color (${color}). Set fill on stages or configure a palette for distinct colors.`);
+      }
+    }
 
     return {
       stages,

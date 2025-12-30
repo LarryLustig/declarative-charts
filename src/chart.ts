@@ -720,8 +720,14 @@ export class Chart extends AxisChart {
     const lineElements = Array.from(this.querySelectorAll('dc-line'))
       .filter(el => !el.hasAttribute('hidden')) as ChartLine[];
 
-    const linesData = lineElements.map(line => {
+    const linesData = lineElements.map((line, lineIndex) => {
       const pointElements = Array.from(line.querySelectorAll('dc-point')) as ChartPoint[];
+
+      // Warn if line has no points
+      if (pointElements.length === 0) {
+        const lineLabel = line.label || `line[${lineIndex}]`;
+        this.log('warning', 'lines.noPoints', `Line '${lineLabel}' has no dc-point children and will not be visible.`);
+      }
       const elementStroke = line.getEffectiveStroke();
       const lineStroke = elementStroke || '';
       const lineShowValue = line.hasAttribute('show-value') ? line.showValue : this.showValue;
@@ -1306,6 +1312,17 @@ export class Chart extends AxisChart {
     const structure = this.getBarStructure();
 
     if (bars.length === 0 && lines.length === 0 && bubbles.length === 0) {
+      // Check if there are any data elements at all (including hidden ones)
+      const allBars = this.querySelectorAll('dc-bar, dc-bar-group');
+      const allLines = this.querySelectorAll('dc-line');
+      const allBubbles = this.querySelectorAll('dc-bubble');
+      const totalElements = allBars.length + allLines.length + allBubbles.length;
+
+      if (totalElements > 0) {
+        this.log('warning', 'data.allHidden', `Chart has ${totalElements} data element(s) but all are hidden. Check for hidden attributes on dc-bar, dc-line, or dc-bubble elements.`);
+      } else {
+        this.log('warning', 'data.empty', 'Chart has no data elements. Add dc-bar, dc-line, or dc-bubble children to display data.');
+      }
       return svg``;
     }
 
@@ -1329,6 +1346,22 @@ export class Chart extends AxisChart {
     this.log('info', 'data.bubbleCount', `Number of bubbles`, bubbles.length);
     this.log('info', 'data.range', `Value range [${range.min}, ${range.max}]`, range);
     this.log('info', 'layout.chartArea', `chartWidth=${chartWidth.toFixed(1)}, chartHeight=${chartHeight.toFixed(1)}`, { width: chartWidth, height: chartHeight });
+
+    // Warn about zero-value bars (invisible)
+    const zeroBars = bars.filter(b => b.value === 0);
+    if (zeroBars.length > 0) {
+      const labels = zeroBars.map(b => b.label || '(unlabeled)').join(', ');
+      this.log('warning', 'bars.zeroValue', `${zeroBars.length} bar(s) have value 0 and will not be visible: ${labels}`);
+    }
+
+    // Warn about all bars having the same color (potential config issue)
+    if (bars.length > 1) {
+      const uniqueColors = new Set(bars.map(b => b.originalFill || b.fill));
+      if (uniqueColors.size === 1) {
+        const color = bars[0].originalFill || bars[0].fill;
+        this.log('info', 'bars.sameColor', `All ${bars.length} bars have the same color (${color}). Set fill attributes on bars or configure a palette for distinct colors.`);
+      }
+    }
 
     // Collect value labels to render them last (on top of lines)
     const deferredLabels: DeferredLabel[] = [];

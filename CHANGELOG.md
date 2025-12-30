@@ -130,6 +130,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `logging` attribute for debugging calculations
   - `<dc-log-console>` element for displaying logs
   - Captures padding, colors, legend dimensions, element positions
+  - `console-log` attribute echoes messages to browser DevTools console
+  - Console messages grouped by render cycle using `console.groupCollapsed()`
+  - Smart chart identification: uses id, title text, or tag name
+  - High-value warnings for common issues:
+    - Empty charts or all-hidden elements
+    - Lines without points, zero-value bars
+    - Small pie slices (<3%), invalid donut radius
+    - Increasing funnel values (anti-pattern)
+    - Uniform colors across elements
 
 ### Changed
 
