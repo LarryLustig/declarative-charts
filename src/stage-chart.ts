@@ -927,11 +927,15 @@ export class StageChart extends BaseChart {
   ): { canShowLabel: boolean; canShowValue: boolean; labelsSuppressed: boolean } {
     const labelFontSize = 14;
     const valueFontSize = 12;
-    const padding = 8;
+    const basePadding = 16; // Total padding (both sides)
     const verticalGap = 4; // Gap between label and value
 
-    const availableWidth = shapeWidth - padding * 2;
-    const availableHeight = shapeHeight - padding * 2;
+    // Scale padding down for smaller shapes: use minimum of 16 total or 10% of dimension
+    const horizontalPadding = Math.min(basePadding, shapeWidth * 0.1);
+    const verticalPadding = Math.min(basePadding, shapeHeight * 0.1);
+
+    const availableWidth = shapeWidth - horizontalPadding;
+    const availableHeight = shapeHeight - verticalPadding;
 
     let canShowLabel = shouldShowLabel;
     let canShowValue = shouldShowValue && !!valueString;
