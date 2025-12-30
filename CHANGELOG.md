@@ -59,6 +59,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - **Donuts** (`donuts.html`): Donut charts with inner-radius variations, legends, palettes
   - Expanded donut examples with inner radius comparisons (25%, 50%, 65%, 80%)
 
+- **Line Chart Examples Reorganization**
+  - Line Charts now uses a dropdown in major nav with 2 pages:
+    - **Basics** (`linecharts.html`): Basic lines, multiple series, point customization, styling, negative values
+    - **Curves** (`line-curves.html`): Curve fitting options (linear, smooth, monotone, step) and comparisons
+
 ### Fixed
 
 - **Stage Chart Zero-Value Sizing**

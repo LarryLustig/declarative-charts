@@ -12,7 +12,13 @@ const NAV_CONFIG = {
                 { href: 'bar-negatives.html', label: 'Negative Values' },
             ]
         },
-        { href: 'linecharts.html', label: 'Line Charts' },
+        {
+            label: 'Line Charts',
+            dropdown: [
+                { href: 'linecharts.html', label: 'Basics' },
+                { href: 'line-curves.html', label: 'Curves' },
+            ]
+        },
         { href: 'bubblecharts.html', label: 'Bubble Charts' },
         {
             label: 'Pie Charts',
