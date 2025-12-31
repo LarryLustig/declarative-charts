@@ -69,6 +69,11 @@ interface BarData {
   patternFill?: string;
   patternScale?: number;
   valueFormat?: string;
+  // Label positioning
+  labelPosition?: string;
+  labelOffsetX?: number;
+  labelOffsetY?: number;
+  labelOffsetR?: number;
 }
 
 interface BarGroupData {
@@ -107,6 +112,11 @@ interface PointData {
   showPercent: ShowCondition;
   shape: string;
   valueFormat?: string;
+  // Label positioning
+  labelPosition?: string;
+  labelOffsetX?: number;
+  labelOffsetY?: number;
+  labelOffsetR?: number;
 }
 
 interface LineData {
@@ -121,6 +131,11 @@ interface LineData {
   element?: ChartLine;
   passthroughAttrs?: Record<string, string>;
   points: PointData[];
+  // Label positioning (inherited by child points)
+  labelPosition?: string;
+  labelOffsetX?: number;
+  labelOffsetY?: number;
+  labelOffsetR?: number;
 }
 
 // ============================================================================
@@ -147,6 +162,11 @@ interface BubbleData {
   patternFill?: string;
   patternScale?: number;
   valueFormat?: string;
+  // Label positioning
+  labelPosition?: string;
+  labelOffsetX?: number;
+  labelOffsetY?: number;
+  labelOffsetR?: number;
 }
 
 /**
@@ -467,7 +487,12 @@ export class Chart extends AxisChart {
       patternStroke: bar.patternStroke,
       patternFill: bar.patternFill,
       patternScale: bar.patternScale,
-      valueFormat: bar.valueFormat
+      valueFormat: bar.valueFormat,
+      // Label positioning (inherit from chart if not set on element)
+      labelPosition: bar.labelPosition ?? this.labelPosition,
+      labelOffsetX: bar.labelOffsetX ?? this.labelOffsetX,
+      labelOffsetY: bar.labelOffsetY ?? this.labelOffsetY,
+      labelOffsetR: bar.labelOffsetR ?? this.labelOffsetR
     };
   }
 
@@ -742,6 +767,12 @@ export class Chart extends AxisChart {
       const knownAttrs = new Set(['label', 'color', 'stroke', 'fill', 'href', 'target', 'show-value', 'show-percent', 'point-shape', 'curve-fit']);
       const passthroughAttrs = line.getPassthroughAttributes(knownAttrs);
 
+      // Label positioning inheritance: point → line → chart → default
+      const lineLabelPosition = line.labelPosition ?? this.labelPosition;
+      const lineLabelOffsetX = line.labelOffsetX ?? this.labelOffsetX;
+      const lineLabelOffsetY = line.labelOffsetY ?? this.labelOffsetY;
+      const lineLabelOffsetR = line.labelOffsetR ?? this.labelOffsetR;
+
       return {
         stroke: lineStroke,
         elementStroke: elementStroke || undefined,
@@ -753,6 +784,10 @@ export class Chart extends AxisChart {
         autoPopup: line.autoPopup,
         element: line,
         passthroughAttrs: Object.keys(passthroughAttrs).length > 0 ? passthroughAttrs : undefined,
+        labelPosition: lineLabelPosition,
+        labelOffsetX: lineLabelOffsetX,
+        labelOffsetY: lineLabelOffsetY,
+        labelOffsetR: lineLabelOffsetR,
         points: pointElements.map(point => {
           const popupEl = point.querySelector('dc-popup') as ChartPopup | null;
           const showValue = point.hasAttribute('show-value') ? point.showValue : lineShowValue;
@@ -770,7 +805,12 @@ export class Chart extends AxisChart {
             showValue,
             showPercent,
             shape,
-            valueFormat: point.valueFormat
+            valueFormat: point.valueFormat,
+            // Label positioning: point → line → chart → default
+            labelPosition: point.labelPosition ?? lineLabelPosition,
+            labelOffsetX: point.labelOffsetX ?? lineLabelOffsetX,
+            labelOffsetY: point.labelOffsetY ?? lineLabelOffsetY,
+            labelOffsetR: point.labelOffsetR ?? lineLabelOffsetR
           };
         })
       };
@@ -825,7 +865,12 @@ export class Chart extends AxisChart {
         patternStroke: bubble.patternStroke,
         patternFill: bubble.patternFill,
         patternScale: bubble.patternScale,
-        valueFormat: bubble.valueFormat
+        valueFormat: bubble.valueFormat,
+        // Label positioning: bubble → chart → default
+        labelPosition: bubble.labelPosition ?? this.labelPosition,
+        labelOffsetX: bubble.labelOffsetX ?? this.labelOffsetX,
+        labelOffsetY: bubble.labelOffsetY ?? this.labelOffsetY,
+        labelOffsetR: bubble.labelOffsetR ?? this.labelOffsetR
       };
     });
 
@@ -1443,6 +1488,353 @@ export class Chart extends AxisChart {
     }
   }
 
+  /**
+   * Calculate label position for a vertical bar.
+   * @param x Bar x position
+   * @param y Bar y position (top edge for positive, bottom edge for negative)
+   * @param barWidth Bar width
+   * @param barHeight Bar height (always positive)
+   * @param isNegative Whether the bar value is negative
+   * @param reverse Whether the chart is in reverse orientation
+   * @param position Label position: outside, inside-top, inside-center, inside-bottom, outside-top, outside-bottom
+   * @param offsetX Horizontal offset
+   * @param offsetY Vertical offset
+   * @param offsetR Radial offset (away from zero line)
+   * @param fontSize Font size for label
+   * @returns Position and anchor for the label
+   */
+  private calculateVerticalBarLabelPosition(
+    x: number, y: number, barWidth: number, barHeight: number,
+    isNegative: boolean, reverse: boolean,
+    position: string | undefined,
+    offsetX: number, offsetY: number, offsetR: number,
+    fontSize: number
+  ): { x: number; y: number; anchor: string } {
+    // Normalize position - outside and outside-top are the same
+    const pos = position === 'outside-top' ? 'outside' : (position || 'outside');
+
+    // Base x is always centered
+    const labelX = x + barWidth / 2 + offsetX;
+
+    // For vertical bars, "top" means away from zero, "bottom" means toward zero
+    // For positive bars (normal): top is visually above, bottom is visually below
+    // For negative bars (normal): top is visually below (away from zero at top), bottom is above (toward zero)
+    // Reverse orientation flips the visual direction
+
+    let labelY: number;
+    let anchor = 'middle';
+
+    // Determine the visual direction based on value sign and reverse orientation
+    // valueEndY = the y coordinate at the "top" of the value (away from zero)
+    // zeroEndY = the y coordinate at the "bottom" of the value (toward zero)
+    const valueEndY = isNegative
+      ? (reverse ? y : y + barHeight)  // Negative: bottom visually (or top if reversed)
+      : (reverse ? y + barHeight : y); // Positive: top visually (or bottom if reversed)
+    const zeroEndY = isNegative
+      ? (reverse ? y + barHeight : y)  // Negative: top visually (toward zero)
+      : (reverse ? y : y + barHeight); // Positive: bottom visually (toward zero)
+
+    switch (pos) {
+      case 'inside-top':
+        // Inside bar, near the value end (away from zero)
+        labelY = valueEndY + (isNegative !== reverse ? -fontSize - 4 : fontSize + 4);
+        labelY += offsetR * (isNegative !== reverse ? 1 : -1);
+        break;
+      case 'inside-center':
+        // Inside bar, centered
+        labelY = y + barHeight / 2 + fontSize / 3;
+        break;
+      case 'inside-bottom':
+        // Inside bar, near zero
+        labelY = zeroEndY + (isNegative !== reverse ? fontSize + 4 : -fontSize - 4);
+        labelY += offsetR * (isNegative !== reverse ? -1 : 1);
+        break;
+      case 'outside-bottom':
+        // Outside bar, toward zero (rarely used but supported)
+        labelY = zeroEndY + (isNegative !== reverse ? -8 : 15);
+        labelY += offsetR * (isNegative !== reverse ? 1 : -1);
+        break;
+      case 'outside':
+      default:
+        // Outside bar, away from zero (default behavior)
+        labelY = valueEndY + (isNegative !== reverse ? 15 : -8);
+        labelY += offsetR * (isNegative !== reverse ? -1 : 1);
+        break;
+    }
+
+    labelY += offsetY;
+
+    return { x: labelX, y: labelY, anchor };
+  }
+
+  /**
+   * Calculate label position for a horizontal bar.
+   * @param x Bar x position (left edge for positive, right edge for negative)
+   * @param y Bar y position
+   * @param barWidth Bar width (always positive, represents distance from zero)
+   * @param barHeight Bar height
+   * @param isNegative Whether the bar value is negative
+   * @param reverse Whether the chart is in reverse orientation
+   * @param position Label position: outside, inside-top, inside-center, inside-bottom, outside-top, outside-bottom
+   * @param offsetX Horizontal offset
+   * @param offsetY Vertical offset
+   * @param offsetR Radial offset (away from zero line)
+   * @param fontSize Font size for label
+   * @returns Position and anchor for the label
+   */
+  private calculateHorizontalBarLabelPosition(
+    x: number, y: number, barWidth: number, barHeight: number,
+    isNegative: boolean, reverse: boolean,
+    position: string | undefined,
+    offsetX: number, offsetY: number, offsetR: number
+  ): { x: number; y: number; anchor: string } {
+    // Normalize position - outside and outside-top are the same
+    const pos = position === 'outside-top' ? 'outside' : (position || 'outside');
+
+    // Base y is always centered vertically in the bar
+    const labelY = y + barHeight / 2 + 4 + offsetY;
+
+    // For horizontal bars, "top" means away from zero, "bottom" means toward zero
+    // In horizontal orientation, this translates to left/right instead of up/down
+    // For positive bars (normal): "top" is right (away from zero at left), "bottom" is left
+    // For negative bars (normal): "top" is left (away from zero at right), "bottom" is right
+    // Reverse orientation flips this
+
+    let labelX: number;
+    let anchor: string;
+
+    // valueEndX = the x coordinate at the "top" of the value (away from zero)
+    // zeroEndX = the x coordinate at the "bottom" of the value (toward zero)
+    const valueEndX = isNegative
+      ? (reverse ? x + barWidth : x)  // Negative: left visually (or right if reversed)
+      : (reverse ? x : x + barWidth); // Positive: right visually (or left if reversed)
+    const zeroEndX = isNegative
+      ? (reverse ? x : x + barWidth)  // Negative: right visually (toward zero)
+      : (reverse ? x + barWidth : x); // Positive: left visually (toward zero)
+
+    switch (pos) {
+      case 'inside-top':
+        // Inside bar, near the value end (away from zero)
+        // Use proper anchor to keep text inside bar boundaries
+        if (isNegative !== reverse) {
+          // Value end is on the left side
+          labelX = valueEndX + 8;
+          anchor = 'start';
+        } else {
+          // Value end is on the right side
+          labelX = valueEndX - 8;
+          anchor = 'end';
+        }
+        labelX += offsetR * (isNegative !== reverse ? 1 : -1);
+        break;
+      case 'inside-center':
+        // Inside bar, centered
+        labelX = x + barWidth / 2;
+        anchor = 'middle';
+        break;
+      case 'inside-bottom':
+        // Inside bar, near zero
+        // Use proper anchor to keep text inside bar boundaries
+        if (isNegative !== reverse) {
+          // Zero end is on the right side
+          labelX = zeroEndX - 8;
+          anchor = 'end';
+        } else {
+          // Zero end is on the left side
+          labelX = zeroEndX + 8;
+          anchor = 'start';
+        }
+        labelX += offsetR * (isNegative !== reverse ? -1 : 1);
+        break;
+      case 'outside-bottom':
+        // Outside bar, toward zero (rarely used but supported)
+        labelX = zeroEndX + (isNegative !== reverse ? 8 : -8);
+        labelX += offsetR * (isNegative !== reverse ? 1 : -1);
+        anchor = isNegative !== reverse ? 'start' : 'end';
+        break;
+      case 'outside':
+      default:
+        // Outside bar, away from zero (default behavior)
+        labelX = valueEndX + (isNegative !== reverse ? -8 : 8);
+        labelX += offsetR * (isNegative !== reverse ? -1 : 1);
+        anchor = isNegative !== reverse ? 'end' : 'start';
+        break;
+    }
+
+    labelX += offsetX;
+
+    return { x: labelX, y: labelY, anchor };
+  }
+
+  /**
+   * Calculate label position for point elements (on lines)
+   * Supports 9 position values: above, above-left, above-right, below, below-left, below-right, left, right, center
+   */
+  private calculatePointLabelPosition(
+    x: number, y: number,
+    position: string | undefined,
+    offsetX: number, offsetY: number, offsetR: number,
+    fontSize: number
+  ): { x: number; y: number; anchor: string } {
+    const pos = position || 'above';
+    const baseOffset = fontSize; // Base distance from point center
+    const halfFont = fontSize / 2;
+
+    let labelX: number;
+    let labelY: number;
+    let anchor: string;
+
+    switch (pos) {
+      case 'above':
+        labelX = x;
+        labelY = y - baseOffset - offsetR;
+        anchor = 'middle';
+        break;
+      case 'above-left':
+        labelX = x - halfFont;
+        labelY = y - baseOffset - offsetR;
+        anchor = 'end';
+        break;
+      case 'above-right':
+        labelX = x + halfFont;
+        labelY = y - baseOffset - offsetR;
+        anchor = 'start';
+        break;
+      case 'below':
+        labelX = x;
+        labelY = y + baseOffset + halfFont + offsetR;
+        anchor = 'middle';
+        break;
+      case 'below-left':
+        labelX = x - halfFont;
+        labelY = y + baseOffset + halfFont + offsetR;
+        anchor = 'end';
+        break;
+      case 'below-right':
+        labelX = x + halfFont;
+        labelY = y + baseOffset + halfFont + offsetR;
+        anchor = 'start';
+        break;
+      case 'left':
+        labelX = x - baseOffset - offsetR;
+        labelY = y + halfFont;
+        anchor = 'end';
+        break;
+      case 'right':
+        labelX = x + baseOffset + offsetR;
+        labelY = y + halfFont;
+        anchor = 'start';
+        break;
+      case 'center':
+        labelX = x;
+        labelY = y + halfFont;
+        anchor = 'middle';
+        break;
+      default:
+        // Default to 'above'
+        labelX = x;
+        labelY = y - baseOffset - offsetR;
+        anchor = 'middle';
+        break;
+    }
+
+    // Apply additional offsets
+    labelX += offsetX;
+    labelY += offsetY;
+
+    return { x: labelX, y: labelY, anchor };
+  }
+
+  /**
+   * Calculate label position for bubble elements
+   * Supports 10 position values: all point positions plus 'inside'
+   */
+  private calculateBubbleLabelPosition(
+    x: number, y: number, radius: number,
+    position: string | undefined,
+    offsetX: number, offsetY: number, offsetR: number,
+    fontSize: number
+  ): { x: number; y: number; anchor: string } {
+    const pos = position || 'above';
+    const halfFont = fontSize / 2;
+
+    // For bubbles, 'inside' means centered inside the bubble
+    if (pos === 'inside') {
+      return {
+        x: x + offsetX,
+        y: y + halfFont + offsetY,
+        anchor: 'middle'
+      };
+    }
+
+    // For other positions, use the bubble edge as the base (like points but at radius distance)
+    const baseOffset = radius + 8; // Distance from bubble edge
+
+    let labelX: number;
+    let labelY: number;
+    let anchor: string;
+
+    switch (pos) {
+      case 'above':
+        labelX = x;
+        labelY = y - baseOffset - offsetR;
+        anchor = 'middle';
+        break;
+      case 'above-left':
+        labelX = x - halfFont;
+        labelY = y - baseOffset - offsetR;
+        anchor = 'end';
+        break;
+      case 'above-right':
+        labelX = x + halfFont;
+        labelY = y - baseOffset - offsetR;
+        anchor = 'start';
+        break;
+      case 'below':
+        labelX = x;
+        labelY = y + baseOffset + halfFont + offsetR;
+        anchor = 'middle';
+        break;
+      case 'below-left':
+        labelX = x - halfFont;
+        labelY = y + baseOffset + halfFont + offsetR;
+        anchor = 'end';
+        break;
+      case 'below-right':
+        labelX = x + halfFont;
+        labelY = y + baseOffset + halfFont + offsetR;
+        anchor = 'start';
+        break;
+      case 'left':
+        labelX = x - baseOffset - offsetR;
+        labelY = y + halfFont;
+        anchor = 'end';
+        break;
+      case 'right':
+        labelX = x + baseOffset + offsetR;
+        labelY = y + halfFont;
+        anchor = 'start';
+        break;
+      case 'center':
+        labelX = x;
+        labelY = y + halfFont;
+        anchor = 'middle';
+        break;
+      default:
+        // Default to 'above'
+        labelX = x;
+        labelY = y - baseOffset - offsetR;
+        anchor = 'middle';
+        break;
+    }
+
+    // Apply additional offsets
+    labelX += offsetX;
+    labelY += offsetY;
+
+    return { x: labelX, y: labelY, anchor };
+  }
+
   private renderVerticalBars(
     bars: FlattenedBar[],
     structure: BarOrGroup[],
@@ -1554,16 +1946,22 @@ export class Chart extends AxisChart {
 
         // Defer label rendering to ensure it appears on top of lines
         if (valueString) {
-          // Position label above positive bars, below negative bars
-          const labelY = isNegative
-            ? (reverse ? y - 8 : y + barHeight + 15)
-            : (reverse ? y + barHeight + 15 : y - 8);
+          const fontSize = 14;
+          const labelPos = this.calculateVerticalBarLabelPosition(
+            x, y, barWidth, barHeight,
+            isNegative, reverse,
+            bar.labelPosition,
+            bar.labelOffsetX || 0,
+            bar.labelOffsetY || 0,
+            bar.labelOffsetR || 0,
+            fontSize
+          );
           deferredLabels.push({
-            x: x + barWidth / 2,
-            y: labelY,
+            x: labelPos.x,
+            y: labelPos.y,
             text: valueString,
-            anchor: 'middle',
-            fontSize: 14
+            anchor: labelPos.anchor,
+            fontSize
           });
         }
 
@@ -1685,19 +2083,21 @@ export class Chart extends AxisChart {
 
         // Defer label rendering to ensure it appears on top of lines
         if (valueString) {
-          // Position label to the right of positive bars, left of negative bars
-          const labelX = isNegative
-            ? (reverse ? x + barWidth + 8 : x - 8)
-            : (reverse ? x - 8 : x + barWidth + 8);
-          const labelAnchor = isNegative
-            ? (reverse ? 'start' : 'end')
-            : (reverse ? 'end' : 'start');
+          const fontSize = 14;
+          const labelPos = this.calculateHorizontalBarLabelPosition(
+            x, y, barWidth, barHeight,
+            isNegative, reverse,
+            bar.labelPosition,
+            bar.labelOffsetX || 0,
+            bar.labelOffsetY || 0,
+            bar.labelOffsetR || 0
+          );
           deferredLabels.push({
-            x: labelX,
-            y: y + barHeight / 2 + 4,
+            x: labelPos.x,
+            y: labelPos.y,
             text: valueString,
-            anchor: labelAnchor,
-            fontSize: 14
+            anchor: labelPos.anchor,
+            fontSize
           });
         }
 
@@ -1878,12 +2278,21 @@ export class Chart extends AxisChart {
 
             // Defer label rendering to ensure it appears on top of bars
             if (valueString) {
+              const fontSize = 12;
+              const labelPos = this.calculatePointLabelPosition(
+                pos.x, pos.y,
+                pos.labelPosition,
+                pos.labelOffsetX || 0,
+                pos.labelOffsetY || 0,
+                pos.labelOffsetR || 0,
+                fontSize
+              );
               deferredLabels.push({
-                x: pos.x,
-                y: pos.y - 10,
+                x: labelPos.x,
+                y: labelPos.y,
                 text: valueString,
-                anchor: 'middle',
-                fontSize: 12
+                anchor: labelPos.anchor,
+                fontSize
               });
             }
 
@@ -1944,12 +2353,21 @@ export class Chart extends AxisChart {
 
         // Defer label rendering to ensure it appears on top of lines
         if (valueString) {
+          const fontSize = 12;
+          const labelPos = this.calculateBubbleLabelPosition(
+            x, y, radius,
+            bubble.labelPosition,
+            bubble.labelOffsetX || 0,
+            bubble.labelOffsetY || 0,
+            bubble.labelOffsetR || 0,
+            fontSize
+          );
           deferredLabels.push({
-            x,
-            y: y - radius - 8,
+            x: labelPos.x,
+            y: labelPos.y,
             text: valueString,
-            anchor: 'middle',
-            fontSize: 12
+            anchor: labelPos.anchor,
+            fontSize
           });
         }
 

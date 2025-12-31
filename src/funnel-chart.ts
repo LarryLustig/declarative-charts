@@ -93,6 +93,11 @@ export class FunnelChart extends BaseChart {
     patternFill?: string;
     patternScale?: number;
     valueFormat?: string;
+    // Label positioning
+    labelPosition?: string;
+    labelOffsetX?: number;
+    labelOffsetY?: number;
+    labelOffsetR?: number;
   }> {
     const stageElements = Array.from(
       this.querySelectorAll('dc-funnel-stage')
@@ -135,7 +140,12 @@ export class FunnelChart extends BaseChart {
         patternStroke: stage.patternStroke,
         patternFill: stage.patternFill,
         patternScale: stage.patternScale,
-        valueFormat: stage.valueFormat
+        valueFormat: stage.valueFormat,
+        // Label positioning: stage → chart → default
+        labelPosition: stage.labelPosition ?? this.labelPosition,
+        labelOffsetX: stage.labelOffsetX ?? this.labelOffsetX,
+        labelOffsetY: stage.labelOffsetY ?? this.labelOffsetY,
+        labelOffsetR: stage.labelOffsetR ?? this.labelOffsetR
       };
     });
   }
@@ -354,6 +364,11 @@ export class FunnelChart extends BaseChart {
       autoPopup?: boolean;
       passthroughAttrs?: Record<string, string>;
       valueFormat?: string;
+      // Label positioning
+      labelPosition?: string;
+      labelOffsetX?: number;
+      labelOffsetY?: number;
+      labelOffsetR?: number;
     }>;
     padding: { top: number; right: number; bottom: number; left: number };
     chartWidth: number;
@@ -546,7 +561,12 @@ export class FunnelChart extends BaseChart {
         popup: stage.popup,
         autoPopup: stage.autoPopup,
         passthroughAttrs: stage.passthroughAttrs,
-        valueFormat: stage.valueFormat
+        valueFormat: stage.valueFormat,
+        // Label positioning
+        labelPosition: stage.labelPosition,
+        labelOffsetX: stage.labelOffsetX,
+        labelOffsetY: stage.labelOffsetY,
+        labelOffsetR: stage.labelOffsetR
       };
     });
 
@@ -684,6 +704,37 @@ export class FunnelChart extends BaseChart {
           valueY -= chevronDepth / 2;
         }
 
+        // Calculate label X position and text anchor based on labelPosition
+        const position = stage.labelPosition || 'inside';
+        const offsetX = stage.labelOffsetX || 0;
+        const offsetY = stage.labelOffsetY || 0;
+        const offsetR = stage.labelOffsetR || 0; // Positive = away from center
+
+        let labelX: number;
+        let textAnchor: string;
+
+        // Use the average of left edges for positioning (midpoint of stage width)
+        const stageLeftEdge = (stage.topLeft + stage.bottomLeft) / 2;
+        const stageRightEdge = (stage.topRight + stage.bottomRight) / 2;
+        const outsidePadding = 15;
+
+        if (position === 'outside-left') {
+          labelX = stageLeftEdge - outsidePadding - offsetR;
+          textAnchor = 'end';
+        } else if (position === 'outside-right') {
+          labelX = stageRightEdge + outsidePadding + offsetR;
+          textAnchor = 'start';
+        } else {
+          // Default 'inside' positioning
+          labelX = chartCenterX + offsetR;
+          textAnchor = 'middle';
+        }
+
+        // Apply x/y offsets
+        labelX += offsetX;
+        labelY += offsetY;
+        valueY += offsetY;
+
         // Determine if any popup should show (explicit or auto)
         const hasPopup = stage.popup || this.shouldShowAutoPopup(stage.autoPopup);
 
@@ -704,9 +755,9 @@ export class FunnelChart extends BaseChart {
           ${shouldShowLabel ? svg`
             <!-- Stage label -->
             <text
-              x="${chartCenterX}"
+              x="${labelX}"
               y="${labelY}"
-              text-anchor="middle"
+              text-anchor="${textAnchor}"
               dominant-baseline="middle"
               font-size="16"
               font-weight="bold"
@@ -720,9 +771,9 @@ export class FunnelChart extends BaseChart {
           ${valueString ? svg`
             <!-- Stage value/percent -->
             <text
-              x="${chartCenterX}"
+              x="${labelX}"
               y="${valueY}"
-              text-anchor="middle"
+              text-anchor="${textAnchor}"
               dominant-baseline="middle"
               font-size="14"
               fill="${textColor}"

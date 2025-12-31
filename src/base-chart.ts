@@ -302,6 +302,53 @@ export abstract class BaseChart extends LitElement {
   showPercent: ShowCondition = false;
 
   // ============================================================================
+  // Label Positioning Properties
+  // ============================================================================
+
+  /**
+   * Default position for labels on chart elements.
+   * Valid values depend on element type:
+   * - Bars: "outside", "inside-top", "inside-center", "inside-bottom", "outside-top", "outside-bottom"
+   * - Points: "above", "above-left", "above-right", "below", "below-left", "below-right", "left", "right", "center"
+   * - Bubbles: Same as points, plus "inside"
+   * - Pie slices: "inside", "outside"
+   * - Funnel/Stage: "inside", "outside-left", "outside-right"
+   * - Stage chart: Also supports "above", "below"
+   * Can be overridden per element.
+   */
+  @property({ type: String, attribute: 'label-position' })
+  labelPosition?: string;
+
+  /**
+   * Horizontal offset for labels in viewBox units.
+   * Positive values move right, negative values move left.
+   * Can be overridden per element.
+   */
+  @property({ type: Number, attribute: 'label-offset-x' })
+  labelOffsetX?: number;
+
+  /**
+   * Vertical offset for labels in viewBox units.
+   * Positive values move down (SVG convention), negative values move up.
+   * Can be overridden per element.
+   */
+  @property({ type: Number, attribute: 'label-offset-y' })
+  labelOffsetY?: number;
+
+  /**
+   * Radial offset for labels in viewBox units.
+   * Meaning depends on element type:
+   * - Bars: away from zero line
+   * - Pie/Bubbles: away from center
+   * - Points: away from point center
+   * - Funnel/Stage: away from stage center
+   * Positive values move outward, negative values move inward.
+   * Can be overridden per element.
+   */
+  @property({ type: Number, attribute: 'label-offset-r' })
+  labelOffsetR?: number;
+
+  // ============================================================================
   // Number Formatting Properties
   // ============================================================================
 

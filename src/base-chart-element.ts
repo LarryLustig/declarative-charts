@@ -88,6 +88,57 @@ export abstract class BaseChartElement extends LitElement {
   @property({ attribute: 'show-percent', converter: showConditionConverter })
   showPercent?: ShowCondition;
 
+  /**
+   * Position for labels on this element.
+   * Valid values depend on element type:
+   * - Bars: "outside", "inside-top", "inside-center", "inside-bottom", "outside-top", "outside-bottom"
+   * - Points: "above", "above-left", "above-right", "below", "below-left", "below-right", "left", "right", "center"
+   * - Bubbles: Same as points, plus "inside"
+   * - Pie slices: "inside", "outside"
+   * - Funnel/Stage: "inside", "outside-left", "outside-right"
+   * - Stage chart: Also supports "above", "below"
+   * If not set, inherits from parent element or chart-level setting.
+   *
+   * @attr label-position
+   */
+  @property({ type: String, attribute: 'label-position' })
+  labelPosition?: string;
+
+  /**
+   * Horizontal offset for labels in viewBox units.
+   * Positive values move right, negative values move left.
+   * If not set, inherits from parent element or chart-level setting.
+   *
+   * @attr label-offset-x
+   */
+  @property({ type: Number, attribute: 'label-offset-x' })
+  labelOffsetX?: number;
+
+  /**
+   * Vertical offset for labels in viewBox units.
+   * Positive values move down (SVG convention), negative values move up.
+   * If not set, inherits from parent element or chart-level setting.
+   *
+   * @attr label-offset-y
+   */
+  @property({ type: Number, attribute: 'label-offset-y' })
+  labelOffsetY?: number;
+
+  /**
+   * Radial offset for labels in viewBox units.
+   * Meaning depends on element type:
+   * - Bars: away from zero line
+   * - Pie/Bubbles: away from center
+   * - Points: away from point center
+   * - Funnel/Stage: away from stage center
+   * Positive values move outward, negative values move inward.
+   * If not set, inherits from parent element or chart-level setting.
+   *
+   * @attr label-offset-r
+   */
+  @property({ type: Number, attribute: 'label-offset-r' })
+  labelOffsetR?: number;
+
   static styles = css`
     :host {
       display: none !important;
@@ -108,7 +159,11 @@ export abstract class BaseChartElement extends LitElement {
     'auto-popup',
     'value-format',
     'show-value',
-    'show-percent'
+    'show-percent',
+    'label-position',
+    'label-offset-x',
+    'label-offset-y',
+    'label-offset-r'
   ]);
 
   /**

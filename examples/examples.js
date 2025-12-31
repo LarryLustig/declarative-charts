@@ -45,6 +45,7 @@ const NAV_CONFIG = {
             label: 'Data Display',
             dropdown: [
                 { href: 'data-labels.html', label: 'Labels & Values' },
+                { href: 'label-positioning.html', label: 'Label Positioning' },
                 { href: 'formatting.html', label: 'Number Formatting' },
             ]
         },

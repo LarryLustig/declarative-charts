@@ -292,29 +292,39 @@ Comprehensive test coverage implemented across unit, component, integration, and
 
 ### Label Positioning
 
-**Status:** Not Started
+**Status:** Complete (basic), Future enhancement pending (`<dc-label>` child element)
 **Priority:** Important
 
 **Problem:** Labels on data elements (bars, points, bubbles) have hardcoded positions. Users cannot control where labels appear or fine-tune their placement.
 
-**Current Behavior:**
-- Vertical bars: labels above positive bars, below negative bars
-- Horizontal bars: labels right of positive bars, left of negative bars
-- Points/Lines: labels always above (y - 10)
-- Bubbles: labels always above (y - radius - 8)
-- Pie slices: labels inside at calculated label point
-- Funnel stages: labels inside, vertically centered
+**Completed - Display Control:**
+- `show-value` attribute on all data elements (chart-level and element-level)
+- `show-percent` attribute on all data elements (chart-level and element-level)
+- `value-format` per-element override
+- Threshold-based conditional display (e.g., `show-value="100"`, `show-label="5%"`)
+- Inheritance hierarchy: element → parent → chart → default
 
-**Design Approach:** Hybrid
+See [API.md](API.md) "Controlling Labels, Values, and Percentages" section for full documentation.
 
-Simple cases use a single `label-position` attribute on elements. Complex cases use a `<dc-label>` child element.
+**Completed - Positional Control:**
+- `label-position` attribute on all chart types with element-specific position values
+- `label-offset-x`, `label-offset-y`, `label-offset-r` for fine-tuning
+- Cascading inheritance: element → parent (line) → chart → default
+- Bars: 6 positions (outside, inside-top, inside-center, inside-bottom, outside-top, outside-bottom)
+- Points/Lines: 9 positions (above, above-left, above-right, below, below-left, below-right, left, right, center)
+- Bubbles: 10 positions (all point positions plus inside)
+- Pie slices: 2 positions (inside, outside)
+- Funnel stages: 3 positions (inside, outside-left, outside-right)
+- Stage chart stages: 5 positions (inside, outside-left, outside-right, above, below)
+
+See [API.md](API.md) "Label Positioning" section for full documentation.
+
+**Future Enhancement - `<dc-label>` Child Element:**
+
+For complex label configuration, a `<dc-label>` child element may be added in the future. This would allow more advanced customization beyond what attributes provide. Currently deferred to keep the initial implementation simple.
 
 **Attribute Retained on Chart Elements:**
 - `label-position` - Where to place the label (simple positioning only)
-
-**Default Behavior:**
-- Labels show value only (not percent)
-- To show percent, customize formatting, or adjust offsets, use `<dc-label>`
 
 **New Element: `<dc-label>`**
 
@@ -326,8 +336,7 @@ For complex label configuration, place a `<dc-label>` child inside the data elem
 
 <!-- Complex: child element -->
 <dc-bar value="50" label="Q1">
-  <dc-label position="outside-top" offset-x="5" offset-y="-10" offset-r="15"
-            show-value show-percent value-format="currency USD">
+  <dc-label position="outside-top" offset-x="5" offset-y="-10" offset-r="15">
   </dc-label>
 </dc-bar>
 
@@ -345,9 +354,6 @@ For complex label configuration, place a `<dc-label>` child inside the data elem
 | `offset-x` | length | Horizontal adjustment (positive = right) |
 | `offset-y` | length | Vertical adjustment (positive = down, SVG convention) |
 | `offset-r` | length | Radial adjustment (positive = away from reference point) |
-| `show-value` | boolean | Whether to show the numeric value (default: true) |
-| `show-percent` | boolean | Whether to show the percentage (default: false) |
-| `value-format` | string | Format string for value display |
 | `hidden` | boolean | Hide the label entirely |
 
 Compound syntax supported: `position="outside-top 5 -10 15"` (position + x, y, r offsets)
@@ -428,7 +434,7 @@ Same as Points, plus:
 
 2. **Backward Compatibility:**
    - Bar default changes from outside (above/below) to `inside-top` - breaking change
-   - `show-value` and `show-percent` attributes on elements will be deprecated in favor of `<dc-label>`
+   - Existing `show-value`, `show-percent`, and `value-format` attributes remain on elements (no deprecation)
 
 3. **Collision Detection (Future):** This feature does not include automatic collision avoidance. Labels may overlap if positions are not carefully chosen.
 
@@ -867,16 +873,16 @@ chart.downloadPng('my-chart', { scale: 2, background: 'white' });
 
 ### Documentation Improvements
 
-**Status:** Partially Complete
+**Status:** Complete
 **Priority:** Important for 1.0
 
 **Required:**
-- [ ] LICENSE file (MIT text)
+- [x] LICENSE file (MIT text)
 - [x] CHANGELOG.md
-- [ ] CONTRIBUTING.md
-- [ ] Browser compatibility table in README
-- [ ] Bundle size documentation
-- [ ] Performance guidelines
+- [x] CONTRIBUTING.md
+- [x] Browser compatibility table in README
+- [x] Bundle size documentation
+- [x] Performance guidelines
 
 **Nice-to-Have:**
 - [ ] Documentation website (VitePress or Docusaurus)

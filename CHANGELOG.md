@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Label Positioning System**
+  - New `label-position` attribute for controlling where labels appear on chart elements
+  - New offset attributes for fine-tuning: `label-offset-x`, `label-offset-y`, `label-offset-r`
+  - Cascading inheritance: element → parent (line) → chart → default
+  - Bars support 6 positions: `outside`, `inside-top`, `inside-center`, `inside-bottom`, `outside-top`, `outside-bottom`
+  - Points/Lines support 9 positions: `above`, `above-left`, `above-right`, `below`, `below-left`, `below-right`, `left`, `right`, `center`
+  - Bubbles support 10 positions (all point positions plus `inside`)
+  - Pie slices support 2 positions: `inside`, `outside`
+  - Funnel stages support 3 positions: `inside`, `outside-left`, `outside-right`
+  - Stage chart stages support 5 positions: `inside`, `outside-left`, `outside-right`, `above`, `below`
+  - See API.md "Label Positioning" section for complete documentation
+
 - **Stage Chart Auto-Fit Label Suppression**
   - Labels that don't fit inside small shapes are automatically suppressed
   - Hover popups are automatically enabled when labels are suppressed
@@ -85,7 +97,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Stage Chart Label Suppression Too Aggressive**
   - Labels were being suppressed in small shapes even when there was visual room
   - Scaled padding down for smaller shapes: uses `min(16, dimension * 0.1)`
-  - Small shapes now show both label and value when they visually fit
+
+- **Horizontal Bar Inside Label Positioning**
+  - Fixed `inside-top` and `inside-bottom` labels overlapping bar boundaries
+  - Changed from middle-anchored text with fontSize-based offsets to edge-anchored text
+  - Labels now properly stay inside bar boundaries using directional text anchors
 
 - **Stale Attributes in Examples**
   - Replaced non-existent `fill-colors` attribute with `bar-color` or `palette`

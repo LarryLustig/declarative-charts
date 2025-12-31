@@ -71,6 +71,10 @@ export class PieChart extends BaseChart {
     element?: ChartPieSlice;
     passthroughAttrs?: Record<string, string>;
     valueFormat?: string;
+    labelPosition?: string;
+    labelOffsetX?: number;
+    labelOffsetY?: number;
+    labelOffsetR?: number;
   }> {
     const sliceElements = Array.from(
       this.querySelectorAll('dc-pie-slice')
@@ -111,7 +115,12 @@ export class PieChart extends BaseChart {
         autoPopup: slice.autoPopup,
         element: slice,
         passthroughAttrs: Object.keys(passthroughAttrs).length > 0 ? passthroughAttrs : undefined,
-        valueFormat: slice.valueFormat
+        valueFormat: slice.valueFormat,
+        // Label positioning: slice → chart → default
+        labelPosition: slice.labelPosition ?? this.labelPosition,
+        labelOffsetX: slice.labelOffsetX ?? this.labelOffsetX,
+        labelOffsetY: slice.labelOffsetY ?? this.labelOffsetY,
+        labelOffsetR: slice.labelOffsetR ?? this.labelOffsetR
       };
     });
   }
@@ -133,6 +142,7 @@ export class PieChart extends BaseChart {
       percentage: number;
       labelX: number;
       labelY: number;
+      textAnchor: string;
       color: string;
       originalColor: string;
       stroke: string;
@@ -217,7 +227,10 @@ export class PieChart extends BaseChart {
     this.log('info', 'data.totalValue', `Sum of all slice values`, totalValue);
     this.log('info', 'data.sliceCount', `Number of slices`, sliceData.length);
 
-    const labelRadius = innerRadiusPixels + (radius - innerRadiusPixels) * 0.5;
+    // Default label radius (inside, center of slice arc)
+    const insideLabelRadius = innerRadiusPixels + (radius - innerRadiusPixels) * 0.5;
+    // Outside label radius (beyond the pie edge)
+    const outsideLabelRadius = radius + 20;
 
     let currentAngle = -Math.PI / 2; // Start at top (12 o'clock)
 
@@ -229,9 +242,33 @@ export class PieChart extends BaseChart {
 
       currentAngle = endAngle;
 
-      const labelX = centerX + labelRadius * Math.cos(midAngle);
-      const labelY = centerY + labelRadius * Math.sin(midAngle);
       const percentage = (slice.value / totalValue) * 100;
+
+      // Calculate label position based on labelPosition attribute
+      const position = slice.labelPosition || 'inside';
+      const offsetR = slice.labelOffsetR || 0;
+      const offsetX = slice.labelOffsetX || 0;
+      const offsetY = slice.labelOffsetY || 0;
+
+      let labelRadius: number;
+      let textAnchor: string;
+
+      if (position === 'outside') {
+        labelRadius = outsideLabelRadius + offsetR;
+        // For outside labels, anchor based on which side of the pie they're on
+        // Right side (midAngle between -π/2 and π/2): start
+        // Left side: end
+        const normalizedAngle = midAngle % (2 * Math.PI);
+        const isRightSide = normalizedAngle > -Math.PI / 2 && normalizedAngle < Math.PI / 2;
+        textAnchor = isRightSide ? 'start' : 'end';
+      } else {
+        // Default 'inside' positioning
+        labelRadius = insideLabelRadius + offsetR;
+        textAnchor = 'middle';
+      }
+
+      const labelX = centerX + labelRadius * Math.cos(midAngle) + offsetX;
+      const labelY = centerY + labelRadius * Math.sin(midAngle) + offsetY;
 
       this.log('info', `slices[${index}]`, `"${slice.label}": value=${slice.value}, ${percentage.toFixed(1)}%, angle=${(sliceAngle * 180 / Math.PI).toFixed(1)}°`, {
         label: slice.label,
@@ -253,6 +290,7 @@ export class PieChart extends BaseChart {
         percentage,
         labelX,
         labelY,
+        textAnchor,
         color: resolvedFills[index].fill,
         originalColor: resolvedFills[index].originalFill,
         stroke: strokeColors[index],
@@ -388,7 +426,7 @@ export class PieChart extends BaseChart {
             <text
               x="${slice.labelX}"
               y="${slice.labelY - (valueString ? 8 : 0)}"
-              text-anchor="middle"
+              text-anchor="${slice.textAnchor}"
               dominant-baseline="middle"
               font-size="14"
               font-weight="bold"
@@ -403,7 +441,7 @@ export class PieChart extends BaseChart {
             <text
               x="${slice.labelX}"
               y="${slice.labelY + (shouldShowLabel ? 10 : 0)}"
-              text-anchor="middle"
+              text-anchor="${slice.textAnchor}"
               dominant-baseline="middle"
               font-size="12"
               fill="white"

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Label Positioning - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+    <style>
+        .position-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        .position-table th, .position-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        .position-table th {
+            background: #f3f4f6;
+        }
+        .position-table code {
+            background: #e5e7eb;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Label Positioning</h1>
+    <p>Control where labels appear on chart elements using <code>label-position</code> and offset attributes. Settings cascade from chart to element.</p>
+
+    <nav></nav>
+
+    <h2>Position Attributes</h2>
+    <table class="position-table">
+        <thead>
+            <tr>
+                <th>Attribute</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>label-position</code></td>
+                <td>string</td>
+                <td>Where to place the label (values depend on element type)</td>
+            </tr>
+            <tr>
+                <td><code>label-offset-x</code></td>
+                <td>number</td>
+                <td>Horizontal adjustment in viewBox units (positive = right)</td>
+            </tr>
+            <tr>
+                <td><code>label-offset-y</code></td>
+                <td>number</td>
+                <td>Vertical adjustment in viewBox units (positive = down)</td>
+            </tr>
+            <tr>
+                <td><code>label-offset-r</code></td>
+                <td>number</td>
+                <td>Radial adjustment (positive = away from reference point)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="example">
+        <h2>Bar Charts</h2>
+        <p>Bar labels support 6 positions. "Top" means away from zero, "bottom" means toward zero.</p>
+        <table class="position-table">
+            <tr><th>Position</th><th>Description</th></tr>
+            <tr><td><code>outside</code></td><td>Outside bar, away from zero (default)</td></tr>
+            <tr><td><code>inside-top</code></td><td>Inside bar, near value end</td></tr>
+            <tr><td><code>inside-center</code></td><td>Inside bar, centered</td></tr>
+            <tr><td><code>inside-bottom</code></td><td>Inside bar, near zero line</td></tr>
+            <tr><td><code>outside-top</code></td><td>Alias for outside</td></tr>
+            <tr><td><code>outside-bottom</code></td><td>Outside bar, toward zero line</td></tr>
+        </table>
+
+        <div class="grid">
+            <div>
+                <h3>Inside Positions</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-bar value="180" label="Top" label-position="inside-top"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="200" label="Center" label-position="inside-center"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="160" label="Bottom" label-position="inside-bottom"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="140" label="Outside"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" palette="tableau10">
+                    <dc-title>Vertical Bar Positions</dc-title>
+                    <dc-bar value="180" label="Top" label-position="inside-top"></dc-bar>
+                    <dc-bar value="200" label="Center" label-position="inside-center"></dc-bar>
+                    <dc-bar value="160" label="Bottom" label-position="inside-bottom"></dc-bar>
+                    <dc-bar value="140" label="Outside"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Horizontal Bars</h3>
+                <p><em>Note: "top" = away from zero (right), "bottom" = toward zero (left)</em></p>
+                <pre><code>&lt;dc-chart width="500" height="350" orientation="horizontal"&gt;
+  &lt;dc-bar value="180" label="inside-top (end)" label-position="inside-top"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="200" label="inside-center" label-position="inside-center"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="160" label="inside-bottom (start)" label-position="inside-bottom"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" orientation="horizontal" palette="tableau10">
+                    <dc-title>Horizontal Bar Positions</dc-title>
+                    <dc-bar value="180" label="inside-top (end)" label-position="inside-top"></dc-bar>
+                    <dc-bar value="200" label="inside-center" label-position="inside-center"></dc-bar>
+                    <dc-bar value="160" label="inside-bottom (start)" label-position="inside-bottom"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>With Offsets</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" label-position="inside-center"&gt;
+  &lt;dc-bar value="180" label="Normal"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="200" label="Offset X+15" label-offset-x="15"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="160" label="Offset Y-10" label-offset-y="-10"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="170" label="Offset R+20" label-offset-r="20"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" label-position="inside-center" palette="set2">
+                    <dc-title>Label Offsets</dc-title>
+                    <dc-bar value="180" label="Normal"></dc-bar>
+                    <dc-bar value="200" label="X+15" label-offset-x="15"></dc-bar>
+                    <dc-bar value="160" label="Y-10" label-offset-y="-10"></dc-bar>
+                    <dc-bar value="170" label="R+20" label-offset-r="20"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Negative Values</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" label-position="inside-center"&gt;
+  &lt;dc-bar value="120" label="Positive"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-80" label="Negative"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" label="Positive"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-60" label="Negative"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" label-position="inside-center" palette="paired">
+                    <dc-title>Negative Values</dc-title>
+                    <dc-bar value="120" label="Positive"></dc-bar>
+                    <dc-bar value="-80" label="Negative"></dc-bar>
+                    <dc-bar value="90" label="Positive"></dc-bar>
+                    <dc-bar value="-60" label="Negative"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Line and Point Charts</h2>
+        <p>Point labels support 9 positions around the point.</p>
+        <table class="position-table">
+            <tr><th>Position</th><th>Description</th></tr>
+            <tr><td><code>above</code></td><td>Above the point (default)</td></tr>
+            <tr><td><code>above-left</code></td><td>Above and left-aligned</td></tr>
+            <tr><td><code>above-right</code></td><td>Above and right-aligned</td></tr>
+            <tr><td><code>below</code></td><td>Below the point</td></tr>
+            <tr><td><code>below-left</code></td><td>Below and left-aligned</td></tr>
+            <tr><td><code>below-right</code></td><td>Below and right-aligned</td></tr>
+            <tr><td><code>left</code></td><td>Left of the point</td></tr>
+            <tr><td><code>right</code></td><td>Right of the point</td></tr>
+            <tr><td><code>center</code></td><td>Centered on the point</td></tr>
+        </table>
+
+        <div class="grid">
+            <div>
+                <h3>Line-Level Positioning</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-line label="Above (default)"&gt;
+    &lt;dc-point value="50" label="Jan"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="80" label="Feb"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="65" label="Mar"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line label="Below" label-position="below"&gt;
+    &lt;dc-point value="30" label="Jan"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="55" label="Feb"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="45" label="Mar"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Line-Level Inheritance</dc-title>
+                    <dc-line label="Above (default)" stroke="#3498db">
+                        <dc-point value="50" label="Jan"></dc-point>
+                        <dc-point value="80" label="Feb"></dc-point>
+                        <dc-point value="65" label="Mar"></dc-point>
+                    </dc-line>
+                    <dc-line label="Below" label-position="below" stroke="#e74c3c">
+                        <dc-point value="30" label="Jan"></dc-point>
+                        <dc-point value="55" label="Feb"></dc-point>
+                        <dc-point value="45" label="Mar"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Point-Level Positioning</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-line label="Mixed"&gt;
+    &lt;dc-point value="40" label="Left" label-position="left"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="90" label="Above"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="60" label="Right" label-position="right"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="75" label="Below" label-position="below"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Per-Point Positioning</dc-title>
+                    <dc-line label="Mixed" stroke="#9b59b6">
+                        <dc-point value="40" label="Left" label-position="left"></dc-point>
+                        <dc-point value="90" label="Above"></dc-point>
+                        <dc-point value="60" label="Right" label-position="right"></dc-point>
+                        <dc-point value="75" label="Below" label-position="below"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Diagonal Positions</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-line label="Corners"&gt;
+    &lt;dc-point value="60" label="Above-Left" label-position="above-left"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="80" label="Above-Right" label-position="above-right"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="50" label="Below-Left" label-position="below-left"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="70" label="Below-Right" label-position="below-right"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Diagonal Positions</dc-title>
+                    <dc-line label="Corners" stroke="#2ecc71">
+                        <dc-point value="60" label="Above-Left" label-position="above-left"></dc-point>
+                        <dc-point value="80" label="Above-Right" label-position="above-right"></dc-point>
+                        <dc-point value="50" label="Below-Left" label-position="below-left"></dc-point>
+                        <dc-point value="70" label="Below-Right" label-position="below-right"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>With Radial Offset</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" label-offset-r="10"&gt;
+  &lt;dc-line label="Pushed Out"&gt;
+    &lt;dc-point value="50" label="Jan"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="80" label="Feb"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="65" label="Mar"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="90" label="Apr"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" label-offset-r="10">
+                    <dc-title>Radial Offset (pushed further out)</dc-title>
+                    <dc-line label="Pushed Out" stroke="#f39c12">
+                        <dc-point value="50" label="Jan"></dc-point>
+                        <dc-point value="80" label="Feb"></dc-point>
+                        <dc-point value="65" label="Mar"></dc-point>
+                        <dc-point value="90" label="Apr"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Bubble Charts</h2>
+        <p>Bubble labels support all 9 point positions plus <code>inside</code>.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Inside Bubbles</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" label-position="inside"&gt;
+  &lt;dc-bubble value="80" size-value="100" label="Large"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="60" size-value="70" label="Medium"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="90" size-value="120" label="Bigger"&gt;&lt;/dc-bubble&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" label-position="inside" palette="category10">
+                    <dc-title>Labels Inside Bubbles</dc-title>
+                    <dc-bubble value="80" size-value="100" label="Large"></dc-bubble>
+                    <dc-bubble value="60" size-value="70" label="Medium"></dc-bubble>
+                    <dc-bubble value="90" size-value="120" label="Bigger"></dc-bubble>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Mixed Positions</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-bubble value="70" size-value="80" label="Above"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="85" size-value="100" label="Inside" label-position="inside"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble value="55" size-value="60" label="Below" label-position="below"&gt;&lt;/dc-bubble&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" palette="set1">
+                    <dc-title>Mixed Bubble Positions</dc-title>
+                    <dc-bubble value="70" size-value="80" label="Above"></dc-bubble>
+                    <dc-bubble value="85" size-value="100" label="Inside" label-position="inside"></dc-bubble>
+                    <dc-bubble value="55" size-value="60" label="Below" label-position="below"></dc-bubble>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Pie Charts</h2>
+        <p>Pie slices support <code>inside</code> (default) and <code>outside</code> positions.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Inside (Default)</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350"&gt;
+  &lt;dc-pie-slice value="40" label="Product A"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="30" label="Product B"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="20" label="Product C"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="10" label="Other"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350" palette="category10">
+                    <dc-title>Labels Inside Slices</dc-title>
+                    <dc-pie-slice value="40" label="Product A"></dc-pie-slice>
+                    <dc-pie-slice value="30" label="Product B"></dc-pie-slice>
+                    <dc-pie-slice value="20" label="Product C"></dc-pie-slice>
+                    <dc-pie-slice value="10" label="Other"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Outside</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350" label-position="outside"&gt;
+  &lt;dc-pie-slice value="40" label="Product A"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="30" label="Product B"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="20" label="Product C"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="10" label="Other"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350" label-position="outside" palette="category10">
+                    <dc-title>Labels Outside Slices</dc-title>
+                    <dc-pie-slice value="40" label="Product A"></dc-pie-slice>
+                    <dc-pie-slice value="30" label="Product B"></dc-pie-slice>
+                    <dc-pie-slice value="20" label="Product C"></dc-pie-slice>
+                    <dc-pie-slice value="10" label="Other"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>With Radial Offset</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350" label-position="outside" label-offset-r="20"&gt;
+  &lt;dc-pie-slice value="35" label="Alpha"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="25" label="Beta"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="25" label="Gamma"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" label="Delta"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350" label-position="outside" label-offset-r="20" palette="pastel">
+                    <dc-title>Pushed Further Out</dc-title>
+                    <dc-pie-slice value="35" label="Alpha"></dc-pie-slice>
+                    <dc-pie-slice value="25" label="Beta"></dc-pie-slice>
+                    <dc-pie-slice value="25" label="Gamma"></dc-pie-slice>
+                    <dc-pie-slice value="15" label="Delta"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Donut with Outside Labels</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350" inner-radius="50" label-position="outside"&gt;
+  &lt;dc-pie-slice value="40" label="Q1"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="30" label="Q2"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="20" label="Q3"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="10" label="Q4"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350" inner-radius="50" label-position="outside" palette="set2">
+                    <dc-title>Donut with Outside Labels</dc-title>
+                    <dc-pie-slice value="40" label="Q1"></dc-pie-slice>
+                    <dc-pie-slice value="30" label="Q2"></dc-pie-slice>
+                    <dc-pie-slice value="20" label="Q3"></dc-pie-slice>
+                    <dc-pie-slice value="10" label="Q4"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Funnel Charts</h2>
+        <p>Funnel stages support <code>inside</code> (default), <code>outside-left</code>, and <code>outside-right</code>.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Inside (Default)</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="350"&gt;
+  &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="500" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="200" label="Qualified"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="100" label="Customers"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="350">
+                    <dc-title>Labels Inside</dc-title>
+                    <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
+                    <dc-funnel-stage value="500" label="Leads"></dc-funnel-stage>
+                    <dc-funnel-stage value="200" label="Qualified"></dc-funnel-stage>
+                    <dc-funnel-stage value="100" label="Customers"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Outside Left</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="350" label-position="outside-left"&gt;
+  &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="500" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="200" label="Qualified"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="100" label="Customers"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="350" label-position="outside-left">
+                    <dc-title>Labels Outside Left</dc-title>
+                    <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
+                    <dc-funnel-stage value="500" label="Leads"></dc-funnel-stage>
+                    <dc-funnel-stage value="200" label="Qualified"></dc-funnel-stage>
+                    <dc-funnel-stage value="100" label="Customers"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Outside Right</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="350" label-position="outside-right"&gt;
+  &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="500" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="200" label="Qualified"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="100" label="Customers"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="350" label-position="outside-right">
+                    <dc-title>Labels Outside Right</dc-title>
+                    <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
+                    <dc-funnel-stage value="500" label="Leads"></dc-funnel-stage>
+                    <dc-funnel-stage value="200" label="Qualified"></dc-funnel-stage>
+                    <dc-funnel-stage value="100" label="Customers"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Mixed with Offsets</h3>
+                <pre><code>&lt;dc-funnel-chart width="500" height="350" chevron="15"&gt;
+  &lt;dc-funnel-stage value="1000" label="Step 1"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="600" label="Step 2" label-position="outside-left"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="300" label="Step 3" label-position="outside-right"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="150" label="Step 4" label-offset-y="-5"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart width="500" height="350" chevron="15">
+                    <dc-title>Mixed Positions</dc-title>
+                    <dc-funnel-stage value="1000" label="Step 1"></dc-funnel-stage>
+                    <dc-funnel-stage value="600" label="Step 2" label-position="outside-left"></dc-funnel-stage>
+                    <dc-funnel-stage value="300" label="Step 3" label-position="outside-right"></dc-funnel-stage>
+                    <dc-funnel-stage value="150" label="Step 4" label-offset-y="-5"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Stage Charts</h2>
+        <p>Stage charts support 5 positions: <code>inside</code> (default), <code>outside-left</code>, <code>outside-right</code>, <code>above</code>, and <code>below</code>.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Above and Below</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="350" label-position="above"&gt;
+  &lt;dc-stage value="100" label="Alpha"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="150" label="Beta"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="120" label="Gamma"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="350" label-position="above" palette="category10">
+                    <dc-title>Labels Above</dc-title>
+                    <dc-stage value="100" label="Alpha"></dc-stage>
+                    <dc-stage value="150" label="Beta"></dc-stage>
+                    <dc-stage value="120" label="Gamma"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>Outside Left/Right</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="350" orientation="horizontal"&gt;
+  &lt;dc-stage value="100" label="Start" label-position="outside-left"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="150" label="Middle"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="120" label="End" label-position="outside-right"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="350" orientation="horizontal" palette="set2">
+                    <dc-title>Horizontal with Side Labels</dc-title>
+                    <dc-stage value="100" label="Start" label-position="outside-left"></dc-stage>
+                    <dc-stage value="150" label="Middle"></dc-stage>
+                    <dc-stage value="120" label="End" label-position="outside-right"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>Below with Shapes</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="350" shape="circle" label-position="below"&gt;
+  &lt;dc-stage value="80" label="Phase 1"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="120" label="Phase 2"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="100" label="Phase 3"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="350" shape="circle" label-position="below" palette="pastel">
+                    <dc-title>Circles with Labels Below</dc-title>
+                    <dc-stage value="80" label="Phase 1"></dc-stage>
+                    <dc-stage value="120" label="Phase 2"></dc-stage>
+                    <dc-stage value="100" label="Phase 3"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>With Offsets</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="350" label-position="above" label-offset-y="-10"&gt;
+  &lt;dc-stage value="100" label="Step 1"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="150" label="Step 2" label-offset-x="10"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="120" label="Step 3" label-offset-r="15"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="500" height="350" label-position="above" label-offset-y="-10" palette="dark2">
+                    <dc-title>With Various Offsets</dc-title>
+                    <dc-stage value="100" label="Step 1"></dc-stage>
+                    <dc-stage value="150" label="Step 2" label-offset-x="10"></dc-stage>
+                    <dc-stage value="120" label="Step 3" label-offset-r="15"></dc-stage>
+                </dc-stage-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Inheritance</h2>
+        <p>Label positioning cascades from chart to parent to element. More specific settings override general ones.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Chart-Level Default</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" label-position="inside-center"&gt;
+  &lt;!-- All bars inherit inside-center --&gt;
+  &lt;dc-bar value="120" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" label-position="inside-center" palette="tableau10">
+                    <dc-title>Chart-Level Setting</dc-title>
+                    <dc-bar value="120" label="A"></dc-bar>
+                    <dc-bar value="180" label="B"></dc-bar>
+                    <dc-bar value="150" label="C"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Element Override</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" label-position="inside-center"&gt;
+  &lt;dc-bar value="120" label="Inherited"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" label="Override" label-position="outside"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Inherited"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" label-position="inside-center" palette="tableau10">
+                    <dc-title>Element Override</dc-title>
+                    <dc-bar value="120" label="Inherited"></dc-bar>
+                    <dc-bar value="180" label="Override" label-position="outside"></dc-bar>
+                    <dc-bar value="150" label="Inherited"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+</body>
+</html>

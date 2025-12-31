@@ -166,6 +166,11 @@ export class StageChart extends BaseChart {
     patternFill?: string;
     patternScale?: number;
     valueFormat?: string;
+    // Label positioning
+    labelPosition?: string;
+    labelOffsetX?: number;
+    labelOffsetY?: number;
+    labelOffsetR?: number;
   }> {
     const stageElements = Array.from(
       this.querySelectorAll('dc-stage')
@@ -203,7 +208,12 @@ export class StageChart extends BaseChart {
         patternStroke: stage.patternStroke,
         patternFill: stage.patternFill,
         patternScale: stage.patternScale,
-        valueFormat: stage.valueFormat
+        valueFormat: stage.valueFormat,
+        // Label positioning: stage → chart → default
+        labelPosition: stage.labelPosition ?? this.labelPosition,
+        labelOffsetX: stage.labelOffsetX ?? this.labelOffsetX,
+        labelOffsetY: stage.labelOffsetY ?? this.labelOffsetY,
+        labelOffsetR: stage.labelOffsetR ?? this.labelOffsetR
       };
     });
   }
@@ -582,6 +592,11 @@ export class StageChart extends BaseChart {
         strokeOpacity?: number;
         pattern?: string;
       };
+      // Label positioning
+      labelPosition?: string;
+      labelOffsetX?: number;
+      labelOffsetY?: number;
+      labelOffsetR?: number;
     }>;
     connectorConfig: ConnectorConfig;
     padding: { top: number; right: number; bottom: number; left: number };
@@ -832,7 +847,12 @@ export class StageChart extends BaseChart {
         valueFormat: stage.valueFormat,
         isZero,
         isHidden,
-        zeroFillOverride
+        zeroFillOverride,
+        // Label positioning
+        labelPosition: stage.labelPosition,
+        labelOffsetX: stage.labelOffsetX,
+        labelOffsetY: stage.labelOffsetY,
+        labelOffsetR: stage.labelOffsetR
       };
     });
 
@@ -1130,6 +1150,44 @@ export class StageChart extends BaseChart {
         const centerX = stage.x + stage.width / 2;
         const centerY = stage.y + stage.height / 2;
 
+        // Calculate label position based on labelPosition attribute
+        const position = stage.labelPosition || 'inside';
+        const offsetX = stage.labelOffsetX || 0;
+        const offsetY = stage.labelOffsetY || 0;
+        const offsetR = stage.labelOffsetR || 0; // Positive = away from center
+        const outsidePadding = 15;
+
+        let labelX: number;
+        let labelY: number;
+        let textAnchor: string;
+
+        if (position === 'outside-left') {
+          labelX = stage.x - outsidePadding - offsetR;
+          labelY = centerY;
+          textAnchor = 'end';
+        } else if (position === 'outside-right') {
+          labelX = stage.x + stage.width + outsidePadding + offsetR;
+          labelY = centerY;
+          textAnchor = 'start';
+        } else if (position === 'above') {
+          labelX = centerX;
+          labelY = stage.y - outsidePadding - offsetR;
+          textAnchor = 'middle';
+        } else if (position === 'below') {
+          labelX = centerX;
+          labelY = stage.y + stage.height + outsidePadding + 10 + offsetR;
+          textAnchor = 'middle';
+        } else {
+          // Default 'inside' positioning
+          labelX = centerX + offsetR;
+          labelY = centerY;
+          textAnchor = 'middle';
+        }
+
+        // Apply x/y offsets
+        labelX += offsetX;
+        labelY += offsetY;
+
         return svg`
           <!-- Stage shape -->
           ${this.renderShape(
@@ -1152,9 +1210,9 @@ export class StageChart extends BaseChart {
 
           ${textFit.canShowLabel ? svg`
             <text
-              x="${centerX}"
-              y="${centerY - (textFit.canShowValue ? 8 : 0)}"
-              text-anchor="middle"
+              x="${labelX}"
+              y="${labelY - (textFit.canShowValue ? 8 : 0)}"
+              text-anchor="${textAnchor}"
               dominant-baseline="middle"
               font-size="14"
               font-weight="bold"
@@ -1168,9 +1226,9 @@ export class StageChart extends BaseChart {
 
           ${textFit.canShowValue && valueString ? svg`
             <text
-              x="${centerX}"
-              y="${centerY + (textFit.canShowLabel ? 10 : 0)}"
-              text-anchor="middle"
+              x="${labelX}"
+              y="${labelY + (textFit.canShowLabel ? 10 : 0)}"
+              text-anchor="${textAnchor}"
               dominant-baseline="middle"
               font-size="12"
               fill="${textColor}"

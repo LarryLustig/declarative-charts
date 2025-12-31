@@ -395,6 +395,129 @@ See [`examples/data-labels.html`](examples/data-labels.html) for comprehensive e
 
 ---
 
+## Label Positioning
+
+Control where labels appear on chart elements using `label-position` and offset attributes. These can be set at the chart level (applying to all elements) or on individual elements.
+
+### Common Attributes
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `label-position` | string | Where to place the label (values depend on element type) |
+| `label-offset-x` | number | Horizontal adjustment in viewBox units (positive = right) |
+| `label-offset-y` | number | Vertical adjustment in viewBox units (positive = down) |
+| `label-offset-r` | number | Radial adjustment (positive = away from reference point) |
+
+### Position Values by Element Type
+
+**Bars** (`<dc-bar>`):
+| Value | Description |
+|-------|-------------|
+| `outside` | Outside bar, away from zero (default) |
+| `inside-top` | Inside bar, near value end |
+| `inside-center` | Inside bar, centered |
+| `inside-bottom` | Inside bar, near zero line |
+| `outside-top` | Alias for `outside` |
+| `outside-bottom` | Outside bar, toward zero line |
+
+**Points/Lines** (`<dc-point>`):
+| Value | Description |
+|-------|-------------|
+| `above` | Above the point (default) |
+| `above-left` | Above and left-aligned |
+| `above-right` | Above and right-aligned |
+| `below` | Below the point |
+| `below-left` | Below and left-aligned |
+| `below-right` | Below and right-aligned |
+| `left` | Left of the point |
+| `right` | Right of the point |
+| `center` | Centered on the point |
+
+**Bubbles** (`<dc-bubble>`):
+Same as Points, plus:
+| Value | Description |
+|-------|-------------|
+| `inside` | Centered inside the bubble |
+
+**Pie Slices** (`<dc-pie-slice>`):
+| Value | Description |
+|-------|-------------|
+| `inside` | Inside the slice (default) |
+| `outside` | Outside the slice, along radial line |
+
+**Funnel Stages** (`<dc-funnel-stage>`):
+| Value | Description |
+|-------|-------------|
+| `inside` | Inside the stage (default) |
+| `outside-left` | Outside, to the left |
+| `outside-right` | Outside, to the right |
+
+**Stage Chart Stages** (`<dc-stage>`):
+| Value | Description |
+|-------|-------------|
+| `inside` | Inside the stage shape (default) |
+| `outside-left` | Outside, to the left |
+| `outside-right` | Outside, to the right |
+| `above` | Above the stage shape |
+| `below` | Below the stage shape |
+
+### Inheritance
+
+Settings cascade from chart to element:
+1. **Element-level**: `<dc-bar label-position="inside-center">`
+2. **Parent-level** (for lines): `<dc-line label-position="below">` affects child points
+3. **Chart-level**: `<dc-chart label-position="inside-top">`
+4. **Default**: Element-type specific default
+
+### Examples
+
+**Bar chart with inside labels:**
+```html
+<dc-chart label-position="inside-center">
+  <dc-bar value="120" label="A"></dc-bar>
+  <dc-bar value="180" label="B"></dc-bar>
+</dc-chart>
+```
+
+**Line chart with labels below points:**
+```html
+<dc-chart>
+  <dc-line label="Sales" label-position="below">
+    <dc-point value="100" label="Jan"></dc-point>
+    <dc-point value="150" label="Feb"></dc-point>
+  </dc-line>
+</dc-chart>
+```
+
+**Pie chart with outside labels:**
+```html
+<dc-pie-chart label-position="outside">
+  <dc-pie-slice value="60" label="Product A"></dc-pie-slice>
+  <dc-pie-slice value="40" label="Product B"></dc-pie-slice>
+</dc-pie-chart>
+```
+
+**Fine-tuning with offsets:**
+```html
+<!-- Move labels 10 units right and 5 units down -->
+<dc-chart label-offset-x="10" label-offset-y="5">
+  <dc-bar value="100" label="A"></dc-bar>
+  <!-- Override for specific bar -->
+  <dc-bar value="200" label="B" label-offset-y="-10"></dc-bar>
+</dc-chart>
+```
+
+**Radial offset (useful for pie/bubble charts):**
+```html
+<!-- Push labels further out from center -->
+<dc-pie-chart label-position="outside" label-offset-r="15">
+  <dc-pie-slice value="60" label="Large"></dc-pie-slice>
+  <dc-pie-slice value="40" label="Small"></dc-pie-slice>
+</dc-pie-chart>
+```
+
+---
+
 ## Negative Values
 
 Bar, line, and bubble charts support negative values with automatic axis scaling and intuitive visual positioning.
