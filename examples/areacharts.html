@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Area Charts - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+</head>
+<body>
+    <h1>Area Charts</h1>
+    <p>Display filled regions bounded by data points using <code>&lt;dc-area&gt;</code> and <code>&lt;dc-point&gt;</code> elements</p>
+
+    <nav></nav>
+
+    <div class="example">
+        <h2>Basic Area Charts</h2>
+        <p>Area charts show filled regions under a line. Use <code>&lt;dc-area&gt;</code> elements containing <code>&lt;dc-point&gt;</code> elements. The area extends from the data points down to the zero line.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Single Area</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Website Traffic&lt;/dc-title&gt;
+  &lt;dc-area fill="#4CAF50" label="Visitors"&gt;
+    &lt;dc-point value="100" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="150" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="180" label="Wed"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="140" label="Thu"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="200" label="Fri"&gt;&lt;/dc-point&gt;
+  &lt;/dc-area&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Website Traffic</dc-title>
+                    <dc-area fill="#4CAF50" label="Visitors">
+                        <dc-point value="100" label="Mon"></dc-point>
+                        <dc-point value="150" label="Tue"></dc-point>
+                        <dc-point value="180" label="Wed"></dc-point>
+                        <dc-point value="140" label="Thu"></dc-point>
+                        <dc-point value="200" label="Fri"></dc-point>
+                    </dc-area>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Custom Opacity</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Revenue Trend&lt;/dc-title&gt;
+  &lt;dc-area fill="#2196F3" fill-opacity="0.3"
+           stroke="#1976D2" label="Revenue"&gt;
+    &lt;dc-point value="50" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="80" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="65" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="120" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-area&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Revenue Trend</dc-title>
+                    <dc-area fill="#2196F3" fill-opacity="0.3" stroke="#1976D2" label="Revenue">
+                        <dc-point value="50" label="Q1"></dc-point>
+                        <dc-point value="80" label="Q2"></dc-point>
+                        <dc-point value="65" label="Q3"></dc-point>
+                        <dc-point value="120" label="Q4"></dc-point>
+                    </dc-area>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Stacked Area Charts</h2>
+        <p>When multiple areas are present, they stack by default. Each area's baseline is the cumulative sum of previous areas. This is useful for showing part-to-whole relationships over time.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Stacked Areas (Default)</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Product Revenue&lt;/dc-title&gt;
+  &lt;dc-area fill="#4CAF50" label="Product A"&gt;
+    &lt;dc-point value="100" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="120" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="140" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="160" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-area&gt;
+  &lt;dc-area fill="#2196F3" label="Product B"&gt;
+    &lt;dc-point value="80" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="90" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="100" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="110" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-area&gt;
+  &lt;dc-area fill="#FF9800" label="Product C"&gt;
+    &lt;dc-point value="50" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="60" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="70" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="80" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-area&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Product Revenue</dc-title>
+                    <dc-area fill="#4CAF50" label="Product A">
+                        <dc-point value="100" label="Q1"></dc-point>
+                        <dc-point value="120" label="Q2"></dc-point>
+                        <dc-point value="140" label="Q3"></dc-point>
+                        <dc-point value="160" label="Q4"></dc-point>
+                    </dc-area>
+                    <dc-area fill="#2196F3" label="Product B">
+                        <dc-point value="80" label="Q1"></dc-point>
+                        <dc-point value="90" label="Q2"></dc-point>
+                        <dc-point value="100" label="Q3"></dc-point>
+                        <dc-point value="110" label="Q4"></dc-point>
+                    </dc-area>
+                    <dc-area fill="#FF9800" label="Product C">
+                        <dc-point value="50" label="Q1"></dc-point>
+                        <dc-point value="60" label="Q2"></dc-point>
+                        <dc-point value="70" label="Q3"></dc-point>
+                        <dc-point value="80" label="Q4"></dc-point>
+                    </dc-area>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Overlapping Areas</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" overlapping&gt;
+  &lt;dc-title&gt;Year-over-Year Comparison&lt;/dc-title&gt;
+  &lt;dc-area fill="#4CAF50" fill-opacity="0.4"
+           label="2023"&gt;
+    &lt;dc-point value="100" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="150" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="130" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="180" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-area&gt;
+  &lt;dc-area fill="#2196F3" fill-opacity="0.4"
+           label="2024"&gt;
+    &lt;dc-point value="120" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="180" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="160" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="220" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-area&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" overlapping>
+                    <dc-title>Year-over-Year Comparison</dc-title>
+                    <dc-area fill="#4CAF50" fill-opacity="0.4" label="2023">
+                        <dc-point value="100" label="Q1"></dc-point>
+                        <dc-point value="150" label="Q2"></dc-point>
+                        <dc-point value="130" label="Q3"></dc-point>
+                        <dc-point value="180" label="Q4"></dc-point>
+                    </dc-area>
+                    <dc-area fill="#2196F3" fill-opacity="0.4" label="2024">
+                        <dc-point value="120" label="Q1"></dc-point>
+                        <dc-point value="180" label="Q2"></dc-point>
+                        <dc-point value="160" label="Q3"></dc-point>
+                        <dc-point value="220" label="Q4"></dc-point>
+                    </dc-area>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Curve Fitting</h2>
+        <p>Use the <code>curve-fit</code> attribute to control how lines are drawn between points. The same options are available as for line charts.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Smooth Curves</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Smooth Area&lt;/dc-title&gt;
+  &lt;dc-area fill="#9C27B0" curve-fit="smooth"
+           label="Sales"&gt;
+    &lt;dc-point value="50" label="Jan"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="80" label="Feb"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="65" label="Mar"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="95" label="Apr"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="75" label="May"&gt;&lt;/dc-point&gt;
+  &lt;/dc-area&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Smooth Area</dc-title>
+                    <dc-area fill="#9C27B0" curve-fit="smooth" label="Sales">
+                        <dc-point value="50" label="Jan"></dc-point>
+                        <dc-point value="80" label="Feb"></dc-point>
+                        <dc-point value="65" label="Mar"></dc-point>
+                        <dc-point value="95" label="Apr"></dc-point>
+                        <dc-point value="75" label="May"></dc-point>
+                    </dc-area>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Step Areas</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Step Area&lt;/dc-title&gt;
+  &lt;dc-area fill="#00BCD4" curve-fit="step"
+           label="Stock Level"&gt;
+    &lt;dc-point value="100" label="Jan"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="80" label="Feb"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="120" label="Mar"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="60" label="Apr"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="90" label="May"&gt;&lt;/dc-point&gt;
+  &lt;/dc-area&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Step Area</dc-title>
+                    <dc-area fill="#00BCD4" curve-fit="step" label="Stock Level">
+                        <dc-point value="100" label="Jan"></dc-point>
+                        <dc-point value="80" label="Feb"></dc-point>
+                        <dc-point value="120" label="Mar"></dc-point>
+                        <dc-point value="60" label="Apr"></dc-point>
+                        <dc-point value="90" label="May"></dc-point>
+                    </dc-area>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Patterns</h2>
+        <p>Apply pattern fills to areas for visual distinction or accessibility. Patterns can be combined with colors.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Pattern Fill</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Patterned Areas&lt;/dc-title&gt;
+  &lt;dc-area fill="#4CAF50" pattern="diagonal-lines"
+           label="Category A"&gt;
+    &lt;dc-point value="100" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="130" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="110" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="150" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-area&gt;
+  &lt;dc-area fill="#FF9800" pattern="dots"
+           label="Category B"&gt;
+    &lt;dc-point value="60" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="80" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="70" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="90" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-area&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Patterned Areas</dc-title>
+                    <dc-area fill="#4CAF50" pattern="diagonal-lines" label="Category A">
+                        <dc-point value="100" label="Q1"></dc-point>
+                        <dc-point value="130" label="Q2"></dc-point>
+                        <dc-point value="110" label="Q3"></dc-point>
+                        <dc-point value="150" label="Q4"></dc-point>
+                    </dc-area>
+                    <dc-area fill="#FF9800" pattern="dots" label="Category B">
+                        <dc-point value="60" label="Q1"></dc-point>
+                        <dc-point value="80" label="Q2"></dc-point>
+                        <dc-point value="70" label="Q3"></dc-point>
+                        <dc-point value="90" label="Q4"></dc-point>
+                    </dc-area>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>High Contrast</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" high-contrast&gt;
+  &lt;dc-title&gt;High Contrast Areas&lt;/dc-title&gt;
+  &lt;dc-area label="Series A"&gt;
+    &lt;dc-point value="80" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="100" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="90" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="120" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-area&gt;
+  &lt;dc-area label="Series B"&gt;
+    &lt;dc-point value="40" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="60" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="55" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="70" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-area&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" high-contrast>
+                    <dc-title>High Contrast Areas</dc-title>
+                    <dc-area label="Series A">
+                        <dc-point value="80" label="Q1"></dc-point>
+                        <dc-point value="100" label="Q2"></dc-point>
+                        <dc-point value="90" label="Q3"></dc-point>
+                        <dc-point value="120" label="Q4"></dc-point>
+                    </dc-area>
+                    <dc-area label="Series B">
+                        <dc-point value="40" label="Q1"></dc-point>
+                        <dc-point value="60" label="Q2"></dc-point>
+                        <dc-point value="55" label="Q3"></dc-point>
+                        <dc-point value="70" label="Q4"></dc-point>
+                    </dc-area>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Combo Charts</h2>
+        <p>Combine areas with lines and bars. Each chart type renders in its own layer, with areas below lines.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Area with Line Overlay</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Revenue vs Target&lt;/dc-title&gt;
+  &lt;dc-area fill="#4CAF50" fill-opacity="0.5"
+           label="Revenue"&gt;
+    &lt;dc-point value="80" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="120" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="100" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="150" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-area&gt;
+  &lt;dc-line stroke="#F44336" stroke-width="3"
+           label="Target"&gt;
+    &lt;dc-point value="90" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="100" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="110" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="120" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Revenue vs Target</dc-title>
+                    <dc-area fill="#4CAF50" fill-opacity="0.5" label="Revenue">
+                        <dc-point value="80" label="Q1"></dc-point>
+                        <dc-point value="120" label="Q2"></dc-point>
+                        <dc-point value="100" label="Q3"></dc-point>
+                        <dc-point value="150" label="Q4"></dc-point>
+                    </dc-area>
+                    <dc-line stroke="#F44336" stroke-width="3" label="Target">
+                        <dc-point value="90" label="Q1"></dc-point>
+                        <dc-point value="100" label="Q2"></dc-point>
+                        <dc-point value="110" label="Q3"></dc-point>
+                        <dc-point value="120" label="Q4"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Area with Bars</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Sales Trend with Highlights&lt;/dc-title&gt;
+  &lt;dc-area fill="#E3F2FD" stroke="#2196F3"
+           label="Trend"&gt;
+    &lt;dc-point value="40" label="Jan"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="60" label="Feb"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="55" label="Mar"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="80" label="Apr"&gt;&lt;/dc-point&gt;
+  &lt;/dc-area&gt;
+  &lt;dc-bar value="50" fill="#4CAF50" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="70" fill="#4CAF50" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="60" fill="#4CAF50" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" fill="#4CAF50" label="Apr"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Sales Trend with Highlights</dc-title>
+                    <dc-area fill="#E3F2FD" stroke="#2196F3" label="Trend">
+                        <dc-point value="40" label="Jan"></dc-point>
+                        <dc-point value="60" label="Feb"></dc-point>
+                        <dc-point value="55" label="Mar"></dc-point>
+                        <dc-point value="80" label="Apr"></dc-point>
+                    </dc-area>
+                    <dc-bar value="50" fill="#4CAF50" label="Jan"></dc-bar>
+                    <dc-bar value="70" fill="#4CAF50" label="Feb"></dc-bar>
+                    <dc-bar value="60" fill="#4CAF50" label="Mar"></dc-bar>
+                    <dc-bar value="90" fill="#4CAF50" label="Apr"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+</body>
+</html>

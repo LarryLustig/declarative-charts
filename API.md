@@ -721,6 +721,7 @@ Renders bar, line, or bubble charts depending on child elements.
 - `bar-width` (string) - Default width for bars (e.g., "50px", "2rem")
 - `gutter` (number) - Space between bars in pixels (default: 10)
 - `point-shape` (string) - Default shape for points: "circle", "square", "triangle", "diamond", "star", "cross", "plus", or unicode character (default: "circle")
+- `overlapping` (boolean) - When true, multiple areas overlap instead of stacking (default: false)
 - Plus all [common chart attributes](#common-chart-attributes)
 
 **Child Elements:**
@@ -729,6 +730,7 @@ Renders bar, line, or bubble charts depending on child elements.
 - `<dc-bar>` - Individual bars (one or more)
 - `<dc-bar-group>` - Optional groups of bars
 - `<dc-line>` - Individual lines, each containing `<dc-point>` elements
+- `<dc-area>` - Individual areas, each containing `<dc-point>` elements
 - `<dc-bubble>` - Individual bubbles
 - `<dc-legend>` - Optional legend
 
@@ -844,6 +846,71 @@ Defines a single line in a line chart. Contains multiple `<dc-point>` elements.
 
 **Child Elements:**
 - `<dc-point>` - Individual points (one or more)
+
+### `<dc-area>`
+
+Defines a filled area in an area chart. Contains multiple `<dc-point>` elements.
+
+Areas are filled regions bounded by data points above and the zero line (or chart bottom) below. When multiple areas are present, they stack by default (each area's baseline is the cumulative sum of previous areas). Use the `overlapping` attribute on the parent `<dc-chart>` to disable stacking.
+
+**Attributes:**
+- `fill` (string) - CSS color for the area fill
+- `fill-opacity` (number) - Opacity of the area fill, 0-1 (default: 0.5)
+- `stroke` (string) - CSS color for the top edge line (defaults to fill color)
+- `stroke-width` (number) - Width of the top edge stroke (default: 2)
+- `label` (string) - Label for the area (for legend)
+- `curve-fit` (string) - Curve fitting method: "linear", "smooth", "monotone", "step" (default: "linear")
+- `show-value` (boolean|string) - Whether to display values on points (default: true)
+- `show-percent` (boolean|string) - Whether to display percentages on points
+- `pattern` (string) - Pattern type ("diagonal-lines", "dots", etc.) or ID reference
+- `pattern-stroke` (string) - Pattern element color
+- `pattern-fill` (string) - Pattern background color
+- `pattern-scale` (number) - Pattern size multiplier (default: 1)
+
+**Child Elements:**
+- `<dc-point>` - Individual points (one or more)
+
+**Examples:**
+
+Basic area chart:
+```html
+<dc-chart width="600" height="400">
+  <dc-title>Website Traffic</dc-title>
+  <dc-area fill="#4CAF50" label="Visitors">
+    <dc-point value="100" label="Mon"></dc-point>
+    <dc-point value="150" label="Tue"></dc-point>
+    <dc-point value="180" label="Wed"></dc-point>
+  </dc-area>
+</dc-chart>
+```
+
+Stacked area chart (default behavior):
+```html
+<dc-chart width="600" height="400">
+  <dc-area fill="#4CAF50" label="Product A">
+    <dc-point value="100" label="Q1"></dc-point>
+    <dc-point value="120" label="Q2"></dc-point>
+  </dc-area>
+  <dc-area fill="#2196F3" label="Product B">
+    <dc-point value="80" label="Q1"></dc-point>
+    <dc-point value="90" label="Q2"></dc-point>
+  </dc-area>
+</dc-chart>
+```
+
+Overlapping areas (year-over-year comparison):
+```html
+<dc-chart width="600" height="400" overlapping>
+  <dc-area fill="#4CAF50" fill-opacity="0.3" label="2023">
+    <dc-point value="100" label="Q1"></dc-point>
+    <dc-point value="150" label="Q2"></dc-point>
+  </dc-area>
+  <dc-area fill="#2196F3" fill-opacity="0.3" label="2024">
+    <dc-point value="120" label="Q1"></dc-point>
+    <dc-point value="180" label="Q2"></dc-point>
+  </dc-area>
+</dc-chart>
+```
 
 ### `<dc-point>`
 
@@ -1427,7 +1494,7 @@ chart.requestUpdate();
 
 ### Hiding and Showing Elements
 
-Use the standard HTML `hidden` attribute to dynamically show or hide chart elements. Supported on `<dc-line>`, `<dc-bar>`, `<dc-bar-group>`, `<dc-bubble>`, and `<dc-stage>`.
+Use the standard HTML `hidden` attribute to dynamically show or hide chart elements. Supported on `<dc-line>`, `<dc-area>`, `<dc-bar>`, `<dc-bar-group>`, `<dc-bubble>`, and `<dc-stage>`.
 
 ```html
 <dc-chart id="my-chart" width="600" height="400">
@@ -1472,7 +1539,7 @@ chart.requestUpdate();
 
 ## Integration with htmx and Other Libraries
 
-All shape elements (`<dc-bar>`, `<dc-line>`, `<dc-pie-slice>`, `<dc-funnel-stage>`) support **automatic attribute passthrough**. Any attributes not explicitly defined by the library are passed through to the rendered SVG elements.
+All shape elements (`<dc-bar>`, `<dc-line>`, `<dc-area>`, `<dc-pie-slice>`, `<dc-funnel-stage>`) support **automatic attribute passthrough**. Any attributes not explicitly defined by the library are passed through to the rendered SVG elements.
 
 ### How It Works
 

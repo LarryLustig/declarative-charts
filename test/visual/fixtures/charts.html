@@ -143,6 +143,70 @@
     </dc-chart>
   </div>
 
+  <!-- Area Chart - Basic -->
+  <div id="area-basic" class="chart-container">
+    <h2>Area Chart - Basic</h2>
+    <dc-chart width="500" height="350">
+      <dc-title>Website Traffic</dc-title>
+      <dc-area label="Visitors" fill="#4CAF50">
+        <dc-point value="100" label="Mon"></dc-point>
+        <dc-point value="150" label="Tue"></dc-point>
+        <dc-point value="180" label="Wed"></dc-point>
+        <dc-point value="140" label="Thu"></dc-point>
+        <dc-point value="200" label="Fri"></dc-point>
+      </dc-area>
+      <dc-legend position="right"></dc-legend>
+    </dc-chart>
+  </div>
+
+  <!-- Area Chart - Stacked -->
+  <div id="area-stacked" class="chart-container">
+    <h2>Area Chart - Stacked</h2>
+    <dc-chart width="500" height="350">
+      <dc-title>Product Revenue</dc-title>
+      <dc-area label="Product A" fill="#4CAF50">
+        <dc-point value="100" label="Q1"></dc-point>
+        <dc-point value="120" label="Q2"></dc-point>
+        <dc-point value="140" label="Q3"></dc-point>
+        <dc-point value="160" label="Q4"></dc-point>
+      </dc-area>
+      <dc-area label="Product B" fill="#2196F3">
+        <dc-point value="80" label="Q1"></dc-point>
+        <dc-point value="90" label="Q2"></dc-point>
+        <dc-point value="100" label="Q3"></dc-point>
+        <dc-point value="110" label="Q4"></dc-point>
+      </dc-area>
+      <dc-area label="Product C" fill="#FF9800">
+        <dc-point value="50" label="Q1"></dc-point>
+        <dc-point value="60" label="Q2"></dc-point>
+        <dc-point value="70" label="Q3"></dc-point>
+        <dc-point value="80" label="Q4"></dc-point>
+      </dc-area>
+      <dc-legend position="right"></dc-legend>
+    </dc-chart>
+  </div>
+
+  <!-- Area Chart - Overlapping -->
+  <div id="area-overlapping" class="chart-container">
+    <h2>Area Chart - Overlapping</h2>
+    <dc-chart width="500" height="350" overlapping>
+      <dc-title>Year-over-Year Comparison</dc-title>
+      <dc-area label="2023" fill="#4CAF50" fill-opacity="0.4">
+        <dc-point value="100" label="Q1"></dc-point>
+        <dc-point value="150" label="Q2"></dc-point>
+        <dc-point value="130" label="Q3"></dc-point>
+        <dc-point value="180" label="Q4"></dc-point>
+      </dc-area>
+      <dc-area label="2024" fill="#2196F3" fill-opacity="0.4">
+        <dc-point value="120" label="Q1"></dc-point>
+        <dc-point value="180" label="Q2"></dc-point>
+        <dc-point value="160" label="Q3"></dc-point>
+        <dc-point value="220" label="Q4"></dc-point>
+      </dc-area>
+      <dc-legend position="right"></dc-legend>
+    </dc-chart>
+  </div>
+
   <!-- Bubble Chart -->
   <div id="bubble-basic" class="chart-container">
     <h2>Bubble Chart</h2>

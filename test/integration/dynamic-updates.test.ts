@@ -7,6 +7,7 @@ import '../../src/chart-bar';
 import '../../src/chart-bar-group';
 import '../../src/chart-bar-segment';
 import '../../src/chart-line';
+import '../../src/chart-area';
 import '../../src/chart-point';
 import '../../src/chart-bubble';
 import '../../src/chart-axis';
@@ -403,6 +404,131 @@ describe('Dynamic Updates - Line Charts', () => {
       // Max value should reflect the change
       const maxValue = (chart as any).getMaxValue();
       expect(maxValue).toBe(100);
+    });
+  });
+});
+
+describe('Dynamic Updates - Area Charts', () => {
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  describe('adding areas', () => {
+    it('adds a new area dynamically', async () => {
+      const chart = await fixture<Chart>(
+        'dc-chart',
+        {},
+        `
+        <dc-area label="Area A" fill="#4CAF50">
+          <dc-point value="10" label="Jan"></dc-point>
+          <dc-point value="20" label="Feb"></dc-point>
+        </dc-area>
+      `
+      );
+
+      // Initially 1 area path
+      let areaPaths = queryShadowAll(chart, 'path[data-area="true"]');
+      expect(areaPaths).toHaveLength(1);
+
+      // Add a new area
+      const newArea = document.createElement('dc-area');
+      newArea.setAttribute('label', 'Area B');
+      newArea.setAttribute('fill', '#2196F3');
+      newArea.innerHTML = `
+        <dc-point value="15" label="Jan"></dc-point>
+        <dc-point value="25" label="Feb"></dc-point>
+      `;
+      chart.appendChild(newArea);
+
+      chart.requestUpdate();
+      await elementUpdated(chart);
+
+      // Should now have 2 area paths
+      areaPaths = queryShadowAll(chart, 'path[data-area="true"]');
+      expect(areaPaths).toHaveLength(2);
+    });
+  });
+
+  describe('adding points to existing area', () => {
+    it('adds a point to an existing area', async () => {
+      const chart = await fixture<Chart>(
+        'dc-chart',
+        {},
+        `
+        <dc-area label="Area A" fill="#4CAF50">
+          <dc-point value="10" label="Jan"></dc-point>
+          <dc-point value="20" label="Feb"></dc-point>
+        </dc-area>
+      `
+      );
+
+      // Add a new point to the area
+      const area = chart.querySelector('dc-area');
+      const newPoint = document.createElement('dc-point');
+      newPoint.setAttribute('value', '30');
+      newPoint.setAttribute('label', 'Mar');
+      area?.appendChild(newPoint);
+
+      chart.requestUpdate();
+      await elementUpdated(chart);
+
+      // Check that the area now has 3 points worth of data
+      const labels = (chart as any).getCategoryLabels();
+      expect(labels).toContain('Mar');
+    });
+  });
+
+  describe('updating area properties', () => {
+    it('updates area fill color', async () => {
+      const chart = await fixture<Chart>(
+        'dc-chart',
+        {},
+        `
+        <dc-area label="Area A" fill="#4CAF50">
+          <dc-point value="10" label="Jan"></dc-point>
+          <dc-point value="20" label="Feb"></dc-point>
+        </dc-area>
+      `
+      );
+
+      // Update the area fill
+      const area = chart.querySelector('dc-area');
+      area?.setAttribute('fill', '#FF0000');
+
+      chart.requestUpdate();
+      await elementUpdated(chart);
+
+      // Verify the color changed
+      const areaPath = chart.shadowRoot?.querySelector('path[data-area="true"]');
+      expect(areaPath?.getAttribute('fill')).toBe('#FF0000');
+    });
+
+    it('toggles overlapping mode', async () => {
+      const chart = await fixture<Chart>(
+        'dc-chart',
+        {},
+        `
+        <dc-area label="Area A" fill="#4CAF50">
+          <dc-point value="10" label="Jan"></dc-point>
+          <dc-point value="20" label="Feb"></dc-point>
+        </dc-area>
+        <dc-area label="Area B" fill="#2196F3">
+          <dc-point value="15" label="Jan"></dc-point>
+          <dc-point value="25" label="Feb"></dc-point>
+        </dc-area>
+      `
+      );
+
+      // Initially not overlapping (stacked)
+      expect(chart.overlapping).toBe(false);
+
+      // Set overlapping mode
+      chart.setAttribute('overlapping', '');
+
+      chart.requestUpdate();
+      await elementUpdated(chart);
+
+      expect(chart.overlapping).toBe(true);
     });
   });
 });

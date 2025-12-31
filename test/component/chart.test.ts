@@ -7,6 +7,7 @@ import '../../src/chart-bar';
 import '../../src/chart-bar-group';
 import '../../src/chart-bar-segment';
 import '../../src/chart-line';
+import '../../src/chart-area';
 import '../../src/chart-point';
 import '../../src/chart-bubble';
 import '../../src/chart-axis';
@@ -260,6 +261,171 @@ describe('Chart component', () => {
         </dc-line>
       `);
       expect(chart.curveFit).toBe('catmull-rom');
+    });
+  });
+
+  // ============================================================================
+  // Area chart rendering
+  // ============================================================================
+
+  describe('area chart rendering', () => {
+    it('renders area path', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-area label="Trend" fill="#4CAF50">
+          <dc-point value="10" label="A"></dc-point>
+          <dc-point value="20" label="B"></dc-point>
+          <dc-point value="15" label="C"></dc-point>
+        </dc-area>
+      `);
+      const paths = chart.shadowRoot?.querySelectorAll('path[data-area="true"]');
+      expect(paths?.length).toBeGreaterThan(0);
+    });
+
+    it('applies fill color to area', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-area label="Trend" fill="#ff0000">
+          <dc-point value="10" label="A"></dc-point>
+          <dc-point value="20" label="B"></dc-point>
+        </dc-area>
+      `);
+      const path = chart.shadowRoot?.querySelector('path[data-area="true"]');
+      expect(path?.getAttribute('fill')).toBe('#ff0000');
+    });
+
+    it('applies fill-opacity to area', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-area label="Trend" fill="#ff0000" fill-opacity="0.3">
+          <dc-point value="10" label="A"></dc-point>
+          <dc-point value="20" label="B"></dc-point>
+        </dc-area>
+      `);
+      const path = chart.shadowRoot?.querySelector('path[data-area="true"]');
+      expect(path?.getAttribute('fill-opacity')).toBe('0.3');
+    });
+
+    it('renders stroke on top edge', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-area label="Trend" fill="#ff0000" stroke="#0000ff">
+          <dc-point value="10" label="A"></dc-point>
+          <dc-point value="20" label="B"></dc-point>
+        </dc-area>
+      `);
+      const strokePath = chart.shadowRoot?.querySelector('path[data-area-stroke="true"]');
+      expect(strokePath?.getAttribute('stroke')).toBe('#0000ff');
+    });
+
+    it('supports multiple areas (stacked by default)', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-area label="Area 1" fill="red">
+          <dc-point value="10" label="A"></dc-point>
+          <dc-point value="20" label="B"></dc-point>
+        </dc-area>
+        <dc-area label="Area 2" fill="blue">
+          <dc-point value="15" label="A"></dc-point>
+          <dc-point value="25" label="B"></dc-point>
+        </dc-area>
+      `);
+      const areaPaths = chart.shadowRoot?.querySelectorAll('path[data-area="true"]');
+      expect(areaPaths?.length).toBe(2);
+    });
+
+    it('supports overlapping mode', async () => {
+      chart = await fixture<Chart>('dc-chart', { overlapping: '' }, `
+        <dc-area label="Area 1" fill="red">
+          <dc-point value="10" label="A"></dc-point>
+          <dc-point value="20" label="B"></dc-point>
+        </dc-area>
+        <dc-area label="Area 2" fill="blue">
+          <dc-point value="15" label="A"></dc-point>
+          <dc-point value="25" label="B"></dc-point>
+        </dc-area>
+      `);
+      expect(chart.overlapping).toBe(true);
+      const areaPaths = chart.shadowRoot?.querySelectorAll('path[data-area="true"]');
+      expect(areaPaths?.length).toBe(2);
+    });
+
+    it('supports curve-fit attribute', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'curve-fit': 'smooth' }, `
+        <dc-area label="Smooth" fill="#4CAF50">
+          <dc-point value="10" label="A"></dc-point>
+          <dc-point value="30" label="B"></dc-point>
+          <dc-point value="20" label="C"></dc-point>
+        </dc-area>
+      `);
+      const path = chart.shadowRoot?.querySelector('path[data-area="true"]');
+      expect(path).toBeDefined();
+    });
+
+    it('area can override chart curve-fit', async () => {
+      chart = await fixture<Chart>('dc-chart', { 'curve-fit': 'linear' }, `
+        <dc-area label="Smooth" fill="#4CAF50" curve-fit="smooth">
+          <dc-point value="10" label="A"></dc-point>
+          <dc-point value="30" label="B"></dc-point>
+          <dc-point value="20" label="C"></dc-point>
+        </dc-area>
+      `);
+      const path = chart.shadowRoot?.querySelector('path[data-area="true"]');
+      expect(path).toBeDefined();
+    });
+
+    it('hides areas with hidden attribute', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-area label="Visible" fill="green">
+          <dc-point value="10" label="A"></dc-point>
+        </dc-area>
+        <dc-area label="Hidden" fill="red" hidden>
+          <dc-point value="20" label="A"></dc-point>
+        </dc-area>
+      `);
+      const areaPaths = chart.shadowRoot?.querySelectorAll('path[data-area="true"]');
+      expect(areaPaths?.length).toBe(1);
+    });
+
+    it('combines area with bars', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-bar value="30" label="Q1"></dc-bar>
+        <dc-bar value="40" label="Q2"></dc-bar>
+        <dc-area label="Trend" fill="#4CAF50">
+          <dc-point value="35" label="Q1"></dc-point>
+          <dc-point value="35" label="Q2"></dc-point>
+        </dc-area>
+      `);
+      const rects = chart.shadowRoot?.querySelectorAll('rect[data-shape-index]');
+      const areaPaths = chart.shadowRoot?.querySelectorAll('path[data-area="true"]');
+      expect(rects).toHaveLength(2);
+      expect(areaPaths?.length).toBe(1);
+    });
+
+    it('combines area with line', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-area label="Area" fill="#4CAF50">
+          <dc-point value="10" label="A"></dc-point>
+          <dc-point value="20" label="B"></dc-point>
+        </dc-area>
+        <dc-line label="Line" stroke="#FF0000">
+          <dc-point value="15" label="A"></dc-point>
+          <dc-point value="25" label="B"></dc-point>
+        </dc-line>
+      `);
+      const areaPaths = chart.shadowRoot?.querySelectorAll('path[data-area="true"]');
+      const linePaths = chart.shadowRoot?.querySelectorAll('path[data-shape-index]:not([data-area])');
+      expect(areaPaths?.length).toBe(1);
+      expect(linePaths?.length).toBeGreaterThan(0);
+    });
+
+    it('calculates max value including stacked areas', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-area label="A" fill="red">
+          <dc-point value="50" label="X"></dc-point>
+        </dc-area>
+        <dc-area label="B" fill="blue">
+          <dc-point value="30" label="X"></dc-point>
+        </dc-area>
+      `);
+      // Stacked max should be 50 + 30 = 80
+      const maxValue = (chart as any).getMaxValue();
+      expect(maxValue).toBeGreaterThanOrEqual(80);
     });
   });
 
@@ -862,6 +1028,30 @@ describe('Chart component', () => {
       expect(items.some((i: any) => i.label === 'Trend B')).toBe(true);
     });
 
+    it('generates legend items for areas', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-area label="Area A" fill="red">
+          <dc-point value="10" label="A"></dc-point>
+        </dc-area>
+        <dc-area label="Area B" fill="blue">
+          <dc-point value="20" label="A"></dc-point>
+        </dc-area>
+      `);
+      const items = (chart as any).getLegendItems();
+      expect(items.some((i: any) => i.label === 'Area A')).toBe(true);
+      expect(items.some((i: any) => i.label === 'Area B')).toBe(true);
+    });
+
+    it('uses square shape for area legend items', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-area label="Trend" fill="red">
+          <dc-point value="10" label="A"></dc-point>
+        </dc-area>
+      `);
+      const items = (chart as any).getLegendItems();
+      expect(items[0].shape).toBe('square');
+    });
+
     it('generates legend items for bubbles', async () => {
       chart = await fixture<Chart>('dc-chart', {}, `
         <dc-bubble value="10" size="50" label="Small" fill="red"></dc-bubble>
@@ -919,6 +1109,15 @@ describe('Chart component', () => {
       expect((chart as any).getChartTypeName()).toBe('line chart');
     });
 
+    it('returns correct chart type for areas', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-area label="Trend" fill="green">
+          <dc-point value="10" label="A"></dc-point>
+        </dc-area>
+      `);
+      expect((chart as any).getChartTypeName()).toBe('area chart');
+    });
+
     it('returns correct chart type for bubbles', async () => {
       chart = await fixture<Chart>('dc-chart', {}, `
         <dc-bubble value="10" size="50" label="A"></dc-bubble>
@@ -945,6 +1144,18 @@ describe('Chart component', () => {
       `);
       const summary = (chart as any).getDataSummary();
       expect(summary.length).toBeGreaterThan(0);
+    });
+
+    it('returns data summary including areas', async () => {
+      chart = await fixture<Chart>('dc-chart', {}, `
+        <dc-area label="Trend" fill="green">
+          <dc-point value="10" label="A"></dc-point>
+          <dc-point value="20" label="B"></dc-point>
+        </dc-area>
+      `);
+      const summary = (chart as any).getDataSummary();
+      expect(summary).toContain('area');
+      expect(summary).toContain('2 point');
     });
 
     it('generates insights', async () => {

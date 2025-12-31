@@ -40,6 +40,7 @@ export { ChartBarSegment } from './chart-bar-segment.js';
 export { ChartBubble } from './chart-bubble.js';
 export { ChartLine } from './chart-line.js';
 export type { CurveFit } from './chart-line.js';
+export { ChartArea } from './chart-area.js';
 export { ChartPoint } from './chart-point.js';
 export { ChartPopup } from './chart-popup.js';
 export { ChartFunnelStage } from './chart-funnel-stage.js';

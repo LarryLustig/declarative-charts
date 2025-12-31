@@ -20,6 +20,7 @@ const NAV_CONFIG = {
                 { href: 'line-curves.html', label: 'Curves' },
             ]
         },
+        { href: 'areacharts.html', label: 'Area Charts' },
         { href: 'bubblecharts.html', label: 'Bubble Charts' },
         { href: 'combo-charts.html', label: 'Combo Charts' },
         {

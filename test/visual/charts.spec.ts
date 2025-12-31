@@ -110,6 +110,32 @@ test.describe('Line Charts', () => {
   });
 });
 
+test.describe('Area Charts', () => {
+  test('basic area chart', async ({ page }) => {
+    await page.goto(`${FIXTURES_URL}?chart=area-basic`);
+    await waitForChartRender(page);
+
+    const container = await getChartContainer(page, 'area-basic');
+    await expect(container).toHaveScreenshot('area-basic.png');
+  });
+
+  test('stacked area chart', async ({ page }) => {
+    await page.goto(`${FIXTURES_URL}?chart=area-stacked`);
+    await waitForChartRender(page);
+
+    const container = await getChartContainer(page, 'area-stacked');
+    await expect(container).toHaveScreenshot('area-stacked.png');
+  });
+
+  test('overlapping area chart', async ({ page }) => {
+    await page.goto(`${FIXTURES_URL}?chart=area-overlapping`);
+    await waitForChartRender(page);
+
+    const container = await getChartContainer(page, 'area-overlapping');
+    await expect(container).toHaveScreenshot('area-overlapping.png');
+  });
+});
+
 test.describe('Bubble Charts', () => {
   test('basic bubble chart', async ({ page }) => {
     await page.goto(`${FIXTURES_URL}?chart=bubble-basic`);

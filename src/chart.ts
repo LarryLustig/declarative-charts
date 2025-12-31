@@ -11,6 +11,7 @@ import type { ChartLine, CurveFit } from './chart-line.js';
 import type { ChartPoint } from './chart-point.js';
 import type { ChartBubble } from './chart-bubble.js';
 import type { ChartPopup } from './chart-popup.js';
+import type { ChartArea } from './chart-area.js';
 
 // ============================================================================
 // Deferred Label Rendering
@@ -143,6 +144,40 @@ interface LineData {
 }
 
 // ============================================================================
+// Data Structures for Areas
+// ============================================================================
+
+interface AreaData {
+  fill: string;
+  fillOpacity: number;
+  stroke: string;
+  strokeWidth: number;
+  label: string;
+  curveFit: CurveFit;
+  points: PointData[];
+  // Pattern properties
+  pattern?: string;
+  patternStroke?: string;
+  patternFill?: string;
+  patternScale?: number;
+  originalFill?: string;  // Original solid color for legend (fill may be pattern URL)
+  // Common properties
+  href?: string;
+  target?: string;
+  popup?: { content: string; trigger: string };
+  autoPopup?: boolean;
+  element?: ChartArea;
+  passthroughAttrs?: Record<string, string>;
+  valueFormat?: string;
+  // Label positioning (inherited by child points)
+  labelPosition?: string;
+  labelOffsetX?: number;
+  labelOffsetY?: number;
+  labelOffsetR?: number;
+  labelFill?: string;
+}
+
+// ============================================================================
 // Data Structures for Bubbles
 // ============================================================================
 
@@ -255,6 +290,15 @@ export class Chart extends AxisChart {
   @property({ type: Number, attribute: 'min-bubble-radius' })
   minBubbleRadius = 5;
 
+  // Area-specific properties
+  /**
+   * Disable stacking for multiple areas.
+   * When false (default), multiple areas stack on top of each other.
+   * When true, areas overlap with transparency.
+   */
+  @property({ type: Boolean })
+  overlapping = false;
+
   // Internal state
   private clickedBarIndex = -1;
   private clickedPointIndex = { lineIndex: -1, pointIndex: -1 };
@@ -337,15 +381,17 @@ export class Chart extends AxisChart {
     const barMax = this.getBarMaxValue();
     const lineMax = this.getLineMaxValue();
     const bubbleMax = this.getBubbleMaxValue();
-    return Math.max(barMax, lineMax, bubbleMax);
+    const areaMax = this.getAreaMaxValue();
+    return Math.max(barMax, lineMax, bubbleMax, areaMax);
   }
 
   protected getMinValue(): number {
     const barMin = this.getBarMinValue();
     const lineMin = this.getLineMinValue();
     const bubbleMin = this.getBubbleMinValue();
+    const areaMin = this.getAreaMinValue();
     // Return the minimum, but don't go below 0 if all values are positive
-    return Math.min(barMin, lineMin, bubbleMin);
+    return Math.min(barMin, lineMin, bubbleMin, areaMin);
   }
 
   private getBarMaxValue(): number {
@@ -387,21 +433,48 @@ export class Chart extends AxisChart {
     return Math.min(...bubbles.map(b => b.value), 0);
   }
 
+  private getAreaMaxValue(): number {
+    const areas = this.getAreas();
+    if (areas.length === 0) return 0;
+
+    // For stacked areas, we need to include the cumulative maximum
+    const stackedMaximums = this.getAreaStackedMaximums();
+    const individualMax = Math.max(...areas.flatMap(a => a.points.map(p => p.value)));
+    const stackedMax = stackedMaximums.length > 0 ? Math.max(...stackedMaximums) : 0;
+
+    return Math.max(individualMax, stackedMax);
+  }
+
+  private getAreaMinValue(): number {
+    const areas = this.getAreas();
+    if (areas.length === 0) return 0;
+    const allValues = areas.flatMap(area => area.points.map(p => p.value));
+    return Math.min(...allValues, 0);
+  }
+
   protected getAllValues(): number[] {
     const barValues = this.getFlattenedBars().map(b => b.value);
     const lineValues = this.getLines().flatMap(line => line.points.map(p => p.value));
     const bubbleValues = this.getBubbles().map(b => b.value);
-    return [...barValues, ...lineValues, ...bubbleValues];
+    const areaValues = this.getAreas().flatMap(area => area.points.map(p => p.value));
+    // Include stacked area maximums for proper axis scaling
+    const stackedMaximums = this.getAreaStackedMaximums();
+    return [...barValues, ...lineValues, ...bubbleValues, ...areaValues, ...stackedMaximums];
   }
 
   protected getCategoryLabels(): string[] {
-    // Prefer bar labels, then line labels, then bubble labels
+    // Prefer bar labels, then line labels, then area labels, then bubble labels
     const bars = this.getFlattenedBars();
     if (bars.length > 0) return bars.map(b => b.label);
 
     const lines = this.getLines();
     if (lines.length > 0 && lines[0].points.length > 0) {
       return lines[0].points.map(p => p.label);
+    }
+
+    const areas = this.getAreas();
+    if (areas.length > 0 && areas[0].points.length > 0) {
+      return areas[0].points.map(p => p.label);
     }
 
     const bubbles = this.getBubbles();
@@ -837,6 +910,153 @@ export class Chart extends AxisChart {
     }
 
     return linesData;
+  }
+
+  // ============================================================================
+  // Area Data Extraction
+  // ============================================================================
+
+  private getAreas(): AreaData[] {
+    const areaElements = Array.from(this.querySelectorAll('dc-area'))
+      .filter(el => !el.hasAttribute('hidden')) as ChartArea[];
+
+    if (areaElements.length === 0) return [];
+
+    const areasData = areaElements.map((area, areaIndex) => {
+      const pointElements = Array.from(area.querySelectorAll('dc-point')) as ChartPoint[];
+
+      // Warn if area has no points
+      if (pointElements.length === 0) {
+        const areaLabel = area.label || `area[${areaIndex}]`;
+        this.log('warning', 'areas.noPoints', `Area '${areaLabel}' has no dc-point children and will not be visible.`);
+      }
+
+      const elementFill = area.getEffectiveFill();
+      const areaFill = elementFill || '';
+      const areaShowValue = area.hasAttribute('show-value') ? area.showValue : this.showValue;
+      const areaShowPercent = area.hasAttribute('show-percent') ? area.showPercent! : this.showPercent;
+      const areaCurveFit = area.hasAttribute('curve-fit') ? area.curveFit! : this.curveFit;
+
+      const areaPopupEl = Array.from(area.children).find(
+        child => child.tagName.toLowerCase() === 'dc-popup'
+      ) as ChartPopup | null;
+
+      const knownAttrs = new Set(['label', 'fill', 'fill-opacity', 'stroke', 'stroke-width', 'href', 'target', 'show-value', 'show-percent', 'curve-fit', 'pattern', 'pattern-stroke', 'pattern-fill', 'pattern-scale']);
+      const passthroughAttrs = area.getPassthroughAttributes(knownAttrs);
+
+      // Label positioning inheritance: point → area → chart → default
+      const areaLabelPosition = area.labelPosition ?? this.labelPosition;
+      const areaLabelOffsetX = area.labelOffsetX ?? this.labelOffsetX;
+      const areaLabelOffsetY = area.labelOffsetY ?? this.labelOffsetY;
+      const areaLabelOffsetR = area.labelOffsetR ?? this.labelOffsetR;
+      const areaLabelFill = area.labelFill ?? this.labelFill;
+
+      return {
+        fill: areaFill,
+        fillOpacity: area.fillOpacity ?? 0.5,
+        stroke: area.getEffectiveStroke() || areaFill,
+        strokeWidth: area.strokeWidth ?? 2,
+        label: area.label || `Area ${areaIndex + 1}`,
+        curveFit: areaCurveFit,
+        href: area.href || undefined,
+        target: area.target || undefined,
+        popup: areaPopupEl ? { content: areaPopupEl.content, trigger: areaPopupEl.trigger } : undefined,
+        autoPopup: area.autoPopup,
+        element: area,
+        passthroughAttrs: Object.keys(passthroughAttrs).length > 0 ? passthroughAttrs : undefined,
+        pattern: area.pattern,
+        patternStroke: area.patternStroke,
+        patternFill: area.patternFill,
+        patternScale: area.patternScale,
+        originalFill: undefined as string | undefined,
+        valueFormat: area.valueFormat,
+        labelPosition: areaLabelPosition,
+        labelOffsetX: areaLabelOffsetX,
+        labelOffsetY: areaLabelOffsetY,
+        labelOffsetR: areaLabelOffsetR,
+        labelFill: areaLabelFill,
+        points: pointElements.map(point => {
+          const pointPopupEl = point.querySelector('dc-popup') as ChartPopup | null;
+          const showValue = point.hasAttribute('show-value') ? point.showValue : areaShowValue;
+          const showPercent = point.hasAttribute('show-percent') ? point.showPercent! : areaShowPercent;
+          // Inherit label positioning from point → area → chart
+          const pointLabelPosition = point.labelPosition ?? areaLabelPosition;
+          const pointLabelOffsetX = point.labelOffsetX ?? areaLabelOffsetX;
+          const pointLabelOffsetY = point.labelOffsetY ?? areaLabelOffsetY;
+          const pointLabelOffsetR = point.labelOffsetR ?? areaLabelOffsetR;
+          const pointLabelFill = point.labelFill ?? areaLabelFill;
+
+          return {
+            value: point.value,
+            label: point.label,
+            fill: point.fill || undefined,
+            href: point.href || undefined,
+            target: point.target || undefined,
+            popup: pointPopupEl ? { content: pointPopupEl.content, trigger: pointPopupEl.trigger } : undefined,
+            autoPopup: point.autoPopup,
+            showValue,
+            showPercent,
+            shape: point.shape || 'circle',
+            valueFormat: point.valueFormat,
+            labelPosition: pointLabelPosition,
+            labelOffsetX: pointLabelOffsetX,
+            labelOffsetY: pointLabelOffsetY,
+            labelOffsetR: pointLabelOffsetR,
+            labelFill: pointLabelFill
+          };
+        })
+      };
+    });
+
+    // Resolve fills with patterns
+    if (areasData.length > 0) {
+      const elements = areasData.map(a => ({
+        fill: a.fill || undefined,
+        label: a.label,
+        value: 0,  // Areas don't have a single value
+        pattern: a.pattern,
+        patternStroke: a.patternStroke,
+        patternFill: a.patternFill,
+        patternScale: a.patternScale,
+        defaultColor: this.lineColor  // Use line color as default for areas
+      }));
+      const resolvedFills = this.resolveFillsWithPatterns(elements);
+
+      areasData.forEach((area, index) => {
+        area.fill = resolvedFills[index].fill;
+        area.originalFill = resolvedFills[index].originalFill;
+        // Update stroke to match fill if not explicitly set
+        if (!areaElements[index].getEffectiveStroke()) {
+          area.stroke = resolvedFills[index].originalFill || resolvedFills[index].fill;
+        }
+      });
+    }
+
+    return areasData;
+  }
+
+  /**
+   * Get maximum stacked value for areas (for axis scaling).
+   * Returns the cumulative sum at each x-position.
+   */
+  private getAreaStackedMaximums(): number[] {
+    const areas = this.getAreas();
+    if (areas.length <= 1 || this.overlapping) {
+      // No stacking - return empty (individual values are sufficient)
+      return [];
+    }
+
+    // Calculate cumulative values per x-position
+    const cumulativeByIndex = new Map<number, number>();
+
+    areas.forEach(area => {
+      area.points.forEach((point, pointIndex) => {
+        const current = cumulativeByIndex.get(pointIndex) || 0;
+        cumulativeByIndex.set(pointIndex, current + point.value);
+      });
+    });
+
+    return Array.from(cumulativeByIndex.values());
   }
 
   // ============================================================================
@@ -1353,6 +1573,7 @@ export class Chart extends AxisChart {
     // Apply passthrough attributes for all element types
     this.applyPassthroughAttributes(this.getFlattenedBars());
     this.applyPassthroughAttributes(this.getLines());
+    this.applyPassthroughAttributes(this.getAreas());
     this.applyPassthroughAttributes(this.getBubbles());
   }
 
@@ -1363,20 +1584,22 @@ export class Chart extends AxisChart {
 
     const bars = this.getFlattenedBars();
     const lines = this.getLines();
+    const areas = this.getAreas();
     const bubbles = this.getBubbles();
     const structure = this.getBarStructure();
 
-    if (bars.length === 0 && lines.length === 0 && bubbles.length === 0) {
+    if (bars.length === 0 && lines.length === 0 && areas.length === 0 && bubbles.length === 0) {
       // Check if there are any data elements at all (including hidden ones)
       const allBars = this.querySelectorAll('dc-bar, dc-bar-group');
       const allLines = this.querySelectorAll('dc-line');
+      const allAreas = this.querySelectorAll('dc-area');
       const allBubbles = this.querySelectorAll('dc-bubble');
-      const totalElements = allBars.length + allLines.length + allBubbles.length;
+      const totalElements = allBars.length + allLines.length + allAreas.length + allBubbles.length;
 
       if (totalElements > 0) {
-        this.log('warning', 'data.allHidden', `Chart has ${totalElements} data element(s) but all are hidden. Check for hidden attributes on dc-bar, dc-line, or dc-bubble elements.`);
+        this.log('warning', 'data.allHidden', `Chart has ${totalElements} data element(s) but all are hidden. Check for hidden attributes on dc-bar, dc-line, dc-area, or dc-bubble elements.`);
       } else {
-        this.log('warning', 'data.empty', 'Chart has no data elements. Add dc-bar, dc-line, or dc-bubble children to display data.');
+        this.log('warning', 'data.empty', 'Chart has no data elements. Add dc-bar, dc-line, dc-area, or dc-bubble children to display data.');
       }
       return svg``;
     }
@@ -1398,6 +1621,7 @@ export class Chart extends AxisChart {
     // Log layout info
     this.log('info', 'data.barCount', `Number of bars`, bars.length);
     this.log('info', 'data.lineCount', `Number of lines`, lines.length);
+    this.log('info', 'data.areaCount', `Number of areas`, areas.length);
     this.log('info', 'data.bubbleCount', `Number of bubbles`, bubbles.length);
     this.log('info', 'data.range', `Value range [${range.min}, ${range.max}]`, range);
     this.log('info', 'layout.chartArea', `chartWidth=${chartWidth.toFixed(1)}, chartHeight=${chartHeight.toFixed(1)}`, { width: chartWidth, height: chartHeight });
@@ -1421,6 +1645,16 @@ export class Chart extends AxisChart {
     // Collect value labels to render them last (on top of lines)
     const deferredLabels: DeferredLabel[] = [];
 
+    // Build label positions map for aligning areas/lines with bars
+    const labelPositions = new Map<string, number>();
+    if (bars.length > 0) {
+      const stepX = chartWidth / bars.length;
+      bars.forEach((bar, index) => {
+        const x = padding.left + stepX / 2 + index * stepX;
+        labelPositions.set(bar.label, x);
+      });
+    }
+
     return svg`
       ${this.renderDefs()}
 
@@ -1430,7 +1664,10 @@ export class Chart extends AxisChart {
       <!-- Bars -->
       ${bars.length > 0 ? this.renderBars(bars, structure, padding, chartWidth, chartHeight, range, total, deferredLabels) : ''}
 
-      <!-- Bubbles (rendered after bars but before lines) -->
+      <!-- Areas (rendered after bars but before lines) -->
+      ${areas.length > 0 ? this.renderAreas(areas, padding, chartWidth, chartHeight, range, total, deferredLabels, labelPositions) : ''}
+
+      <!-- Bubbles (rendered after areas but before lines) -->
       ${bubbles.length > 0 ? this.renderBubbles(bubbles, padding, chartWidth, chartHeight, range, total, deferredLabels) : ''}
 
       <!-- Lines (rendered on top of shapes) -->
@@ -2397,6 +2634,351 @@ export class Chart extends AxisChart {
   }
 
   // ============================================================================
+  // Area Rendering
+  // ============================================================================
+
+  /**
+   * Generate SVG path data for an area fill.
+   * Creates a closed path from the line path back to the zero line.
+   *
+   * @param points Array of {x, y} coordinates forming the top edge
+   * @param zeroY Y coordinate of the zero/baseline
+   * @param curveFit The curve fitting method (for top edge consistency)
+   * @returns SVG path data string for a closed area shape
+   */
+  private generateAreaPath(
+    points: Array<{ x: number; y: number }>,
+    zeroY: number,
+    curveFit: CurveFit
+  ): string {
+    if (points.length === 0) return '';
+    if (points.length === 1) {
+      // Single point: small vertical line
+      return `M ${points[0].x} ${zeroY} L ${points[0].x} ${points[0].y} Z`;
+    }
+
+    // Generate the top edge using the same curve fitting as the line
+    const topEdge = this.generatePathData(points, curveFit);
+
+    // Close the path along the bottom (zero line)
+    const firstPoint = points[0];
+    const lastPoint = points[points.length - 1];
+
+    return `${topEdge} L ${lastPoint.x} ${zeroY} L ${firstPoint.x} ${zeroY} Z`;
+  }
+
+  /**
+   * Generate SVG path for a stacked area.
+   * Uses the previous area's top edge as this area's baseline.
+   */
+  private generateStackedAreaPath(
+    topPoints: Array<{ x: number; y: number }>,
+    bottomPoints: Array<{ x: number; y: number }>,
+    curveFit: CurveFit
+  ): string {
+    if (topPoints.length === 0 || bottomPoints.length === 0) return '';
+    if (topPoints.length < 2) return '';
+
+    // Top edge (forward direction)
+    const topEdge = this.generatePathData(topPoints, curveFit);
+
+    // Bottom edge (reverse direction)
+    const reversedBottom = [...bottomPoints].reverse();
+    const bottomEdge = this.generatePathData(reversedBottom, curveFit)
+      .replace(/^M/, 'L'); // Change initial M to L for continuity
+
+    return `${topEdge} ${bottomEdge} Z`;
+  }
+
+  /**
+   * Calculate stacked area baselines (cumulative positions).
+   */
+  private calculateStackedAreaBaselines(
+    areas: AreaData[],
+    padding: { top: number; right: number; bottom: number; left: number },
+    chartWidth: number,
+    chartHeight: number,
+    range: ValueRange,
+    labelPositions: Map<string, number>
+  ): { topPoints: Array<{ x: number; y: number }>[]; bottomPoints: Array<{ x: number; y: number }>[] } {
+    const { min, max } = range;
+    const totalRange = max - min;
+    const zeroY = this.height - padding.bottom - ((0 - min) / totalRange) * chartHeight;
+
+    const result: { topPoints: Array<{ x: number; y: number }>[]; bottomPoints: Array<{ x: number; y: number }>[] } = {
+      topPoints: [],
+      bottomPoints: []
+    };
+
+    // Track cumulative Y values per x-position
+    const cumulativeY = new Map<number, number>();
+
+    areas.forEach(area => {
+      const topPoints: Array<{ x: number; y: number }> = [];
+      const bottomPoints: Array<{ x: number; y: number }> = [];
+
+      area.points.forEach((point, pointIndex) => {
+        // Calculate X position
+        const stepX = chartWidth / area.points.length;
+        let x = padding.left + stepX / 2 + pointIndex * stepX;
+
+        // Try to align with existing label positions (for combo charts)
+        if (point.label && labelPositions.has(point.label)) {
+          x = labelPositions.get(point.label)!;
+        }
+
+        const valueHeight = (point.value / totalRange) * chartHeight;
+
+        // Get the baseline for this x position
+        const baseY = cumulativeY.get(pointIndex) ?? zeroY;
+        const topY = baseY - valueHeight; // SVG y is inverted
+
+        bottomPoints.push({ x, y: baseY });
+        topPoints.push({ x, y: topY });
+
+        // Update cumulative for next area
+        cumulativeY.set(pointIndex, topY);
+      });
+
+      result.bottomPoints.push(bottomPoints);
+      result.topPoints.push(topPoints);
+    });
+
+    return result;
+  }
+
+  private renderAreas(
+    areas: AreaData[],
+    padding: { top: number; right: number; bottom: number; left: number },
+    chartWidth: number,
+    chartHeight: number,
+    range: ValueRange,
+    total: number,
+    deferredLabels: DeferredLabel[],
+    labelPositions: Map<string, number>
+  ): SVGTemplateResult {
+    if (areas.length === 0) return svg``;
+
+    const { min, max } = range;
+    const totalRange = max - min;
+    const zeroY = this.height - padding.bottom - ((0 - min) / totalRange) * chartHeight;
+
+    // Determine stacking mode
+    const shouldStack = areas.length > 1 && !this.overlapping;
+
+    if (shouldStack) {
+      return this.renderStackedAreas(areas, padding, chartWidth, chartHeight, range, total, deferredLabels, labelPositions);
+    } else {
+      return this.renderOverlappingAreas(areas, padding, chartWidth, chartHeight, range, total, deferredLabels, labelPositions, zeroY);
+    }
+  }
+
+  private renderOverlappingAreas(
+    areas: AreaData[],
+    padding: { top: number; right: number; bottom: number; left: number },
+    chartWidth: number,
+    chartHeight: number,
+    range: ValueRange,
+    total: number,
+    deferredLabels: DeferredLabel[],
+    labelPositions: Map<string, number>,
+    zeroY: number
+  ): SVGTemplateResult {
+    const { min, max } = range;
+    const totalRange = max - min;
+
+    return svg`
+      ${areas.map((area, areaIndex) => {
+        if (area.points.length === 0) return '';
+
+        // Calculate point positions
+        const stepX = chartWidth / area.points.length;
+        const positions = area.points.map((point, pointIndex) => {
+          let x = padding.left + stepX / 2 + pointIndex * stepX;
+
+          // Align with existing label positions if available
+          if (point.label && labelPositions.has(point.label)) {
+            x = labelPositions.get(point.label)!;
+          }
+
+          const y = this.height - padding.bottom - ((point.value - min) / totalRange) * chartHeight;
+
+          return { x, y, point };
+        });
+
+        const areaPath = this.generateAreaPath(
+          positions.map(p => ({ x: p.x, y: p.y })),
+          zeroY,
+          area.curveFit
+        );
+
+        const strokePath = this.generatePathData(
+          positions.map(p => ({ x: p.x, y: p.y })),
+          area.curveFit
+        );
+
+        // Add deferred labels for points
+        positions.forEach(pos => {
+          const percent = total > 0 ? (pos.point.value / total) * 100 : 0;
+          const shouldShowValue = this.evaluateShowCondition(pos.point.showValue, pos.point.value, percent);
+          const shouldShowPercent = this.evaluateShowCondition(pos.point.showPercent, pos.point.value, percent);
+          const valueString = this.formatValueString(
+            pos.point.value,
+            percent,
+            shouldShowValue,
+            shouldShowPercent,
+            pos.point.valueFormat
+          );
+
+          if (valueString) {
+            deferredLabels.push({
+              x: pos.x,
+              y: pos.y - 10,  // Above the point
+              text: valueString,
+              anchor: 'middle',
+              fontSize: 12,
+              fill: pos.point.labelFill || '#333'
+            });
+          }
+        });
+
+        return svg`
+          <!-- Area fill -->
+          <path
+            d="${areaPath}"
+            fill="${area.fill}"
+            fill-opacity="${area.fillOpacity}"
+            stroke="none"
+            data-shape-index="${areaIndex}"
+            data-area="true"
+          />
+          <!-- Top edge stroke -->
+          <path
+            d="${strokePath}"
+            fill="none"
+            stroke="${area.stroke}"
+            stroke-width="${area.strokeWidth}"
+            data-shape-index="${areaIndex}"
+            data-area-stroke="true"
+          />
+          <!-- Points -->
+          ${positions.map((pos, pointIndex) => {
+            const pointFill = pos.point.fill || area.originalFill || area.fill;
+            return svg`
+              <circle
+                cx="${pos.x}"
+                cy="${pos.y}"
+                r="4"
+                fill="${pointFill}"
+                stroke="white"
+                stroke-width="1"
+                data-shape-index="${areaIndex}"
+                data-point-index="${pointIndex}"
+              />
+            `;
+          })}
+        `;
+      })}
+    `;
+  }
+
+  private renderStackedAreas(
+    areas: AreaData[],
+    padding: { top: number; right: number; bottom: number; left: number },
+    chartWidth: number,
+    chartHeight: number,
+    range: ValueRange,
+    total: number,
+    deferredLabels: DeferredLabel[],
+    labelPositions: Map<string, number>
+  ): SVGTemplateResult {
+    const baselines = this.calculateStackedAreaBaselines(
+      areas, padding, chartWidth, chartHeight, range, labelPositions
+    );
+
+    return svg`
+      ${areas.map((area, areaIndex) => {
+        if (area.points.length === 0) return '';
+
+        const topPoints = baselines.topPoints[areaIndex];
+        const bottomPoints = baselines.bottomPoints[areaIndex];
+
+        if (!topPoints || !bottomPoints) return '';
+
+        const areaPath = this.generateStackedAreaPath(topPoints, bottomPoints, area.curveFit);
+        const strokePath = this.generatePathData(topPoints, area.curveFit);
+
+        // Add deferred labels for points on the top edge
+        topPoints.forEach((pos, pointIndex) => {
+          const point = area.points[pointIndex];
+          if (!point) return;
+
+          const percent = total > 0 ? (point.value / total) * 100 : 0;
+          const shouldShowValue = this.evaluateShowCondition(point.showValue, point.value, percent);
+          const shouldShowPercent = this.evaluateShowCondition(point.showPercent, point.value, percent);
+          const valueString = this.formatValueString(
+            point.value,
+            percent,
+            shouldShowValue,
+            shouldShowPercent,
+            point.valueFormat
+          );
+
+          if (valueString) {
+            deferredLabels.push({
+              x: pos.x,
+              y: pos.y - 10,  // Above the point
+              text: valueString,
+              anchor: 'middle',
+              fontSize: 12,
+              fill: point.labelFill || '#333'
+            });
+          }
+        });
+
+        return svg`
+          <!-- Area fill -->
+          <path
+            d="${areaPath}"
+            fill="${area.fill}"
+            fill-opacity="${area.fillOpacity}"
+            stroke="none"
+            data-shape-index="${areaIndex}"
+            data-area="true"
+          />
+          <!-- Top edge stroke -->
+          <path
+            d="${strokePath}"
+            fill="none"
+            stroke="${area.stroke}"
+            stroke-width="${area.strokeWidth}"
+            data-shape-index="${areaIndex}"
+            data-area-stroke="true"
+          />
+          <!-- Points on top edge -->
+          ${topPoints.map((pos, pointIndex) => {
+            const point = area.points[pointIndex];
+            if (!point) return '';
+            const pointFill = point.fill || area.originalFill || area.fill;
+            return svg`
+              <circle
+                cx="${pos.x}"
+                cy="${pos.y}"
+                r="4"
+                fill="${pointFill}"
+                stroke="white"
+                stroke-width="1"
+                data-shape-index="${areaIndex}"
+                data-point-index="${pointIndex}"
+              />
+            `;
+          })}
+        `;
+      })}
+    `;
+  }
+
+  // ============================================================================
   // Bubble Rendering
   // ============================================================================
 
@@ -3020,6 +3602,7 @@ export class Chart extends AxisChart {
 
     const bars = this.getFlattenedBars();
     const lines = this.getLines();
+    const areas = this.getAreas();
     const bubbles = this.getBubbles();
 
     // If we have stacked bars, return segment labels
@@ -3056,6 +3639,16 @@ export class Chart extends AxisChart {
         } as DimensionlessLegendItem);
       });
 
+      // Also add area items if present (combo chart with stacked bars + areas)
+      areas.forEach(area => {
+        legendItems.push({
+          label: area.label,
+          color: area.originalFill || area.fill,
+          dimensionless: true,
+          shape: 'square'  // Areas use square shape (filled regions)
+        } as DimensionlessLegendItem);
+      });
+
       return legendItems;
     }
 
@@ -3071,6 +3664,18 @@ export class Chart extends AxisChart {
         value: bar.value,
         shape: 'square'
       });
+    });
+
+    // Add area items (shape: square)
+    // Areas are dimensionless - they show trend, not single aggregate value
+    // Use originalFill for legend (fill may be pattern URL)
+    areas.forEach(area => {
+      items.push({
+        label: area.label,
+        color: area.originalFill || area.fill,
+        dimensionless: true,
+        shape: 'square'  // Areas use square shape (filled regions)
+      } as DimensionlessLegendItem);
     });
 
     // Add line items (shape: line)
@@ -3109,10 +3714,12 @@ export class Chart extends AxisChart {
   protected override getChartTypeName(): string {
     const hasBars = this.getFlattenedBars().length > 0;
     const hasLines = this.getLines().length > 0;
+    const hasAreas = this.getAreas().length > 0;
     const hasBubbles = this.getBubbles().length > 0;
 
     const types: string[] = [];
     if (hasBars) types.push('bar');
+    if (hasAreas) types.push('area');
     if (hasLines) types.push('line');
     if (hasBubbles) types.push('bubble');
 
@@ -3127,6 +3734,7 @@ export class Chart extends AxisChart {
   protected override getDataSummary(): string {
     const bars = this.getFlattenedBars();
     const lines = this.getLines();
+    const areas = this.getAreas();
     const bubbles = this.getBubbles();
 
     const parts: string[] = [];
@@ -3136,6 +3744,12 @@ export class Chart extends AxisChart {
       const min = Math.min(...values);
       const max = Math.max(...values);
       parts.push(`${bars.length} bar${bars.length !== 1 ? 's' : ''}, values from ${min} to ${max}`);
+    }
+
+    if (areas.length > 0) {
+      const totalPoints = areas.reduce((sum, area) => sum + area.points.length, 0);
+      const stacking = areas.length > 1 && !this.overlapping ? 'stacked' : 'overlapping';
+      parts.push(`${areas.length} ${stacking} area${areas.length !== 1 ? 's' : ''} with ${totalPoints} point${totalPoints !== 1 ? 's' : ''}`);
     }
 
     if (lines.length > 0) {

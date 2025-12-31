@@ -83,47 +83,57 @@ Comprehensive test coverage implemented across unit, component, integration, and
 
 ### Area Charts
 
-**Status:** Not Started
+**Status:** Complete
 **Priority:** Important
 
 **Problem:** Area charts (filled line charts) are a very common visualization type that the library doesn't support.
 
-**Requirements:**
+**Implementation:**
 
 1. **Basic Area**
-   - Line with filled area below (to zero line or chart bottom)
-   - `fill` attribute on `<dc-line>` triggers area mode
-   - `fill-opacity` for transparency
+   - New `<dc-area>` element for filled area charts
+   - Areas extend from data points down to the zero line
+   - `fill-opacity` for transparency (default: 0.5)
+   - Full pattern fill support
 
 2. **Stacked Areas**
-   - Multiple `<dc-line>` elements with fills stack on each other
-   - `stacked` attribute on chart enables stacking
+   - Multiple `<dc-area>` elements stack by default
+   - `overlapping` attribute on chart disables stacking for comparisons
+   - Uses cumulative baselines for proper stacking
 
-3. **Gradient Fills**
-   - Support vertical gradients (darker at bottom)
-   - Use SVG gradient definitions within the chart
+3. **Curve Fitting**
+   - All curve-fit methods supported: linear, smooth, monotone, step
+   - Inherits from chart-level `curve-fit` if not specified
 
-**Proposed API:**
+**Note:** Gradient fills deferred to future enhancement.
+
+**API:**
 ```html
 <!-- Basic area chart -->
 <dc-chart>
-  <dc-line fill="#4CAF50" fill-opacity="0.3" stroke="#4CAF50">
+  <dc-area fill="#4CAF50" label="Revenue">
     <dc-point value="10" label="Jan"></dc-point>
     <dc-point value="25" label="Feb"></dc-point>
     <dc-point value="15" label="Mar"></dc-point>
-  </dc-line>
+  </dc-area>
 </dc-chart>
 
-<!-- Stacked area chart -->
-<dc-chart stacked>
-  <dc-line fill="#4CAF50" fill-opacity="0.7" label="Product A">
+<!-- Stacked area chart (default) -->
+<dc-chart>
+  <dc-area fill="#4CAF50" label="Product A">
     <dc-point value="10" label="Q1"></dc-point>
     <dc-point value="20" label="Q2"></dc-point>
-  </dc-line>
-  <dc-line fill="#2196F3" fill-opacity="0.7" label="Product B">
+  </dc-area>
+  <dc-area fill="#2196F3" label="Product B">
     <dc-point value="15" label="Q1"></dc-point>
     <dc-point value="25" label="Q2"></dc-point>
-  </dc-line>
+  </dc-area>
+</dc-chart>
+
+<!-- Overlapping areas for comparison -->
+<dc-chart overlapping>
+  <dc-area fill="#4CAF50" fill-opacity="0.3" label="2023">...</dc-area>
+  <dc-area fill="#2196F3" fill-opacity="0.3" label="2024">...</dc-area>
 </dc-chart>
 ```
 

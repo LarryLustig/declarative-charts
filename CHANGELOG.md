@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Area Charts**
+  - New `<dc-area>` element for creating filled area charts
+  - Areas are filled regions bounded by data points above and the zero line below
+  - Multiple areas stack by default (each area's baseline is the cumulative sum of previous areas)
+  - New `overlapping` attribute on `<dc-chart>` to disable stacking for comparisons
+  - Supports all curve-fit methods: linear, smooth, monotone, step
+  - Full pattern fill support inherited from BaseFilledShape
+  - Works in combo charts with bars and lines
+  - New examples page: `examples/areacharts.html`
+
 - **Label Positioning System**
   - New `label-position` attribute for controlling where labels appear on chart elements
   - New offset attributes for fine-tuning: `label-offset-x`, `label-offset-y`, `label-offset-r`
