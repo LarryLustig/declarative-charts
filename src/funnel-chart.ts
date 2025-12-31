@@ -98,6 +98,7 @@ export class FunnelChart extends BaseChart {
     labelOffsetX?: number;
     labelOffsetY?: number;
     labelOffsetR?: number;
+    labelFill?: string;
   }> {
     const stageElements = Array.from(
       this.querySelectorAll('dc-funnel-stage')
@@ -145,7 +146,8 @@ export class FunnelChart extends BaseChart {
         labelPosition: stage.labelPosition ?? this.labelPosition,
         labelOffsetX: stage.labelOffsetX ?? this.labelOffsetX,
         labelOffsetY: stage.labelOffsetY ?? this.labelOffsetY,
-        labelOffsetR: stage.labelOffsetR ?? this.labelOffsetR
+        labelOffsetR: stage.labelOffsetR ?? this.labelOffsetR,
+        labelFill: stage.labelFill ?? this.labelFill
       };
     });
   }
@@ -369,6 +371,7 @@ export class FunnelChart extends BaseChart {
       labelOffsetX?: number;
       labelOffsetY?: number;
       labelOffsetR?: number;
+      labelFill?: string;
     }>;
     padding: { top: number; right: number; bottom: number; left: number };
     chartWidth: number;
@@ -566,7 +569,8 @@ export class FunnelChart extends BaseChart {
         labelPosition: stage.labelPosition,
         labelOffsetX: stage.labelOffsetX,
         labelOffsetY: stage.labelOffsetY,
-        labelOffsetR: stage.labelOffsetR
+        labelOffsetR: stage.labelOffsetR,
+        labelFill: stage.labelFill
       };
     });
 
@@ -614,9 +618,6 @@ export class FunnelChart extends BaseChart {
         const y = stage.y;
         const nextY = y + stage.height;
         const { topLeft, topRight, bottomLeft, bottomRight } = stage;
-
-        // Use originalColor for text contrast (fillColor may be pattern URL)
-        const textColor = this.getContrastingTextColor(stage.originalColor);
 
         // Create polygon points based on whether chevron is enabled
         let polygonPoints: string;
@@ -709,6 +710,10 @@ export class FunnelChart extends BaseChart {
         const offsetX = stage.labelOffsetX || 0;
         const offsetY = stage.labelOffsetY || 0;
         const offsetR = stage.labelOffsetR || 0; // Positive = away from center
+
+        // Calculate text color based on position (inside vs outside)
+        const isInsideShape = position === 'inside';
+        const textColor = this.calculateLabelFill(stage.labelFill, isInsideShape, stage.originalColor);
 
         let labelX: number;
         let textAnchor: string;

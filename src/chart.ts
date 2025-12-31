@@ -22,6 +22,7 @@ interface DeferredLabel {
   text: string;
   anchor?: string;
   fontSize?: number;
+  fill?: string;
 }
 
 // ============================================================================
@@ -74,6 +75,7 @@ interface BarData {
   labelOffsetX?: number;
   labelOffsetY?: number;
   labelOffsetR?: number;
+  labelFill?: string;
 }
 
 interface BarGroupData {
@@ -117,6 +119,7 @@ interface PointData {
   labelOffsetX?: number;
   labelOffsetY?: number;
   labelOffsetR?: number;
+  labelFill?: string;
 }
 
 interface LineData {
@@ -136,6 +139,7 @@ interface LineData {
   labelOffsetX?: number;
   labelOffsetY?: number;
   labelOffsetR?: number;
+  labelFill?: string;
 }
 
 // ============================================================================
@@ -167,6 +171,7 @@ interface BubbleData {
   labelOffsetX?: number;
   labelOffsetY?: number;
   labelOffsetR?: number;
+  labelFill?: string;
 }
 
 /**
@@ -492,7 +497,8 @@ export class Chart extends AxisChart {
       labelPosition: bar.labelPosition ?? this.labelPosition,
       labelOffsetX: bar.labelOffsetX ?? this.labelOffsetX,
       labelOffsetY: bar.labelOffsetY ?? this.labelOffsetY,
-      labelOffsetR: bar.labelOffsetR ?? this.labelOffsetR
+      labelOffsetR: bar.labelOffsetR ?? this.labelOffsetR,
+      labelFill: bar.labelFill ?? this.labelFill
     };
   }
 
@@ -772,6 +778,7 @@ export class Chart extends AxisChart {
       const lineLabelOffsetX = line.labelOffsetX ?? this.labelOffsetX;
       const lineLabelOffsetY = line.labelOffsetY ?? this.labelOffsetY;
       const lineLabelOffsetR = line.labelOffsetR ?? this.labelOffsetR;
+      const lineLabelFill = line.labelFill ?? this.labelFill;
 
       return {
         stroke: lineStroke,
@@ -788,6 +795,7 @@ export class Chart extends AxisChart {
         labelOffsetX: lineLabelOffsetX,
         labelOffsetY: lineLabelOffsetY,
         labelOffsetR: lineLabelOffsetR,
+        labelFill: lineLabelFill,
         points: pointElements.map(point => {
           const popupEl = point.querySelector('dc-popup') as ChartPopup | null;
           const showValue = point.hasAttribute('show-value') ? point.showValue : lineShowValue;
@@ -810,7 +818,8 @@ export class Chart extends AxisChart {
             labelPosition: point.labelPosition ?? lineLabelPosition,
             labelOffsetX: point.labelOffsetX ?? lineLabelOffsetX,
             labelOffsetY: point.labelOffsetY ?? lineLabelOffsetY,
-            labelOffsetR: point.labelOffsetR ?? lineLabelOffsetR
+            labelOffsetR: point.labelOffsetR ?? lineLabelOffsetR,
+            labelFill: point.labelFill ?? lineLabelFill
           };
         })
       };
@@ -870,7 +879,8 @@ export class Chart extends AxisChart {
         labelPosition: bubble.labelPosition ?? this.labelPosition,
         labelOffsetX: bubble.labelOffsetX ?? this.labelOffsetX,
         labelOffsetY: bubble.labelOffsetY ?? this.labelOffsetY,
-        labelOffsetR: bubble.labelOffsetR ?? this.labelOffsetR
+        labelOffsetR: bubble.labelOffsetR ?? this.labelOffsetR,
+        labelFill: bubble.labelFill ?? this.labelFill
       };
     });
 
@@ -1433,7 +1443,7 @@ export class Chart extends AxisChart {
           y="${label.y}"
           text-anchor="${label.anchor || 'middle'}"
           font-size="${label.fontSize || 14}"
-          fill="#333"
+          fill="${label.fill || '#333'}"
         >${label.text}</text>
       `)}
 
@@ -1486,6 +1496,68 @@ export class Chart extends AxisChart {
     } else {
       return this.renderVerticalBars(bars, structure, padding, chartWidth, chartHeight, range, total, isReverse, deferredLabels);
     }
+  }
+
+  // ============================================================================
+  // Label Fill Calculation (Geometric Hit-Testing)
+  // ============================================================================
+
+  /**
+   * Check if a point is inside a rectangular bar.
+   */
+  private isPointInsideBar(
+    pointX: number, pointY: number,
+    barX: number, barY: number, barWidth: number, barHeight: number
+  ): boolean {
+    return pointX >= barX && pointX <= barX + barWidth &&
+           pointY >= barY && pointY <= barY + barHeight;
+  }
+
+  /**
+   * Check if a point is inside a circle (for bubbles).
+   */
+  private isPointInsideCircle(
+    pointX: number, pointY: number,
+    centerX: number, centerY: number, radius: number
+  ): boolean {
+    const dx = pointX - centerX;
+    const dy = pointY - centerY;
+    return (dx * dx + dy * dy) <= (radius * radius);
+  }
+
+  /**
+   * Calculate the fill color for a bar label using geometric hit-testing.
+   */
+  private calculateBarLabelFill(
+    labelX: number, labelY: number,
+    barX: number, barY: number, barWidth: number, barHeight: number,
+    shapeFill: string,
+    explicitFill?: string
+  ): string {
+    const isInside = this.isPointInsideBar(labelX, labelY, barX, barY, barWidth, barHeight);
+    return this.calculateLabelFill(explicitFill, isInside, shapeFill);
+  }
+
+  /**
+   * Calculate the fill color for a bubble label using geometric hit-testing.
+   */
+  private calculateBubbleLabelFill(
+    labelX: number, labelY: number,
+    centerX: number, centerY: number, radius: number,
+    shapeFill: string,
+    explicitFill?: string
+  ): string {
+    const isInside = this.isPointInsideCircle(labelX, labelY, centerX, centerY, radius);
+    return this.calculateLabelFill(explicitFill, isInside, shapeFill);
+  }
+
+  /**
+   * Calculate the fill color for a point label.
+   * Points are small, so labels are typically outside.
+   */
+  private calculatePointLabelFill(explicitFill?: string): string {
+    // Points are small - labels are essentially always outside
+    return this.calculateLabelFill(explicitFill, false, '#ffffff');
   }
 
   /**
@@ -1956,12 +2028,20 @@ export class Chart extends AxisChart {
             bar.labelOffsetR || 0,
             fontSize
           );
+          // Calculate label fill using geometric hit-testing
+          const labelFill = this.calculateBarLabelFill(
+            labelPos.x, labelPos.y,
+            x, y, barWidth, barHeight,
+            bar.originalFill || bar.fill,
+            bar.labelFill
+          );
           deferredLabels.push({
             x: labelPos.x,
             y: labelPos.y,
             text: valueString,
             anchor: labelPos.anchor,
-            fontSize
+            fontSize,
+            fill: labelFill
           });
         }
 
@@ -2092,12 +2172,20 @@ export class Chart extends AxisChart {
             bar.labelOffsetY || 0,
             bar.labelOffsetR || 0
           );
+          // Calculate label fill using geometric hit-testing
+          const labelFill = this.calculateBarLabelFill(
+            labelPos.x, labelPos.y,
+            x, y, barWidth, barHeight,
+            bar.originalFill || bar.fill,
+            bar.labelFill
+          );
           deferredLabels.push({
             x: labelPos.x,
             y: labelPos.y,
             text: valueString,
             anchor: labelPos.anchor,
-            fontSize
+            fontSize,
+            fill: labelFill
           });
         }
 
@@ -2287,12 +2375,15 @@ export class Chart extends AxisChart {
                 pos.labelOffsetR || 0,
                 fontSize
               );
+              // Calculate label fill (points are small, labels are effectively outside)
+              const labelFill = this.calculatePointLabelFill(pos.labelFill);
               deferredLabels.push({
                 x: labelPos.x,
                 y: labelPos.y,
                 text: valueString,
                 anchor: labelPos.anchor,
-                fontSize
+                fontSize,
+                fill: labelFill
               });
             }
 
@@ -2362,12 +2453,20 @@ export class Chart extends AxisChart {
             bubble.labelOffsetR || 0,
             fontSize
           );
+          // Calculate label fill using geometric hit-testing
+          const labelFill = this.calculateBubbleLabelFill(
+            labelPos.x, labelPos.y,
+            x, y, radius,
+            bubble.originalFill || bubble.fill || '#999',
+            bubble.labelFill
+          );
           deferredLabels.push({
             x: labelPos.x,
             y: labelPos.y,
             text: valueString,
             anchor: labelPos.anchor,
-            fontSize
+            fontSize,
+            fill: labelFill
           });
         }
 

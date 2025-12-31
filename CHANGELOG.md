@@ -21,6 +21,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Stage chart stages support 5 positions: `inside`, `outside-left`, `outside-right`, `above`, `below`
   - See API.md "Label Positioning" section for complete documentation
 
+- **Automatic Label Contrast (label-fill)**
+  - New `label-fill` attribute for controlling label text color
+  - Defaults to `"auto"` which automatically calculates optimal contrast based on label position:
+    - Labels inside shapes: contrasts against shape fill color
+    - Labels outside shapes: uses dark text for chart background
+  - Geometric hit-testing determines if labels are inside or outside shapes
+  - Supports all chart types: bars, points/bubbles, pie slices, funnel stages, stage chart stages
+  - Can be overridden with any CSS color value
+  - Fixes unreadable labels when positioning inside dark bars or outside light pie slices
+
 - **Stage Chart Auto-Fit Label Suppression**
   - Labels that don't fit inside small shapes are automatically suppressed
   - Hover popups are automatically enabled when labels are suppressed

@@ -319,6 +319,48 @@ See [API.md](API.md) "Controlling Labels, Values, and Percentages" section for f
 
 See [API.md](API.md) "Label Positioning" section for full documentation.
 
+**Completed - Label Fill Color (`label-fill`):**
+- `label-fill` attribute for controlling label text color
+- Defaults to `"auto"` which calculates optimal contrast based on position:
+  - Labels inside shapes: contrasts against shape fill
+  - Labels outside shapes: uses dark text for chart background
+- Uses geometric hit-testing to determine inside/outside status
+- Can be overridden with any CSS color value
+
+**Future Enhancement - Label Backdrop and Stroke:**
+
+For labels that span multiple backgrounds (e.g., partially inside and outside a shape) or need additional emphasis, a backdrop and stroke system may be added:
+
+```html
+<!-- Backdrop for readability -->
+<dc-bar value="50" label="Sales">
+  <dc-label backdrop backdrop-color="white" backdrop-opacity="0.8" backdrop-padding="4"></dc-label>
+</dc-bar>
+
+<!-- Text stroke for contrast -->
+<dc-bar value="50" label="Sales">
+  <dc-label stroke="white" stroke-width="2"></dc-label>
+</dc-bar>
+
+<!-- Combined approach -->
+<dc-chart label-stroke="white" label-stroke-width="2">
+  ...
+</dc-chart>
+```
+
+This enhancement would provide:
+- `label-backdrop` (boolean) - Add semi-transparent background behind label
+- `label-backdrop-color` - Backdrop fill color (default: contrasting color)
+- `label-backdrop-opacity` - Backdrop transparency (default: 0.8)
+- `label-backdrop-padding` - Padding around text (default: 4)
+- `label-stroke` - Text outline color for "halo" effect
+- `label-stroke-width` - Outline width (default: 2)
+
+Currently deferred as `label-fill="auto"` handles most cases. Backdrop/stroke useful for:
+- Labels spanning shape boundaries
+- Low-contrast fill colors
+- Complex gradient or pattern backgrounds
+
 **Future Enhancement - `<dc-label>` Child Element:**
 
 For complex label configuration, a `<dc-label>` child element may be added in the future. This would allow more advanced customization beyond what attributes provide. Currently deferred to keep the initial implementation simple.

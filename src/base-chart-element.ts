@@ -139,6 +139,19 @@ export abstract class BaseChartElement extends LitElement {
   @property({ type: Number, attribute: 'label-offset-r' })
   labelOffsetR?: number;
 
+  /**
+   * Fill color for labels on this element (SVG text fill).
+   * - "auto" (default): Automatically calculate based on background
+   *   - Inside shapes: Contrast against shape fill color
+   *   - Outside shapes: Use dark text (#333) for light backgrounds
+   * - Any CSS color: Use the specified color
+   * If not set, inherits from parent element or chart-level setting.
+   *
+   * @attr label-fill
+   */
+  @property({ type: String, attribute: 'label-fill' })
+  labelFill?: string;
+
   static styles = css`
     :host {
       display: none !important;
@@ -163,7 +176,8 @@ export abstract class BaseChartElement extends LitElement {
     'label-position',
     'label-offset-x',
     'label-offset-y',
-    'label-offset-r'
+    'label-offset-r',
+    'label-fill'
   ]);
 
   /**

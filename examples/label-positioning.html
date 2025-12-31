@@ -396,13 +396,14 @@
 
             <div>
                 <h3>Outside Left</h3>
-                <pre><code>&lt;dc-funnel-chart width="500" height="350" label-position="outside-left"&gt;
+                <pre><code>&lt;dc-funnel-chart width="500" height="350" label-position="outside-left"
+    padding-left="80"&gt;
   &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="500" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="200" label="Qualified"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="100" label="Customers"&gt;&lt;/dc-funnel-stage&gt;
 &lt;/dc-funnel-chart&gt;</code></pre>
-                <dc-funnel-chart width="500" height="350" label-position="outside-left">
+                <dc-funnel-chart width="500" height="350" label-position="outside-left" padding-left="80">
                     <dc-title>Labels Outside Left</dc-title>
                     <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
                     <dc-funnel-stage value="500" label="Leads"></dc-funnel-stage>
@@ -413,13 +414,14 @@
 
             <div>
                 <h3>Outside Right</h3>
-                <pre><code>&lt;dc-funnel-chart width="500" height="350" label-position="outside-right"&gt;
+                <pre><code>&lt;dc-funnel-chart width="500" height="350" label-position="outside-right"
+    padding-right="80"&gt;
   &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="500" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="200" label="Qualified"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="100" label="Customers"&gt;&lt;/dc-funnel-stage&gt;
 &lt;/dc-funnel-chart&gt;</code></pre>
-                <dc-funnel-chart width="500" height="350" label-position="outside-right">
+                <dc-funnel-chart width="500" height="350" label-position="outside-right" padding-right="80">
                     <dc-title>Labels Outside Right</dc-title>
                     <dc-funnel-stage value="1000" label="Visitors"></dc-funnel-stage>
                     <dc-funnel-stage value="500" label="Leads"></dc-funnel-stage>
@@ -430,13 +432,14 @@
 
             <div>
                 <h3>Mixed with Offsets</h3>
-                <pre><code>&lt;dc-funnel-chart width="500" height="350" chevron="15"&gt;
+                <pre><code>&lt;dc-funnel-chart width="500" height="350" chevron="15"
+    padding-left="60" padding-right="60"&gt;
   &lt;dc-funnel-stage value="1000" label="Step 1"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="600" label="Step 2" label-position="outside-left"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="300" label="Step 3" label-position="outside-right"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="150" label="Step 4" label-offset-y="-5"&gt;&lt;/dc-funnel-stage&gt;
 &lt;/dc-funnel-chart&gt;</code></pre>
-                <dc-funnel-chart width="500" height="350" chevron="15">
+                <dc-funnel-chart width="500" height="350" chevron="15" padding-left="60" padding-right="60">
                     <dc-title>Mixed Positions</dc-title>
                     <dc-funnel-stage value="1000" label="Step 1"></dc-funnel-stage>
                     <dc-funnel-stage value="600" label="Step 2" label-position="outside-left"></dc-funnel-stage>
@@ -453,14 +456,14 @@
 
         <div class="grid">
             <div>
-                <h3>Above and Below</h3>
-                <pre><code>&lt;dc-stage-chart width="500" height="350" label-position="above"&gt;
+                <h3>Outside Left (Vertical)</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="350" label-position="outside-left"&gt;
   &lt;dc-stage value="100" label="Alpha"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="150" label="Beta"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="120" label="Gamma"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="500" height="350" label-position="above" palette="category10">
-                    <dc-title>Labels Above</dc-title>
+                <dc-stage-chart width="500" height="350" label-position="outside-left" palette="category10">
+                    <dc-title>Labels to the Left</dc-title>
                     <dc-stage value="100" label="Alpha"></dc-stage>
                     <dc-stage value="150" label="Beta"></dc-stage>
                     <dc-stage value="120" label="Gamma"></dc-stage>
@@ -468,29 +471,29 @@
             </div>
 
             <div>
-                <h3>Outside Left/Right</h3>
+                <h3>Above/Below (Horizontal)</h3>
                 <pre><code>&lt;dc-stage-chart width="500" height="350" orientation="horizontal"&gt;
-  &lt;dc-stage value="100" label="Start" label-position="outside-left"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="100" label="Start" label-position="above"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="150" label="Middle"&gt;&lt;/dc-stage&gt;
-  &lt;dc-stage value="120" label="End" label-position="outside-right"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="120" label="End" label-position="below"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
                 <dc-stage-chart width="500" height="350" orientation="horizontal" palette="set2">
-                    <dc-title>Horizontal with Side Labels</dc-title>
-                    <dc-stage value="100" label="Start" label-position="outside-left"></dc-stage>
+                    <dc-title>Horizontal with Above/Below Labels</dc-title>
+                    <dc-stage value="100" label="Start" label-position="above"></dc-stage>
                     <dc-stage value="150" label="Middle"></dc-stage>
-                    <dc-stage value="120" label="End" label-position="outside-right"></dc-stage>
+                    <dc-stage value="120" label="End" label-position="below"></dc-stage>
                 </dc-stage-chart>
             </div>
 
             <div>
-                <h3>Below with Shapes</h3>
-                <pre><code>&lt;dc-stage-chart width="500" height="350" shape="circle" label-position="below"&gt;
+                <h3>Outside Right with Shapes</h3>
+                <pre><code>&lt;dc-stage-chart width="500" height="350" shape="circle" label-position="outside-right"&gt;
   &lt;dc-stage value="80" label="Phase 1"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="120" label="Phase 2"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="100" label="Phase 3"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="500" height="350" shape="circle" label-position="below" palette="pastel">
-                    <dc-title>Circles with Labels Below</dc-title>
+                <dc-stage-chart width="500" height="350" shape="circle" label-position="outside-right" palette="pastel">
+                    <dc-title>Circles with Labels Right</dc-title>
                     <dc-stage value="80" label="Phase 1"></dc-stage>
                     <dc-stage value="120" label="Phase 2"></dc-stage>
                     <dc-stage value="100" label="Phase 3"></dc-stage>
@@ -499,15 +502,15 @@
 
             <div>
                 <h3>With Offsets</h3>
-                <pre><code>&lt;dc-stage-chart width="500" height="350" label-position="above" label-offset-y="-10"&gt;
+                <pre><code>&lt;dc-stage-chart width="500" height="350" label-position="outside-left" label-offset-x="-10"&gt;
   &lt;dc-stage value="100" label="Step 1"&gt;&lt;/dc-stage&gt;
-  &lt;dc-stage value="150" label="Step 2" label-offset-x="10"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="150" label="Step 2" label-offset-y="5"&gt;&lt;/dc-stage&gt;
   &lt;dc-stage value="120" label="Step 3" label-offset-r="15"&gt;&lt;/dc-stage&gt;
 &lt;/dc-stage-chart&gt;</code></pre>
-                <dc-stage-chart width="500" height="350" label-position="above" label-offset-y="-10" palette="dark2">
+                <dc-stage-chart width="500" height="350" label-position="outside-left" label-offset-x="-10" palette="dark2">
                     <dc-title>With Various Offsets</dc-title>
                     <dc-stage value="100" label="Step 1"></dc-stage>
-                    <dc-stage value="150" label="Step 2" label-offset-x="10"></dc-stage>
+                    <dc-stage value="150" label="Step 2" label-offset-y="5"></dc-stage>
                     <dc-stage value="120" label="Step 3" label-offset-r="15"></dc-stage>
                 </dc-stage-chart>
             </div>

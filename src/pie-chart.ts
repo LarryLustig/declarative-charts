@@ -75,6 +75,7 @@ export class PieChart extends BaseChart {
     labelOffsetX?: number;
     labelOffsetY?: number;
     labelOffsetR?: number;
+    labelFill?: string;
   }> {
     const sliceElements = Array.from(
       this.querySelectorAll('dc-pie-slice')
@@ -120,11 +121,29 @@ export class PieChart extends BaseChart {
         labelPosition: slice.labelPosition ?? this.labelPosition,
         labelOffsetX: slice.labelOffsetX ?? this.labelOffsetX,
         labelOffsetY: slice.labelOffsetY ?? this.labelOffsetY,
-        labelOffsetR: slice.labelOffsetR ?? this.labelOffsetR
+        labelOffsetR: slice.labelOffsetR ?? this.labelOffsetR,
+        labelFill: slice.labelFill ?? this.labelFill
       };
     });
   }
 
+
+  /**
+   * Check if a point is inside a pie slice (within the ring between inner and outer radius).
+   * Used for label fill calculation.
+   */
+  private isPointInsidePieRing(
+    pointX: number, pointY: number,
+    centerX: number, centerY: number,
+    innerRadius: number, outerRadius: number
+  ): boolean {
+    const dx = pointX - centerX;
+    const dy = pointY - centerY;
+    const distanceSquared = dx * dx + dy * dy;
+    const innerSquared = innerRadius * innerRadius;
+    const outerSquared = outerRadius * outerRadius;
+    return distanceSquared >= innerSquared && distanceSquared <= outerSquared;
+  }
 
   /**
    * Calculate layout for all slices. Single source of truth for rendering, legend, and logging.
@@ -154,6 +173,7 @@ export class PieChart extends BaseChart {
       autoPopup?: boolean;
       passthroughAttrs?: Record<string, string>;
       valueFormat?: string;
+      labelFill?: string;
     }>;
     centerX: number;
     centerY: number;
@@ -301,7 +321,8 @@ export class PieChart extends BaseChart {
         popup: slice.popup,
         autoPopup: slice.autoPopup,
         passthroughAttrs: slice.passthroughAttrs,
-        valueFormat: slice.valueFormat
+        valueFormat: slice.valueFormat,
+        labelFill: slice.labelFill
       };
     });
 
@@ -407,6 +428,14 @@ export class PieChart extends BaseChart {
         // Determine if any popup should show (explicit or auto)
         const hasPopup = slice.popup || this.shouldShowAutoPopup(slice.autoPopup);
 
+        // Calculate label fill using geometric hit-testing
+        const isInsideSlice = this.isPointInsidePieRing(
+          slice.labelX, slice.labelY,
+          centerX, centerY,
+          innerRadiusPixels, radius
+        );
+        const labelFill = this.calculateLabelFill(slice.labelFill, isInsideSlice, slice.originalColor);
+
         return svg`
           <!-- Slice path -->
           <path
@@ -430,7 +459,7 @@ export class PieChart extends BaseChart {
               dominant-baseline="middle"
               font-size="14"
               font-weight="bold"
-              fill="white"
+              fill="${labelFill}"
             >
               ${slice.label}
             </text>
@@ -444,7 +473,7 @@ export class PieChart extends BaseChart {
               text-anchor="${slice.textAnchor}"
               dominant-baseline="middle"
               font-size="12"
-              fill="white"
+              fill="${labelFill}"
             >
               ${valueString}
             </text>

@@ -171,6 +171,7 @@ export class StageChart extends BaseChart {
     labelOffsetX?: number;
     labelOffsetY?: number;
     labelOffsetR?: number;
+    labelFill?: string;
   }> {
     const stageElements = Array.from(
       this.querySelectorAll('dc-stage')
@@ -213,7 +214,8 @@ export class StageChart extends BaseChart {
         labelPosition: stage.labelPosition ?? this.labelPosition,
         labelOffsetX: stage.labelOffsetX ?? this.labelOffsetX,
         labelOffsetY: stage.labelOffsetY ?? this.labelOffsetY,
-        labelOffsetR: stage.labelOffsetR ?? this.labelOffsetR
+        labelOffsetR: stage.labelOffsetR ?? this.labelOffsetR,
+        labelFill: stage.labelFill ?? this.labelFill
       };
     });
   }
@@ -597,6 +599,7 @@ export class StageChart extends BaseChart {
       labelOffsetX?: number;
       labelOffsetY?: number;
       labelOffsetR?: number;
+      labelFill?: string;
     }>;
     connectorConfig: ConnectorConfig;
     padding: { top: number; right: number; bottom: number; left: number };
@@ -852,7 +855,8 @@ export class StageChart extends BaseChart {
         labelPosition: stage.labelPosition,
         labelOffsetX: stage.labelOffsetX,
         labelOffsetY: stage.labelOffsetY,
-        labelOffsetR: stage.labelOffsetR
+        labelOffsetR: stage.labelOffsetR,
+        labelFill: stage.labelFill
       };
     });
 
@@ -1106,7 +1110,10 @@ export class StageChart extends BaseChart {
       ${stages.map((stage) => {
         if (stage.isHidden) return '';
 
-        const textColor = this.getContrastingTextColor(stage.originalColor);
+        // Calculate label fill based on position (inside vs outside shape)
+        const position = stage.labelPosition || 'inside';
+        const isInsideShape = position === 'inside';
+        const textColor = this.calculateLabelFill(stage.labelFill, isInsideShape, stage.originalColor);
         const percent = total > 0 ? (stage.value / total) * 100 : 0;
         const shouldShowValue = this.evaluateShowCondition(stage.showValue, stage.value, percent);
         const shouldShowLabel = this.evaluateShowCondition(stage.showLabel, stage.value, percent);
@@ -1150,8 +1157,7 @@ export class StageChart extends BaseChart {
         const centerX = stage.x + stage.width / 2;
         const centerY = stage.y + stage.height / 2;
 
-        // Calculate label position based on labelPosition attribute
-        const position = stage.labelPosition || 'inside';
+        // Calculate label position based on labelPosition attribute (position already defined above for textColor)
         const offsetX = stage.labelOffsetX || 0;
         const offsetY = stage.labelOffsetY || 0;
         const offsetR = stage.labelOffsetR || 0; // Positive = away from center

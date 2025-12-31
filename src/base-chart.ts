@@ -348,6 +348,17 @@ export abstract class BaseChart extends LitElement {
   @property({ type: Number, attribute: 'label-offset-r' })
   labelOffsetR?: number;
 
+  /**
+   * Fill color for labels (SVG text fill).
+   * - "auto" (default): Automatically calculate based on background
+   *   - Inside shapes: Contrast against shape fill color
+   *   - Outside shapes: Use dark text (#333) for light backgrounds
+   * - Any CSS color: Use the specified color
+   * Can be overridden per element.
+   */
+  @property({ type: String, attribute: 'label-fill' })
+  labelFill?: string;
+
   // ============================================================================
   // Number Formatting Properties
   // ============================================================================
@@ -1307,6 +1318,35 @@ export abstract class BaseChart extends LitElement {
   protected getContrastingTextColor(bgColor: string): string {
     const luminance = this.getLuminance(bgColor);
     return luminance > 0.5 ? '#333' : 'white';
+  }
+
+  /**
+   * Calculate the fill color for a label based on its position relative to a shape.
+   * This is a common utility for all chart types that need label fill calculation.
+   *
+   * @param explicitFill User-specified label-fill value (or undefined for auto)
+   * @param isInsideShape Whether the label center is inside the shape (determined by caller)
+   * @param shapeFill Fill color of the shape
+   * @param chartBackground Background color of the chart (default white)
+   * @returns The fill color to use for the label
+   */
+  protected calculateLabelFill(
+    explicitFill: string | undefined,
+    isInsideShape: boolean,
+    shapeFill: string,
+    chartBackground = '#ffffff'
+  ): string {
+    // If explicit fill is specified (and not "auto"), use it
+    if (explicitFill && explicitFill !== 'auto') {
+      return explicitFill;
+    }
+
+    // Calculate contrast based on whether label is inside or outside the shape
+    if (isInsideShape) {
+      return this.getContrastingTextColor(shapeFill);
+    } else {
+      return this.getContrastingTextColor(chartBackground);
+    }
   }
 
   /**

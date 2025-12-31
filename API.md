@@ -407,6 +407,27 @@ Control where labels appear on chart elements using `label-position` and offset 
 | `label-offset-x` | number | Horizontal adjustment in viewBox units (positive = right) |
 | `label-offset-y` | number | Vertical adjustment in viewBox units (positive = down) |
 | `label-offset-r` | number | Radial adjustment (positive = away from reference point) |
+| `label-fill` | string | Text fill color: `"auto"` (default) or any CSS color |
+
+### Label Fill Color
+
+The `label-fill` attribute controls the text color of labels. By default (`"auto"`), the color is automatically calculated for optimal contrast:
+
+- **Inside shapes**: Uses a contrasting color against the shape's fill (e.g., white text on dark shapes, dark text on light shapes)
+- **Outside shapes**: Uses dark text (`#333`) for readability against the chart background
+
+When `label-position` changes, `label-fill="auto"` automatically recalculates to ensure readability. You can override with any CSS color value.
+
+```html
+<!-- Auto contrast (default) -->
+<dc-chart label-position="inside-center">
+  <dc-bar value="100" fill="#1e3a5f" label="Dark bar"></dc-bar>  <!-- White text auto -->
+  <dc-bar value="80" fill="#f0f0f0" label="Light bar"></dc-bar>  <!-- Dark text auto -->
+</dc-chart>
+
+<!-- Explicit color -->
+<dc-bar value="100" label="Custom" label-fill="#ff6600"></dc-bar>
+```
 
 ### Position Values by Element Type
 
