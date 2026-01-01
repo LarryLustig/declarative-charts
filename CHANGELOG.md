@@ -19,6 +19,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Works in combo charts with bars and lines
   - New examples page: `examples/areacharts.html`
 
+- **Custom Legends**
+  - New `<dc-legend-item>` element for defining legend entries manually
+  - Use inside `<dc-legend>` to override auto-generated legend items
+  - Enables semantic coloring where multiple data elements share the same color but represent different concepts
+  - Supports `fill`, `stroke`, `stroke-dasharray`, `shape`, `pattern`, and `value` attributes
+  - Items with `value` attribute display values and percentages (controlled by `show-value`/`show-percent` on legend)
+  - Items without `value` are treated as dimensionless (label-only)
+  - Shape defaults to "line" when only stroke is set
+
 - **Label Positioning System**
   - New `label-position` attribute for controlling where labels appear on chart elements
   - New offset attributes for fine-tuning: `label-offset-x`, `label-offset-y`, `label-offset-r`

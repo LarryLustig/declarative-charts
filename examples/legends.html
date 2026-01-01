@@ -363,6 +363,151 @@
         </div>
     </div>
 
+    <div class="example">
+        <h2>Custom Legends</h2>
+        <p>Use <code>&lt;dc-legend-item&gt;</code> elements to define legend entries manually. This is useful for semantic coloring where multiple data elements share the same color but represent different concepts.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Semantic Coloring</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Department Performance&lt;/dc-title&gt;
+  &lt;dc-bar value="85" fill="#4CAF50" label="Engineering"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="78" fill="#FF9800" label="Marketing"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="92" fill="#4CAF50" label="Sales"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="65" fill="#F44336" label="Operations"&gt;&lt;/dc-bar&gt;
+  &lt;dc-legend&gt;
+    &lt;dc-legend-item fill="#4CAF50" label="Above Target"&gt;&lt;/dc-legend-item&gt;
+    &lt;dc-legend-item fill="#FF9800" label="Near Target"&gt;&lt;/dc-legend-item&gt;
+    &lt;dc-legend-item fill="#F44336" label="Below Target"&gt;&lt;/dc-legend-item&gt;
+  &lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Department Performance</dc-title>
+                    <dc-bar value="85" fill="#4CAF50" label="Engineering"></dc-bar>
+                    <dc-bar value="78" fill="#FF9800" label="Marketing"></dc-bar>
+                    <dc-bar value="92" fill="#4CAF50" label="Sales"></dc-bar>
+                    <dc-bar value="65" fill="#F44336" label="Operations"></dc-bar>
+                    <dc-legend>
+                        <dc-legend-item fill="#4CAF50" label="Above Target"></dc-legend-item>
+                        <dc-legend-item fill="#FF9800" label="Near Target"></dc-legend-item>
+                        <dc-legend-item fill="#F44336" label="Below Target"></dc-legend-item>
+                    </dc-legend>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Aggregated Values</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Department Performance&lt;/dc-title&gt;
+  &lt;dc-bar value="85" fill="#4CAF50" label="Engineering"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="78" fill="#FF9800" label="Marketing"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="92" fill="#4CAF50" label="Sales"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="65" fill="#F44336" label="Operations"&gt;&lt;/dc-bar&gt;
+  &lt;dc-legend show-value show-percent&gt;
+    &lt;dc-legend-item fill="#4CAF50" label="Above Target" value="177"&gt;&lt;/dc-legend-item&gt;
+    &lt;dc-legend-item fill="#FF9800" label="Near Target" value="78"&gt;&lt;/dc-legend-item&gt;
+    &lt;dc-legend-item fill="#F44336" label="Below Target" value="65"&gt;&lt;/dc-legend-item&gt;
+  &lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Department Performance</dc-title>
+                    <dc-bar value="85" fill="#4CAF50" label="Engineering"></dc-bar>
+                    <dc-bar value="78" fill="#FF9800" label="Marketing"></dc-bar>
+                    <dc-bar value="92" fill="#4CAF50" label="Sales"></dc-bar>
+                    <dc-bar value="65" fill="#F44336" label="Operations"></dc-bar>
+                    <dc-legend show-value show-percent>
+                        <dc-legend-item fill="#4CAF50" label="Above Target" value="177"></dc-legend-item>
+                        <dc-legend-item fill="#FF9800" label="Near Target" value="78"></dc-legend-item>
+                        <dc-legend-item fill="#F44336" label="Below Target" value="65"></dc-legend-item>
+                    </dc-legend>
+                </dc-chart>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div>
+                <h3>Line Legend</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Actual vs Target&lt;/dc-title&gt;
+  &lt;dc-line stroke="#2196F3" label="Actual"&gt;
+    &lt;dc-point value="10" label="Jan"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="25" label="Feb"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="15" label="Mar"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="30" label="Apr"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line stroke="#F44336" stroke-dasharray="dashed" label="Target"&gt;
+    &lt;dc-point value="20" label="Jan"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="20" label="Feb"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="20" label="Mar"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="20" label="Apr"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-legend&gt;
+    &lt;dc-legend-item stroke="#2196F3" label="Actual" shape="line"&gt;&lt;/dc-legend-item&gt;
+    &lt;dc-legend-item stroke="#F44336" label="Target" shape="line"&gt;&lt;/dc-legend-item&gt;
+  &lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Actual vs Target</dc-title>
+                    <dc-line stroke="#2196F3" label="Actual">
+                        <dc-point value="10" label="Jan"></dc-point>
+                        <dc-point value="25" label="Feb"></dc-point>
+                        <dc-point value="15" label="Mar"></dc-point>
+                        <dc-point value="30" label="Apr"></dc-point>
+                    </dc-line>
+                    <dc-line stroke="#F44336" stroke-dasharray="dashed" label="Target">
+                        <dc-point value="20" label="Jan"></dc-point>
+                        <dc-point value="20" label="Feb"></dc-point>
+                        <dc-point value="20" label="Mar"></dc-point>
+                        <dc-point value="20" label="Apr"></dc-point>
+                    </dc-line>
+                    <dc-legend>
+                        <dc-legend-item stroke="#2196F3" label="Actual" shape="line"></dc-legend-item>
+                        <dc-legend-item stroke="#F44336" label="Target" shape="line"></dc-legend-item>
+                    </dc-legend>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Mixed Shapes</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Sales Analysis&lt;/dc-title&gt;
+  &lt;dc-bar value="45" fill="#2196F3" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="52" fill="#2196F3" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="38" fill="#2196F3" label="Q3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="61" fill="#2196F3" label="Q4"&gt;&lt;/dc-bar&gt;
+  &lt;dc-line stroke="#F44336" label="Trend"&gt;
+    &lt;dc-point value="40" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="45" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="50" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="55" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-legend&gt;
+    &lt;dc-legend-item fill="#2196F3" label="Quarterly Sales" shape="square"&gt;&lt;/dc-legend-item&gt;
+    &lt;dc-legend-item stroke="#F44336" label="Trend Line" shape="line"&gt;&lt;/dc-legend-item&gt;
+  &lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Sales Analysis</dc-title>
+                    <dc-bar value="45" fill="#2196F3" label="Q1"></dc-bar>
+                    <dc-bar value="52" fill="#2196F3" label="Q2"></dc-bar>
+                    <dc-bar value="38" fill="#2196F3" label="Q3"></dc-bar>
+                    <dc-bar value="61" fill="#2196F3" label="Q4"></dc-bar>
+                    <dc-line stroke="#F44336" label="Trend">
+                        <dc-point value="40" label="Q1"></dc-point>
+                        <dc-point value="45" label="Q2"></dc-point>
+                        <dc-point value="50" label="Q3"></dc-point>
+                        <dc-point value="55" label="Q4"></dc-point>
+                    </dc-line>
+                    <dc-legend>
+                        <dc-legend-item fill="#2196F3" label="Quarterly Sales" shape="square"></dc-legend-item>
+                        <dc-legend-item stroke="#F44336" label="Trend Line" shape="line"></dc-legend-item>
+                    </dc-legend>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="../src/index.ts"></script>
     <script src="examples.js"></script>
 </body>

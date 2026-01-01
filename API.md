@@ -1248,6 +1248,7 @@ Adds a legend to any chart type.
 
 **Child Elements:**
 - `<dc-title>` - Optional custom title for the legend
+- `<dc-legend-item>` - Custom legend items (see below)
 
 **Examples:**
 
@@ -1271,6 +1272,61 @@ Legend with custom position and title:
     <dc-title>Products</dc-title>
   </dc-legend>
 </dc-pie-chart>
+```
+
+### `<dc-legend-item>`
+
+Custom legend item for defining legend entries manually. Use inside `<dc-legend>` to override auto-generated legend items.
+
+This is useful for semantic coloring scenarios where multiple data elements share the same color but represent different concepts (e.g., "Above Target" vs "Below Target").
+
+**Attributes:**
+- `label` (string, required) - Legend item label
+- `fill` (string) - Fill color for squares/circles (bars, areas, pie slices)
+- `stroke` (string) - Stroke color for lines
+- `stroke-dasharray` (string) - Dash pattern: "dashed", "dotted", or numeric (e.g., "5 3")
+- `shape` (string) - Shape indicator: "square" (default), "circle", "line"
+- `pattern` (string) - Pattern type for patterned fills
+- `value` (number) - Value for aggregated legends (enables value/percent display)
+
+**Behavior:**
+- When `<dc-legend-item>` children are present, they completely replace auto-generated legend items
+- Items with `value` attribute can display values and percentages (controlled by `show-value`/`show-percent` on `<dc-legend>`)
+- Items without `value` are treated as dimensionless (no value/percent display)
+- Shape defaults to "line" when only `stroke` is set (no `fill`)
+
+**Examples:**
+
+Semantic coloring legend:
+```html
+<dc-chart width="600" height="400">
+  <dc-bar value="85" fill="#4CAF50" label="Engineering"></dc-bar>
+  <dc-bar value="78" fill="#FF9800" label="Marketing"></dc-bar>
+  <dc-bar value="92" fill="#4CAF50" label="Sales"></dc-bar>
+  <dc-bar value="72" fill="#F44336" label="Operations"></dc-bar>
+  <dc-legend>
+    <dc-legend-item fill="#4CAF50" label="Above Target"></dc-legend-item>
+    <dc-legend-item fill="#FF9800" label="Near Target"></dc-legend-item>
+    <dc-legend-item fill="#F44336" label="Below Target"></dc-legend-item>
+  </dc-legend>
+</dc-chart>
+```
+
+Aggregated legend with values:
+```html
+<dc-legend show-value show-percent>
+  <dc-legend-item fill="#4CAF50" label="Above Target" value="177"></dc-legend-item>
+  <dc-legend-item fill="#FF9800" label="Near Target" value="78"></dc-legend-item>
+  <dc-legend-item fill="#F44336" label="Below Target" value="72"></dc-legend-item>
+</dc-legend>
+```
+
+Line legend with different stroke styles:
+```html
+<dc-legend>
+  <dc-legend-item stroke="#2196F3" label="Actual" shape="line"></dc-legend-item>
+  <dc-legend-item stroke="#F44336" stroke-dasharray="dashed" label="Target" shape="line"></dc-legend-item>
+</dc-legend>
 ```
 
 ### `<dc-title>`

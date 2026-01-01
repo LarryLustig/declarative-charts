@@ -4,6 +4,7 @@ import { SVG_TEXT_STYLE_ATTRS, HTML_TO_SVG_WARNINGS, type TitleStyleWarning } fr
 import type { ChartTitle } from './chart-title.js';
 import { ChartSwatch } from './chart-swatch.js';
 import { NumberFormatter } from './format.js';
+import type { ChartLegendItem } from './chart-legend-item.js';
 
 /**
  * Shape types for legend indicators.
@@ -209,6 +210,51 @@ export class ChartLegend extends LitElement {
   }
 
   /**
+   * Get custom legend items defined as child `<dc-legend-item>` elements.
+   * When custom items are present, they completely replace auto-generated legend items.
+   *
+   * @returns Array of LegendItems if custom items are defined, null otherwise
+   *
+   * @example
+   * ```html
+   * <dc-legend>
+   *   <dc-legend-item fill="#4CAF50" label="Above Target"></dc-legend-item>
+   *   <dc-legend-item fill="#FF9800" label="Near Target"></dc-legend-item>
+   * </dc-legend>
+   * ```
+   */
+  getCustomItems(): LegendItem[] | null {
+    const itemElements = Array.from(this.querySelectorAll('dc-legend-item'))
+      .filter(el => !el.hasAttribute('hidden')) as ChartLegendItem[];
+
+    if (itemElements.length === 0) return null;
+
+    return itemElements
+      .filter(item => item.label) // Skip items without labels
+      .map(item => {
+        const color = item.getEffectiveColor();
+        const shape = item.getEffectiveShape();
+
+        // If value is provided, return ValuedLegendItem; otherwise DimensionlessLegendItem
+        if (item.value !== undefined) {
+          return {
+            label: item.label || '',
+            color,
+            shape,
+            value: item.value,
+          } as ValuedLegendItem;
+        } else {
+          return {
+            label: item.label || '',
+            color,
+            shape,
+            dimensionless: true,
+          } as DimensionlessLegendItem;
+        }
+      });
+  }
+
+  /**
    * Get SVG presentation attributes to pass through to the rendered legend text elements.
    * Only returns attributes that are valid SVG text styling attributes.
    * @returns Object with attribute names and values
@@ -398,7 +444,11 @@ export class ChartLegend extends LitElement {
     chartPercentFormat: string = 'percent 1',
     chartLocale?: string
   ): { width: number; height: number } {
-    if (!items || items.length === 0) {
+    // Use custom items if defined, otherwise use auto-generated items
+    const customItems = this.getCustomItems();
+    const effectiveItems = customItems ?? items;
+
+    if (!effectiveItems || effectiveItems.length === 0) {
       return { width: 0, height: 0 };
     }
 
@@ -415,7 +465,7 @@ export class ChartLegend extends LitElement {
     const formatter = new NumberFormatter({ locale: chartLocale });
 
     const itemsWithDisplay = this.prepareItems(
-      items, showLabel, showValue, showPercent,
+      effectiveItems, showLabel, showValue, showPercent,
       formatter, valueFormat, percentFormat
     );
     const titleInfo = this.getTitleInfo();
@@ -502,7 +552,7 @@ export class ChartLegend extends LitElement {
       }
 
       const contentWidth = numColumns * columnWidth + (numColumns - 1) * columnGap;
-      const rowCount = Math.ceil(items.length / numColumns);
+      const rowCount = Math.ceil(effectiveItems.length / numColumns);
 
       legendWidth = contentWidth + titleWidthContribution + 2 * padding;
       legendHeight = rowCount * itemHeight + titleHeightContribution + 2 * padding;
@@ -570,7 +620,11 @@ export class ChartLegend extends LitElement {
     height: number;
     svg: SVGTemplateResult;
   } {
-    if (!items || items.length === 0) {
+    // Use custom items if defined, otherwise use auto-generated items
+    const customItems = this.getCustomItems();
+    const effectiveItems = customItems ?? items;
+
+    if (!effectiveItems || effectiveItems.length === 0) {
       return { width: 0, height: 0, svg: svg`` };
     }
 
@@ -587,7 +641,7 @@ export class ChartLegend extends LitElement {
     const formatter = new NumberFormatter({ locale: chartLocale });
 
     const itemsWithDisplay = this.prepareItems(
-      items, showLabel, showValue, showPercent,
+      effectiveItems, showLabel, showValue, showPercent,
       formatter, valueFormat, percentFormat
     );
     const titleInfo = this.getTitleInfo();

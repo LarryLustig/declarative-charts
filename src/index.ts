@@ -48,11 +48,13 @@ export { ChartStage } from './chart-stage.js';
 export type { StageShape } from './chart-stage.js';
 export { ChartPieSlice } from './chart-pie-slice.js';
 export { ChartLegend } from './chart-legend.js';
+export { ChartLegendItem } from './chart-legend-item.js';
 export { ChartTitle } from './chart-title.js';
 
 // Export palette components
-// Side-effect import ensures dc-fill is always registered (required by dc-palette and dc-swatch)
+// Side-effect imports ensure elements are always registered when used as children
 import './chart-fill.js';
+import './chart-legend-item.js';
 export { ChartPalette } from './chart-palette.js';
 export type { PaletteColorResult } from './chart-palette.js';
 export { ChartFill } from './chart-fill.js';

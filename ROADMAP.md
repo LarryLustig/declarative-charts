@@ -549,45 +549,25 @@ Same as Points, plus:
 
 ### Custom Legends
 
-**Status:** Planned
+**Status:** ✅ Complete
 **Priority:** Important
 
-**Problem:** The current legend auto-generates entries from data elements. This doesn't work well for charts using semantic coloring where the same color appears on multiple bars with different labels.
+New `<dc-legend-item>` element for defining custom legend entries:
 
-**Example Problem:**
 ```html
-<!-- Current: Legend shows 4 entries with redundant colors -->
-<dc-chart>
-  <dc-bar value="85" fill="#4CAF50" label="Engineering"></dc-bar>  <!-- green = above target -->
-  <dc-bar value="78" fill="#FF9800" label="Marketing"></dc-bar>    <!-- orange = near target -->
-  <dc-bar value="92" fill="#4CAF50" label="Sales"></dc-bar>        <!-- green = above target -->
-  <dc-bar value="72" fill="#F44336" label="Operations"></dc-bar>   <!-- red = below target -->
-  <dc-legend></dc-legend>
-  <!-- Legend shows: Engineering (green), Marketing (orange), Sales (green), Operations (red) -->
-  <!-- User wants: Above Target (green), Near Target (orange), Below Target (red) -->
-</dc-chart>
+<dc-legend>
+  <dc-legend-item fill="#4CAF50" label="Above Target"></dc-legend-item>
+  <dc-legend-item fill="#FF9800" label="Near Target"></dc-legend-item>
+  <dc-legend-item fill="#F44336" label="Below Target"></dc-legend-item>
+</dc-legend>
 ```
 
-**Proposed API:**
-```html
-<dc-chart>
-  <dc-bar value="85" fill="#4CAF50" label="Engineering"></dc-bar>
-  <dc-bar value="78" fill="#FF9800" label="Marketing"></dc-bar>
-  <dc-bar value="92" fill="#4CAF50" label="Sales"></dc-bar>
-  <dc-bar value="72" fill="#F44336" label="Operations"></dc-bar>
-  <dc-legend>
-    <dc-legend-item fill="#4CAF50" label="Above Target"></dc-legend-item>
-    <dc-legend-item fill="#FF9800" label="Near Target"></dc-legend-item>
-    <dc-legend-item fill="#F44336" label="Below Target"></dc-legend-item>
-  </dc-legend>
-</dc-chart>
-```
-
-**Behavior:**
-- When `<dc-legend-item>` children are present, use only those items (no auto-generation)
-- When no children, fall back to current auto-generation behavior
-- Support both `fill` (for bars/shapes) and `stroke` (for lines) attributes
-- Optional `shape` attribute: `"square"` (default), `"circle"`, `"line"`
+**Features:**
+- Custom items completely replace auto-generated legend items
+- Supports `fill`, `stroke`, `stroke-dasharray`, `shape`, `pattern`, and `value` attributes
+- Items with `value` attribute can display values and percentages
+- Items without `value` are treated as dimensionless (label-only)
+- Shape defaults to "line" when only stroke is set
 
 ---
 
