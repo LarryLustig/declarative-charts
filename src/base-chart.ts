@@ -22,6 +22,11 @@ import {
   getBuiltinPalette,
   generatePaletteColors as generateBuiltinPaletteColors
 } from './builtin-palettes.js';
+import {
+  animateChartEntry,
+  parseAnimateAttribute,
+  type AnimatableChartType
+} from './animation.js';
 
 /**
  * Options for resolving colors for chart elements.
@@ -193,6 +198,27 @@ export abstract class BaseChart extends LitElement {
 
   @property({ type: Number })
   height = 400;
+
+  /**
+   * Enable entry animations when the chart first renders.
+   *
+   * - `animations` or `animations="true"` - Enable with default 300ms duration
+   * - `animations="500ms"` or `animations="0.5s"` - Enable with custom duration
+   * - `animations="false"` - Explicitly disable animations
+   *
+   * Animations automatically respect the user's `prefers-reduced-motion` setting.
+   *
+   * @example
+   * ```html
+   * <dc-chart animations>...</dc-chart>
+   * <dc-chart animations="500ms">...</dc-chart>
+   * ```
+   */
+  @property({ type: String, reflect: true })
+  animations?: string;
+
+  /** Track whether entry animation has been played */
+  private _hasAnimated = false;
 
   @state()
   protected popupContent = '';
@@ -2159,6 +2185,61 @@ export abstract class BaseChart extends LitElement {
     super.connectedCallback();
     // Add data attribute to host element for identification
     this.setAttribute('data-chart-type', this.tagName.toLowerCase());
+  }
+
+  /**
+   * Called after the first render. Triggers entry animations if enabled.
+   * We wait for updateComplete + requestAnimationFrame to ensure:
+   * 1. All child elements are connected and upgraded
+   * 2. The browser has completed layout (needed for getTotalLength on paths)
+   */
+  protected override firstUpdated(): void {
+    this.updateComplete.then(() => {
+      requestAnimationFrame(() => {
+        this.playEntryAnimation();
+      });
+    });
+  }
+
+  /**
+   * Play entry animation if animate attribute is set and hasn't played yet.
+   * Respects prefers-reduced-motion automatically (handled in animation module).
+   */
+  protected playEntryAnimation(): void {
+    // Only play once
+    if (this._hasAnimated) return;
+
+    // Parse the animations attribute
+    const duration = parseAnimateAttribute(this.animations ?? null);
+    if (duration === null) return;
+
+    this._hasAnimated = true;
+
+    // Determine chart type for animation dispatch
+    const chartType = this.getAnimatableChartType();
+
+    // Determine orientation (for bar charts)
+    const horizontal = (this as unknown as { orientation?: string }).orientation === 'horizontal';
+
+    // Trigger animations
+    animateChartEntry(
+      this.shadowRoot!,
+      chartType,
+      { duration },
+      horizontal
+    );
+  }
+
+  /**
+   * Get the chart type for animation purposes.
+   * Override in subclasses if needed.
+   */
+  protected getAnimatableChartType(): AnimatableChartType {
+    const tagName = this.tagName.toLowerCase();
+    if (tagName.includes('pie')) return 'pie';
+    if (tagName.includes('funnel')) return 'funnel';
+    if (tagName.includes('stage')) return 'stage';
+    return 'mixed'; // dc-chart can have bars, lines, areas, etc.
   }
 
   render() {

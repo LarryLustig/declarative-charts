@@ -2564,6 +2564,7 @@ export class Chart extends AxisChart {
 
         const linePath = svg`
           <path
+            class="line-path"
             d="${pathData}"
             stroke="${line.stroke}"
             stroke-width="3"
@@ -2845,6 +2846,7 @@ export class Chart extends AxisChart {
         return svg`
           <!-- Area fill -->
           <path
+            class="area-path"
             d="${areaPath}"
             fill="${area.fill}"
             fill-opacity="${area.fillOpacity}"
@@ -2939,6 +2941,7 @@ export class Chart extends AxisChart {
         return svg`
           <!-- Area fill -->
           <path
+            class="area-path"
             d="${areaPath}"
             fill="${area.fill}"
             fill-opacity="${area.fillOpacity}"

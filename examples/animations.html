@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animations - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+</head>
+<body>
+    <h1>Animations</h1>
+    <p>Entry animations that play when charts first render using the <code>animations</code> attribute</p>
+
+    <nav></nav>
+
+    <div class="example">
+        <h2>Bar Chart Animations</h2>
+        <p>Bars grow from their baseline. Vertical bars grow upward, horizontal bars grow rightward. Elements animate in sequence with staggered timing.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Vertical Bars</h3>
+                <pre><code>&lt;dc-chart animations width="500" height="350"&gt;
+  &lt;dc-title&gt;Quarterly Sales&lt;/dc-title&gt;
+  &lt;dc-bar value="45" label="Q1" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="72" label="Q2" fill="#2196F3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="58" label="Q3" fill="#FF9800"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="91" label="Q4" fill="#9C27B0"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart animations width="500" height="350">
+                    <dc-title>Quarterly Sales</dc-title>
+                    <dc-bar value="45" label="Q1" fill="#4CAF50"></dc-bar>
+                    <dc-bar value="72" label="Q2" fill="#2196F3"></dc-bar>
+                    <dc-bar value="58" label="Q3" fill="#FF9800"></dc-bar>
+                    <dc-bar value="91" label="Q4" fill="#9C27B0"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Horizontal Bars</h3>
+                <pre><code>&lt;dc-chart animations orientation="horizontal"
+          width="500" height="350"&gt;
+  &lt;dc-title&gt;Product Ratings&lt;/dc-title&gt;
+  &lt;dc-bar value="85" label="Quality" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="78" label="Value" fill="#2196F3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="92" label="Service" fill="#FF9800"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="65" label="Speed" fill="#9C27B0"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart animations orientation="horizontal" width="500" height="350">
+                    <dc-title>Product Ratings</dc-title>
+                    <dc-bar value="85" label="Quality" fill="#4CAF50"></dc-bar>
+                    <dc-bar value="78" label="Value" fill="#2196F3"></dc-bar>
+                    <dc-bar value="92" label="Service" fill="#FF9800"></dc-bar>
+                    <dc-bar value="65" label="Speed" fill="#9C27B0"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Line Chart Animations</h2>
+        <p>Lines draw along their path using the stroke-dashoffset technique, creating a drawing effect. Points scale up with a slight overshoot for visual interest.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Drawing Effect</h3>
+                <pre><code>&lt;dc-chart animations width="500" height="350"&gt;
+  &lt;dc-title&gt;Monthly Revenue&lt;/dc-title&gt;
+  &lt;dc-line stroke="#2196F3" label="Revenue"&gt;
+    &lt;dc-point value="120" label="Jan"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="145" label="Feb"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="132" label="Mar"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="178" label="Apr"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="165" label="May"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="210" label="Jun"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart animations width="500" height="350">
+                    <dc-title>Monthly Revenue</dc-title>
+                    <dc-line stroke="#2196F3" label="Revenue">
+                        <dc-point value="120" label="Jan"></dc-point>
+                        <dc-point value="145" label="Feb"></dc-point>
+                        <dc-point value="132" label="Mar"></dc-point>
+                        <dc-point value="178" label="Apr"></dc-point>
+                        <dc-point value="165" label="May"></dc-point>
+                        <dc-point value="210" label="Jun"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Multiple Lines</h3>
+                <pre><code>&lt;dc-chart animations width="500" height="350"&gt;
+  &lt;dc-title&gt;Product Comparison&lt;/dc-title&gt;
+  &lt;dc-line stroke="#4CAF50" label="Product A"&gt;
+    &lt;dc-point value="80" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="95" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="110" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="125" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line stroke="#FF9800" label="Product B"&gt;
+    &lt;dc-point value="60" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="85" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="75" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="95" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart animations width="500" height="350">
+                    <dc-title>Product Comparison</dc-title>
+                    <dc-line stroke="#4CAF50" label="Product A">
+                        <dc-point value="80" label="Q1"></dc-point>
+                        <dc-point value="95" label="Q2"></dc-point>
+                        <dc-point value="110" label="Q3"></dc-point>
+                        <dc-point value="125" label="Q4"></dc-point>
+                    </dc-line>
+                    <dc-line stroke="#FF9800" label="Product B">
+                        <dc-point value="60" label="Q1"></dc-point>
+                        <dc-point value="85" label="Q2"></dc-point>
+                        <dc-point value="75" label="Q3"></dc-point>
+                        <dc-point value="95" label="Q4"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Area Chart Animations</h2>
+        <p>Areas fade in with a subtle vertical grow effect. This creates a smooth reveal that emphasizes the filled region.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Single Area</h3>
+                <pre><code>&lt;dc-chart animations width="500" height="350"&gt;
+  &lt;dc-title&gt;Website Traffic&lt;/dc-title&gt;
+  &lt;dc-area fill="#4CAF50" label="Visitors"&gt;
+    &lt;dc-point value="100" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="150" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="180" label="Wed"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="140" label="Thu"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="200" label="Fri"&gt;&lt;/dc-point&gt;
+  &lt;/dc-area&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart animations width="500" height="350">
+                    <dc-title>Website Traffic</dc-title>
+                    <dc-area fill="#4CAF50" label="Visitors">
+                        <dc-point value="100" label="Mon"></dc-point>
+                        <dc-point value="150" label="Tue"></dc-point>
+                        <dc-point value="180" label="Wed"></dc-point>
+                        <dc-point value="140" label="Thu"></dc-point>
+                        <dc-point value="200" label="Fri"></dc-point>
+                    </dc-area>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Stacked Areas</h3>
+                <pre><code>&lt;dc-chart animations width="500" height="350"&gt;
+  &lt;dc-title&gt;Revenue by Product&lt;/dc-title&gt;
+  &lt;dc-area fill="#4CAF50" label="Product A"&gt;
+    &lt;dc-point value="50" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="60" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="70" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="80" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-area&gt;
+  &lt;dc-area fill="#2196F3" label="Product B"&gt;
+    &lt;dc-point value="40" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="50" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="45" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="55" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-area&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart animations width="500" height="350">
+                    <dc-title>Revenue by Product</dc-title>
+                    <dc-area fill="#4CAF50" label="Product A">
+                        <dc-point value="50" label="Q1"></dc-point>
+                        <dc-point value="60" label="Q2"></dc-point>
+                        <dc-point value="70" label="Q3"></dc-point>
+                        <dc-point value="80" label="Q4"></dc-point>
+                    </dc-area>
+                    <dc-area fill="#2196F3" label="Product B">
+                        <dc-point value="40" label="Q1"></dc-point>
+                        <dc-point value="50" label="Q2"></dc-point>
+                        <dc-point value="45" label="Q3"></dc-point>
+                        <dc-point value="55" label="Q4"></dc-point>
+                    </dc-area>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Pie Chart Animations</h2>
+        <p>Pie slices fade in sequentially, with extended stagger timing for a dramatic reveal.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Pie Slices</h3>
+                <pre><code>&lt;dc-pie-chart animations width="500" height="350"&gt;
+  &lt;dc-title&gt;Market Share&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="45" label="Leader"
+                fill="#4CAF50"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="30" label="Challenger"
+                fill="#2196F3"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" label="Follower"
+                fill="#FF9800"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="10" label="Nicher"
+                fill="#9C27B0"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart animations width="500" height="350">
+                    <dc-title>Market Share</dc-title>
+                    <dc-pie-slice value="45" label="Leader" fill="#4CAF50"></dc-pie-slice>
+                    <dc-pie-slice value="30" label="Challenger" fill="#2196F3"></dc-pie-slice>
+                    <dc-pie-slice value="15" label="Follower" fill="#FF9800"></dc-pie-slice>
+                    <dc-pie-slice value="10" label="Nicher" fill="#9C27B0"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+
+            <div>
+                <h3>Donut Chart</h3>
+                <pre><code>&lt;dc-pie-chart animations inner-radius="50%"
+              width="500" height="350"&gt;
+  &lt;dc-title&gt;Budget Allocation&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="40" label="Development"
+                fill="#4CAF50"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="25" label="Marketing"
+                fill="#2196F3"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="20" label="Operations"
+                fill="#FF9800"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="15" label="Research"
+                fill="#9C27B0"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart animations inner-radius="50%" width="500" height="350">
+                    <dc-title>Budget Allocation</dc-title>
+                    <dc-pie-slice value="40" label="Development" fill="#4CAF50"></dc-pie-slice>
+                    <dc-pie-slice value="25" label="Marketing" fill="#2196F3"></dc-pie-slice>
+                    <dc-pie-slice value="20" label="Operations" fill="#FF9800"></dc-pie-slice>
+                    <dc-pie-slice value="15" label="Research" fill="#9C27B0"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Funnel Chart Animations</h2>
+        <p>Funnel stages cascade in from the left with extended stagger timing, creating a flow that matches the funnel's progressive nature.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Sales Funnel</h3>
+                <pre><code>&lt;dc-funnel-chart animations width="500" height="350"&gt;
+  &lt;dc-title&gt;Sales Pipeline&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="1000" label="Leads"
+                   fill="#4CAF50"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="600" label="Qualified"
+                   fill="#8BC34A"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="300" label="Proposals"
+                   fill="#CDDC39"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="100" label="Closed"
+                   fill="#FFEB3B"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart animations width="500" height="350">
+                    <dc-title>Sales Pipeline</dc-title>
+                    <dc-funnel-stage value="1000" label="Leads" fill="#4CAF50"></dc-funnel-stage>
+                    <dc-funnel-stage value="600" label="Qualified" fill="#8BC34A"></dc-funnel-stage>
+                    <dc-funnel-stage value="300" label="Proposals" fill="#CDDC39"></dc-funnel-stage>
+                    <dc-funnel-stage value="100" label="Closed" fill="#FFEB3B"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+
+            <div>
+                <h3>Chevron Style</h3>
+                <pre><code>&lt;dc-funnel-chart animations flat-top flat-bottom
+                 width="500" height="350"&gt;
+  &lt;dc-title&gt;Recruitment Funnel&lt;/dc-title&gt;
+  &lt;dc-funnel-stage value="500" label="Applications"
+                   fill="#2196F3"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="200" label="Screened"
+                   fill="#42A5F5"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="50" label="Interviewed"
+                   fill="#64B5F6"&gt;&lt;/dc-funnel-stage&gt;
+  &lt;dc-funnel-stage value="10" label="Hired"
+                   fill="#90CAF9"&gt;&lt;/dc-funnel-stage&gt;
+&lt;/dc-funnel-chart&gt;</code></pre>
+                <dc-funnel-chart animations flat-top flat-bottom width="500" height="350">
+                    <dc-title>Recruitment Funnel</dc-title>
+                    <dc-funnel-stage value="500" label="Applications" fill="#2196F3"></dc-funnel-stage>
+                    <dc-funnel-stage value="200" label="Screened" fill="#42A5F5"></dc-funnel-stage>
+                    <dc-funnel-stage value="50" label="Interviewed" fill="#64B5F6"></dc-funnel-stage>
+                    <dc-funnel-stage value="10" label="Hired" fill="#90CAF9"></dc-funnel-stage>
+                </dc-funnel-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Custom Duration</h2>
+        <p>Specify a custom animation duration using the <code>animations</code> attribute value. Supports milliseconds (<code>500ms</code>) or seconds (<code>0.5s</code>).</p>
+
+        <div class="grid">
+            <div>
+                <h3>Fast Animation (200ms)</h3>
+                <pre><code>&lt;dc-chart animations="200ms" width="500" height="350"&gt;
+  &lt;dc-title&gt;Quick Entry&lt;/dc-title&gt;
+  &lt;dc-bar value="60" label="A" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="80" label="B" fill="#2196F3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="45" label="C" fill="#FF9800"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="95" label="D" fill="#9C27B0"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart animations="200ms" width="500" height="350">
+                    <dc-title>Quick Entry</dc-title>
+                    <dc-bar value="60" label="A" fill="#4CAF50"></dc-bar>
+                    <dc-bar value="80" label="B" fill="#2196F3"></dc-bar>
+                    <dc-bar value="45" label="C" fill="#FF9800"></dc-bar>
+                    <dc-bar value="95" label="D" fill="#9C27B0"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Slow Animation (800ms)</h3>
+                <pre><code>&lt;dc-chart animations="800ms" width="500" height="350"&gt;
+  &lt;dc-title&gt;Dramatic Entry&lt;/dc-title&gt;
+  &lt;dc-bar value="60" label="A" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="80" label="B" fill="#2196F3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="45" label="C" fill="#FF9800"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="95" label="D" fill="#9C27B0"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart animations="800ms" width="500" height="350">
+                    <dc-title>Dramatic Entry</dc-title>
+                    <dc-bar value="60" label="A" fill="#4CAF50"></dc-bar>
+                    <dc-bar value="80" label="B" fill="#2196F3"></dc-bar>
+                    <dc-bar value="45" label="C" fill="#FF9800"></dc-bar>
+                    <dc-bar value="95" label="D" fill="#9C27B0"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Combo Chart Animations</h2>
+        <p>Mixed chart types animate together. Bars grow, lines draw, and areas fade in the visual order (back to front).</p>
+
+        <div class="grid">
+            <div>
+                <h3>Bars with Line Overlay</h3>
+                <pre><code>&lt;dc-chart animations width="500" height="350"&gt;
+  &lt;dc-title&gt;Sales vs Target&lt;/dc-title&gt;
+  &lt;dc-bar value="45" label="Q1" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="72" label="Q2" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="58" label="Q3" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="91" label="Q4" fill="#4CAF50"&gt;&lt;/dc-bar&gt;
+  &lt;dc-line stroke="#E91E63" label="Target"&gt;
+    &lt;dc-point value="50" label="Q1"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="60" label="Q2"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="70" label="Q3"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="80" label="Q4"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart animations width="500" height="350">
+                    <dc-title>Sales vs Target</dc-title>
+                    <dc-bar value="45" label="Q1" fill="#4CAF50"></dc-bar>
+                    <dc-bar value="72" label="Q2" fill="#4CAF50"></dc-bar>
+                    <dc-bar value="58" label="Q3" fill="#4CAF50"></dc-bar>
+                    <dc-bar value="91" label="Q4" fill="#4CAF50"></dc-bar>
+                    <dc-line stroke="#E91E63" label="Target">
+                        <dc-point value="50" label="Q1"></dc-point>
+                        <dc-point value="60" label="Q2"></dc-point>
+                        <dc-point value="70" label="Q3"></dc-point>
+                        <dc-point value="80" label="Q4"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Area with Line</h3>
+                <pre><code>&lt;dc-chart animations width="500" height="350"&gt;
+  &lt;dc-title&gt;Revenue Analysis&lt;/dc-title&gt;
+  &lt;dc-area fill="#4CAF50" fill-opacity="0.3"
+           label="Actual"&gt;
+    &lt;dc-point value="100" label="Jan"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="120" label="Feb"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="140" label="Mar"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="130" label="Apr"&gt;&lt;/dc-point&gt;
+  &lt;/dc-area&gt;
+  &lt;dc-line stroke="#E91E63" label="Forecast"&gt;
+    &lt;dc-point value="110" label="Jan"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="125" label="Feb"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="135" label="Mar"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="145" label="Apr"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart animations width="500" height="350">
+                    <dc-title>Revenue Analysis</dc-title>
+                    <dc-area fill="#4CAF50" fill-opacity="0.3" label="Actual">
+                        <dc-point value="100" label="Jan"></dc-point>
+                        <dc-point value="120" label="Feb"></dc-point>
+                        <dc-point value="140" label="Mar"></dc-point>
+                        <dc-point value="130" label="Apr"></dc-point>
+                    </dc-area>
+                    <dc-line stroke="#E91E63" label="Forecast">
+                        <dc-point value="110" label="Jan"></dc-point>
+                        <dc-point value="125" label="Feb"></dc-point>
+                        <dc-point value="135" label="Mar"></dc-point>
+                        <dc-point value="145" label="Apr"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Accessibility: Reduced Motion</h2>
+        <p>Animations automatically respect the user's <code>prefers-reduced-motion</code> system setting. When enabled, all chart animations are skipped to avoid discomfort for users with vestibular disorders.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Not Seeing Animations?</h3>
+                <p><strong>Check your OS accessibility settings.</strong> If "reduce motion" is enabled, animations are automatically skipped.</p>
+                <ul>
+                    <li><strong>Windows:</strong> Settings &rarr; Accessibility &rarr; Visual effects &rarr; Animation effects (turn ON)</li>
+                    <li><strong>macOS:</strong> System Preferences &rarr; Accessibility &rarr; Display &rarr; Reduce motion (turn OFF)</li>
+                    <li><strong>iOS:</strong> Settings &rarr; Accessibility &rarr; Motion &rarr; Reduce Motion (turn OFF)</li>
+                    <li><strong>Android:</strong> Settings &rarr; Accessibility &rarr; Remove animations (turn OFF)</li>
+                </ul>
+            </div>
+
+            <div>
+                <h3>How It Works</h3>
+                <p>The library checks the media query <code>prefers-reduced-motion: reduce</code> before playing any animation. If the user has enabled reduced motion in their OS settings, the chart renders immediately without animation.</p>
+                <p>No configuration is needed - this is automatic and respects user preferences out of the box.</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/index.ts"></script>
+    <script src="examples.js"></script>
+</body>
+</html>

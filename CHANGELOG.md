@@ -28,6 +28,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Items without `value` are treated as dimensionless (label-only)
   - Shape defaults to "line" when only stroke is set
 
+- **Entry Animations**
+  - New `animations` attribute on all chart types enables entry animations on first render
+  - Supports custom duration: `animations="500ms"` or `animations="0.5s"`
+  - Animation types by element:
+    - Bars grow from baseline (vertical grows up, horizontal grows right)
+    - Lines draw along path using stroke-dashoffset technique
+    - Areas fade in with subtle vertical grow
+    - Pie slices fade in sequentially
+    - Points/Bubbles scale up with overshoot easing
+    - Funnel/Stage elements cascade in from left
+  - Respects `prefers-reduced-motion` media query for accessibility
+  - Staggered timing creates cascading effect across elements
+  - Animation code isolated in `src/animation.ts` module
+  - New examples page: `examples/animations.html`
+
 - **Label Positioning System**
   - New `label-position` attribute for controlling where labels appear on chart elements
   - New offset attributes for fine-tuning: `label-offset-x`, `label-offset-y`, `label-offset-r`

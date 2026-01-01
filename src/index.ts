@@ -146,3 +146,19 @@ export {
   parseDateLabels
 } from './date-utils.js';
 export type { ParsedDates } from './date-utils.js';
+
+// Export animation utilities
+export {
+  animateChartEntry,
+  animateBars,
+  animateLines,
+  animateAreas,
+  animatePieSlices,
+  animatePoints,
+  animateCascade,
+  cancelAnimations,
+  parseAnimateAttribute,
+  prefersReducedMotion,
+  DEFAULT_ANIMATION_OPTIONS
+} from './animation.js';
+export type { AnimationOptions, AnimatableChartType } from './animation.js';

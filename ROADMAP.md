@@ -141,66 +141,89 @@ Comprehensive test coverage implemented across unit, component, integration, and
 
 ### Animations
 
-**Status:** Not Started
+**Status:** Phase 1 Complete
 **Priority:** Important
 
 **Problem:** Charts appear instantly without any visual feedback. Animations improve perceived quality and help users understand data changes.
 
-**Requirements:**
-
-1. **Initial Render Animation**
-   - Bars grow from zero
-   - Pie slices expand from center or rotate in
-   - Lines draw progressively
-   - Configurable duration and easing
-
-2. **Data Change Transitions**
-   - Smooth transition when values change
-   - Elements animate to new positions
-   - New elements fade/grow in, removed elements fade/shrink out
-
-3. **Accessibility**
-   - Respect `prefers-reduced-motion` media query
-   - `animation="none"` attribute to disable
-   - Reduced motion: instant transitions or very short duration
-
-4. **Configuration**
-   - `animation-duration` - Duration in ms (default: 500)
-   - `animation-easing` - Easing function (default: "ease-out")
-   - `animation` - Enable/disable or animation type
-
-**Proposed API:**
+**Current API (Phase 1):**
 ```html
-<!-- Default animation -->
-<dc-chart animation>
+<!-- Enable animation (default duration 300ms) -->
+<dc-chart animations>
   <dc-bar value="50" label="A"></dc-bar>
 </dc-chart>
 
-<!-- Custom duration and easing -->
-<dc-chart animation animation-duration="1000" animation-easing="ease-in-out">
-  ...
-</dc-chart>
-
-<!-- Disable animation -->
-<dc-chart animation="none">
-  ...
-</dc-chart>
-
-<!-- Specific animation type -->
-<dc-pie-chart animation="spin">
-  <!-- Pie rotates in -->
-</dc-pie-chart>
-
-<dc-chart animation="grow">
-  <!-- Bars grow from baseline -->
-</dc-chart>
+<!-- Custom duration -->
+<dc-chart animations="500ms">...</dc-chart>
+<dc-chart animations="0.5s">...</dc-chart>
 ```
 
-**Animation Types by Chart:**
-- **Bar Chart**: `grow` (from zero), `slide` (from left/bottom), `fade`
-- **Line Chart**: `draw` (progressive line drawing), `fade`
-- **Pie Chart**: `spin` (rotate in), `expand` (grow from center), `fade`
-- **Funnel Chart**: `cascade` (top-down reveal), `fade`
+**Architecture - Isolation from Core:**
+
+Animation code is a separate layer that doesn't modify core rendering logic:
+
+```
+┌─────────────────────────────────────────────┐
+│              Chart Component                │
+│  ┌─────────────────────────────────────┐   │
+│  │     Core Rendering (unchanged)       │   │
+│  │     - renderChart() returns SVG      │   │
+│  │     - Pure, stateless transforms     │   │
+│  └─────────────────────────────────────┘   │
+│                    │                        │
+│                    ▼                        │
+│  ┌─────────────────────────────────────┐   │
+│  │     Animation Layer (optional)       │   │
+│  │     - Intercepts after first render  │   │
+│  │     - Uses Web Animations API        │   │
+│  └─────────────────────────────────────┘   │
+└─────────────────────────────────────────────┘
+```
+
+**Implementation Files:**
+- `src/animation.ts` - All animation logic (~430 lines)
+- Minimal changes to `base-chart.ts` - `animations` property and `firstUpdated()` hook
+
+**Phased Implementation:**
+
+| Phase | Scope | Status | Lines |
+|-------|-------|--------|-------|
+| **Phase 1** | Entry animations | ✅ Complete | ~430 |
+| **Phase 2** | Value change transitions | Not Started | ~400 est |
+| **Phase 3** | Path morphing (lines/areas) | Not Started | ~300 est |
+
+**Phase 1: Entry Animations** ✅
+- Bars: grow from baseline (scaleY for vertical, scaleX for horizontal)
+- Lines: draw along path (stroke-dasharray/dashoffset)
+- Areas: fade in with subtle vertical grow
+- Pie slices: fade in sequentially (no scale to preserve donut holes)
+- Bubbles/Points: scale up with overshoot easing
+- Funnel/Stage: cascade in from left
+- Uses Web Animations API (WAAPI), no dependencies
+- Respects `prefers-reduced-motion`
+- Staggered timing (30ms between elements)
+
+**Phase 2: Value Change Transitions** (Future)
+- Snapshot/compare pattern captures element state before render
+- WAAPI animates bar heights, positions
+- Add/remove elements fade in/out
+- Element identity via `label` or `key` attribute
+
+**Phase 3: Path Morphing** (Future)
+- Line and area path interpolation
+- Consider d3-interpolate-path (~5kb) or custom linear interpolation
+- Handle different point counts gracefully
+
+**Accessibility:**
+- Respects `prefers-reduced-motion` media query automatically
+- `animations="false"` to disable explicitly
+- Documentation includes OS settings for troubleshooting
+
+**Technical Notes:**
+- Uses `data-shape-index` attributes already on elements for targeting
+- CSS classes `line-path` and `area-path` added for animation selectors
+- WAAPI supports `.cancel()` for interrupted animations
+- CSS transforms are GPU-accelerated for performance
 
 ---
 

@@ -70,6 +70,7 @@ const NAV_CONFIG = {
         {
             label: 'Interactivity',
             dropdown: [
+                { href: 'animations.html', label: 'Animations' },
                 { href: 'popups.html', label: 'Popups' },
                 { href: 'interactive.html', label: 'Links & Updates' },
             ]

@@ -33,6 +33,23 @@ All chart components (`<dc-chart>`, `<dc-pie-chart>`, `<dc-funnel-chart>`, `<dc-
 - `logging` (string) - Controls log capture level: `'false'` (default, no logging), `'error'`, `'warning'`, `'info'`, or `'true'` (same as `'info'`). See [Logging & Debugging](#logging--debugging) for details.
 - `console-log` (string) - Controls which captured logs are echoed to browser console: `'none'` (default), `'error'`, `'warning'`, or `'info'`. See [Browser Console Output](#browser-console-output) for details.
 
+### Animation
+- `animations` (string) - Enable entry animations when the chart first renders. See [Animations](#animations) for details.
+  - `"true"` or `""` (empty) - Enable with default duration (300ms)
+  - `"500ms"` or `"0.5s"` - Custom duration
+  - `"false"` - Explicitly disable
+
+```html
+<!-- Enable with default duration -->
+<dc-chart animations>...</dc-chart>
+
+<!-- Custom duration -->
+<dc-chart animations="500ms">...</dc-chart>
+
+<!-- Disable explicitly -->
+<dc-chart animations="false">...</dc-chart>
+```
+
 ### Padding
 
 Control the spacing between the chart edge and the chart content (axes, bars, pie, etc.):
@@ -1753,6 +1770,57 @@ interface LogEntry {
 - **Per-element details** - Positions, sizes, percentages
 
 See [`examples/logging.html`](examples/logging.html) for working examples.
+
+---
+
+## Animations
+
+Charts support entry animations that play when first rendered. Animation code is isolated from core rendering and uses the Web Animations API (WAAPI) for smooth performance.
+
+### Enabling Animations
+
+Add the `animations` attribute to any chart:
+
+```html
+<!-- Enable with default duration (300ms) -->
+<dc-chart animations>
+  <dc-bar value="50" label="A"></dc-bar>
+  <dc-bar value="80" label="B"></dc-bar>
+</dc-chart>
+
+<!-- Custom duration -->
+<dc-chart animations="500ms">...</dc-chart>
+<dc-chart animations="0.5s">...</dc-chart>
+```
+
+### Animation Types by Element
+
+| Element | Animation Effect |
+|---------|------------------|
+| Bars (vertical) | Grow upward from baseline |
+| Bars (horizontal) | Grow rightward from baseline |
+| Lines | Draw along path |
+| Areas | Fade in with subtle vertical grow |
+| Pie slices | Fade in sequentially |
+| Points/Bubbles | Scale up with overshoot easing |
+| Funnel stages | Cascade in from left |
+| Stage shapes | Cascade in from left |
+
+### Reduced Motion
+
+Animations automatically respect the user's `prefers-reduced-motion` setting. When enabled, animations are skipped entirely for accessibility.
+
+> **Not seeing animations?** Check your operating system's accessibility settings:
+> - **Windows**: Settings → Accessibility → Visual effects → Animation effects (turn ON)
+> - **macOS**: System Preferences → Accessibility → Display → Reduce motion (turn OFF)
+> - **iOS**: Settings → Accessibility → Motion → Reduce Motion (turn OFF)
+> - **Android**: Settings → Accessibility → Remove animations (turn OFF)
+
+### Staggering
+
+Elements animate in sequence with a small delay between each (30ms by default). This creates a cascading effect that draws attention across the chart.
+
+See [`examples/animations.html`](examples/animations.html) for working examples.
 
 ---
 
