@@ -1,6 +1,7 @@
 import { customElement, property } from 'lit/decorators.js';
 import { svg, SVGTemplateResult } from 'lit';
 import { BaseChart, showConditionConverter, type ShowCondition, type FocusableElement } from './base-chart.js';
+import { ErrorCode } from './errors.js';
 import type { LegendItem } from './chart-legend.js';
 import type { ChartPieSlice } from './chart-pie-slice.js';
 import type { ChartPopup } from './chart-popup.js';
@@ -185,7 +186,10 @@ export class PieChart extends BaseChart {
   } | null {
     const sliceData = this.getSlices();
     if (sliceData.length === 0) {
-      this.log('warning', 'data.empty', 'Pie chart has no dc-pie-slice children. Add slices to display data.');
+      this.logError(ErrorCode.DATA_EMPTY, {
+        chartType: 'Pie chart',
+        expectedElements: 'dc-pie-slice children'
+      });
       return null;
     }
 
@@ -193,7 +197,12 @@ export class PieChart extends BaseChart {
     const invalidSlices = sliceData.filter(s => s.value <= 0);
     if (invalidSlices.length > 0) {
       const labels = invalidSlices.map(s => `${s.label || '(unlabeled)'} (${s.value})`).join(', ');
-      this.log('warning', 'slices.invalidValues', `${invalidSlices.length} slice(s) have zero or negative values and will not be visible: ${labels}. Pie charts require positive values.`);
+      this.logError(ErrorCode.DATA_INVALID_VALUES, {
+        count: invalidSlices.length,
+        elementType: 'slice',
+        labels,
+        chartType: 'Pie chart'
+      });
     }
 
     const padding = this.getChartPadding();
@@ -211,9 +220,17 @@ export class PieChart extends BaseChart {
 
     // Warn about invalid inner radius
     if (this.innerRadius < 0) {
-      this.log('warning', 'donut.invalidInnerRadius', `inner-radius="${this.innerRadius}" is negative. Using 0 (solid pie).`);
+      this.logError(ErrorCode.DONUT_INVALID_RADIUS, {
+        value: this.innerRadius,
+        reason: 'negative',
+        suggestion: 'Using 0 (solid pie).'
+      });
     } else if (this.innerRadius >= 100) {
-      this.log('warning', 'donut.invalidInnerRadius', `inner-radius="${this.innerRadius}" is >= 100%. Pie will not be visible. Use a value between 0-99.`);
+      this.logError(ErrorCode.DONUT_INVALID_RADIUS, {
+        value: this.innerRadius,
+        reason: '>= 100%',
+        suggestion: 'Pie will not be visible. Use a value between 0-99.'
+      });
     } else if (this.innerRadius >= 90) {
       this.log('info', 'donut.thinRing', `inner-radius="${this.innerRadius}" creates a very thin ring. Labels may not fit inside slices.`);
     }
@@ -241,7 +258,10 @@ export class PieChart extends BaseChart {
 
     const totalValue = sliceData.reduce((sum, slice) => sum + slice.value, 0);
     if (totalValue === 0) {
-      this.log('warning', 'data.zeroTotal', 'All slice values sum to 0. Pie chart cannot be rendered. Check that slices have positive values.');
+      this.logError(ErrorCode.DATA_ZERO_TOTAL, {
+        elementType: 'slice',
+        chartType: 'Pie chart'
+      });
       return null;
     }
     this.log('info', 'data.totalValue', `Sum of all slice values`, totalValue);

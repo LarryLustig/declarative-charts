@@ -166,6 +166,8 @@ Use `getPaletteColors(count, colorType)` in chart code to resolve palette colors
 
 **Logging**: `this.log(level, path, message, value?)` records calculations. Set `logging` attribute to enable.
 
+**Error Handling**: Use structured error codes for all warnings and errors. See [Error Handling System](#error-handling-system) section below.
+
 **Accessibility**: Charts auto-generate ARIA attributes. Implement `getInsights()` for descriptions. Use utilities from `src/accessibility/insights.ts`.
 
 **Keyboard Navigation**: Roving tabindex pattern. Implement `getFocusableElements()`, `getShapeBounds()`, `renderFocusIndicator()`.
@@ -205,6 +207,98 @@ In code:
 
 When rendering labels, always use `formatValueString()` which handles show-value/show-percent logic and applies element-level format overrides.
 
+## Error Handling System
+
+The library uses structured error codes for consistent warning and error messages. All warnings should use the error code system defined in `src/errors.ts`.
+
+### Error Code Categories
+
+| Range | Category | Description |
+|-------|----------|-------------|
+| DC001-DC099 | Data Errors | Empty charts, invalid values, all hidden |
+| DC100-DC199 | Configuration Errors | Invalid attributes, missing children |
+| DC200-DC299 | Reference Errors | Palette/pattern/element not found |
+| DC300-DC399 | Style Warnings | CSS conventions used instead of SVG |
+| DC400-DC499 | Informational | Suboptimal but functional configurations |
+
+### Using Error Codes
+
+**Preferred method - `this.logError()`:**
+```typescript
+import { ErrorCode } from './errors.js';
+
+// In a chart class method:
+this.logError(ErrorCode.DATA_EMPTY, {
+  chartType: 'Pie chart',
+  expectedElements: 'dc-pie-slice children'
+});
+
+// With an optional value parameter:
+this.logError(ErrorCode.DATA_NEGATIVE_VALUES, {
+  count: negativeStages.length,
+  elementType: 'stage',
+  labels: negativeStages.map(s => s.label).join(', ')
+}, negativeStages.map(s => s.label));
+```
+
+**For standalone functions (outside chart classes):**
+```typescript
+import { ErrorCode } from './errors.js';
+
+console.warn(`[${ErrorCode.FORMAT_INVALID.code}] ${ErrorCode.FORMAT_INVALID.path}: Invalid format string: "${format}", using default`);
+```
+
+### Adding New Error Codes
+
+When adding new warnings or errors:
+
+1. **Add to `src/errors.ts`** with appropriate code number and category
+2. **Use descriptive message templates** with `{placeholders}` for dynamic values
+3. **Set the default log path** matching the existing path conventions
+4. **Update this list** if adding a new category
+
+```typescript
+// In src/errors.ts
+export const ErrorCode = {
+  // ... existing codes ...
+
+  /**
+   * Description of what this error means
+   */
+  MY_NEW_ERROR: {
+    code: 'DC1XX',
+    level: 'warning',
+    path: 'category.subcategory',
+    message: '{count} {elementType}(s) have issues: {details}'
+  }
+} as const;
+```
+
+### Current Error Codes
+
+| Code | Name | Description |
+|------|------|-------------|
+| DC001 | DATA_EMPTY | Chart has no data elements |
+| DC002 | DATA_ALL_HIDDEN | All data elements are hidden |
+| DC003 | DATA_ZERO_TOTAL | Total of all values is zero |
+| DC004 | DATA_INVALID_VALUES | Elements have zero/negative values |
+| DC005 | DATA_ZERO_BARS | Bars have value 0 |
+| DC006 | DATA_NEGATIVE_VALUES | Elements have negative values |
+| DC101 | LINE_NO_POINTS | Line element has no points |
+| DC102 | AREA_NO_POINTS | Area element has no points |
+| DC103 | DONUT_INVALID_RADIUS | Invalid inner radius for donut |
+| DC104 | PARSE_ERROR | Could not parse attribute value |
+| DC105 | FORMAT_INVALID | Invalid format string |
+| DC106 | TIME_AXIS_FEW_DATES | Time axis has insufficient dates |
+| DC201 | PALETTE_NOT_FOUND | Palette not found |
+| DC202 | PATTERN_NOT_FOUND | Pattern not found or invalid |
+| DC203 | ZERO_FILL_NOT_FOUND | Zero-fill element not found |
+| DC204 | SVG_NOT_FOUND | SVG element not found in shadow DOM |
+| DC301 | TITLE_STYLE_WARNING | CSS attribute on title |
+| DC302 | LEGEND_STYLE_WARNING | CSS attribute on legend |
+| DC303 | AXIS_STYLE_WARNING | CSS attribute on axis |
+| DC401 | COLORS_UNIFORM | All elements have same color |
+
 ## Development Workflow
 
 ### Adding a New Chart Type
@@ -218,8 +312,12 @@ When rendering labels, always use `formatValueString()` which handles show-value
    - Labels: use `formatValueString(value, percent, showValue, showPercent, elementFormat)`
    - Insights: pass `this.formatValue` to insight functions
    - Extract `valueFormat` from data elements and pass through data structures
-7. Export from `src/index.ts`
-8. Document in `API.md` and add examples to `examples/`
+7. **Use error code system for all warnings:**
+   - Import `ErrorCode` from `./errors.js`
+   - Use `this.logError()` for data validation, configuration issues
+   - Add new error codes to `src/errors.ts` if needed (see [Error Handling System](#error-handling-system))
+8. Export from `src/index.ts`
+9. Document in `API.md` and add examples to `examples/`
 
 ### Adding a New Data Element
 
@@ -472,6 +570,7 @@ src/
 ├── pie-chart.ts            # <dc-pie-chart>
 ├── funnel-chart.ts         # <dc-funnel-chart>
 ├── builtin-palettes.ts     # Built-in color palettes (category10, viridis, etc.) [TESTED]
+├── errors.ts               # Error code registry and formatting utilities [TESTED]
 ├── format.ts               # NumberFormatter, presets, d3-format parsing [TESTED]
 ├── accessibility/          # Insight analysis utilities [TESTED]
 ├── chart-axis.ts           # <dc-axis> configuration [TESTED]
@@ -486,6 +585,7 @@ src/
 
 test/
 ├── unit/                   # Pure function tests (node environment)
+│   ├── errors.test.ts      # Tests for src/errors.ts
 │   ├── format.test.ts      # Tests for src/format.ts
 │   ├── insights.test.ts    # Tests for src/accessibility/insights.ts
 │   ├── patterns.test.ts    # Tests for src/patterns.ts

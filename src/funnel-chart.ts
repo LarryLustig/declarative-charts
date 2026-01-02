@@ -1,6 +1,7 @@
 import { customElement, property } from 'lit/decorators.js';
 import { svg, SVGTemplateResult } from 'lit';
 import { BaseChart, type ShowCondition, type FocusableElement } from './base-chart.js';
+import { ErrorCode } from './errors.js';
 import type { LegendItem } from './chart-legend.js';
 import type { ChartFunnelStage } from './chart-funnel-stage.js';
 import type { ChartPopup } from './chart-popup.js';
@@ -220,7 +221,11 @@ export class FunnelChart extends BaseChart {
       return numeric;
     }
 
-    this.log('warning', 'chevron.parse', `Could not parse chevron value "${trimmed}", defaulting to 0`, 0);
+    this.logError(ErrorCode.PARSE_ERROR, {
+      attribute: 'chevron',
+      value: trimmed,
+      default: '0'
+    }, 0);
     return 0;
   }
 
@@ -387,7 +392,10 @@ export class FunnelChart extends BaseChart {
   } | null {
     const stagesData = this.getStages();
     if (stagesData.length === 0) {
-      this.log('warning', 'data.empty', 'Funnel chart has no dc-funnel-stage children. Add stages to display data.');
+      this.logError(ErrorCode.DATA_EMPTY, {
+        chartType: 'Funnel chart',
+        expectedElements: 'dc-funnel-stage children'
+      });
       return null;
     }
 
@@ -395,7 +403,12 @@ export class FunnelChart extends BaseChart {
     const invalidStages = stagesData.filter(s => s.value <= 0);
     if (invalidStages.length > 0) {
       const labels = invalidStages.map(s => `${s.label || '(unlabeled)'} (${s.value})`).join(', ');
-      this.log('warning', 'stages.invalidValues', `${invalidStages.length} stage(s) have zero or negative values: ${labels}. These stages will have minimal or no width.`);
+      this.logError(ErrorCode.DATA_INVALID_VALUES, {
+        count: invalidStages.length,
+        elementType: 'stage',
+        labels,
+        chartType: 'Funnel chart'
+      });
     }
 
     // Check for increasing values (anti-pattern for funnels)

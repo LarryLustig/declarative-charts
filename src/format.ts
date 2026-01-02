@@ -3,6 +3,8 @@
  * Supports named presets with compound syntax and d3-format subset.
  */
 
+import { ErrorCode } from './errors.js';
+
 /** Named preset types */
 export type FormatPreset = 'number' | 'compact' | 'currency' | 'percent';
 
@@ -97,7 +99,7 @@ export function parseFormat(format: string): ParsedFormat {
 
   if (!match) {
     // Invalid format - return safe default
-    console.warn(`[declarative-charts] Invalid format string: "${format}", using default`);
+    console.warn(`[${ErrorCode.FORMAT_INVALID.code}] ${ErrorCode.FORMAT_INVALID.path}: Invalid format string: "${format}", using default`);
     return { type: 'd3', formatType: 'none' };
   }
 

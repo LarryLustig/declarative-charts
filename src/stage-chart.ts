@@ -1,6 +1,7 @@
 import { customElement, property } from 'lit/decorators.js';
 import { svg, SVGTemplateResult } from 'lit';
 import { BaseChart, type ShowCondition, type FocusableElement } from './base-chart.js';
+import { ErrorCode } from './errors.js';
 import type { LegendItem } from './chart-legend.js';
 import type { ChartStage, StageShape } from './chart-stage.js';
 import type { ChartPopup } from './chart-popup.js';
@@ -616,7 +617,10 @@ export class StageChart extends BaseChart {
   } | null {
     const stagesData = this.getStages();
     if (stagesData.length === 0) {
-      this.log('warning', 'data.empty', 'Stage chart has no dc-stage children - nothing to render');
+      this.logError(ErrorCode.DATA_EMPTY, {
+        chartType: 'Stage chart',
+        expectedElements: 'dc-stage children'
+      });
       return null;
     }
 
@@ -628,7 +632,7 @@ export class StageChart extends BaseChart {
     if (zeroSettings.fillId) {
       zeroFillElement = this.getZeroFillElement(zeroSettings.fillId);
       if (!zeroFillElement) {
-        this.log('warning', 'zero.fillNotFound', `Zero-fill element with id "${zeroSettings.fillId}" not found`);
+        this.logError(ErrorCode.ZERO_FILL_NOT_FOUND, { id: zeroSettings.fillId });
       }
     }
 
@@ -870,7 +874,11 @@ export class StageChart extends BaseChart {
     const zeroStages = stagesData.filter(s => s.value === 0);
     const negativeStages = stagesData.filter(s => s.value < 0);
     if (negativeStages.length > 0) {
-      this.log('warning', 'data.negativeValues', `${negativeStages.length} stage(s) have negative values which may not display correctly`, negativeStages.map(s => s.label));
+      this.logError(ErrorCode.DATA_NEGATIVE_VALUES, {
+        count: negativeStages.length,
+        elementType: 'stage',
+        labels: negativeStages.map(s => s.label).join(', ')
+      }, negativeStages.map(s => s.label));
     }
     if (zeroStages.length > 0) {
       if (zeroSettings.hidden) {
@@ -894,7 +902,10 @@ export class StageChart extends BaseChart {
     // Check for uniform colors (potential config issue)
     const uniqueColors = new Set(fillColors);
     if (uniqueColors.size === 1 && stagesData.length > 1) {
-      this.log('warning', 'colors.uniform', `All ${stagesData.length} stages have the same fill color - consider using a palette for visual distinction`, fillColors[0]);
+      this.logError(ErrorCode.COLORS_UNIFORM, {
+        count: stagesData.length,
+        elementType: 'stage'
+      }, fillColors[0]);
     }
 
     return {

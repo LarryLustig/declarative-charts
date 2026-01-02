@@ -2,6 +2,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { svg, SVGTemplateResult } from 'lit';
 import { AxisChart, type ValueRange } from './axis-chart.js';
 import { type ShowCondition, type FocusableElement } from './base-chart.js';
+import { ErrorCode } from './errors.js';
 import { analyzeLines, analyzeBars, analyzeBubbles, type LineData as InsightLineData, type BarData as InsightBarData, type BubbleData as InsightBubbleData } from './accessibility/index.js';
 import type { LegendItem, DimensionlessLegendItem } from './chart-legend.js';
 import type { ChartBar } from './chart-bar.js';
@@ -830,7 +831,7 @@ export class Chart extends AxisChart {
       // Warn if line has no points
       if (pointElements.length === 0) {
         const lineLabel = line.label || `line[${lineIndex}]`;
-        this.log('warning', 'lines.noPoints', `Line '${lineLabel}' has no dc-point children and will not be visible.`);
+        this.logError(ErrorCode.LINE_NO_POINTS, { label: lineLabel });
       }
       const elementStroke = line.getEffectiveStroke();
       const lineStroke = elementStroke || '';
@@ -928,7 +929,7 @@ export class Chart extends AxisChart {
       // Warn if area has no points
       if (pointElements.length === 0) {
         const areaLabel = area.label || `area[${areaIndex}]`;
-        this.log('warning', 'areas.noPoints', `Area '${areaLabel}' has no dc-point children and will not be visible.`);
+        this.logError(ErrorCode.AREA_NO_POINTS, { label: areaLabel });
       }
 
       const elementFill = area.getEffectiveFill();
@@ -1597,9 +1598,16 @@ export class Chart extends AxisChart {
       const totalElements = allBars.length + allLines.length + allAreas.length + allBubbles.length;
 
       if (totalElements > 0) {
-        this.log('warning', 'data.allHidden', `Chart has ${totalElements} data element(s) but all are hidden. Check for hidden attributes on dc-bar, dc-line, dc-area, or dc-bubble elements.`);
+        this.logError(ErrorCode.DATA_ALL_HIDDEN, {
+          chartType: 'Chart',
+          count: totalElements,
+          elementTypes: 'dc-bar, dc-line, dc-area, or dc-bubble elements'
+        });
       } else {
-        this.log('warning', 'data.empty', 'Chart has no data elements. Add dc-bar, dc-line, dc-area, or dc-bubble children to display data.');
+        this.logError(ErrorCode.DATA_EMPTY, {
+          chartType: 'Chart',
+          expectedElements: 'dc-bar, dc-line, dc-area, or dc-bubble children'
+        });
       }
       return svg``;
     }
@@ -1630,7 +1638,7 @@ export class Chart extends AxisChart {
     const zeroBars = bars.filter(b => b.value === 0);
     if (zeroBars.length > 0) {
       const labels = zeroBars.map(b => b.label || '(unlabeled)').join(', ');
-      this.log('warning', 'bars.zeroValue', `${zeroBars.length} bar(s) have value 0 and will not be visible: ${labels}`);
+      this.logError(ErrorCode.DATA_ZERO_BARS, { count: zeroBars.length, labels });
     }
 
     // Warn about all bars having the same color (potential config issue)

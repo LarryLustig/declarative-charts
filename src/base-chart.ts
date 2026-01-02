@@ -31,6 +31,11 @@ import {
   findDefaultsElement,
   type DefaultableAttribute
 } from './chart-defaults.js';
+import {
+  type ErrorDefinition,
+  formatErrorMessage,
+  ErrorCode
+} from './errors.js';
 
 /**
  * Options for resolving colors for chart elements.
@@ -148,6 +153,8 @@ export interface LogEntry {
   message: string;
   /** The computed value (optional) */
   value?: unknown;
+  /** Error code for structured warnings/errors (e.g., "DC001") */
+  code?: string;
 }
 
 /**
@@ -910,12 +917,15 @@ export abstract class BaseChart extends LitElement {
    * @param path The path identifier
    * @param message The log message
    * @param value Optional value
+   * @param code Optional error code (e.g., "DC001")
    */
-  private echoToConsole(level: LogLevel, path: string, message: string, value?: unknown): void {
+  private echoToConsole(level: LogLevel, path: string, message: string, value?: unknown, code?: string): void {
     // Start a group for this render cycle if not already open
     this.startConsoleGroup();
 
-    const fullMessage = `${path}: ${message}`;
+    // Format: "[DC001] path: message" or "path: message" if no code
+    const prefix = code ? `[${code}] ` : '';
+    const fullMessage = `${prefix}${path}: ${message}`;
 
     const consoleFn = level === 'error' ? console.error
                     : level === 'warning' ? console.warn
@@ -938,16 +948,41 @@ export abstract class BaseChart extends LitElement {
    * @param path Dotted path identifying what was calculated (e.g., "padding.left", "slices[0].angle")
    * @param message Human-readable description of the calculation or issue
    * @param value Optional computed value
+   * @param code Optional error code (e.g., "DC001")
    */
-  protected log(level: LogLevel, path: string, message: string, value?: unknown): void {
+  protected log(level: LogLevel, path: string, message: string, value?: unknown, code?: string): void {
     if (this.shouldLog(level)) {
-      this.logEntries.push({ level, path, message, value });
+      this.logEntries.push({ level, path, message, value, code });
 
       // Also echo to browser console if configured
       if (this.shouldEchoToConsole(level)) {
-        this.echoToConsole(level, path, message, value);
+        this.echoToConsole(level, path, message, value, code);
       }
     }
+  }
+
+  /**
+   * Log a structured error/warning using an ErrorDefinition.
+   * This is the preferred method for logging warnings and errors as it ensures
+   * consistent error codes and message formatting.
+   *
+   * @param error The error definition from ErrorCode registry
+   * @param values Placeholder values to substitute in the message template
+   * @param value Optional computed value to include in the log
+   *
+   * @example
+   * this.logError(ErrorCode.DATA_EMPTY, {
+   *   chartType: 'Chart',
+   *   expectedElements: 'dc-bar, dc-line, or dc-bubble children'
+   * });
+   */
+  protected logError(
+    error: ErrorDefinition,
+    values: Record<string, string | number | undefined> = {},
+    value?: unknown
+  ): void {
+    const message = formatErrorMessage(error.message, values);
+    this.log(error.level, error.path, message, value, error.code);
   }
 
   /**
@@ -1145,7 +1180,7 @@ export abstract class BaseChart extends LitElement {
       };
     }
 
-    this.log('warning', 'pattern.resolve', `Pattern "${patternAttr}" is not a valid type or ID reference`, null);
+    this.logError(ErrorCode.PATTERN_NOT_FOUND, { id: patternAttr });
     return null;
   }
 
@@ -1574,7 +1609,7 @@ export abstract class BaseChart extends LitElement {
     }
 
     // No palette found
-    this.log('warning', 'colors.palette', `Palette "${this.paletteId}" not found (no DOM element or built-in with that name)`);
+    this.logError(ErrorCode.PALETTE_NOT_FOUND, { id: this.paletteId });
     return undefined;
   }
 
@@ -2072,7 +2107,7 @@ export abstract class BaseChart extends LitElement {
     // Log any style warnings
     const warnings = titleEl.getStyleWarnings();
     for (const warning of warnings) {
-      this.log('warning', 'title.style', warning.message);
+      this.logError(ErrorCode.TITLE_STYLE_WARNING, { message: warning.message });
     }
 
     const position = titleEl.position;
@@ -2555,7 +2590,7 @@ export abstract class BaseChart extends LitElement {
     // Check for common style mistakes and log warnings
     const legendWarnings = legend.getStyleWarnings();
     for (const warning of legendWarnings) {
-      this.log('warning', 'legend.style', warning.message);
+      this.logError(ErrorCode.LEGEND_STYLE_WARNING, { message: warning.message });
     }
 
     // Generate the legend SVG at 0,0
@@ -3118,7 +3153,7 @@ export abstract class BaseChart extends LitElement {
   public downloadSvg(filename: string = 'chart.svg'): void {
     const svg = this.shadowRoot?.querySelector('svg');
     if (!svg) {
-      console.warn('No SVG element found in chart shadow DOM');
+      console.warn(`[${ErrorCode.SVG_NOT_FOUND.code}] ${ErrorCode.SVG_NOT_FOUND.message}`);
       return;
     }
 

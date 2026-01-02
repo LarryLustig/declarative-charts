@@ -16,8 +16,12 @@
 
 // Export base classes and utilities
 export { BaseChart, booleanConverter, showConditionConverter } from './base-chart.js';
-export type { ShowCondition } from './base-chart.js';
+export type { ShowCondition, LogEntry, LogLevel } from './base-chart.js';
 export { AxisChart } from './axis-chart.js';
+
+// Export error handling
+export { ErrorCode, formatErrorMessage, getErrorByCode, createErrorLog } from './errors.js';
+export type { ErrorDefinition, ErrorCodeKey } from './errors.js';
 export type { AxisConfig, TickConfig, TimeScale } from './axis-chart.js';
 export { BaseChartElement } from './base-chart-element.js';
 export { BaseFilledShape, BaseShape } from './base-filled-shape.js';

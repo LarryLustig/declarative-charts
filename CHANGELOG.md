@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Error Code System**
+  - New structured error handling with unique error codes (DC001-DC499)
+  - Error codes organized by category: data errors, configuration errors, reference errors, style warnings, informational
+  - New `src/errors.ts` with `ErrorCode` registry and utility functions
+  - New `logError()` method on all chart classes for consistent warning/error logging
+  - All existing warnings migrated to use error codes
+  - Console output includes error code prefix: `[DC001] path: message`
+  - `LogEntry` interface extended with optional `code` field
+  - Exported types and utilities: `ErrorCode`, `ErrorDefinition`, `formatErrorMessage`, `getErrorByCode`
+  - Documentation in CLAUDE.md for adding new error codes
+
 - **Default Configuration**
   - New `<dc-defaults>` element for setting default attribute values across charts
   - Place before charts to configure page-wide or container-scoped defaults

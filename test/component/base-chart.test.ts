@@ -640,7 +640,7 @@ describe('BaseChart component', () => {
 
       chart.downloadSvg();
 
-      expect(warnSpy).toHaveBeenCalledWith('No SVG element found in chart shadow DOM');
+      expect(warnSpy).toHaveBeenCalledWith('[DC204] No SVG element found in chart shadow DOM');
     });
 
     it('downloadSvg method exists and is callable', async () => {

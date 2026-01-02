@@ -1,5 +1,6 @@
 import { svg, SVGTemplateResult } from 'lit';
 import { BaseChart } from './base-chart.js';
+import { ErrorCode } from './errors.js';
 import type { ChartAxis, AxisPosition, AxisType } from './chart-axis.js';
 import type { GridConfig } from './chart-grid.js';
 import { calculateLabelLines, calculateLabelInterval, calculateTicks } from './chart-utils.js';
@@ -302,7 +303,7 @@ export abstract class AxisChart extends BaseChart {
     for (const axis of axes) {
       const warnings = axis.getStyleWarnings();
       for (const warning of warnings) {
-        console.warn(warning.message);
+        this.logError(ErrorCode.AXIS_STYLE_WARNING, { message: warning.message });
       }
     }
   }
@@ -1224,7 +1225,7 @@ export abstract class AxisChart extends BaseChart {
 
     // Need at least 2 valid dates for a time scale
     if (parsed.validIndices.length < 2 || !parsed.range) {
-      this.log('warning', 'timeAxis', `Type is 'time' but only ${parsed.validIndices.length} valid dates found`, labels);
+      this.logError(ErrorCode.TIME_AXIS_FEW_DATES, { count: parsed.validIndices.length }, labels);
       return null;
     }
 
