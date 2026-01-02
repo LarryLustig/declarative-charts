@@ -1,6 +1,6 @@
 import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { showConditionConverter, type ShowCondition } from './base-chart.js';
+import { showConditionConverter, type ShowCondition } from './converters.js';
 
 /**
  * List of attribute names that can be configured via <dc-defaults>.

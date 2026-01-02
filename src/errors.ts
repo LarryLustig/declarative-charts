@@ -14,7 +14,11 @@
  * - path: Default log path for this error type
  */
 
-import type { LogLevel } from './base-chart.js';
+/**
+ * Log level for error definitions.
+ * Duplicated here to avoid circular dependency with base-chart.ts.
+ */
+export type ErrorLevel = 'error' | 'warning' | 'info';
 
 /**
  * Structure for error code definitions
@@ -23,7 +27,7 @@ export interface ErrorDefinition {
   /** Unique error code (e.g., "DC001") */
   code: string;
   /** Default severity level */
-  level: LogLevel;
+  level: ErrorLevel;
   /** Default log path */
   path: string;
   /** Human-readable message template. Use {placeholders} for dynamic values. */
@@ -306,7 +310,7 @@ export function formatErrorMessage(
 export function createErrorLog(
   error: ErrorDefinition,
   values: Record<string, string | number | undefined> = {}
-): { code: string; level: LogLevel; path: string; message: string } {
+): { code: string; level: ErrorLevel; path: string; message: string } {
   return {
     code: error.code,
     level: error.level,

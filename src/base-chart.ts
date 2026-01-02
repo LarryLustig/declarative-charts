@@ -37,6 +37,20 @@ import {
   ErrorCode
 } from './errors.js';
 
+// Import and re-export converters from their dedicated module to avoid circular dependencies
+import {
+  showConditionConverter,
+  booleanConverter,
+  optionalBooleanConverter,
+  type ShowCondition
+} from './converters.js';
+export {
+  showConditionConverter,
+  booleanConverter,
+  optionalBooleanConverter,
+  type ShowCondition
+};
+
 /**
  * Options for resolving colors for chart elements.
  */
@@ -64,57 +78,6 @@ export interface PaddingContentItem {
   element: Element;
 }
 
-/**
- * Represents a show condition that can be:
- * - boolean: true/false for always show/hide
- * - { type: 'value', threshold: number }: show only when value >= threshold
- * - { type: 'percent', threshold: number }: show only when percent >= threshold
- */
-export type ShowCondition =
-  | boolean
-  | { type: 'value'; threshold: number }
-  | { type: 'percent'; threshold: number };
-
-/**
- * Custom converter for show-* attributes that handles:
- * - "false" or absent → false
- * - "true" or "" (present without value) → true
- * - "5%" → { type: 'percent', threshold: 5 }
- * - "100" or "100px" (number without %) → { type: 'value', threshold: 100 }
- */
-export const showConditionConverter = {
-  fromAttribute: (value: string | null): ShowCondition => {
-    if (value === null) return false;
-    if (value === 'false') return false;
-    if (value === '' || value === 'true') return true;
-
-    // Check for percentage threshold
-    if (value.endsWith('%')) {
-      const threshold = parseFloat(value);
-      if (!isNaN(threshold)) {
-        return { type: 'percent', threshold };
-      }
-    }
-
-    // Check for value threshold (number, optionally with px suffix)
-    const numValue = parseFloat(value);
-    if (!isNaN(numValue)) {
-      return { type: 'value', threshold: numValue };
-    }
-
-    // Default to true for any other non-empty string
-    return true;
-  },
-  toAttribute: (value: ShowCondition): string | null => {
-    if (typeof value === 'boolean') {
-      return value ? '' : null;
-    }
-    if (value.type === 'percent') {
-      return `${value.threshold}%`;
-    }
-    return `${value.threshold}`;
-  }
-};
 
 /**
  * Log level for chart logging system.
@@ -157,48 +120,6 @@ export interface LogEntry {
   code?: string;
 }
 
-/**
- * @deprecated Use showConditionConverter instead
- * Legacy converter kept for backwards compatibility
- */
-export const booleanConverter = {
-  fromAttribute: (value: string | null) => {
-    if (value === null) return false;
-    if (value === 'false') return false;
-    return true;
-  },
-  toAttribute: (value: boolean) => {
-    return value ? '' : null;
-  }
-};
-
-/**
- * Converter for optional boolean attributes that need to distinguish between
- * undefined (attribute absent), true, and false.
- *
- * Use this for attributes that inherit from a parent when not specified.
- * Standard Lit Boolean type treats ANY attribute presence as true.
- * This converter properly handles attribute="false".
- *
- * - null (absent) → undefined (inherit from parent)
- * - "false" → false (explicitly disabled)
- * - "" or "true" or any other value → true (explicitly enabled)
- */
-export const optionalBooleanConverter = {
-  fromAttribute(value: string | null): boolean | undefined {
-    if (value === null) {
-      return undefined; // Attribute not present - inherit from parent
-    }
-    // Attribute present - check if explicitly "false"
-    return value.toLowerCase() !== 'false';
-  },
-  toAttribute(value: boolean | undefined): string | null {
-    if (value === undefined) {
-      return null; // Remove attribute
-    }
-    return value ? '' : 'false';
-  }
-};
 
 /**
  * Base class for chart components with popup support

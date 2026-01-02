@@ -21,7 +21,7 @@ export { AxisChart } from './axis-chart.js';
 
 // Export error handling
 export { ErrorCode, formatErrorMessage, getErrorByCode, createErrorLog } from './errors.js';
-export type { ErrorDefinition, ErrorCodeKey } from './errors.js';
+export type { ErrorDefinition, ErrorCodeKey, ErrorLevel } from './errors.js';
 export type { AxisConfig, TickConfig, TimeScale } from './axis-chart.js';
 export { BaseChartElement } from './base-chart-element.js';
 export { BaseFilledShape, BaseShape } from './base-filled-shape.js';
@@ -105,9 +105,6 @@ export type { PatternType, PatternConfig, ResolvedPattern, ResolvedFillAndPatter
 
 // Export logging/debugging components
 export { LogConsole } from './log-console.js';
-
-// Export log entry types from base-chart
-export type { LogEntry, LogLevel } from './base-chart.js';
 
 // Export accessibility utilities
 export {

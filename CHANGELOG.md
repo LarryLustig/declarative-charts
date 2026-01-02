@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Exported types and utilities: `ErrorCode`, `ErrorDefinition`, `formatErrorMessage`, `getErrorByCode`
   - Documentation in CLAUDE.md for adding new error codes
 
+- **Converters Module**
+  - New `src/converters.ts` module with property converters separated to avoid circular dependencies
+  - Exports: `showConditionConverter`, `booleanConverter`, `optionalBooleanConverter`, `ShowCondition` type
+  - Re-exported from `base-chart.ts` for backwards compatibility
+
 - **Default Configuration**
   - New `<dc-defaults>` element for setting default attribute values across charts
   - Place before charts to configure page-wide or container-scoped defaults
@@ -157,6 +162,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - **Developer**: Logging, htmx Integration, Accessibility
 
 ### Fixed
+
+- **Circular Dependency in Module Loading**
+  - Fixed "Cannot access 'showConditionConverter' before initialization" error
+  - Moved converters to separate `src/converters.ts` module to break circular dependency between `base-chart.ts` and `chart-defaults.ts`
+  - All existing imports from `base-chart.js` continue to work (re-exported for backwards compatibility)
 
 - **Stage Chart Zero-Value Sizing**
   - Fixed clipping and label centering issues when using `zero-value="auto"`
