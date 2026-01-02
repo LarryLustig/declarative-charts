@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Default Configuration - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+</head>
+<body>
+    <h1>Default Configuration</h1>
+    <p>The <code>&lt;dc-defaults&gt;</code> element sets default attributes for charts, reducing repetition and enabling consistent styling</p>
+
+    <nav></nav>
+
+    <div class="example">
+        <h2>Page-Wide Defaults</h2>
+        <p>Place a <code>&lt;dc-defaults&gt;</code> element at the top of your page to configure all charts. All charts below inherit animations and the viridis palette.</p>
+
+        <dc-defaults animations palette="viridis"></dc-defaults>
+
+        <div class="grid">
+            <div>
+                <h3>Bar Chart</h3>
+                <pre><code>&lt;dc-defaults animations palette="viridis"&gt;&lt;/dc-defaults&gt;
+
+&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Quarterly Revenue&lt;/dc-title&gt;
+  &lt;dc-bar value="45" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="72" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="58" label="Q3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="91" label="Q4"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Quarterly Revenue</dc-title>
+                    <dc-bar value="45" label="Q1"></dc-bar>
+                    <dc-bar value="72" label="Q2"></dc-bar>
+                    <dc-bar value="58" label="Q3"></dc-bar>
+                    <dc-bar value="91" label="Q4"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Pie Chart</h3>
+                <pre><code>&lt;!-- Same dc-defaults applies --&gt;
+
+&lt;dc-pie-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Market Share&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="45" label="Desktop"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="35" label="Mobile"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="20" label="Tablet"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350">
+                    <dc-title>Market Share</dc-title>
+                    <dc-pie-slice value="45" label="Desktop"></dc-pie-slice>
+                    <dc-pie-slice value="35" label="Mobile"></dc-pie-slice>
+                    <dc-pie-slice value="20" label="Tablet"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Scoped Defaults</h2>
+        <p>Defaults can be scoped to specific containers. Charts inside a container use the nearest <code>&lt;dc-defaults&gt;</code>.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Using Outer Defaults</h3>
+                <pre><code>&lt;dc-defaults palette="category10"&gt;&lt;/dc-defaults&gt;
+
+&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Category10 Palette&lt;/dc-title&gt;
+  &lt;dc-bar value="85" label="Sales"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="65" label="Marketing"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="45" label="Support"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-defaults palette="category10"></dc-defaults>
+                <dc-chart width="500" height="350">
+                    <dc-title>Category10 Palette</dc-title>
+                    <dc-bar value="85" label="Sales"></dc-bar>
+                    <dc-bar value="65" label="Marketing"></dc-bar>
+                    <dc-bar value="45" label="Support"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Scoped to Container</h3>
+                <pre><code>&lt;div class="high-contrast-section"&gt;
+  &lt;dc-defaults high-contrast&gt;&lt;/dc-defaults&gt;
+
+  &lt;dc-chart width="500" height="350"&gt;
+    &lt;dc-title&gt;High Contrast Mode&lt;/dc-title&gt;
+    &lt;dc-bar value="85" label="Sales"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="65" label="Marketing"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="45" label="Support"&gt;&lt;/dc-bar&gt;
+  &lt;/dc-chart&gt;
+&lt;/div&gt;</code></pre>
+                <div>
+                    <dc-defaults high-contrast></dc-defaults>
+                    <dc-chart width="500" height="350">
+                        <dc-title>High Contrast Mode</dc-title>
+                        <dc-bar value="85" label="Sales"></dc-bar>
+                        <dc-bar value="65" label="Marketing"></dc-bar>
+                        <dc-bar value="45" label="Support"></dc-bar>
+                    </dc-chart>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Overriding Defaults</h2>
+        <p>Explicit attributes on a chart always override defaults.</p>
+
+        <dc-defaults palette="warm" animations></dc-defaults>
+
+        <div class="grid">
+            <div>
+                <h3>Using Defaults</h3>
+                <pre><code>&lt;dc-defaults palette="warm" animations&gt;&lt;/dc-defaults&gt;
+
+&lt;!-- Uses warm palette and animations --&gt;
+&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Warm Palette (Default)&lt;/dc-title&gt;
+  &lt;dc-bar value="80" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="60" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Warm Palette (Default)</dc-title>
+                    <dc-bar value="80" label="A"></dc-bar>
+                    <dc-bar value="60" label="B"></dc-bar>
+                    <dc-bar value="90" label="C"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Overriding Palette</h3>
+                <pre><code>&lt;!-- Overrides palette but keeps animations --&gt;
+&lt;dc-chart palette="cool" width="500" height="350"&gt;
+  &lt;dc-title&gt;Cool Palette (Override)&lt;/dc-title&gt;
+  &lt;dc-bar value="80" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="60" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="90" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart palette="cool" width="500" height="350">
+                    <dc-title>Cool Palette (Override)</dc-title>
+                    <dc-bar value="80" label="A"></dc-bar>
+                    <dc-bar value="60" label="B"></dc-bar>
+                    <dc-bar value="90" label="C"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Formatting Defaults</h2>
+        <p>Set consistent number formatting across all charts.</p>
+
+        <dc-defaults value-format="currency USD" show-percent></dc-defaults>
+
+        <div class="grid">
+            <div>
+                <h3>Currency Format</h3>
+                <pre><code>&lt;dc-defaults value-format="currency USD" show-percent&gt;&lt;/dc-defaults&gt;
+
+&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Revenue by Region&lt;/dc-title&gt;
+  &lt;dc-bar value="1500000" label="North"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="1200000" label="South"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="900000" label="East"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="600000" label="West"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Revenue by Region</dc-title>
+                    <dc-bar value="1500000" label="North"></dc-bar>
+                    <dc-bar value="1200000" label="South"></dc-bar>
+                    <dc-bar value="900000" label="East"></dc-bar>
+                    <dc-bar value="600000" label="West"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Pie with Percentages</h3>
+                <pre><code>&lt;!-- Same formatting defaults apply --&gt;
+&lt;dc-pie-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Budget Allocation&lt;/dc-title&gt;
+  &lt;dc-pie-slice value="500000" label="R&amp;D"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="300000" label="Sales"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="200000" label="Ops"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350">
+                    <dc-title>Budget Allocation</dc-title>
+                    <dc-pie-slice value="500000" label="R&D"></dc-pie-slice>
+                    <dc-pie-slice value="300000" label="Sales"></dc-pie-slice>
+                    <dc-pie-slice value="200000" label="Ops"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Multiple Defaults</h2>
+        <p>Combine multiple settings in a single <code>&lt;dc-defaults&gt;</code> element.</p>
+
+        <dc-defaults
+            palette="tableau10"
+            animations="500ms"
+            auto-popup
+            value-format="compact 1"
+            show-value
+        ></dc-defaults>
+
+        <div class="grid">
+            <div>
+                <h3>Combined Settings</h3>
+                <pre><code>&lt;dc-defaults
+    palette="tableau10"
+    animations="500ms"
+    auto-popup
+    value-format="compact 1"
+    show-value&gt;
+&lt;/dc-defaults&gt;
+
+&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Sales Overview&lt;/dc-title&gt;
+  &lt;dc-bar value="4500000" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="5200000" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="4800000" label="Q3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="6100000" label="Q4"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Sales Overview</dc-title>
+                    <dc-bar value="4500000" label="Q1"></dc-bar>
+                    <dc-bar value="5200000" label="Q2"></dc-bar>
+                    <dc-bar value="4800000" label="Q3"></dc-bar>
+                    <dc-bar value="6100000" label="Q4"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Line Chart</h3>
+                <pre><code>&lt;!-- Same defaults apply to all chart types --&gt;
+&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Trend Analysis&lt;/dc-title&gt;
+  &lt;dc-line label="Revenue"&gt;
+    &lt;dc-point value="3200000" label="Jan"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="3800000" label="Feb"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="4100000" label="Mar"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="4500000" label="Apr"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Trend Analysis</dc-title>
+                    <dc-line label="Revenue">
+                        <dc-point value="3200000" label="Jan"></dc-point>
+                        <dc-point value="3800000" label="Feb"></dc-point>
+                        <dc-point value="4100000" label="Mar"></dc-point>
+                        <dc-point value="4500000" label="Apr"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../dist/declarative-charts.js"></script>
+    <script src="examples.js"></script>
+</body>
+</html>

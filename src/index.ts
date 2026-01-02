@@ -55,7 +55,19 @@ export { ChartTitle } from './chart-title.js';
 // Side-effect imports ensure elements are always registered when used as children
 import './chart-fill.js';
 import './chart-legend-item.js';
+import './chart-defaults.js';
 export { ChartPalette } from './chart-palette.js';
+export {
+  ChartDefaults,
+  configure,
+  getConfiguration,
+  getGlobalDefault,
+  findDefaultsElement,
+  getDefault,
+  resolveDefault,
+  DEFAULTABLE_ATTRIBUTES
+} from './chart-defaults.js';
+export type { DefaultableAttribute, ConfigureOptions } from './chart-defaults.js';
 export type { PaletteColorResult } from './chart-palette.js';
 export { ChartFill } from './chart-fill.js';
 export { ChartSwatch, STANDARD_SHAPES } from './chart-swatch.js';

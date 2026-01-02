@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Default Configuration**
+  - New `<dc-defaults>` element for setting default attribute values across charts
+  - Place before charts to configure page-wide or container-scoped defaults
+  - Supports all common chart attributes: `animations`, `palette`, `high-contrast`, `show-value`, `show-label`, `show-percent`, `value-format`, `percent-format`, `label-position`, `label-fill`, `stroke`, `stroke-width`, `auto-popup`, `logging`, `console-log`, and padding properties
+  - Scoped defaults: charts use the nearest `<dc-defaults>` ancestor
+  - Explicit chart attributes always override defaults
+  - New utility functions: `findDefaultsElement()`, `getDefault()`, `resolveDefault()`
+  - New examples page: `examples/defaults.html`
+  - **Site-wide defaults via JavaScript API:**
+    - New `configure()` function for setting defaults across all pages
+    - New `getConfiguration()` function to retrieve current configuration
+    - Import from shared module loaded on every page for consistent site-wide settings
+    - Priority: element attribute > `<dc-defaults>` > `configure()` > library default
+
 - **Area Charts**
   - New `<dc-area>` element for creating filled area charts
   - Areas are filled regions bounded by data points above and the zero line below

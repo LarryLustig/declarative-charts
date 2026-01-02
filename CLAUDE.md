@@ -299,6 +299,7 @@ npm run test:visual:update  # Update visual test baselines
 | `src/chart-title.ts` | `test/unit/chart-title.test.ts` | 44% (constants, warnings) |
 | `src/chart-swatch.ts` | `test/unit/chart-swatch.test.ts` | 25% (constants, properties) |
 | `src/base-filled-shape.ts` | `test/unit/base-shape.test.ts` | 100% |
+| `src/chart-defaults.ts` | `test/unit/chart-defaults.test.ts`, `test/component/chart-defaults.test.ts` | properties, DOM traversal |
 
 ### ⚠️ REQUIRED: Update Tests When Modifying Covered Files
 

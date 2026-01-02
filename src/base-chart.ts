@@ -27,6 +27,10 @@ import {
   parseAnimateAttribute,
   type AnimatableChartType
 } from './animation.js';
+import {
+  findDefaultsElement,
+  type DefaultableAttribute
+} from './chart-defaults.js';
 
 /**
  * Options for resolving colors for chart elements.
@@ -2183,8 +2187,62 @@ export abstract class BaseChart extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
+    // Apply defaults from <dc-defaults> elements before first render
+    this.applyDefaults();
     // Add data attribute to host element for identification
     this.setAttribute('data-chart-type', this.tagName.toLowerCase());
+  }
+
+  /**
+   * Apply default values from ancestor <dc-defaults> elements.
+   *
+   * For each defaultable attribute, if the attribute was not explicitly set
+   * on this element, look for a value in the nearest <dc-defaults> ancestor.
+   *
+   * This is called automatically in connectedCallback before the first render.
+   */
+  protected applyDefaults(): void {
+    const defaults = findDefaultsElement(this);
+    if (!defaults) return;
+
+    // Map of attribute names to property names
+    const defaultableProps: Array<{ attr: DefaultableAttribute; prop: string }> = [
+      { attr: 'animations', prop: 'animations' },
+      { attr: 'palette', prop: 'paletteId' },
+      { attr: 'high-contrast', prop: 'highContrast' },
+      { attr: 'show-value', prop: 'showValue' },
+      { attr: 'show-label', prop: 'showLabel' },
+      { attr: 'show-percent', prop: 'showPercent' },
+      { attr: 'value-format', prop: 'valueFormat' },
+      { attr: 'percent-format', prop: 'percentFormat' },
+      { attr: 'label-position', prop: 'labelPosition' },
+      { attr: 'label-fill', prop: 'labelFill' },
+      { attr: 'stroke', prop: 'stroke' },
+      { attr: 'stroke-width', prop: 'strokeWidth' },
+      { attr: 'auto-popup', prop: 'autoPopup' },
+      { attr: 'logging', prop: 'logging' },
+      { attr: 'console-log', prop: 'consoleLog' },
+      { attr: 'padding', prop: 'padding' },
+      { attr: 'padding-top', prop: 'paddingTop' },
+      { attr: 'padding-right', prop: 'paddingRight' },
+      { attr: 'padding-bottom', prop: 'paddingBottom' },
+      { attr: 'padding-left', prop: 'paddingLeft' },
+    ];
+
+    for (const { attr, prop } of defaultableProps) {
+      // Skip if this element has the attribute explicitly set
+      if (this.hasAttribute(attr)) continue;
+
+      // Check if the defaults element has this attribute
+      if (defaults.hasDefault(attr)) {
+        const value = defaults.getDefault(attr);
+        if (value !== undefined) {
+          // Apply the default value to this element's property
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (this as any)[prop] = value;
+        }
+      }
+    }
   }
 
   /**

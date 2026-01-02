@@ -4,6 +4,7 @@ Complete documentation for all elements and attributes in the Declarative Chart 
 
 ## Table of Contents
 
+- [Default Configuration](#default-configuration)
 - [Common Chart Attributes](#common-chart-attributes)
 - [Color System](#color-system)
 - [Palettes and Pattern Fills](#palettes-and-pattern-fills)
@@ -15,6 +16,163 @@ Complete documentation for all elements and attributes in the Declarative Chart 
 - [Integration with htmx and Other Libraries](#integration-with-htmx-and-other-libraries)
 - [Logging & Debugging](#logging--debugging)
 - [Accessibility](#accessibility)
+
+---
+
+## Default Configuration
+
+The `<dc-defaults>` element allows you to configure default attribute values for charts. Instead of repeating the same attributes on every chart, set them once and have all charts inherit those values.
+
+### Basic Usage
+
+Place a `<dc-defaults>` element before your charts to set defaults:
+
+```html
+<!-- Page-wide defaults -->
+<dc-defaults animations palette="viridis" value-format="compact 1"></dc-defaults>
+
+<dc-chart>
+  <dc-bar value="1500000" label="Q1"></dc-bar>
+  <dc-bar value="2300000" label="Q2"></dc-bar>
+</dc-chart>
+
+<dc-pie-chart>
+  <dc-pie-slice value="60" label="Desktop"></dc-pie-slice>
+  <dc-pie-slice value="40" label="Mobile"></dc-pie-slice>
+</dc-pie-chart>
+```
+
+Both charts will use animations, the viridis palette, and compact number formatting.
+
+### Scoped Defaults
+
+Defaults can be scoped to specific containers:
+
+```html
+<!-- Outer defaults apply to charts outside the section -->
+<dc-defaults palette="category10"></dc-defaults>
+
+<dc-chart>...</dc-chart>  <!-- Uses category10 -->
+
+<div class="high-contrast-section">
+  <!-- Inner defaults apply only to charts in this container -->
+  <dc-defaults high-contrast animations="false"></dc-defaults>
+
+  <dc-chart>...</dc-chart>  <!-- Uses high-contrast, no animations -->
+  <dc-pie-chart>...</dc-pie-chart>  <!-- Also high-contrast, no animations -->
+</div>
+
+<dc-chart>...</dc-chart>  <!-- Uses category10 (outer defaults) -->
+```
+
+### Priority Order
+
+Attribute values are resolved in this order (first defined wins):
+
+1. **Explicit attribute** on the chart element
+2. **Nearest `<dc-defaults>`** ancestor (scoped defaults)
+3. **Document-level `<dc-defaults>`** (page-wide defaults)
+4. **Library default** (hardcoded fallback)
+
+```html
+<dc-defaults palette="viridis" animations></dc-defaults>
+
+<!-- Uses viridis palette but NO animations (explicit override) -->
+<dc-chart palette="viridis" animations="false">...</dc-chart>
+
+<!-- Uses both defaults (animations and viridis) -->
+<dc-chart>...</dc-chart>
+```
+
+### Supported Attributes
+
+The following attributes can be configured via `<dc-defaults>`:
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `animations` | string | Entry animation setting (`"true"`, `"500ms"`, `"false"`) |
+| `palette` | string | Default palette name or ID |
+| `high-contrast` | boolean | Enable high contrast mode |
+| `show-value` | boolean/threshold | Show numeric values on elements |
+| `show-label` | boolean/threshold | Show labels on elements |
+| `show-percent` | boolean/threshold | Show percentages on elements |
+| `value-format` | string | Number format for values |
+| `percent-format` | string | Number format for percentages |
+| `label-position` | string | Default label position |
+| `label-fill` | string | Default label color |
+| `stroke` | string | Default stroke color |
+| `stroke-width` | number | Default stroke width |
+| `auto-popup` | boolean | Enable hover popups |
+| `logging` | string | Logging level |
+| `console-log` | string | Console output level |
+| `padding` | string | Chart padding (CSS shorthand) |
+| `padding-top` | string | Top padding |
+| `padding-right` | string | Right padding |
+| `padding-bottom` | string | Bottom padding |
+| `padding-left` | string | Left padding |
+
+### Site-Wide Defaults (JavaScript API)
+
+For defaults that apply across multiple pages, use the `configure()` function from a shared JavaScript module:
+
+```javascript
+// config.js - loaded on every page
+import { configure } from 'declarative-charts';
+
+configure({
+  animations: true,
+  palette: 'viridis',
+  valueFormat: 'compact 1',
+  highContrast: false,
+});
+```
+
+```html
+<!-- In each page -->
+<script type="module" src="config.js"></script>
+<script type="module" src="declarative-charts.js"></script>
+
+<dc-chart>...</dc-chart>  <!-- Uses site-wide defaults -->
+```
+
+**API:**
+
+```javascript
+import { configure, getConfiguration } from 'declarative-charts';
+
+// Set site-wide defaults (clears previous configuration)
+configure({
+  animations: true,           // or '500ms'
+  palette: 'viridis',
+  highContrast: false,
+  showValue: true,
+  showLabel: true,
+  showPercent: false,
+  valueFormat: 'number 2',
+  percentFormat: 'percent 1',
+  labelPosition: 'outside',
+  labelFill: 'auto',
+  stroke: '#333',
+  strokeWidth: 1,
+  autoPopup: false,
+  logging: 'false',
+  consoleLog: 'none',
+  padding: '5%',
+});
+
+// Get current configuration
+const config = getConfiguration();
+console.log(config.palette);  // 'viridis'
+
+// Reset to library defaults
+configure({});
+```
+
+**Priority order** (first defined wins):
+1. Explicit attribute on the chart element
+2. Nearest `<dc-defaults>` ancestor (page/container scope)
+3. Global defaults set via `configure()` (site-wide)
+4. Library hardcoded defaults
 
 ---
 
