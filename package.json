@@ -6,14 +6,24 @@
   "main": "./dist/declarative-charts.umd.cjs",
   "module": "./dist/declarative-charts.js",
   "types": "./dist/index.d.ts",
+  "unpkg": "./dist/declarative-charts.standalone.js",
+  "jsdelivr": "./dist/declarative-charts.standalone.js",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/declarative-charts.js",
-      "require": "./dist/declarative-charts.umd.cjs",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/declarative-charts.umd.cjs"
+    },
+    "./standalone": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/declarative-charts.standalone.js"
     }
   },
-  "sideEffects": false,
+  "//sideEffects": "Defining custom elements IS the side effect. Marking this package side-effect-free lets bundlers drop `import 'declarative-charts'` entirely, registering nothing and rendering a blank page with no error.",
+  "sideEffects": [
+    "*.js",
+    "*.cjs"
+  ],
   "files": [
     "dist",
     "README.md",
@@ -21,7 +31,7 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && tsc -p tsconfig.build.json",
+    "build": "tsc && vite build && vite build --config vite.config.standalone.ts && tsc -p tsconfig.build.json",
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
@@ -30,16 +40,17 @@
     "test:visual:update": "playwright test --update-snapshots",
     "test:visual:report": "playwright show-report test/visual/report",
     "bench": "node test/visual/bench.mjs",
-    "prepublishOnly": "npm run test:run && npm run build"
+    "test:package": "node test/package/smoke.mjs",
+    "prepublishOnly": "npm run test:run && npm run build && npm run test:package"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YOUR_USERNAME/decl-charts.git"
+    "url": "git+https://github.com/LarryLustig/decl-charts.git"
   },
   "bugs": {
-    "url": "https://github.com/YOUR_USERNAME/decl-charts/issues"
+    "url": "https://github.com/LarryLustig/decl-charts/issues"
   },
-  "homepage": "https://github.com/YOUR_USERNAME/decl-charts#readme",
+  "homepage": "https://github.com/LarryLustig/decl-charts#readme",
   "keywords": [
     "charts",
     "web-components",
@@ -50,12 +61,14 @@
     "line-chart",
     "data-visualization"
   ],
-  "author": "Your Name <your.email@example.com>",
+  "author": "Lawrence Lustig <larrylustig@gmail.com>",
   "license": "MIT",
-  "dependencies": {
+  "peerDependencies": {
     "lit": "^3.1.0"
   },
   "devDependencies": {
+    "lit": "^3.1.0",
+    "esbuild": "^0.21.5",
     "@playwright/test": "^1.57.0",
     "@vitest/coverage-v8": "^4.0.16",
     "happy-dom": "^20.0.11",

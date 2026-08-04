@@ -9,6 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`"sideEffects": false` let bundlers delete the entire library**
+  - Defining custom elements *is* a side effect, so the flag was a false promise. Webpack and
+    Rollup honoured it and dropped the documented `import 'declarative-charts'` wholesale —
+    registering nothing and rendering a blank page with no error. Measured: esbuild produced a
+    **0-byte** bundle
+  - Invisible in development, because Vite's dev server does not tree-shake
+  - Now `"sideEffects": ["*.js", "*.cjs"]`
+
+- **Lit was bundled into the library *and* declared a runtime dependency**
+  - Consumers already using Lit got two copies of `ReactiveElement` in one page: doubled
+    payload, `instanceof` failing across the boundary, and Lit's duplicate-version warnings
+  - Lit is now a **peer dependency**, externalized from the bundler-facing ESM build
+  - The no-build path is served by separate self-contained artifacts rather than by the package
+    main: `declarative-charts.standalone.js` (ESM, referenced by the new `unpkg`/`jsdelivr`
+    fields and a `./standalone` export) and `declarative-charts.umd.cjs`. A CDN
+    `<script type="module">` cannot resolve a bare `import 'lit'` specifier, so those keep Lit
+    inlined by design
+  - `npm install declarative-charts lit` is now the install line
+
+- **Placeholder package metadata**
+  - `YOUR_USERNAME` in the repository, bugs, and homepage URLs, and
+    `Your Name <your.email@example.com>` as author, replaced with real values
+  - `npm run test:package` now fails if placeholders reappear
+
 - **Bar charts rendered nothing past ~84 bars**
   - Each bar unit reserves a fixed gutter, so beyond a certain count the gutters consumed the
     whole plot area and the computed bar width went negative. A negative `width` is invalid SVG,
@@ -39,6 +63,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     (Vitest skips coverage output and clears `coverage/` when any test fails)
 
 ### Added
+
+- **Package smoke test**
+  - `npm run test:package` validates the built artifacts through a real bundler: resolves the
+    package via `node_modules`, bundles `import 'declarative-charts'` with esbuild, and asserts
+    the element registrations survive tree shaking
+  - Also checks lit externalization per artifact, CDN field wiring, tarball contents, and
+    absence of placeholder metadata
+  - Wired into `prepublishOnly`, which now runs tests, build, then this
+  - The two packaging defects above were undetectable by every other test in the repo, because
+    they only appear once a bundler consumes the built package
 
 - **Render-performance harness**
   - `npm run bench` measures how render cost scales with datapoint count and probes for layout

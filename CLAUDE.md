@@ -381,7 +381,36 @@ npm run test:coverage # Run tests with coverage report
 npm run test:visual   # Run visual regression tests
 npm run test:visual:update  # Update visual test baselines
 npm run bench         # Render-performance harness (requires `npm run dev` running)
+npm run test:package  # Validate built artifacts through a real bundler (run after `npm run build`)
 ```
+
+### Package Smoke Test
+
+`npm run test:package` is the only test that exercises the **published** package rather than the
+source, and it exists because two defects were invisible to everything else in the repo:
+
+- `"sideEffects": false` on a package whose whole job is `customElements.define` let bundlers
+  delete `import 'declarative-charts'` entirely — esbuild produced a 0-byte bundle. Vite's dev
+  server does not tree-shake, so every example page and test still worked.
+- Lit was inlined into the bundler-facing build *and* declared a runtime dependency, giving
+  consumers two copies of `ReactiveElement`.
+
+It resolves the package through a real `node_modules` junction (importing `dist/` by relative
+path would skip `sideEffects` and make the test meaningless), bundles with esbuild, and asserts
+the element registrations survive. Add a case here whenever you change `exports`, `sideEffects`,
+`files`, externals, or the artifact layout — none of which any other test covers.
+
+**Three build artifacts, deliberately:**
+
+| artifact | lit | consumed by |
+|---|---|---|
+| `declarative-charts.js` | external (peer dep) | bundlers |
+| `declarative-charts.standalone.js` | inlined | CDN, `unpkg`/`jsdelivr`, `./standalone` export |
+| `declarative-charts.umd.cjs` | inlined | `<script src>`, `require()` |
+
+`vite.config.ts` builds the first; `vite.config.standalone.ts` builds the other two with
+`emptyOutDir: false`. Do not externalize lit from the standalone builds — a
+`<script type="module">` cannot resolve a bare `import 'lit'` specifier.
 
 ### Performance Harness
 

@@ -21,12 +21,16 @@ A modern Web Components-based chart library built with Lit that allows you to cr
 **Via npm:**
 
 ```bash
-npm install declarative-charts
+npm install declarative-charts lit
 ```
 
 ```javascript
 import 'declarative-charts';
 ```
+
+Lit is a peer dependency, so you install it alongside. This keeps a single copy of
+Lit in your app if you already use it — bundling our own would give you two.
+The CDN builds below need no such thing; they are fully self-contained.
 
 **Via CDN:**
 

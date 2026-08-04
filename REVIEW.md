@@ -186,7 +186,11 @@ signal the project drifted from shipping into polishing.
 
 Ordered by cost-of-discovery-after-publish.
 
-### 2.1 `"sideEffects": false` on a package whose entire job is `customElements.define`
+### 2.1 `"sideEffects": false` on a package whose entire job is `customElements.define` — ✅ FIXED
+
+> **Fixed.** Now `"sideEffects": ["*.js", "*.cjs"]`. The severity was confirmed empirically
+> before fixing: with the old flag, esbuild reduced `import 'declarative-charts'` to a **0-byte
+> bundle**. `npm run test:package` now guards it through a real bundler. Original finding below.
 
 `package.json:20` declares `"sideEffects": false`. The package registers 25 elements via
 `@customElement` decorators plus three explicit side-effect imports at `src/index.ts:60-62`.
@@ -202,7 +206,20 @@ consumers without a patch release.
 `dist/declarative-charts.js` through a real bundler and asserts `customElements.get('dc-chart')`
 is defined.
 
-### 2.2 Lit is bundled *and* declared a runtime dependency
+### 2.2 Lit is bundled *and* declared a runtime dependency — ✅ FIXED
+
+> **Fixed**, by splitting the artifacts rather than simply externalizing — the old bundling was
+> serving the CDN case, which a bare externalization would have broken, since a
+> `<script type="module">` cannot resolve `import 'lit'`.
+>
+> | artifact | lit | consumer |
+> |---|---|---|
+> | `declarative-charts.js` (358kb) | external, peer dep | bundlers |
+> | `declarative-charts.standalone.js` (383kb) | inlined | CDN / `unpkg` / `jsdelivr` |
+> | `declarative-charts.umd.cjs` (241kb) | inlined | `<script src>`, `require()` |
+>
+> Split across `vite.config.ts` and `vite.config.standalone.ts`; install line is now
+> `npm install declarative-charts lit`. Original finding below.
 
 `vite.config.ts:11` sets `external: []` while `package.json` lists `lit: ^3.1.0` under
 `dependencies`. Result: a 383 KB `dist/declarative-charts.js` with Lit inlined, *and* npm
@@ -256,7 +273,10 @@ npx vitest run --coverage --exclude='**/base-chart-calc.test.ts' → exit 0, ful
 `README.md:68` uses `stroke-colors="#9C27B0"` — an attribute that does not exist anywhere in
 `src/`. The first-run experience contains a non-functional example.
 
-### 2.5 Placeholder package metadata
+### 2.5 Placeholder package metadata — ✅ FIXED
+
+> **Fixed.** Real repository URLs and author. `npm run test:package` fails if placeholders
+> reappear. Original finding below.
 
 `YOUR_USERNAME` in `repository`, `bugs`, and `homepage`; `"Your Name <your.email@example.com>"`
 as author.
@@ -896,11 +916,17 @@ error codes in `errors.ts` are actually used.
 
 ## 8. Recommended sequence
 
-**Phase 0 — unblock (days).** §2.3 converter one-liner (greens the suite *and* restores coverage
-reporting, so everything after is verifiable) · §2.1 `sideEffects` + §2.2 externalize Lit + a
-bundler smoke test asserting `customElements.get('dc-chart')` · §2.5 package metadata · §2.4
-README fix. Then **publish**, even rough. Nothing else counts until a stranger can paste a
-`<script>` tag and get a chart.
+**Phase 0 — unblock. ✅ COMPLETE.** §2.1 `sideEffects`, §2.2 Lit externalization + the
+three-artifact split, §2.3 the converter fix, §2.5 metadata — all done, plus a bundler smoke
+test (`npm run test:package`) guarding them. `npm run prepublishOnly` runs tests → build →
+package checks and **exits 0**.
+
+Only §2.4 remains open, and it is one line: `README.md:68` still shows `stroke-colors`, an
+attribute that does not exist.
+
+**The package is now publishable.** That is the whole of Phase 0's purpose — nothing further in
+this document counts until a stranger can `npm install` or paste a `<script>` tag and get a
+chart. Publish before starting Phase 1.
 
 **Phase 1 — breaking changes, while they're still free.** §3.1 parent invalidation · §5.2 hoist
 the quartet + route all text through `formatValue()` (fixes §3.3 for free) · §3.2
