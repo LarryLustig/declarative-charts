@@ -268,10 +268,12 @@ npx vitest run --coverage --exclude='**/base-chart-calc.test.ts' → exit 0, ful
 
 `prepublishOnly` runs the suite, so **publish is currently blocked regardless.**
 
-### 2.4 The README's line-chart quick-start is broken
+### 2.4 The README's line-chart quick-start is broken — ✅ FIXED
 
-`README.md:68` uses `stroke-colors="#9C27B0"` — an attribute that does not exist anywhere in
-`src/`. The first-run experience contains a non-functional example.
+> **Fixed.** Corrected to `stroke` on `<dc-line>`, matching `API.md:271`. Confirmed by rendering
+> both forms in Chromium: the old markup produced `stroke="#2196F3"` (the palette default, colour
+> silently ignored), the new one produces `stroke="#9C27B0"`. All five README chart examples now
+> render with the expected shape counts and no console errors. Original finding below.
 
 ### 2.5 Placeholder package metadata — ✅ FIXED
 
@@ -920,9 +922,6 @@ error codes in `errors.ts` are actually used.
 three-artifact split, §2.3 the converter fix, §2.5 metadata — all done, plus a bundler smoke
 test (`npm run test:package`) guarding them. `npm run prepublishOnly` runs tests → build →
 package checks and **exits 0**.
-
-Only §2.4 remains open, and it is one line: `README.md:68` still shows `stroke-colors`, an
-attribute that does not exist.
 
 **The package is now publishable.** That is the whole of Phase 0's purpose — nothing further in
 this document counts until a stranger can `npm install` or paste a `<script>` tag and get a

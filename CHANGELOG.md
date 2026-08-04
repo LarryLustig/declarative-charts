@@ -28,6 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     inlined by design
   - `npm install declarative-charts lit` is now the install line
 
+- **README line-chart quick-start used a nonexistent attribute**
+  - `stroke-colors` on `<dc-chart>` does not exist, so the first line chart a new user copied
+    silently ignored its colour and fell back to the palette default
+  - Corrected to `stroke` on `<dc-line>`, matching `API.md`
+
 - **Placeholder package metadata**
   - `YOUR_USERNAME` in the repository, bugs, and homepage URLs, and
     `Your Name <your.email@example.com>` as author, replaced with real values

@@ -69,9 +69,9 @@ Open your browser to `http://localhost:5173`
 ### Line Chart
 
 ```html
-<dc-chart width="600" height="400" stroke-colors="#9C27B0">
+<dc-chart width="600" height="400">
   <dc-title>Temperature Trends</dc-title>
-  <dc-line label="City A">
+  <dc-line stroke="#9C27B0" label="City A">
     <dc-point value="15" label="Mon"></dc-point>
     <dc-point value="18" label="Tue"></dc-point>
     <dc-point value="22" label="Wed"></dc-point>
