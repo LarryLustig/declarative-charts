@@ -44,6 +44,17 @@ export function prefersReducedMotion(): boolean {
 }
 
 /**
+ * Check whether the Web Animations API is available.
+ *
+ * Absent in non-browser DOM implementations (jsdom, happy-dom) and in older
+ * browsers. Charts must still render there, so every animation entry point
+ * degrades to a no-op rather than throwing.
+ */
+export function supportsWebAnimations(): boolean {
+  return typeof Element !== 'undefined' && typeof Element.prototype.animate === 'function';
+}
+
+/**
  * Parse the animate attribute value.
  *
  * @param value - The attribute value
@@ -82,6 +93,7 @@ export function animateBars(
   options: AnimationOptions,
   horizontal: boolean = false
 ): Animation[] {
+  if (!supportsWebAnimations()) return [];
   const bars = container.querySelectorAll('rect[data-shape-index]');
   const animations: Animation[] = [];
 
@@ -133,6 +145,7 @@ export function animateLines(
   container: Element,
   options: AnimationOptions
 ): Animation[] {
+  if (!supportsWebAnimations()) return [];
   const paths = container.querySelectorAll('path.line-path');
   const animations: Animation[] = [];
 
@@ -184,6 +197,7 @@ export function animateAreas(
   container: Element,
   options: AnimationOptions
 ): Animation[] {
+  if (!supportsWebAnimations()) return [];
   const areas = container.querySelectorAll('path.area-path');
   const animations: Animation[] = [];
 
@@ -228,6 +242,7 @@ export function animatePieSlices(
   container: Element,
   options: AnimationOptions
 ): Animation[] {
+  if (!supportsWebAnimations()) return [];
   const slices = container.querySelectorAll('path[data-shape-index]');
   const animations: Animation[] = [];
 
@@ -269,6 +284,7 @@ export function animatePoints(
   container: Element,
   options: AnimationOptions
 ): Animation[] {
+  if (!supportsWebAnimations()) return [];
   const points = container.querySelectorAll('circle[data-shape-index]');
   const animations: Animation[] = [];
 
@@ -309,6 +325,7 @@ export function animateCascade(
   selector: string,
   options: AnimationOptions
 ): Animation[] {
+  if (!supportsWebAnimations()) return [];
   const elements = container.querySelectorAll(selector);
   const animations: Animation[] = [];
 

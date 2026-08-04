@@ -24,19 +24,24 @@ export type ShowCondition =
 export const showConditionConverter = {
   fromAttribute: (value: string | null): ShowCondition => {
     if (value === null) return false;
-    if (value === 'false') return false;
-    if (value === '' || value === 'true') return true;
+
+    // Attribute values are compared case-insensitively and whitespace-tolerantly,
+    // matching how HTML treats enumerated attributes.
+    const normalized = value.trim();
+    const lower = normalized.toLowerCase();
+    if (lower === 'false') return false;
+    if (normalized === '' || lower === 'true') return true;
 
     // Check for percentage threshold
-    if (value.endsWith('%')) {
-      const threshold = parseFloat(value);
+    if (normalized.endsWith('%')) {
+      const threshold = parseFloat(normalized);
       if (!isNaN(threshold)) {
         return { type: 'percent', threshold };
       }
     }
 
     // Check for value threshold (number, optionally with px)
-    const numValue = parseFloat(value.replace('px', ''));
+    const numValue = parseFloat(normalized.replace('px', ''));
     if (!isNaN(numValue)) {
       return { type: 'value', threshold: numValue };
     }
@@ -63,8 +68,8 @@ export const showConditionConverter = {
  */
 export const booleanConverter = {
   fromAttribute: (value: string | null): boolean => {
-    if (value === null || value === 'false') return false;
-    return true;
+    if (value === null) return false;
+    return value.trim().toLowerCase() !== 'false';
   },
   toAttribute: (value: boolean): string | null => {
     return value ? '' : null;
@@ -82,7 +87,7 @@ export const booleanConverter = {
 export const optionalBooleanConverter = {
   fromAttribute: (value: string | null): boolean | undefined => {
     if (value === null) return undefined;
-    if (value === 'false') return false;
+    if (value.trim().toLowerCase() === 'false') return false;
     return true;
   },
   toAttribute: (value: boolean | undefined): string | null => {

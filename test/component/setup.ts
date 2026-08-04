@@ -102,6 +102,52 @@ beforeAll(() => {
       clearTimeout(handle);
     };
   }
+
+  // Mock the Web Animations API.
+  //
+  // happy-dom does not implement Element.prototype.animate. Without this, entry
+  // animations throw asynchronously inside firstUpdated - uncaught exceptions that
+  // fail the run (and block `prepublishOnly`) even when every assertion passes.
+  // Stubbing it also means tests exercise the real animated code path rather than
+  // the no-op fallback in `supportsWebAnimations()`.
+  if (typeof Element.prototype.animate !== 'function') {
+    Element.prototype.animate = function (
+      this: Element,
+      _keyframes: Keyframe[] | PropertyIndexedKeyframes | null,
+      _options?: number | KeyframeAnimationOptions
+    ): Animation {
+      const animation = {
+        onfinish: null as ((this: Animation, ev: AnimationPlaybackEvent) => unknown) | null,
+        oncancel: null as ((this: Animation, ev: AnimationPlaybackEvent) => unknown) | null,
+        playState: 'finished' as AnimationPlayState,
+        currentTime: 0,
+        startTime: 0,
+        playbackRate: 1,
+        finished: Promise.resolve(),
+        ready: Promise.resolve(),
+        play() {},
+        pause() {},
+        reverse() {},
+        finish() {},
+        cancel() {},
+        updatePlaybackRate() {},
+        addEventListener() {},
+        removeEventListener() {},
+        dispatchEvent: () => true,
+      };
+
+      // Fire onfinish on a later tick so cleanup handlers (which strip
+      // data-animated and reset dash styles) still run, as they would in a browser.
+      setTimeout(() => {
+        animation.onfinish?.call(
+          animation as unknown as Animation,
+          undefined as unknown as AnimationPlaybackEvent
+        );
+      }, 0);
+
+      return animation as unknown as Animation;
+    };
+  }
 });
 
 // Clean up after each test

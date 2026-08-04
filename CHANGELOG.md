@@ -7,7 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Bar charts rendered nothing past ~84 bars**
+  - Each bar unit reserves a fixed gutter, so beyond a certain count the gutters consumed the
+    whole plot area and the computed bar width went negative. A negative `width` is invalid SVG,
+    so the browser discarded every `<rect>` and the chart drew nothing — with no warning raised
+  - Gutters are now compressed proportionally when space runs short, and bar size is floored at
+    1 viewBox unit so a bar can never collapse or invert
+  - New warning `DC107` (`BAR_SPACE_EXHAUSTED`) reports the compression factor
+  - `calculateUnitDimensions()` now returns `gutterScale`; all bar and category-label render
+    paths apply it, so bars and their labels stay aligned under compression
+  - New regression tests in `test/component/bar-layout.test.ts`
+
+- **Entry animations threw where the Web Animations API is unavailable**
+  - `firstUpdated` fired animations unconditionally, so `Element.prototype.animate` being absent
+    (happy-dom, jsdom, older browsers) produced uncaught `rect.animate is not a function`
+    exceptions. In tests this failed the run — and blocked `prepublishOnly` — even with every
+    assertion passing
+  - New `supportsWebAnimations()` guard; all six animation entry points now degrade to a no-op
+  - The component test setup stubs the Web Animations API, so tests exercise the real animated
+    path rather than the fallback
+
+- **Boolean attribute values were case-sensitive**
+  - `show-value="FALSE"`, `hidden="False"` and similar were treated as `true`, because
+    `showConditionConverter`, `booleanConverter`, and `optionalBooleanConverter` compared against
+    lowercase `'false'` only
+  - All three now compare case-insensitively and tolerate surrounding whitespace, matching how
+    HTML handles enumerated attributes
+  - This fixes the one failing unit test, which was also suppressing the entire coverage report
+    (Vitest skips coverage output and clears `coverage/` when any test fails)
+
 ### Added
+
+- **Render-performance harness**
+  - `npm run bench` measures how render cost scales with datapoint count and probes for layout
+    degeneracies; `npm run bench -- --probe` is a fast pass/fail gate that exits non-zero
+  - `test/visual/bench.mjs` (driver) and `test/visual/fixtures/bench.html` (page)
 
 - **Error Code System**
   - New structured error handling with unique error codes (DC001-DC499)

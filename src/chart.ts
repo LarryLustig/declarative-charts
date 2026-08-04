@@ -261,6 +261,13 @@ interface BubbleData {
  */
 @customElement('dc-chart')
 export class Chart extends AxisChart {
+  /**
+   * Smallest width (or height, when horizontal) a bar may occupy, in viewBox units.
+   * Bars are never allowed below this: a zero or negative dimension is invalid SVG
+   * and causes the browser to drop the shape entirely.
+   */
+  private static readonly MIN_UNIT_SIZE = 1;
+
   // Bar-specific properties
   @property({ type: String })
   orientation: 'vertical' | 'horizontal' | 'vertical-reverse' | 'horizontal-reverse' = 'vertical';
@@ -1204,12 +1211,22 @@ export class Chart extends AxisChart {
   // Unit Dimension Calculations (for bars)
   // ============================================================================
 
+  /**
+   * Spacing to apply on either side of a unit, honouring any per-unit override and
+   * the compression factor from {@link calculateUnitDimensions}.
+   */
+  private unitGutter(unit: BarOrGroup, gutterScale = 1): number {
+    return (unit.gutter ?? this.gutter) * gutterScale;
+  }
+
   private calculateUnitDimensions(
     structure: BarOrGroup[],
     availableSpace: number
   ): {
     unitSizes: number[];
     totalGutterSpace: number;
+    /** Factor applied to every gutter to fit bars in the available space (1 = uncompressed). */
+    gutterScale: number;
     totalCustomSize: number;
     remainingSpace: number;
     defaultUnitSize: number;
@@ -1217,7 +1234,7 @@ export class Chart extends AxisChart {
   } {
     let totalGutterSpace = 0;
     structure.forEach(unit => {
-      const gutter = unit.isGroup ? (unit.gutter ?? this.gutter) : (unit.gutter ?? this.gutter);
+      const gutter = this.unitGutter(unit);
       totalGutterSpace += gutter;
     });
 
@@ -1256,13 +1273,40 @@ export class Chart extends AxisChart {
       }
     });
 
+    // Gutters are a fixed cost per unit, so past a certain bar count they consume
+    // the entire plot area and the leftover space for bars turns negative. A negative
+    // width makes the browser reject every <rect>, so the chart silently renders
+    // nothing. Compress the gutters instead, keeping bars at least MIN_UNIT_SIZE wide.
+    const rawGutterSpace = totalGutterSpace;
+    let gutterScale = 1;
+
+    if (unitsWithoutCustomSize > 0 && rawGutterSpace > 0) {
+      const minNeeded = unitsWithoutCustomSize * Chart.MIN_UNIT_SIZE;
+      if (availableSpace - totalCustomSize - rawGutterSpace < minNeeded) {
+        const allowedGutterSpace = Math.max(0, availableSpace - totalCustomSize - minNeeded);
+        gutterScale = Math.min(1, allowedGutterSpace / rawGutterSpace);
+        totalGutterSpace = rawGutterSpace * gutterScale;
+
+        this.logError(ErrorCode.BAR_SPACE_EXHAUSTED, {
+          count: structure.length,
+          available: Math.round(availableSpace),
+          gutterScale: gutterScale.toFixed(2),
+          minSize: Chart.MIN_UNIT_SIZE
+        });
+      }
+    }
+
     const remainingSpace = availableSpace - totalCustomSize - totalGutterSpace;
-    const defaultUnitSize = unitsWithoutCustomSize > 0 ? remainingSpace / unitsWithoutCustomSize : 0;
+    // Never negative: a negative width is invalid SVG and drops the shape entirely.
+    const defaultUnitSize = unitsWithoutCustomSize > 0
+      ? Math.max(Chart.MIN_UNIT_SIZE, remainingSpace / unitsWithoutCustomSize)
+      : 0;
     const finalUnitSizes = unitSizes.map(s => s === -1 ? defaultUnitSize : s);
 
     return {
       unitSizes: finalUnitSizes,
       totalGutterSpace,
+      gutterScale,
       totalCustomSize,
       remainingSpace,
       defaultUnitSize,
@@ -2163,7 +2207,7 @@ export class Chart extends AxisChart {
     reverse: boolean,
     deferredLabels: DeferredLabel[]
   ): SVGTemplateResult {
-    const { unitSizes: finalUnitWidths } = this.calculateUnitDimensions(structure, chartWidth);
+    const { unitSizes: finalUnitWidths, gutterScale } = this.calculateUnitDimensions(structure, chartWidth);
     const { min, max } = range;
     const totalRange = max - min;
 
@@ -2216,7 +2260,7 @@ export class Chart extends AxisChart {
 
         const currentUnit = structure[unitIndex];
         const currentUnitWidth = finalUnitWidths[unitIndex];
-        const currentGutter = currentUnit.isGroup ? (currentUnit.gutter ?? this.gutter) : (currentUnit.gutter ?? this.gutter);
+        const currentGutter = this.unitGutter(currentUnit, gutterScale);
         let x: number;
         let barWidth: number;
 
@@ -2308,7 +2352,7 @@ export class Chart extends AxisChart {
     reverse: boolean,
     deferredLabels: DeferredLabel[]
   ): SVGTemplateResult {
-    const { unitSizes: finalUnitHeights } = this.calculateUnitDimensions(structure, chartHeight);
+    const { unitSizes: finalUnitHeights, gutterScale } = this.calculateUnitDimensions(structure, chartHeight);
     const { min, max } = range;
     const totalRange = max - min;
 
@@ -2361,7 +2405,7 @@ export class Chart extends AxisChart {
 
         const currentUnit = structure[unitIndex];
         const currentUnitHeight = finalUnitHeights[unitIndex];
-        const currentGutter = currentUnit.isGroup ? (currentUnit.gutter ?? this.gutter) : (currentUnit.gutter ?? this.gutter);
+        const currentGutter = this.unitGutter(currentUnit, gutterScale);
         let y: number;
         let barHeight: number;
 
@@ -2470,12 +2514,12 @@ export class Chart extends AxisChart {
 
     if (!isHorizontal && bars.length > 0) {
       // Vertical orientation: build X position map
-      const { unitSizes: finalUnitWidths } = this.calculateUnitDimensions(structure, chartWidth);
+      const { unitSizes: finalUnitWidths, gutterScale } = this.calculateUnitDimensions(structure, chartWidth);
       let cumulativeX = padding.left;
 
       structure.forEach((unit, unitIndex) => {
         const currentUnitWidth = finalUnitWidths[unitIndex];
-        const currentGutter = unit.isGroup ? (unit.gutter ?? this.gutter) : (unit.gutter ?? this.gutter);
+        const currentGutter = this.unitGutter(unit, gutterScale);
 
         cumulativeX += currentGutter / 2;
         const unitCenterX = cumulativeX + currentUnitWidth / 2;
@@ -2492,12 +2536,12 @@ export class Chart extends AxisChart {
       });
     } else if (isHorizontal && bars.length > 0) {
       // Horizontal orientation: build Y position map
-      const { unitSizes: finalUnitHeights } = this.calculateUnitDimensions(structure, chartHeight);
+      const { unitSizes: finalUnitHeights, gutterScale } = this.calculateUnitDimensions(structure, chartHeight);
       let cumulativeY = padding.top;
 
       structure.forEach((unit, unitIndex) => {
         const currentUnitHeight = finalUnitHeights[unitIndex];
-        const currentGutter = unit.isGroup ? (unit.gutter ?? this.gutter) : (unit.gutter ?? this.gutter);
+        const currentGutter = this.unitGutter(unit, gutterScale);
 
         cumulativeY += currentGutter / 2;
         const unitCenterY = cumulativeY + currentUnitHeight / 2;
@@ -3109,7 +3153,7 @@ export class Chart extends AxisChart {
     isReverse: boolean,
     range: ValueRange
   ): SVGTemplateResult {
-    const { unitSizes } = this.calculateUnitDimensions(structure, isHorizontal ? chartHeight : chartWidth);
+    const { unitSizes, gutterScale } = this.calculateUnitDimensions(structure, isHorizontal ? chartHeight : chartWidth);
     // For all-negative vertical charts, position labels at top (where zero is)
     const allNegative = !range.hasPositives;
     const labelsAtTop = !isHorizontal && !isReverse && allNegative;
@@ -3124,7 +3168,7 @@ export class Chart extends AxisChart {
         ${bars.map((bar, index) => {
           const currentUnit = structure[unitIndex];
           const currentUnitHeight = unitSizes[unitIndex];
-          const currentGutter = currentUnit.isGroup ? (currentUnit.gutter ?? this.gutter) : (currentUnit.gutter ?? this.gutter);
+          const currentGutter = this.unitGutter(currentUnit, gutterScale);
           let y: number;
           let barHeight: number;
 
@@ -3203,7 +3247,7 @@ export class Chart extends AxisChart {
         ${bars.map((bar, index) => {
           const currentUnit = structure[unitIndex];
           const currentUnitWidth = unitSizes[unitIndex];
-          const currentGutter = currentUnit.isGroup ? (currentUnit.gutter ?? this.gutter) : (currentUnit.gutter ?? this.gutter);
+          const currentGutter = this.unitGutter(currentUnit, gutterScale);
           let x: number;
           let barWidth: number;
 

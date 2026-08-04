@@ -167,6 +167,17 @@ export const ErrorCode = {
     message: "Type is 'time' but only {count} valid date(s) found"
   },
 
+  /**
+   * Too many bars for the available plot width. Gutters have been compressed
+   * (and bars clamped to a minimum) so the chart still renders.
+   */
+  BAR_SPACE_EXHAUSTED: {
+    code: 'DC107',
+    level: 'warning',
+    path: 'bars.layout',
+    message: '{count} bars exceed the available {available} units; gutters compressed to {gutterScale}x to keep bars at least {minSize} unit(s) wide'
+  },
+
   // ===========================================================================
   // DC200-DC299: Reference Errors
   // ===========================================================================

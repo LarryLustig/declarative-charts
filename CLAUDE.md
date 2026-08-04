@@ -290,6 +290,7 @@ export const ErrorCode = {
 | DC104 | PARSE_ERROR | Could not parse attribute value |
 | DC105 | FORMAT_INVALID | Invalid format string |
 | DC106 | TIME_AXIS_FEW_DATES | Time axis has insufficient dates |
+| DC107 | BAR_SPACE_EXHAUSTED | Too many bars for plot width; gutters compressed |
 | DC201 | PALETTE_NOT_FOUND | Palette not found |
 | DC202 | PATTERN_NOT_FOUND | Pattern not found or invalid |
 | DC203 | ZERO_FILL_NOT_FOUND | Zero-fill element not found |
@@ -379,7 +380,32 @@ npm run test:run      # Run unit/component/integration tests once
 npm run test:coverage # Run tests with coverage report
 npm run test:visual   # Run visual regression tests
 npm run test:visual:update  # Update visual test baselines
+npm run bench         # Render-performance harness (requires `npm run dev` running)
 ```
+
+### Performance Harness
+
+`npm run bench` measures how render cost scales with datapoint count and probes for layout
+degeneracies. It needs the dev server running in another terminal.
+
+```bash
+npm run bench                      # scaling curve (bar + line) + bar-width probe
+npm run bench -- --probe           # degeneracy probe only (fast; exits 1 on failure)
+npm run bench -- --type=line --sizes=50,100,250
+npm run bench -- --url=http://localhost:4173/test/visual/fixtures/bench.html  # preview build
+```
+
+Harness: `test/visual/bench.mjs` (driver) + `test/visual/fixtures/bench.html` (page, exposes
+`window.runBench(type, n)`).
+
+**Two known failures this harness currently reports** — see `REVIEW.md` §3.4 and §3.5:
+- Render cost is **O(n²)** in datapoint count for both bars and lines. Parse/upgrade time is
+  negligible, so the cost is in the render pipeline, not in the one-element-per-datapoint design.
+- Bar width crosses zero past **84 bars** on a 900-unit chart; every `<rect>` is then discarded
+  and the chart draws nothing, with no DC-code raised.
+
+Use a fresh browser context per size when adding cases — sharing a page lets a slow run bleed
+into the next measurement.
 
 ### Files with Test Coverage
 

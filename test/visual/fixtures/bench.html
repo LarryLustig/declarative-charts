@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>decl-charts perf bench</title>
+  <script type="module" src="/src/index.ts"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; background: #fff; }
+    #host { width: 900px; }
+  </style>
+</head>
+<body>
+  <div id="host"></div>
+  <script type="module">
+    const nextPaint = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    function buildMarkup(type, n) {
+      const parts = [];
+      for (let i = 0; i < n; i++) {
+        const v = (Math.sin(i / 12) * 40 + 60).toFixed(2);
+        if (type === 'line') {
+          parts.push(`<dc-point value="${v}" label="P${i}"></dc-point>`);
+        } else {
+          parts.push(`<dc-bar value="${v}" label="P${i}"></dc-bar>`);
+        }
+      }
+      return type === 'line'
+        ? `<dc-line label="Series">${parts.join('')}</dc-line>`
+        : parts.join('');
+    }
+
+    window.runBench = async (type, n) => {
+      const host = document.getElementById('host');
+      host.innerHTML = '';
+      await nextPaint();
+
+      // --- parse: browser upgrades N custom elements ---
+      const tParseStart = performance.now();
+      const chart = document.createElement('dc-chart');
+      chart.setAttribute('width', '900');
+      chart.setAttribute('height', '400');
+      chart.setAttribute('show-value', 'false');
+      chart.innerHTML = buildMarkup(type, n);
+      host.appendChild(chart);
+      const tParsed = performance.now();
+
+      // --- first render: Lit update + paint ---
+      await chart.updateComplete;
+      const tUpdated = performance.now();
+      await nextPaint();
+      const tPainted = performance.now();
+
+      // --- re-render (the htmx-swap / attribute-change path) ---
+      const tReStart = performance.now();
+      chart.requestUpdate();
+      await chart.updateComplete;
+      await nextPaint();
+      const tRePainted = performance.now();
+
+      // --- single mouse event over a shape (uncached-layout hypothesis) ---
+      const svg = chart.shadowRoot.querySelector('svg');
+      const shapes = svg.querySelectorAll('[data-shape-index]');
+      let hoverMs = null;
+      if (shapes.length) {
+        const target = shapes[Math.floor(shapes.length / 2)];
+        const box = target.getBoundingClientRect();
+        const ev = new MouseEvent('mouseenter', {
+          bubbles: true, clientX: box.x + box.width / 2, clientY: box.y + box.height / 2
+        });
+        const tHover = performance.now();
+        target.dispatchEvent(ev);
+        hoverMs = performance.now() - tHover;
+      }
+
+      return {
+        type, n,
+        lightDomEls: chart.querySelectorAll('*').length,
+        shadowSvgEls: svg.querySelectorAll('*').length,
+        renderedShapes: shapes.length,
+        parseMs:    +(tParsed    - tParseStart).toFixed(1),
+        updateMs:   +(tUpdated   - tParsed).toFixed(1),
+        paintMs:    +(tPainted   - tUpdated).toFixed(1),
+        totalMs:    +(tPainted   - tParseStart).toFixed(1),
+        rerenderMs: +(tRePainted - tReStart).toFixed(1),
+        hoverMs:    hoverMs === null ? null : +hoverMs.toFixed(2),
+      };
+    };
+
+    window.benchReady = true;
+  </script>
+</body>
+</html>
