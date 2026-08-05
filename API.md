@@ -1704,24 +1704,32 @@ Displays a colored shape from a palette outside of charts, useful for annotating
 
 ## Dynamic Updates
 
-Charts can be updated dynamically via JavaScript. When you modify chart content (child elements, attributes, or values), you must call `requestUpdate()` on the chart element to trigger a re-render.
+Charts update themselves. Change the markup - by any means - and the chart re-renders on its own:
 
-### When to Call `requestUpdate()`
-
-**Always call `requestUpdate()` after:**
 - Adding, removing, or reordering child elements (e.g., `<dc-bar>`, `<dc-stage>`)
 - Modifying element attributes (e.g., `value`, `label`, `fill`)
 - Toggling the `hidden` attribute
-- Replacing innerHTML (htmx-style updates)
+- Replacing `innerHTML` (htmx-style updates)
+- Changing text content (e.g., inside `<dc-title>`)
 
 ```javascript
-const chart = document.querySelector('dc-chart');
-
-// After any modification...
-chart.requestUpdate();
+const bar = document.querySelector('dc-chart dc-bar');
+bar.setAttribute('value', '50');   // that's it - the chart redraws
 ```
 
-**Why this is required:** Charts cache computed layout data during render for efficiency. This cached data is used by event handlers (for popups, hover effects, etc.) and must match the displayed content. Calling `requestUpdate()` refreshes both the visual display and the internal cache.
+This works because each chart watches its own light-DOM subtree with a `MutationObserver`, so it does not matter whether the change came from your code, a framework, a template re-render, or an htmx swap.
+
+**How it batches:** observer records are delivered once per microtask checkpoint, so a burst of changes produces a single re-render rather than one per attribute.
+
+**`requestUpdate()` is still available** and remains the way to force a redraw when nothing in the DOM changed - for example after mutating a JavaScript property directly rather than an attribute. You no longer need it for ordinary markup changes.
+
+**Awaiting a redraw:** because the observer fires asynchronously, `await chart.updateComplete` immediately after a mutation can resolve before the re-render is scheduled. Yield first if you need to read the result:
+
+```javascript
+bar.setAttribute('value', '50');
+await new Promise(r => setTimeout(r, 0));   // let the observer run
+await chart.updateComplete;
+```
 
 ### Hiding and Showing Elements
 
@@ -1739,8 +1747,7 @@ Toggle visibility with JavaScript:
 ```javascript
 // Toggle a line's visibility
 const line = document.querySelector('#my-chart dc-line[label="Series B"]');
-line.toggleAttribute('hidden');
-document.querySelector('#my-chart').requestUpdate();
+line.toggleAttribute('hidden');   // chart redraws itself
 ```
 
 ### Modifying Elements
@@ -1754,16 +1761,13 @@ bar.setAttribute('value', '25');
 bar.setAttribute('fill', 'purple');
 bar.setAttribute('label', 'April');
 chart.appendChild(bar);
-chart.requestUpdate();
 
 // Update a bar's value
 const firstBar = chart.querySelector('dc-bar');
 firstBar.setAttribute('value', '50');
-chart.requestUpdate();
 
 // Remove a bar
 chart.removeChild(firstBar);
-chart.requestUpdate();
 ```
 
 ---

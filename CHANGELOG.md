@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Charts now re-render themselves when their children change**
+  - Previously only `slotchange` invalidated a chart, which fires on children being added or
+    removed. Changing an existing child did nothing: `bar.setAttribute('value', '80')` updated
+    the `<dc-bar>` and the chart never noticed
+  - `BaseChart` now observes its own light-DOM subtree with a `MutationObserver`, covering
+    attribute changes, `hidden` toggling, additions, removals, reordering, text content, and
+    `innerHTML` swaps — regardless of whether the change came from your code, a framework, a
+    template re-render, or an htmx swap
+  - A Lit `updated()` hook on the data elements would not have been enough: `hidden` is a plain
+    HTML attribute read via `hasAttribute()`, and passthrough attributes (`hx-*`, `data-*`) are
+    undeclared by definition, so neither is a reactive property
+  - **`requestUpdate()` is no longer needed for markup changes.** It still works, and remains the
+    way to force a redraw when nothing in the DOM changed
+  - Observer records are batched per microtask, so a burst of edits produces one re-render
+  - The 52 manual `requestUpdate()` calls in the integration suite have been removed, so those
+    tests now genuinely assert reactivity rather than papering over its absence
+  - New `test/integration/child-reactivity.test.ts` (11 tests); verified in Chromium, including
+    a one-second idle check confirming no re-render loop
+
 ### Fixed
 
 - **`"sideEffects": false` let bundlers delete the entire library**

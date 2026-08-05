@@ -287,7 +287,25 @@ as author.
 
 ## 3. Correctness defects
 
-### 3.1 Child attribute changes do not re-render the chart
+### 3.1 Child attribute changes do not re-render the chart — ✅ FIXED
+
+> **Fixed**, though not by the mechanism proposed below. A Lit `updated()` hook on
+> `BaseChartElement` only fires for *declared reactive properties*, which would have missed the
+> two cases that matter most: `hidden` is a plain HTML attribute read via `hasAttribute()`, and
+> passthrough attributes (`hx-*`, `data-*`) are undeclared by definition. So `BaseChart` now
+> observes its own light-DOM subtree with a `MutationObserver` (`observeChildren()`) — one
+> implementation, in one place, covering attributes, `hidden`, add/remove/reorder, text content,
+> and `innerHTML` swaps.
+>
+> The observer ignores records targeting the chart itself, since the chart's own attributes are
+> Lit's business and reacting to them would loop on anything set during a render.
+>
+> All 52 manual `requestUpdate()` calls were removed from the integration suite, which still
+> passes — so those tests now assert reactivity instead of concealing its absence. The 11 new
+> tests in `test/integration/child-reactivity.test.ts` were confirmed to fail without the fix:
+> 8 of 11 failed, and the 3 that passed were exactly the add/remove cases `slotchange` already
+> covered — precisely the predicted signature. Verified in Chromium too, including a
+> one-second idle check showing zero re-render loops. Original finding below.
 
 Two reviewers found this independently, from opposite directions — the strongest signal in the
 whole review.

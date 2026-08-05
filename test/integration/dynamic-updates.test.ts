@@ -60,7 +60,6 @@ describe('Dynamic Updates - Bar Charts', () => {
       chart.appendChild(newBar);
 
       // Request update and wait
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       // Now should have 3 bars
@@ -85,7 +84,6 @@ describe('Dynamic Updates - Bar Charts', () => {
         chart.appendChild(bar);
       }
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       const bars = queryShadowAll(chart, 'rect[data-shape-index]');
@@ -108,7 +106,6 @@ describe('Dynamic Updates - Bar Charts', () => {
       newBar.setAttribute('label', 'C');
       chart.appendChild(newBar);
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       // The chart should have rescaled - max value should now be 200
@@ -137,7 +134,6 @@ describe('Dynamic Updates - Bar Charts', () => {
       const barToRemove = chart.querySelector('dc-bar:nth-child(2)');
       barToRemove?.remove();
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       // Now should have 2 bars
@@ -158,7 +154,6 @@ describe('Dynamic Updates - Bar Charts', () => {
       // Remove all bars
       chart.querySelectorAll('dc-bar').forEach((bar) => bar.remove());
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       const bars = queryShadowAll(chart, 'rect[data-shape-index]');
@@ -181,7 +176,6 @@ describe('Dynamic Updates - Bar Charts', () => {
       const firstBar = chart.querySelector('dc-bar');
       firstBar?.setAttribute('value', '80');
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       // Max value should now reflect the change
@@ -201,7 +195,6 @@ describe('Dynamic Updates - Bar Charts', () => {
       const bar = chart.querySelector('dc-bar');
       bar?.setAttribute('label', 'Updated Label');
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       // Get category labels
@@ -221,7 +214,6 @@ describe('Dynamic Updates - Bar Charts', () => {
       const bar = chart.querySelector('dc-bar');
       bar?.setAttribute('fill', '#00ff00');
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       const rect = chart.shadowRoot?.querySelector('rect[data-shape-index]');
@@ -249,7 +241,6 @@ describe('Dynamic Updates - Bar Charts', () => {
       const middleBar = chart.querySelector('dc-bar:nth-child(2)');
       middleBar?.setAttribute('hidden', '');
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       // Should now render only 2 bars
@@ -276,7 +267,6 @@ describe('Dynamic Updates - Bar Charts', () => {
       const hiddenBar = chart.querySelector('dc-bar[hidden]');
       hiddenBar?.removeAttribute('hidden');
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       // Should now render 3 bars
@@ -318,7 +308,6 @@ describe('Dynamic Updates - Line Charts', () => {
       `;
       chart.appendChild(newLine);
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       // Should now have 2 line paths
@@ -347,7 +336,6 @@ describe('Dynamic Updates - Line Charts', () => {
       newPoint.setAttribute('label', 'Mar');
       line?.appendChild(newPoint);
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       // Check that the line now has 3 points worth of data
@@ -372,7 +360,6 @@ describe('Dynamic Updates - Line Charts', () => {
       const pointToRemove = chart.querySelector('dc-point:nth-child(2)');
       pointToRemove?.remove();
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       // Check that Feb is no longer in labels
@@ -398,7 +385,6 @@ describe('Dynamic Updates - Line Charts', () => {
       const firstPoint = chart.querySelector('dc-point');
       firstPoint?.setAttribute('value', '100');
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       // Max value should reflect the change
@@ -440,7 +426,6 @@ describe('Dynamic Updates - Area Charts', () => {
       `;
       chart.appendChild(newArea);
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       // Should now have 2 area paths
@@ -469,7 +454,6 @@ describe('Dynamic Updates - Area Charts', () => {
       newPoint.setAttribute('label', 'Mar');
       area?.appendChild(newPoint);
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       // Check that the area now has 3 points worth of data
@@ -495,7 +479,6 @@ describe('Dynamic Updates - Area Charts', () => {
       const area = chart.querySelector('dc-area');
       area?.setAttribute('fill', '#FF0000');
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       // Verify the color changed
@@ -525,7 +508,6 @@ describe('Dynamic Updates - Area Charts', () => {
       // Set overlapping mode
       chart.setAttribute('overlapping', '');
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       expect(chart.overlapping).toBe(true);
@@ -558,7 +540,6 @@ describe('Dynamic Updates - Bubble Charts', () => {
     newBubble.setAttribute('label', 'C');
     chart.appendChild(newBubble);
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     bubbles = queryShadowAll(chart, 'circle[data-shape-index]');
@@ -577,7 +558,6 @@ describe('Dynamic Updates - Bubble Charts', () => {
     const bubble = chart.querySelector('dc-bubble');
     bubble?.setAttribute('size', '60');
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     // The bubble should have updated - we can verify the chart re-rendered
@@ -610,7 +590,6 @@ describe('Dynamic Updates - Pie Charts', () => {
     newSlice.setAttribute('label', 'C');
     chart.appendChild(newSlice);
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     paths = queryShadowAll(chart, 'path[data-shape-index]');
@@ -632,7 +611,6 @@ describe('Dynamic Updates - Pie Charts', () => {
     const sliceToRemove = chart.querySelector('dc-pie-slice:nth-child(2)');
     sliceToRemove?.remove();
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     const paths = queryShadowAll(chart, 'path[data-shape-index]');
@@ -653,7 +631,6 @@ describe('Dynamic Updates - Pie Charts', () => {
     const firstSlice = chart.querySelector('dc-pie-slice');
     firstSlice?.setAttribute('value', '150');
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     // Verify chart still renders 2 slices
@@ -687,7 +664,6 @@ describe('Dynamic Updates - Funnel Charts', () => {
     newStage.setAttribute('label', 'Customers');
     chart.appendChild(newStage);
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     // Should now have 3 stages
@@ -708,7 +684,6 @@ describe('Dynamic Updates - Funnel Charts', () => {
     const firstStage = chart.querySelector('dc-funnel-stage');
     firstStage?.setAttribute('value', '2000');
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     // Verify chart still renders correctly (2 stages)
@@ -798,7 +773,6 @@ describe('Dynamic Updates - Chart Attributes', () => {
     title.textContent = 'My Chart Title';
     chart.appendChild(title);
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     // Title should now render
@@ -824,7 +798,6 @@ describe('Dynamic Updates - Chart Attributes', () => {
     const legend = document.createElement('dc-legend');
     chart.appendChild(legend);
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     // Legend should now render
@@ -857,7 +830,6 @@ describe('Dynamic Updates - Mixed Content', () => {
     `;
     chart.appendChild(line);
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     // Should have both bars and a line path
@@ -885,7 +857,6 @@ describe('Dynamic Updates - Mixed Content', () => {
       <dc-bar value="60" label="Z"></dc-bar>
     `;
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     const bars = queryShadowAll(chart, 'rect[data-shape-index]');
@@ -922,7 +893,6 @@ describe('Dynamic Updates - Negative Values', () => {
     const firstBar = chart.querySelector('dc-bar');
     firstBar?.setAttribute('value', '-20');
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     // Now should have negative minimum
@@ -948,7 +918,6 @@ describe('Dynamic Updates - Negative Values', () => {
     const negativeBar = chart.querySelector('dc-bar');
     negativeBar?.setAttribute('value', '40');
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     // Min should now be 0 (auto-scales to 0 for all-positive)

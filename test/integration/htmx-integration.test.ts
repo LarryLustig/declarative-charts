@@ -72,7 +72,6 @@ describe('htmx-style innerHTML Swaps', () => {
       `
       );
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       bars = queryShadowAll(chart, 'rect[data-shape-index]');
@@ -109,7 +108,6 @@ describe('htmx-style innerHTML Swaps', () => {
       `
       );
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       // Now should have line path, no bars
@@ -140,7 +138,6 @@ describe('htmx-style innerHTML Swaps', () => {
       `
       );
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       const paths = queryShadowAll(chart, 'path[data-shape-index]');
@@ -168,7 +165,6 @@ describe('htmx-style innerHTML Swaps', () => {
       `
       );
 
-      chart.requestUpdate();
       await elementUpdated(chart);
 
       // Verify 4 stages rendered (polygon elements)
@@ -302,8 +298,6 @@ describe('htmx-style Out-of-Band Updates', () => {
     );
 
     // Request updates for both
-    chart1.requestUpdate();
-    chart2.requestUpdate();
     await elementUpdated(chart1);
     await elementUpdated(chart2);
 
@@ -337,7 +331,6 @@ describe('htmx-style Out-of-Band Updates', () => {
     `
     );
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     // Verify title updated
@@ -373,7 +366,6 @@ describe('htmx-style Partial Updates', () => {
     barA?.setAttribute('value', '100');
     barB?.setAttribute('value', '120');
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     // Title and legend should still exist
@@ -401,7 +393,6 @@ describe('htmx-style Partial Updates', () => {
     newBar.setAttribute('label', 'C');
     chart.appendChild(newBar);
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     const bars = queryShadowAll(chart, 'rect[data-shape-index]');
@@ -427,7 +418,6 @@ describe('htmx-style Real-time Updates', () => {
     // Simulate rapid updates (like from polling or SSE)
     for (let i = 0; i < 5; i++) {
       bar?.setAttribute('value', String(50 + i * 10));
-      chart.requestUpdate();
     }
 
     await elementUpdated(chart);
@@ -453,7 +443,6 @@ describe('htmx-style Real-time Updates', () => {
       <dc-bar value="60" label="B"></dc-bar>
     `
     );
-    chart.requestUpdate();
 
     simulateHtmxSwap(
       chart,
@@ -461,7 +450,6 @@ describe('htmx-style Real-time Updates', () => {
       <dc-bar value="70" label="C"></dc-bar>
     `
     );
-    chart.requestUpdate();
 
     simulateHtmxSwap(
       chart,
@@ -469,7 +457,6 @@ describe('htmx-style Real-time Updates', () => {
       <dc-bar value="80" label="D"></dc-bar>
     `
     );
-    chart.requestUpdate();
 
     await elementUpdated(chart);
 
@@ -512,7 +499,6 @@ describe('htmx-style Updates with Palettes', () => {
     `
     );
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     const bars = queryShadowAll(chart, 'rect[data-shape-index]');
@@ -543,7 +529,6 @@ describe('htmx-style Updates with Palettes', () => {
     `
     );
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     // Chart should still render (palette updates may require explicit refresh)
@@ -584,7 +569,6 @@ describe('htmx-style Updates with Grouped/Stacked Bars', () => {
     `
     );
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     const bars = queryShadowAll(chart, 'rect[data-shape-index]');
@@ -615,7 +599,6 @@ describe('htmx-style Updates with Grouped/Stacked Bars', () => {
     `
     );
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     // Total should now be 90
@@ -642,7 +625,6 @@ describe('htmx-style Edge Cases', () => {
     // Swap to empty
     simulateHtmxSwap(chart, '');
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     const bars = queryShadowAll(chart, 'rect[data-shape-index]');
@@ -661,7 +643,6 @@ describe('htmx-style Edge Cases', () => {
     // Swap to whitespace
     simulateHtmxSwap(chart, '   \n\t  ');
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     const bars = queryShadowAll(chart, 'rect[data-shape-index]');
@@ -686,7 +667,6 @@ describe('htmx-style Edge Cases', () => {
     `
     );
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     // Should still work - browser fixes the HTML
@@ -716,7 +696,6 @@ describe('htmx-style Edge Cases', () => {
     `
     );
 
-    chart.requestUpdate();
     await elementUpdated(chart);
 
     // Attributes should be preserved

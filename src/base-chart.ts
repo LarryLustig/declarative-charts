@@ -2141,12 +2141,61 @@ export abstract class BaseChart extends LitElement {
     `;
   }
 
+  /**
+   * Watches light-DOM children for changes so the chart re-renders itself.
+   * See {@link observeChildren}.
+   */
+  private childObserver?: MutationObserver;
+
   connectedCallback() {
     super.connectedCallback();
     // Apply defaults from <dc-defaults> elements before first render
     this.applyDefaults();
     // Add data attribute to host element for identification
     this.setAttribute('data-chart-type', this.tagName.toLowerCase());
+    this.observeChildren();
+  }
+
+  disconnectedCallback() {
+    this.childObserver?.disconnect();
+    this.childObserver = undefined;
+    super.disconnectedCallback();
+  }
+
+  /**
+   * Re-render whenever the light-DOM children change.
+   *
+   * Charts read their data by querying children on every render, but nothing
+   * told them when that data changed. The `slotchange` event covers children
+   * being added or removed; it does not fire when an existing child's attribute
+   * changes, so `bar.setAttribute('value', '80')` updated the `<dc-bar>` and the
+   * change died there.
+   *
+   * A Lit `updated()` hook on the data elements would only cover *declared*
+   * reactive properties, which misses the cases that matter most: `hidden` is a
+   * plain HTML attribute read via `hasAttribute()`, and passthrough attributes
+   * (`hx-*`, `data-*`) are undeclared by definition. Observing the DOM catches
+   * all of them uniformly, in one place.
+   *
+   * `characterData` is included because `<dc-title>` and `<dc-legend-item>` take
+   * their text from child nodes rather than an attribute.
+   */
+  private observeChildren(): void {
+    if (this.childObserver || typeof MutationObserver === 'undefined') return;
+
+    this.childObserver = new MutationObserver(records => {
+      // The chart's own attributes are Lit's business, not ours - reacting to
+      // them here would loop on anything we set on ourselves during a render.
+      const fromChild = records.some(r => r.target !== this);
+      if (fromChild) this.requestUpdate();
+    });
+
+    this.childObserver.observe(this, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      characterData: true
+    });
   }
 
   /**

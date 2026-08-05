@@ -162,7 +162,15 @@ Use `getPaletteColors(count, colorType)` in chart code to resolve palette colors
 
 **High Contrast Mode**: Enable with `high-contrast` attribute or auto-detect via `prefers-contrast: high`. Override colors with `<dc-palette high-contrast>` child.
 
-**Hidden Attribute**: Standard HTML `hidden` on data elements (`<dc-line>`, `<dc-bar>`, etc.) hides them. Call `chart.requestUpdate()` after toggling.
+**Hidden Attribute**: Standard HTML `hidden` on data elements (`<dc-line>`, `<dc-bar>`, etc.) hides them. Toggling it re-renders the chart automatically — see **Child Reactivity** below.
+
+**Child Reactivity**: `BaseChart` watches its own light-DOM subtree with a `MutationObserver` (`observeChildren()`), so any change to child elements — attributes, `hidden`, additions, removals, text content, innerHTML swaps — triggers a re-render. Callers never need `requestUpdate()` for markup changes.
+
+Two constraints when working on this:
+- The observer ignores records whose `target` is the chart itself; the chart's own attributes belong to Lit, and reacting to them would loop on anything set during a render (e.g. `data-chart-type` in `connectedCallback`).
+- **Never mutate light-DOM children from render or `updated()`.** That would feed the observer and loop. Writing to the shadow DOM is fine — `applyPassthroughAttributes()` does exactly that.
+
+In tests, `elementUpdated()` yields to a macrotask before awaiting `updateComplete`, because observer records arrive after `updateComplete` would otherwise resolve. Do not "simplify" it back to a bare `await updateComplete` — mutation tests will pass against broken behaviour.
 
 **Logging**: `this.log(level, path, message, value?)` records calculations. Set `logging` attribute to enable.
 
@@ -538,7 +546,8 @@ describe('Dynamic updates', () => {
     newBar.setAttribute('label', 'B');
     chart.appendChild(newBar);
 
-    chart.requestUpdate();
+    // No requestUpdate() — the chart observes its own children.
+    // Adding one here would mask a regression in that observer.
     await elementUpdated(chart);
 
     const bars = queryShadowAll(chart, 'rect[data-shape-index]');

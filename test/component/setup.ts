@@ -164,6 +164,16 @@ afterEach(() => {
  */
 export async function elementUpdated(element: { updateComplete: Promise<boolean> }): Promise<void> {
   await element.updateComplete;
+
+  // Charts re-render in response to child mutations, and MutationObserver
+  // delivers those records after the current microtask checkpoint - later than
+  // `updateComplete` resolves. Yield to a macrotask so the observer has run,
+  // then settle whatever update it scheduled. `updateComplete` resolves false
+  // when a further update was requested while updating, so loop until stable.
+  for (let i = 0; i < 5; i++) {
+    await new Promise(resolve => setTimeout(resolve, 0));
+    if (await element.updateComplete) break;
+  }
 }
 
 /**
