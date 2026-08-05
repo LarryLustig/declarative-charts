@@ -371,7 +371,41 @@ keyboard-nav labels do the same (`pie-chart.ts:678`, `funnel-chart.ts:997`,
 This is user-visible inconsistency that also undercuts the accessibility story the library
 advertises. It is fixed for free by the hoist in §5.2.
 
-### 3.4 Render cost is quadratic in datapoint count — measured
+### 3.4 Render cost is quadratic in datapoint count — ✅ FIXED
+
+> **Fixed, and the mechanism I hypothesised below was wrong.** This section guessed at
+> `chart.ts:1575-1578` re-deriving datasets in `updated()`. Profiling said otherwise.
+>
+> `shouldShowLabel()` is called once per label from inside the render loop (`chart.ts:3199`,
+> `3278`, `3337`, `3368`). Each call runs `getLabelIntervalValue()` →
+> `calculateAutoLabelInterval()`, which performs an O(n) `measureText` sweep **and** calls
+> `getChartPadding()` → `getAxisLabelPadding()` → `getFlattenedBars()` → `getBarStructure()` →
+> n × `extractBarData` → n × `getPassthroughAttributes`. O(n) labels × O(n) work each.
+>
+> Measured for one 400-bar render: **2,900,800** calls to `extractBarData`, **482,406** to
+> `measureText` — the latter matching the predicted 400 × 400 × 3 renders almost exactly.
+> `getPassthroughAttributes` (`base-filled-shape.ts:46`) held **37%** of self time.
+>
+> Fixed with `BaseChart.cachePerRender()`, cleared in `willUpdate()`. `renderChart` for 400 bars
+> went 14,604ms → **47.4ms**; `extractBarData` 2,900,800 → 1,200 calls.
+>
+> | bars | before | after |
+> |---:|---:|---:|
+> | 250 | 2,869 ms | 134 ms |
+> | 500 | 10,823 ms | 183 ms |
+> | 1,000 | 44,562 ms | **293 ms** |
+> | 2,000 | timed out (>90 s) | 401 ms |
+> | 5,000 | — | 780 ms |
+>
+> Scaling is linear. All 23 visual baselines unchanged, so output is identical.
+> `test/component/render-caching.test.ts` guards it by call count.
+>
+> Two corrections this forces elsewhere in this document: §4.6's claim that the bulk-data path
+> is a *performance* remedy is now doubly wrong — the cost was never element count, and it is no
+> longer quadratic either, so `values="[…]"` is justified purely on ergonomics and payload size.
+> And §5.4's "no caching outside stage-chart" is now resolved at the base-class level.
+>
+> Original finding below.
 
 This review's first draft asserted, without measuring, that dense series would be a problem
 "at around 5,000 points." That was wrong by more than an order of magnitude. Measured in

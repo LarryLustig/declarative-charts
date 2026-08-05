@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Render is no longer quadratic in datapoint count — 1,000 bars went from 44.6s to 0.29s**
+  - Profiling (V8 CPU profile + call counting, not inspection) found that `shouldShowLabel()` is
+    called once per label from inside the render loop, and each call reached
+    `getChartPadding()` → `getAxisLabelPadding()` → `getFlattenedBars()` → `getBarStructure()`,
+    re-deriving *every* bar. Rendering 400 bars made **2,900,800** calls to `extractBarData` and
+    **482,406** text measurements
+  - `BaseChart.cachePerRender()` memoizes derivations for one render pass, cleared in
+    `willUpdate()`. Applied to `measureText`, `getChartPadding`, `getBarStructure`,
+    `getFlattenedBars`, `getLabelIntervalValue`, and `getLabelLinesCount`
+  - The cache deliberately outlives `render()`: event handlers use the same derivations, so they
+    now see exactly the data that produced what is on screen instead of recomputing it
+
+    | bars | before | after | |
+    |---:|---:|---:|---:|
+    | 250 | 2,869 ms | 134 ms | 21× |
+    | 500 | 10,823 ms | 183 ms | 59× |
+    | 1,000 | 44,562 ms | 293 ms | **152×** |
+    | 2,000 | timed out (>90 s) | 401 ms | — |
+    | 5,000 | — | 780 ms | — |
+
+  - Line charts likewise: 1,000 points 12,245 ms → 271 ms. Re-render at 1,000 bars
+    21,073 ms → 33 ms. Scaling is now linear
+  - Output is unchanged — all 23 visual baselines still match
+  - New `test/component/render-caching.test.ts` asserts derivation counts stay independent of
+    element count, so the quadratic cannot return unnoticed
+
 - **Charts now re-render themselves when their children change**
   - Previously only `slotchange` invalidated a chart, which fires on children being added or
     removed. Changing an existing child did nothing: `bar.setAttribute('value', '80')` updated

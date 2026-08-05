@@ -102,12 +102,36 @@ BaseChartElement
 
 **Data Extraction**: Charts query child elements via `querySelector`/`querySelectorAll`.
 
-**Per-Render Caching**: Expensive computations (layout, text fitting, color resolution) should run once per render and be cached for use by event handlers. This pattern:
+**Per-Render Caching**: Expensive computations (layout, text fitting, color resolution) must run once per render and be cached for use by event handlers. This pattern:
 - Avoids redundant DOM queries and calculations within a single render cycle
 - Ensures event handlers (popups, hover effects) use data matching the displayed content
-- Cache is naturally refreshed on the next render (triggered by `requestUpdate()`)
+- Cache is cleared in `willUpdate()`, so it lives from the start of one update to the next
 
-Example from `stage-chart.ts`:
+**⚠️ This is a correctness *and* performance requirement, not an optimization.** Several O(n)
+derivations are reachable from inside per-element render loops — `shouldShowLabel()` leads to
+`getChartPadding()` → `getAxisLabelPadding()` → `getFlattenedBars()` → `getBarStructure()`.
+Uncached, that made rendering **quadratic**: 400 bars produced 2,900,800 calls to
+`extractBarData` and 482,406 text measurements; 1,000 bars locked the main thread for 45
+seconds. Memoizing brought 1,000 bars from 44,562ms to 293ms.
+
+**Preferred mechanism — `cachePerRender()` on `BaseChart`:**
+```typescript
+protected getChartPadding() {
+  return this.cachePerRender('chartPadding', () => this.computeChartPadding());
+}
+```
+Keep the real work in a `computeX()` method and make `getX()` the memoized wrapper — tests and
+profiling then have a stable name to hook. Already applied to `measureText`, `getChartPadding`,
+`getBarStructure`, `getFlattenedBars`, `getLabelIntervalValue`, and `getLabelLinesCount`.
+
+Only use it for derivations of the DOM and of reactive properties. Anything that can change
+*within* a single render pass must not be cached this way. If you override `willUpdate()`, call
+`super.willUpdate()` or the cache never clears.
+
+`test/component/render-caching.test.ts` asserts call counts stay independent of element count;
+`npm run bench` measures the timings.
+
+Chart-specific layout may also be cached on a field, as in `stage-chart.ts`:
 ```typescript
 // In renderChart():
 const layout = this.calculateStageLayout();  // Compute once

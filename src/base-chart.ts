@@ -599,6 +599,38 @@ export abstract class BaseChart extends LitElement {
     if (changedProperties.has('locale')) {
       this._formatter = null;
     }
+    this.renderCache.clear();
+  }
+
+  /**
+   * Memoized results for the current render pass. Cleared in willUpdate(), so it
+   * lives from the start of one update until the start of the next.
+   */
+  private renderCache = new Map<string, unknown>();
+
+  /**
+   * Memoize an expensive derivation for the duration of one render pass.
+   *
+   * Charts derive their data by querying the DOM, and several of those
+   * derivations are reachable from inside per-element loops. Left uncached, a
+   * chart with n elements would call an O(n) derivation n times: rendering 400
+   * bars once produced 2,900,800 calls to extractBarData and 482,406 text
+   * measurements, which is where the render's quadratic cost came from.
+   *
+   * Deliberately outliving render(): event handlers run after the render and use
+   * these same derivations, so they see exactly the data that produced what is on
+   * screen rather than recomputing it and risking disagreement.
+   *
+   * Only safe for derivations of the DOM and of reactive properties. Anything
+   * depending on state that can change *within* a render pass must not use this.
+   */
+  protected cachePerRender<T>(key: string, compute: () => T): T {
+    if (this.renderCache.has(key)) {
+      return this.renderCache.get(key) as T;
+    }
+    const value = compute();
+    this.renderCache.set(key, value);
+    return value;
   }
 
   /**
@@ -744,20 +776,26 @@ export abstract class BaseChart extends LitElement {
    * @returns The width of the text in pixels
    */
   protected measureText(text: string, fontSize: number = 12, fontFamily?: string): number {
-    const ctx = this.getMeasureContext();
-    if (!ctx) {
-      // Fallback to estimation if canvas not available
-      return text.length * fontSize * 0.6;
-    }
+    // Measuring the same string at the same size always gives the same answer,
+    // and label-fitting asks repeatedly. getComputedStyle() below is itself a
+    // layout read, so this cache avoids more than the canvas call.
+    return this.cachePerRender(`text:${fontSize}:${fontFamily ?? ''}:${text}`, () => {
+      const ctx = this.getMeasureContext();
+      if (!ctx) {
+        // Fallback to estimation if canvas not available
+        return text.length * fontSize * 0.6;
+      }
 
-    // If no font family specified, try to get computed style from this element
-    if (!fontFamily) {
-      const computedStyle = window.getComputedStyle(this);
-      fontFamily = computedStyle.fontFamily || 'sans-serif';
-    }
+      let family = fontFamily;
+      // If no font family specified, try to get computed style from this element
+      if (!family) {
+        const computedStyle = window.getComputedStyle(this);
+        family = computedStyle.fontFamily || 'sans-serif';
+      }
 
-    ctx.font = `${fontSize}px ${fontFamily}`;
-    return ctx.measureText(text).width;
+      ctx.font = `${fontSize}px ${family}`;
+      return ctx.measureText(text).width;
+    });
   }
 
   // ============================================================================
@@ -1786,6 +1824,10 @@ export abstract class BaseChart extends LitElement {
    * @returns Object with top, right, bottom, left padding values in viewBox units
    */
   protected getChartPadding(): { top: number; right: number; bottom: number; left: number } {
+    return this.cachePerRender('chartPadding', () => this.computeChartPadding());
+  }
+
+  private computeChartPadding(): { top: number; right: number; bottom: number; left: number } {
     const shorthand = this.parsePaddingShorthand();
 
     // Parse individual properties

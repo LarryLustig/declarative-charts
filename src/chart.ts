@@ -584,6 +584,10 @@ export class Chart extends AxisChart {
   }
 
   private getBarStructure(): BarOrGroup[] {
+    return this.cachePerRender('barStructure', () => this.computeBarStructure());
+  }
+
+  private computeBarStructure(): BarOrGroup[] {
     const structure: BarOrGroup[] = [];
     Array.from(this.children).forEach(child => {
       // Skip hidden elements
@@ -613,6 +617,10 @@ export class Chart extends AxisChart {
   }
 
   private getFlattenedBars(): FlattenedBar[] {
+    return this.cachePerRender('flattenedBars', () => this.computeFlattenedBars());
+  }
+
+  private computeFlattenedBars(): FlattenedBar[] {
     const structure = this.getBarStructure();
     const flattened: FlattenedBar[] = [];
 

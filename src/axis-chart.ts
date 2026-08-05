@@ -525,6 +525,11 @@ export abstract class AxisChart extends BaseChart {
    * @returns Number of lines to use for category labels (1 = single line)
    */
   protected getLabelLinesCount(): number {
+    // Called once per label from the render loop; the auto branch below is O(n).
+    return this.cachePerRender('labelLines', () => this.computeLabelLinesCount());
+  }
+
+  private computeLabelLinesCount(): number {
     const categoryAxisPosition = this.getCategoryAxisPosition();
     const config = this.getAxisConfig(categoryAxisPosition);
 
@@ -543,6 +548,11 @@ export abstract class AxisChart extends BaseChart {
    * @returns Interval for showing labels (1 = show all, 2 = every other, etc.)
    */
   protected getLabelIntervalValue(): number {
+    // Called once per label from the render loop; the auto branch below is O(n).
+    return this.cachePerRender('labelInterval', () => this.computeLabelIntervalValue());
+  }
+
+  private computeLabelIntervalValue(): number {
     const categoryAxisPosition = this.getCategoryAxisPosition();
     const config = this.getAxisConfig(categoryAxisPosition);
 
