@@ -4086,6 +4086,17 @@ export class Chart extends AxisChart {
    * Get the list of focusable elements in this chart.
    * Returns bars, line points, and bubbles that have actions (href, popup).
    */
+  /**
+   * Areas are not focusable, so the inherited focusable count would report an
+   * area-only chart as empty. Count the data itself instead.
+   */
+  protected override getDataElementCount(): number {
+    return this.getFlattenedBars().length
+      + this.getBubbles().length
+      + this.getLines().reduce((sum, line) => sum + line.points.length, 0)
+      + this.getAreas().reduce((sum, area) => sum + area.points.length, 0);
+  }
+
   protected override getFocusableElements(): FocusableElement[] {
     const elements: FocusableElement[] = [];
     const bars = this.getFlattenedBars();

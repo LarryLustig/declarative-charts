@@ -188,6 +188,14 @@ Use `getPaletteColors(count, colorType)` in chart code to resolve palette colors
 
 **Hidden Attribute**: Standard HTML `hidden` on data elements (`<dc-line>`, `<dc-bar>`, etc.) hides them. Toggling it re-renders the chart automatically — see **Child Reactivity** below.
 
+**Empty & Loading States**: `BaseChart.renderPlaceholder()` returns a placeholder instead of the plot when `loading` is set or `getDataElementCount()` is 0. `render()` then skips `renderChart()` *and* the focus indicator, and drops `tabindex` to -1 — axes, grid and legend all describe data, so drawing them around nothing is noise. The title is deliberately kept.
+
+`getDataElementCount()` defaults to the focusable count, but **`Chart` must override it**: areas are not focusable, so an area-only chart would otherwise report as empty. Any new chart type whose data is not all focusable needs the same override.
+
+`<dc-empty>` supplies the message and follows the `<dc-title>` pattern — extends `BaseChartElement`, renders nothing, exposes a `text` getter over its light-DOM content. Keeping the text in markup means the page's own renderer translates it.
+
+The skeleton uses a **fixed** height pattern, not random: a skeleton that reshuffles every frame is a distraction and would break visual snapshots.
+
 **Bar Layout**: `computeBarLayout()` in `chart.ts` is the single source of bar positions. It walks the structure once and returns `{ slots, units }` — each bar's `start`/`size`/`center` along the category axis, and each unit's true extent for centring group labels.
 
 It is **orientation-agnostic**: the traversal only ever moves along the category axis, so `start`/`size` are x/width vertically and y/height horizontally. The value axis is the caller's business.

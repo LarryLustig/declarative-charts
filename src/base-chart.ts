@@ -2,6 +2,7 @@ import { LitElement, css, html, svg, SVGTemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
 import type { ChartTitle } from './chart-title.js';
+import type { ChartEmpty } from './chart-empty.js';
 import type { ChartLegend, LegendItem } from './chart-legend.js';
 import type { ChartPalette, PaletteColorResult } from './chart-palette.js';
 import type { ChartFill } from './chart-fill.js';
@@ -2099,9 +2100,23 @@ export abstract class BaseChart extends LitElement {
       opacity: 0.8;
     }
 
+    /* Skeleton bars pulse to say "still coming", not "finished and empty". */
+    .skeleton rect {
+      animation: dc-skeleton-pulse var(--dc-skeleton-duration, 1.4s) ease-in-out infinite;
+    }
+
+    @keyframes dc-skeleton-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.45; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .popup {
         transition: none;
+      }
+
+      .skeleton rect {
+        animation: none;
       }
     }
   `;
@@ -2160,6 +2175,94 @@ export abstract class BaseChart extends LitElement {
    */
   protected shareOf(value: number, total: number): number | null {
     return total > 0 ? Math.abs(value) / total : null;
+  }
+
+  /**
+   * The loading or empty placeholder, or null when there is a plot to draw.
+   */
+  protected renderPlaceholder(): SVGTemplateResult | null {
+    if (this.loading) return this.renderLoadingState();
+    if (this.getDataElementCount() > 0) return null;
+    return this.renderEmptyState();
+  }
+
+  /**
+   * Message shown when there is nothing to plot.
+   *
+   * Previously this was a blank bordered box: the chart logged DC001 and drew an
+   * empty frame, and because diagnostics are off by default the log went
+   * nowhere. The reader was left to guess whether the data was empty, still
+   * loading, or broken.
+   */
+  protected renderEmptyState(): SVGTemplateResult {
+    const custom = this.querySelector(':scope > dc-empty') as ChartEmpty | null;
+    const hidden = this.hasHiddenDataElements();
+    const message = custom?.text
+      || (hidden ? 'All series are hidden' : 'No data');
+
+    const fill = custom?.fill || 'var(--dc-empty-color, #9ca3af)';
+    const fontSize = this.fontSize(custom?.fontSize ?? 14);
+
+    return svg`
+      <text
+        part="empty"
+        class="empty-message"
+        x="${this.width / 2}"
+        y="${this.height / 2}"
+        text-anchor="middle"
+        dominant-baseline="middle"
+        font-size="${fontSize}"
+        fill="${fill}"
+      >${message}</text>
+    `;
+  }
+
+  /**
+   * Skeleton placeholder shown while data is on its way.
+   *
+   * Bars rather than a spinner: it occupies the same space the chart will, so
+   * nothing jumps when the data lands, and it reads as "a chart is coming"
+   * rather than "something is happening somewhere".
+   */
+  protected renderLoadingState(): SVGTemplateResult {
+    const padding = this.getChartPadding();
+    const plotWidth = this.width - padding.left - padding.right;
+    const plotHeight = this.height - padding.top - padding.bottom;
+    if (plotWidth <= 0 || plotHeight <= 0) return svg``;
+
+    const count = 5;
+    const gap = plotWidth / (count * 4);
+    const barWidth = (plotWidth - gap * (count - 1)) / count;
+    // A fixed pattern, not random: a skeleton that reshuffles on every frame
+    // is a distraction, and randomness would break visual snapshots.
+    const heights = [0.45, 0.7, 0.55, 0.85, 0.6];
+
+    return svg`
+      <g part="skeleton" class="skeleton">
+        ${heights.slice(0, count).map((fraction, i) => {
+          const height = plotHeight * fraction;
+          return svg`
+            <rect
+              part="skeleton-bar"
+              x="${padding.left + i * (barWidth + gap)}"
+              y="${padding.top + plotHeight - height}"
+              width="${barWidth}"
+              height="${height}"
+              rx="2"
+              fill="var(--dc-skeleton-color, #e5e7eb)"
+            />
+          `;
+        })}
+      </g>
+    `;
+  }
+
+  /**
+   * True when the chart has data children that are all hidden - worth saying,
+   * because "no data" and "you hid everything" call for different reactions.
+   */
+  protected hasHiddenDataElements(): boolean {
+    return this.querySelector(':scope > [hidden], :scope > * > [hidden]') !== null;
   }
 
   protected showPopup(content: string, x: number, y: number) {
@@ -2376,6 +2479,28 @@ export abstract class BaseChart extends LitElement {
    */
   @property({ type: String })
   fit: 'aspect' | 'fill' = 'aspect';
+
+  /**
+   * Show a loading placeholder instead of the plot.
+   *
+   * A chart whose markup arrives from the server necessarily has a moment where
+   * the element exists and its data does not. That is the normal first frame of
+   * every server-driven chart, not an error, so it gets a state of its own -
+   * point `hx-indicator` (or the equivalent) at the chart and it resolves itself.
+   */
+  @property({ type: Boolean })
+  loading = false;
+
+  /**
+   * How many data elements the chart would draw right now.
+   *
+   * Drives the empty state. Defaults to the focusable count, which is the set of
+   * navigable data elements; chart types whose data is not all focusable
+   * override it.
+   */
+  protected getDataElementCount(): number {
+    return this.getFocusableElements().length;
+  }
 
   /**
    * The `height` as authored, before `fit="fill"` adapted it. Kept so the chart
@@ -2612,7 +2737,9 @@ export abstract class BaseChart extends LitElement {
     return {
       'svg': 'chart',
       '.popup': 'popup',
-      '.focus-indicator': 'focus-ring'
+      '.focus-indicator': 'focus-ring',
+      '.empty-message': 'empty',
+      '.skeleton': 'skeleton'
     };
   }
 
@@ -2704,6 +2831,10 @@ export abstract class BaseChart extends LitElement {
     // Check if chart has focusable elements for keyboard navigation
     const hasFocusableElements = this.getFocusableElements().length > 0;
 
+    // Loading and empty replace the plot entirely: axes, grid and legend all
+    // describe data, and drawing them around nothing is noise.
+    const placeholder = this.renderPlaceholder();
+
     return html`
       <svg
         viewBox="0 0 ${this.width} ${this.height}"
@@ -2712,7 +2843,7 @@ export abstract class BaseChart extends LitElement {
         role="img"
         aria-label="${ariaLabelValue}"
         aria-describedby="${descriptionContent ? this.descriptionId : ''}"
-        tabindex="${hasFocusableElements ? 0 : -1}"
+        tabindex="${hasFocusableElements && !placeholder ? 0 : -1}"
         @keydown="${this.handleChartKeyDown}"
         @focus="${this.handleChartFocus}"
         @blur="${this.handleChartBlur}"
@@ -2720,8 +2851,8 @@ export abstract class BaseChart extends LitElement {
         ${this.renderDefs()}
         ${descriptionContent ? svg`<desc id="${this.descriptionId}">${descriptionContent}</desc>` : ''}
         ${this.renderTitle()}
-        ${this.renderChart()}
-        ${this.renderFocusIndicator()}
+        ${placeholder ?? this.renderChart()}
+        ${placeholder ? '' : this.renderFocusIndicator()}
       </svg>
       <div
         class="popup ${this.popupVisible ? 'visible' : ''}"
@@ -3157,6 +3288,15 @@ export abstract class BaseChart extends LitElement {
 
     const title = this.getTitle();
     const chartType = this.getChartTypeName();
+
+    // Announce the state rather than describing a chart that is not there.
+    if (this.loading || this.getDataElementCount() === 0) {
+      const state = this.loading
+        ? 'loading'
+        : ((this.querySelector(':scope > dc-empty') as ChartEmpty | null)?.text
+           || (this.hasHiddenDataElements() ? 'all series hidden' : 'no data'));
+      return title ? `${chartType}: ${title} - ${state}` : `${chartType} - ${state}`;
+    }
 
     if (title) {
       return `${chartType}: ${title}`;

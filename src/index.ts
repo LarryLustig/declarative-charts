@@ -60,6 +60,7 @@ export { ChartPieSlice } from './chart-pie-slice.js';
 export { ChartLegend } from './chart-legend.js';
 export { ChartLegendItem } from './chart-legend-item.js';
 export { ChartTitle } from './chart-title.js';
+export { ChartEmpty } from './chart-empty.js';
 
 // Export palette components
 // Side-effect imports ensure elements are always registered when used as children

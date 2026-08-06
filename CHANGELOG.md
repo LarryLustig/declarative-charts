@@ -22,6 +22,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Regression tests in `test/component/bar-layout.test.ts` cover both orientations, differing
     widths, mixed explicit/auto groups, and group centring; verified to fail without the fix
 
+- **Empty and loading states**
+  - A chart with no data rendered a blank bordered box. It logged `DC001`, but diagnostics are
+    off by default so the log went nowhere, leaving the reader to guess whether the data was
+    empty, still loading, or broken
+  - An empty chart now draws a centred message. `<dc-empty>` supplies your own text, which the
+    page's renderer translates because it lives in the markup
+  - "All series are hidden" is distinguished from "No data" — different situations, different
+    reactions
+  - New `loading` attribute draws a skeleton, taking precedence over both data and the empty
+    message so a refresh does not flash stale values. Works with `hx-indicator="closest dc-chart"`
+  - Placeholders replace the plot entirely (axes, grid, legend) but keep the title. The chart
+    announces its state to screen readers — `"bar chart: Q3 Sales - no data"` — and is not
+    keyboard focusable while a placeholder shows
+  - Styleable via `--dc-empty-color`, `--dc-skeleton-color`, `--dc-skeleton-duration`, and the
+    `empty`, `skeleton`, `skeleton-bar` parts. The skeleton pulse respects `prefers-reduced-motion`
+  - Documented in **API.md → Empty and Loading States**
+
 - **Missing values in lines and areas**
   - `value` was `0` by default, so `<dc-point label="Mar">` — what a template emits for a month
     with no data — plotted at zero. The line dived to the axis and the chart asserted the value

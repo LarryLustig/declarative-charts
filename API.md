@@ -13,6 +13,7 @@ Complete documentation for all elements and attributes in the Declarative Chart 
 - [Filling a Container](#filling-a-container)
 - [Controlling Labels, Values, and Percentages](#controlling-labels-values-and-percentages)
 - [Label Positioning](#label-positioning)
+- [Empty and Loading States](#empty-and-loading-states)
 - [Missing Values](#missing-values)
 - [Negative Values](#negative-values)
 - [Number Formatting](#number-formatting)
@@ -951,6 +952,80 @@ dc-chart[fit="fill"] { --dc-height: 240px; }
 ```
 
 ---
+
+---
+
+## Empty and Loading States
+
+A chart with nothing to draw says so, rather than rendering an empty frame:
+
+```html
+<dc-chart width="600" height="400"></dc-chart>
+<!-- draws a centred "No data" message -->
+```
+
+This matters more here than for a config-driven library. A chart whose markup
+arrives from the server has a moment where the element exists and its children do
+not — the normal first frame of every server-driven chart, not an error.
+
+### Custom message
+
+```html
+<dc-chart width="600" height="400">
+  <dc-empty>No sales recorded this quarter</dc-empty>
+</dc-chart>
+```
+
+`<dc-empty>` takes `fill` and `font-size` like other text elements. Because the
+message lives in your markup, it is translated by whatever rendered the page.
+
+If the chart has data elements but they are all `hidden`, the default message is
+**"All series are hidden"** instead of "No data" — a different situation calling for
+a different reaction.
+
+### Loading
+
+```html
+<dc-chart width="600" height="400" loading>
+  <dc-bar value="10" label="Jan"></dc-bar>
+</dc-chart>
+```
+
+`loading` draws a skeleton in the plot area. It takes precedence over both the data
+and the empty message, so a refresh shows a placeholder rather than flashing stale
+values.
+
+With htmx, point the indicator at the chart and it resolves itself:
+
+```html
+<dc-chart hx-get="/api/sales" hx-trigger="load"
+          hx-indicator="closest dc-chart"></dc-chart>
+```
+
+The skeleton is a fixed shape, not random, so it does not shimmer into a different
+chart on every frame and does not break visual snapshots. Its pulse respects
+`prefers-reduced-motion`.
+
+### What a placeholder replaces
+
+Loading and empty replace the plot entirely — axes, grid, and legend all describe
+data, and drawing them around nothing is noise. The **title stays**, because it
+still describes what the chart is for.
+
+The chart also announces its state (`"bar chart: Q3 Sales - no data"`) rather than
+describing a chart that is not there, and is not keyboard focusable while a
+placeholder is showing, since there is nothing to navigate.
+
+### Styling
+
+| Hook | Applies to |
+|------|-----------|
+| `--dc-empty-color` | Empty message text (default `#9ca3af`) |
+| `--dc-skeleton-color` | Skeleton bars (default `#e5e7eb`) |
+| `--dc-skeleton-duration` | Skeleton pulse duration (default `1.4s`) |
+| `::part(empty)` | The empty message |
+| `::part(skeleton)` | The skeleton group |
+| `::part(skeleton-bar)` | An individual skeleton bar |
 
 ## Missing Values
 

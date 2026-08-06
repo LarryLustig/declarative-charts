@@ -636,7 +636,24 @@ own rendered size and cannot react to it.
 - `preserve-aspect-ratio` as a passthrough attribute, plus a `fill` mode for
   aspect-ratio-agnostic containers.
 
-### 4.2 Empty and loading states
+### 4.2 Empty and loading states — ✅ FIXED
+
+> **Fixed**, along the lines proposed: `<dc-empty>` for the message, a `loading` attribute for
+> the skeleton, and "all hidden" distinguished from "no data". The placeholder replaces axes,
+> grid and legend but keeps the title, and the chart announces its state
+> (`"bar chart: Q3 Sales - no data"`) instead of describing a chart that is not there.
+>
+> Two things worth recording. `getDataElementCount()` cannot simply be the focusable count —
+> **areas are not focusable**, so an area-only chart would have reported itself empty; `Chart`
+> overrides it, and any future chart type whose data is not all focusable must too. And the
+> skeleton uses a fixed height pattern rather than random values: a skeleton that reshuffles
+> every frame is a distraction and would break the visual snapshots.
+>
+> `loading` deliberately takes precedence over existing data, so refreshing a populated chart
+> shows a placeholder rather than flashing stale values — the case `hx-indicator` exists for.
+>
+> 17 tests in `test/component/empty-loading.test.ts`; nine states verified in Chromium including
+> every transition. Original finding below.
 
 Right now, a chart with no data elements logs `DC001 DATA_EMPTY` (`chart.ts:1607`,
 `pie-chart.ts:189`, `funnel-chart.ts:395`, `stage-chart.ts:620`) and renders an empty SVG frame
