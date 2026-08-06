@@ -1341,7 +1341,30 @@ export class Chart extends AxisChart {
   // Point Shape Rendering
   // ============================================================================
 
+  /**
+   * Point markers render as one of several shapes, none of which carry an
+   * identifying attribute of their own. Wrapping in a group gives them a single
+   * stable hook for `::part(point)` regardless of which shape was chosen.
+   */
   private renderPointShape(
+    shape: string,
+    x: number,
+    y: number,
+    size: number,
+    color: string,
+    cursor: string,
+    handlers: {
+      mouseenter: (e: MouseEvent) => void;
+      mouseleave: () => void;
+      click: (e: MouseEvent) => void;
+    }
+  ): SVGTemplateResult {
+    return svg`<g class="point-marker">${
+      this.renderPointShapeGeometry(shape, x, y, size, color, cursor, handlers)
+    }</g>`;
+  }
+
+  private renderPointShapeGeometry(
     shape: string,
     x: number,
     y: number,
@@ -1559,6 +1582,7 @@ export class Chart extends AxisChart {
             ${segment.href ? svg`<a href="${segment.href}" target="${segment.target || '_self'}">${segRect}</a>` : segRect}
             ${segValueString ? svg`
               <text
+                part="label"
                 x="${rect.x + rect.width / 2}"
                 y="${currentY + segmentHeight / 2 + 4}"
                 text-anchor="middle" font-size="12" fill="#fff"
@@ -1610,6 +1634,7 @@ export class Chart extends AxisChart {
             ${segment.href ? svg`<a href="${segment.href}" target="${segment.target || '_self'}">${segRect}</a>` : segRect}
             ${segValueString ? svg`
               <text
+                part="label"
                 x="${currentX + segmentWidth / 2}"
                 y="${rect.y + rect.height / 2 + 4}"
                 text-anchor="middle" font-size="12" fill="#fff"
@@ -1624,6 +1649,18 @@ export class Chart extends AxisChart {
   // ============================================================================
   // Main Render Method
   // ============================================================================
+
+  protected override getShadowParts(): Record<string, string> {
+    return {
+      ...super.getShadowParts(),
+      'rect[data-shape-index]': 'bar',
+      'path.line-path': 'line',
+      'path.area-path': 'area',
+      'g.point-marker': 'point',
+      'circle.bubble-shape': 'bubble',
+      '[data-segment-index]': 'bar-segment'
+    };
+  }
 
   protected updated(changedProperties: Map<string, unknown>): void {
     super.updated(changedProperties);
@@ -1740,6 +1777,7 @@ export class Chart extends AxisChart {
       <!-- Value labels (rendered last, on top of everything) -->
       ${deferredLabels.map(label => svg`
         <text
+          part="label"
           x="${label.x}"
           y="${label.y}"
           text-anchor="${label.anchor || 'middle'}"
@@ -3073,6 +3111,7 @@ export class Chart extends AxisChart {
 
         const bubbleCircle = svg`
           <circle
+            class="bubble-shape"
             cx="${x}" cy="${y}" r="${radius}"
             fill="${bubble.fill}"
             stroke="${bubble.stroke || 'none'}"
@@ -3216,6 +3255,7 @@ export class Chart extends AxisChart {
 
           return svg`
             <text
+              part="label"
               x="${labelX}"
               y="${y + barHeight / 2 + 4}"
               text-anchor="${isReverse ? 'start' : 'end'}"
@@ -3240,6 +3280,7 @@ export class Chart extends AxisChart {
 
             return svg`
               <text
+                part="label"
                 x="${labelX}"
                 y="${groupCenterY + 4}"
                 text-anchor="${isReverse ? 'start' : 'end'}"
@@ -3296,6 +3337,7 @@ export class Chart extends AxisChart {
 
           return svg`
             <text
+              part="label"
               x="${x + barWidth / 2}"
               y="${labelY}"
               text-anchor="middle"
@@ -3321,6 +3363,7 @@ export class Chart extends AxisChart {
 
             return svg`
               <text
+                part="label"
                 x="${groupCenterX}"
                 y="${labelY}"
                 text-anchor="middle"
@@ -3354,6 +3397,7 @@ export class Chart extends AxisChart {
 
         return svg`
           <text
+            part="label"
             x="${x}"
             y="${labelY}"
             text-anchor="middle"
@@ -3385,6 +3429,7 @@ export class Chart extends AxisChart {
 
         return svg`
           <text
+            part="label"
             x="${x}"
             y="${labelY}"
             text-anchor="middle"

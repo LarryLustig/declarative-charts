@@ -1020,6 +1020,10 @@ export class StageChart extends BaseChart {
     return { canShowLabel, canShowValue, labelsSuppressed };
   }
 
+  protected override getShadowParts(): Record<string, string> {
+    return { ...super.getShadowParts(), '[data-shape-index]': 'stage' };
+  }
+
   protected updated(changedProperties: Map<string, unknown>): void {
     super.updated(changedProperties);
     this.applyPassthroughAttributes(this.getStages());
@@ -1228,6 +1232,7 @@ export class StageChart extends BaseChart {
 
           ${textFit.canShowLabel ? svg`
             <text
+              part="label"
               x="${labelX}"
               y="${labelY - (textFit.canShowValue ? 8 : 0)}"
               text-anchor="${textAnchor}"
@@ -1244,6 +1249,7 @@ export class StageChart extends BaseChart {
 
           ${textFit.canShowValue && valueString ? svg`
             <text
+              part="label"
               x="${labelX}"
               y="${labelY + (textFit.canShowLabel ? 10 : 0)}"
               text-anchor="${textAnchor}"

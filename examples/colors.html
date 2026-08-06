@@ -18,6 +18,21 @@
             color: #1976d2;
         }
     </style>
+    <style>
+        /* Theming demo - see the "Theming with CSS" section */
+        .dark-theme {
+            --dc-surface: #1f2937;
+            --dc-border: 1px solid #374151;
+            --dc-shadow: none;
+            --dc-font-family: Georgia, serif;
+            --dc-popup-background: #111827;
+        }
+
+        #parts-demo::part(bar) { transition: opacity .15s; }
+        #parts-demo::part(bar):hover { opacity: .6; }
+        #parts-demo::part(grid-line) { stroke: #fde68a; }
+        #parts-demo::part(axis-label) { font-weight: bold; }
+    </style>
 </head>
 <body>
     <h1>Element Colors</h1>
@@ -231,7 +246,59 @@
         </div>
     </div>
 
-    <script type="module" src="../dist/declarative-charts.js"></script>
+    <div class="example" id="css-theming">
+        <h2>Theming with CSS</h2>
+        <p>
+            Per-element attributes handle one-offs. For anything applied consistently &mdash; a brand
+            font, a dark theme, a hover effect &mdash; use the <code>--dc-*</code> custom properties and
+            <code>::part()</code>. Custom properties inherit through the shadow boundary, so one rule
+            themes every chart beneath it.
+        </p>
+        <div class="grid">
+            <div>
+                <h3>Custom properties</h3>
+                <pre><code>.dark-theme {
+  --dc-surface: #1f2937;
+  --dc-border: 1px solid #374151;
+  --dc-shadow: none;
+  --dc-font-family: Georgia, serif;
+}</code></pre>
+                <div class="dark-theme">
+                    <dc-chart width="500" height="350" palette="cool">
+                        <dc-title fill="#f9fafb">Dark Themed</dc-title>
+                        <dc-bar value="45" label="Q1"></dc-bar>
+                        <dc-bar value="72" label="Q2"></dc-bar>
+                        <dc-bar value="38" label="Q3"></dc-bar>
+                        <dc-bar value="60" label="Q4"></dc-bar>
+                    </dc-chart>
+                </div>
+            </div>
+            <div>
+                <h3>Shadow parts</h3>
+                <pre><code>#parts-demo::part(bar) {
+  transition: opacity .15s;
+}
+#parts-demo::part(bar):hover {
+  opacity: .6;
+}
+#parts-demo::part(grid-line) {
+  stroke: #fde68a;
+}
+#parts-demo::part(axis-label) {
+  font-weight: bold;
+}</code></pre>
+                <dc-chart id="parts-demo" width="500" height="350" palette="warm">
+                    <dc-title>Hover the bars</dc-title>
+                    <dc-bar value="45" label="Q1"></dc-bar>
+                    <dc-bar value="72" label="Q2"></dc-bar>
+                    <dc-bar value="38" label="Q3"></dc-bar>
+                    <dc-bar value="60" label="Q4"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../dist/declarative-charts.standalone.js"></script>
     <script src="examples.js"></script>
 </body>
 </html>

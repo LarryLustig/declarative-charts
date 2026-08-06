@@ -9,6 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **CSS styling hooks: `::part()` and `--dc-*` custom properties**
+  - The library had no styling escape hatch at all — no parts, no custom properties — while
+    actively warning against CSS conventions. A design system had no way to theme charts once;
+    a brand font meant editing every `<dc-title>` on the page
+  - **19 custom properties** cover the chart frame (`--dc-surface`, `--dc-border`,
+    `--dc-padding`, `--dc-shadow`, `--dc-border-radius`), typography (`--dc-font-family`), the
+    focus ring, and the popup. They inherit through the shadow boundary, so `:root { … }` themes
+    every chart on the page and dark mode is a media query
+  - **21 shadow parts**: `chart`, `bar`, `bar-segment`, `line`, `area`, `point`, `bubble`,
+    `slice`, `stage`, `label`, `title`, `legend-title`, `legend-label`, `legend-value`,
+    `legend-swatch`, `legend-background`, `axis-line`, `axis-label`, `grid-line` (plus
+    `zero-line`), `popup`, `focus-ring`
+  - This makes states expressible that no attribute could reach —
+    `dc-chart::part(bar):hover { opacity: .75 }` was previously impossible
+  - The hardcoded `:host` frame (white background, grey border, drop shadow) is now tokenised,
+    so charts can sit on a dark page without fighting the library
+  - Parts are stamped after render from a selector map (`getShadowParts()`), so a chart type
+    names its own shapes — `data-shape-index` means a bar in one chart and a slice in another
+  - Popup transitions now respect `prefers-reduced-motion`
+  - Documented in **API.md → Styling with CSS**, including the precedence rules; verified in
+    Chromium that every part resolves and every token applies
+
 - **Interaction events**
   - `dc-click`, `dc-mouseenter`, `dc-mouseleave` on data elements, and `dc-render` after each draw
   - Previously the only ways to respond to a click were `href` navigation and a declarative

@@ -781,6 +781,7 @@ export class ChartLegend extends LitElement {
 
       return svg`
         <text
+          part="legend-title"
           x="${titleX}"
           y="${titleY}"
           text-anchor="${textAnchor}"
@@ -800,6 +801,7 @@ export class ChartLegend extends LitElement {
       svg: svg`
         <!-- Legend background -->
         <rect
+          part="legend-background"
           x="0"
           y="0"
           width="${bgWidth}"
@@ -823,13 +825,14 @@ export class ChartLegend extends LitElement {
 
           return svg`
             <!-- Shape indicator -->
-            <g transform="translate(${itemX}, ${itemY})">
+            <g part="legend-swatch" transform="translate(${itemX}, ${itemY})">
               ${ChartSwatch.renderShape(item.resolvedShape, 18, item.color, 'white')}
             </g>
 
             ${showLabel ? svg`
               <!-- Label -->
               <text
+                part="legend-label"
                 x="${labelX}"
                 y="${itemY + 13}"
                 font-size="${fontSize}"
@@ -842,6 +845,7 @@ export class ChartLegend extends LitElement {
             ${item.displayValue ? svg`
               <!-- Value/Percent -->
               <text
+                part="legend-value"
                 x="${valueX}"
                 y="${itemY + 13}"
                 font-size="${fontSize - 1}"
@@ -1036,12 +1040,13 @@ export class ChartLegend extends LitElement {
         <!-- Wrapped legend items -->
         ${positionedItems.map(item => svg`
           <!-- Shape indicator -->
-          <g transform="translate(${contentX + item.x}, ${contentY + item.y})">
+          <g part="legend-swatch" transform="translate(${contentX + item.x}, ${contentY + item.y})">
             ${ChartSwatch.renderShape(item.resolvedShape, 12, item.color, 'white')}
           </g>
 
           <!-- Item text -->
           <text
+            part="legend-label"
             x="${contentX + item.x + colorBoxWidth + colorBoxGap}"
             y="${contentY + item.y + 10}"
             font-size="${fontSize}"

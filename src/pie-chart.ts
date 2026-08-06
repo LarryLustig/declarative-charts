@@ -415,6 +415,10 @@ export class PieChart extends BaseChart {
     }
   }
 
+  protected override getShadowParts(): Record<string, string> {
+    return { ...super.getShadowParts(), 'path[data-shape-index]': 'slice' };
+  }
+
   protected updated(changedProperties: Map<string, unknown>): void {
     super.updated(changedProperties);
     this.applyPassthroughAttributes(this.getSlices());
@@ -473,6 +477,7 @@ export class PieChart extends BaseChart {
           ${shouldShowLabel ? svg`
             <!-- Slice label -->
             <text
+              part="label"
               x="${slice.labelX}"
               y="${slice.labelY - (valueString ? 8 : 0)}"
               text-anchor="${slice.textAnchor}"
@@ -488,6 +493,7 @@ export class PieChart extends BaseChart {
           ${valueString ? svg`
             <!-- Slice value/percent -->
             <text
+              part="label"
               x="${slice.labelX}"
               y="${slice.labelY + (shouldShowLabel ? 10 : 0)}"
               text-anchor="${slice.textAnchor}"

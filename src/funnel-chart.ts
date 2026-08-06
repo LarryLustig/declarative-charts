@@ -613,6 +613,10 @@ export class FunnelChart extends BaseChart {
     };
   }
 
+  protected override getShadowParts(): Record<string, string> {
+    return { ...super.getShadowParts(), '[data-shape-index]': 'stage' };
+  }
+
   protected updated(changedProperties: Map<string, unknown>): void {
     super.updated(changedProperties);
     this.applyPassthroughAttributes(this.getStages());
@@ -774,6 +778,7 @@ export class FunnelChart extends BaseChart {
           ${shouldShowLabel ? svg`
             <!-- Stage label -->
             <text
+              part="label"
               x="${labelX}"
               y="${labelY}"
               text-anchor="${textAnchor}"
@@ -790,6 +795,7 @@ export class FunnelChart extends BaseChart {
           ${valueString ? svg`
             <!-- Stage value/percent -->
             <text
+              part="label"
               x="${labelX}"
               y="${valueY}"
               text-anchor="${textAnchor}"

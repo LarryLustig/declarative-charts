@@ -729,6 +729,7 @@ export abstract class AxisChart extends BaseChart {
         const x = titleMargin + fontSizeNum / 2;
         return svg`
           <text
+            part="axis-label"
             x="${x}"
             y="${centerY}"
             text-anchor="middle"
@@ -748,6 +749,7 @@ export abstract class AxisChart extends BaseChart {
         const x = this.width - titleMargin - fontSizeNum / 2;
         return svg`
           <text
+            part="axis-label"
             x="${x}"
             y="${centerY}"
             text-anchor="middle"
@@ -767,6 +769,7 @@ export abstract class AxisChart extends BaseChart {
         const y = titleMargin + fontSizeNum;
         return svg`
           <text
+            part="axis-label"
             x="${centerX}"
             y="${y}"
             text-anchor="middle"
@@ -786,6 +789,7 @@ export abstract class AxisChart extends BaseChart {
         const y = this.height - titleMargin;
         return svg`
           <text
+            part="axis-label"
             x="${centerX}"
             y="${y}"
             text-anchor="middle"
@@ -910,6 +914,7 @@ export abstract class AxisChart extends BaseChart {
           const isZeroLine = Math.abs(value) < totalRange * 0.0001 && hasNegatives && hasPositives;
           return svg`
             <line
+              part="${isZeroLine ? 'grid-line zero-line' : 'grid-line'}"
               x1="${padding.left}"
               y1="${y}"
               x2="${this.width - padding.right}"
@@ -930,6 +935,7 @@ export abstract class AxisChart extends BaseChart {
           const isZeroLine = Math.abs(value) < totalRange * 0.0001 && hasNegatives && hasPositives;
           return svg`
             <line
+              part="${isZeroLine ? 'grid-line zero-line' : 'grid-line'}"
               x1="${x}"
               y1="${padding.top}"
               x2="${x}"
@@ -994,6 +1000,7 @@ export abstract class AxisChart extends BaseChart {
         // Vertical-reverse: Y-axis on left, X-axis at top
         return svg`
           <line
+            part="axis-line"
             x1="${padding.left}"
             y1="${padding.top - extend}"
             x2="${padding.left}"
@@ -1002,6 +1009,7 @@ export abstract class AxisChart extends BaseChart {
             stroke-width="${strokeWidth}"
           />
           <line
+            part="axis-line"
             x1="${padding.left - extend}"
             y1="${padding.top}"
             x2="${this.width - padding.right}"
@@ -1014,6 +1022,7 @@ export abstract class AxisChart extends BaseChart {
         // All-negative vertical: Y-axis on left (full height), X-axis at top (where zero is)
         return svg`
           <line
+            part="axis-line"
             x1="${padding.left}"
             y1="${padding.top - extend}"
             x2="${padding.left}"
@@ -1022,6 +1031,7 @@ export abstract class AxisChart extends BaseChart {
             stroke-width="${strokeWidth}"
           />
           <line
+            part="axis-line"
             x1="${padding.left - extend}"
             y1="${padding.top}"
             x2="${this.width - padding.right}"
@@ -1034,6 +1044,7 @@ export abstract class AxisChart extends BaseChart {
         // Standard vertical: Y-axis on left, X-axis at bottom
         return svg`
           <line
+            part="axis-line"
             x1="${padding.left}"
             y1="${padding.top}"
             x2="${padding.left}"
@@ -1042,6 +1053,7 @@ export abstract class AxisChart extends BaseChart {
             stroke-width="${strokeWidth}"
           />
           <line
+            part="axis-line"
             x1="${padding.left - extend}"
             y1="${this.height - padding.bottom}"
             x2="${this.width - padding.right}"
@@ -1056,6 +1068,7 @@ export abstract class AxisChart extends BaseChart {
         // Horizontal-reverse: Y-axis on right, X-axis at bottom
         return svg`
           <line
+            part="axis-line"
             x1="${this.width - padding.right}"
             y1="${padding.top}"
             x2="${this.width - padding.right}"
@@ -1064,6 +1077,7 @@ export abstract class AxisChart extends BaseChart {
             stroke-width="${strokeWidth}"
           />
           <line
+            part="axis-line"
             x1="${padding.left}"
             y1="${this.height - padding.bottom}"
             x2="${this.width - padding.right + extend}"
@@ -1076,6 +1090,7 @@ export abstract class AxisChart extends BaseChart {
         // Standard horizontal: Y-axis on left, X-axis at bottom
         return svg`
           <line
+            part="axis-line"
             x1="${padding.left}"
             y1="${padding.top}"
             x2="${padding.left}"
@@ -1084,6 +1099,7 @@ export abstract class AxisChart extends BaseChart {
             stroke-width="${strokeWidth}"
           />
           <line
+            part="axis-line"
             x1="${padding.left - extend}"
             y1="${this.height - padding.bottom}"
             x2="${this.width - padding.right}"
@@ -1141,6 +1157,7 @@ export abstract class AxisChart extends BaseChart {
             const y = padding.top + ((value - min) / totalRange) * chartHeight;
             return svg`
               <text
+                part="axis-label"
                 x="${padding.left - 10}"
                 y="${y + 4}"
                 text-anchor="end"
@@ -1159,6 +1176,7 @@ export abstract class AxisChart extends BaseChart {
             const y = this.height - padding.bottom - ((value - min) / totalRange) * chartHeight;
             return svg`
               <text
+                part="axis-label"
                 x="${padding.left - 10}"
                 y="${y + 4}"
                 text-anchor="end"
@@ -1179,6 +1197,7 @@ export abstract class AxisChart extends BaseChart {
             const x = this.width - padding.right - ((value - min) / totalRange) * chartWidth;
             return svg`
               <text
+                part="axis-label"
                 x="${x}"
                 y="${this.height - padding.bottom + 20}"
                 text-anchor="middle"
@@ -1197,6 +1216,7 @@ export abstract class AxisChart extends BaseChart {
             const x = padding.left + ((value - min) / totalRange) * chartWidth;
             return svg`
               <text
+                part="axis-label"
                 x="${x}"
                 y="${this.height - padding.bottom + 20}"
                 text-anchor="middle"
@@ -1306,6 +1326,7 @@ export abstract class AxisChart extends BaseChart {
         const label = formatDate(date, timeScale.tickFormat);
         return svg`
           <text
+            part="axis-label"
             x="${x}"
             y="${this.height - padding.bottom + 20}"
             text-anchor="middle"

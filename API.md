@@ -8,6 +8,7 @@ Complete documentation for all elements and attributes in the Declarative Chart 
 - [Common Chart Attributes](#common-chart-attributes)
 - [Color System](#color-system)
 - [Palettes and Pattern Fills](#palettes-and-pattern-fills)
+- [Styling with CSS](#styling-with-css)
 - [Controlling Labels, Values, and Percentages](#controlling-labels-values-and-percentages)
 - [Label Positioning](#label-positioning)
 - [Negative Values](#negative-values)
@@ -465,6 +466,126 @@ Charts also auto-detect the OS `prefers-contrast: high` setting.
 See [`examples/palettes.html`](examples/palettes.html) and [`examples/patterns.html`](examples/patterns.html) for comprehensive examples.
 
 ---
+
+## Styling with CSS
+
+Per-element SVG attributes (`fill`, `stroke`, `font-size`) are for one-off decisions
+on a specific element. For anything you want applied consistently — a brand font
+across forty charts, a dark theme, a hover effect — use the CSS hooks below.
+
+### Custom properties
+
+Custom properties inherit through the shadow boundary, so setting them anywhere up
+the tree themes every chart underneath.
+
+| Property | Default | Applies to |
+|----------|---------|-----------|
+| `--dc-surface` | `white` | Chart background |
+| `--dc-border` | `2px solid #ddd` | Chart border |
+| `--dc-border-radius` | `8px` | Chart corner radius |
+| `--dc-padding` | `20px` | Space between the border and the plot |
+| `--dc-shadow` | `0 2px 8px rgba(0,0,0,.1)` | Chart drop shadow |
+| `--dc-font-family` | inherited | Default font for all chart text |
+| `--dc-focus-ring` | `2px solid #005fcc` | Keyboard focus outline |
+| `--dc-focus-ring-offset` | `2px` | Focus outline offset |
+| `--dc-popup-background` | `rgba(0,0,0,.9)` | Popup background |
+| `--dc-popup-color` | `white` | Popup text |
+| `--dc-popup-border` | `none` | Popup border |
+| `--dc-popup-border-radius` | `6px` | Popup corner radius |
+| `--dc-popup-padding` | `10px 15px` | Popup padding |
+| `--dc-popup-font-size` | `14px` | Popup text size |
+| `--dc-popup-shadow` | `0 4px 12px rgba(0,0,0,.3)` | Popup shadow |
+| `--dc-popup-max-width` | `300px` | Popup maximum width |
+| `--dc-popup-transition-duration` | `0.2s` | Popup fade duration |
+| `--dc-popup-z-index` | `1000` | Popup stacking order |
+
+```css
+/* Theme every chart on the page */
+:root {
+  --dc-font-family: "Inter", system-ui, sans-serif;
+  --dc-border: 1px solid #e5e7eb;
+  --dc-shadow: none;
+}
+
+/* Dark mode, no markup changes */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --dc-surface: #111827;
+    --dc-border: 1px solid #374151;
+    --dc-popup-background: #1f2937;
+  }
+}
+```
+
+> `--dc-font-family` is applied to the `<svg>`, so an explicit `font-family` on a
+> `<dc-title>` still wins — the token only supplies the default.
+
+### Shadow parts
+
+`::part()` reaches individual elements inside the chart. This is the only way to
+express states the library has no attribute for — hover, transitions, filters.
+
+| Part | Element |
+|------|---------|
+| `chart` | The root `<svg>` |
+| `bar` | A bar |
+| `bar-segment` | A segment of a stacked bar |
+| `line` | A line path |
+| `area` | An area fill |
+| `point` | A point marker on a line |
+| `bubble` | A bubble |
+| `slice` | A pie or donut slice |
+| `stage` | A funnel or stage shape |
+| `label` | A data label |
+| `title` | The chart title |
+| `legend-title` | The legend's title |
+| `legend-label` | A legend item's label |
+| `legend-value` | A legend item's value |
+| `legend-swatch` | A legend item's colour swatch |
+| `legend-background` | The legend's background panel |
+| `axis-line` | An axis line |
+| `axis-label` | An axis tick label |
+| `grid-line` | A grid line (the zero line also has `zero-line`) |
+| `popup` | The popup container |
+| `focus-ring` | The keyboard focus indicator |
+
+```css
+/* Hover effects - not expressible with attributes */
+dc-chart::part(bar) {
+  transition: opacity 0.15s;
+}
+dc-chart::part(bar):hover {
+  opacity: 0.75;
+}
+
+/* Restyle chrome */
+dc-chart::part(grid-line) { stroke: #f3f4f6; }
+dc-chart::part(zero-line) { stroke: #111827; }
+dc-chart::part(axis-label) { font-size: 11px; }
+```
+
+### Precedence
+
+From strongest to weakest:
+
+1. **A `::part()` rule** — plain CSS beats SVG presentation attributes
+2. **A per-element attribute** — `<dc-bar fill="red">`
+3. **A palette** — `palette="category10"`
+4. **`--dc-*` tokens and built-in defaults**
+
+Worth knowing: because CSS wins over presentation attributes, a broad rule like
+`dc-chart::part(bar) { fill: blue }` overrides *every* bar, including ones with an
+explicit `fill`. Use `::part()` for properties you want applied uniformly, and
+per-element attributes for individual exceptions — mixing both on the same
+property means the CSS wins.
+
+### Notes
+
+- `::part()` styles the element itself. You cannot select *inside* a part, so
+  `::part(legend) text` does not work — each targetable element has its own part.
+- Part names are a public contract. Treat them like attribute names.
+- Both mechanisms are inert during server rendering; they apply once the element
+  upgrades in the browser.
 
 ## Controlling Labels, Values, and Percentages
 

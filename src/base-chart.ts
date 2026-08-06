@@ -2009,14 +2009,28 @@ export abstract class BaseChart extends LitElement {
     };
   }
 
+  /**
+   * Every value a theme is likely to want to change is a custom property with a
+   * built-in fallback, so `dc-chart { --dc-surface: #111 }` retheme a whole page
+   * without touching markup. Custom properties inherit through the shadow
+   * boundary, which is what makes theming-from-outside possible at all.
+   *
+   * `--dc-font-family` is applied to the <svg>, not to <text>. Presentation
+   * attributes beat *inherited* values, so an explicit `font-family` on a
+   * <dc-title> still wins - the token only supplies the default.
+   *
+   * Deliberately not tokenised: `fill` on the <svg>. Fill is inherited in SVG,
+   * so a rule there would tint every shape that has no explicit fill, not just
+   * the text.
+   */
   static styles = css`
     :host {
       display: block;
-      border: 2px solid #ddd;
-      padding: 20px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border: var(--dc-border, 2px solid #ddd);
+      padding: var(--dc-padding, 20px);
+      background: var(--dc-surface, white);
+      border-radius: var(--dc-border-radius, 8px);
+      box-shadow: var(--dc-shadow, 0 2px 8px rgba(0, 0, 0, 0.1));
       position: relative;
       box-sizing: border-box;
     }
@@ -2025,12 +2039,13 @@ export abstract class BaseChart extends LitElement {
       display: block;
       width: 100%;
       height: auto;
+      font-family: var(--dc-font-family, inherit);
     }
 
     /* Focus styles for keyboard navigation */
     svg:focus {
-      outline: 2px solid #005fcc;
-      outline-offset: 2px;
+      outline: var(--dc-focus-ring, 2px solid #005fcc);
+      outline-offset: var(--dc-focus-ring-offset, 2px);
     }
 
     svg:focus:not(:focus-visible) {
@@ -2038,23 +2053,24 @@ export abstract class BaseChart extends LitElement {
     }
 
     svg:focus-visible {
-      outline: 2px solid #005fcc;
-      outline-offset: 2px;
+      outline: var(--dc-focus-ring, 2px solid #005fcc);
+      outline-offset: var(--dc-focus-ring-offset, 2px);
     }
 
     .popup {
       position: absolute;
-      background: rgba(0, 0, 0, 0.9);
-      color: white;
-      padding: 10px 15px;
-      border-radius: 6px;
-      font-size: 14px;
+      background: var(--dc-popup-background, rgba(0, 0, 0, 0.9));
+      color: var(--dc-popup-color, white);
+      padding: var(--dc-popup-padding, 10px 15px);
+      border-radius: var(--dc-popup-border-radius, 6px);
+      border: var(--dc-popup-border, none);
+      font-size: var(--dc-popup-font-size, 14px);
       pointer-events: auto;
-      z-index: 1000;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      max-width: 300px;
+      z-index: var(--dc-popup-z-index, 1000);
+      box-shadow: var(--dc-popup-shadow, 0 4px 12px rgba(0, 0, 0, 0.3));
+      max-width: var(--dc-popup-max-width, 300px);
       opacity: 0;
-      transition: opacity 0.2s;
+      transition: opacity var(--dc-popup-transition-duration, 0.2s);
     }
 
     .popup.visible {
@@ -2068,6 +2084,12 @@ export abstract class BaseChart extends LitElement {
 
     .popup a:hover {
       opacity: 0.8;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .popup {
+        transition: none;
+      }
     }
   `;
 
@@ -2419,7 +2441,44 @@ export abstract class BaseChart extends LitElement {
   }
 
   protected updated(_changedProperties: Map<string, unknown>): void {
+    this.applyShadowParts();
     this.emitRender();
+  }
+
+  /**
+   * Selector -> `part` name for elements in the shadow root.
+   *
+   * Chart types override this to name their own shapes: `data-shape-index` means
+   * a bar in one chart and a slice in another, so the mapping cannot live in one
+   * place. Merge with `super.getShadowParts()` rather than replacing it.
+   */
+  protected getShadowParts(): Record<string, string> {
+    return {
+      'svg': 'chart',
+      '.popup': 'popup',
+      '.focus-indicator': 'focus-ring'
+    };
+  }
+
+  /**
+   * Stamp `part` attributes onto the rendered shadow DOM so consumers can style
+   * internals with `::part()`.
+   *
+   * Applied after render rather than written into every template: the shapes are
+   * emitted from ~50 places across five files, and a selector map is both easier
+   * to audit and impossible to get subtly out of step. Lit does not manage the
+   * `part` attribute, so re-stamping after each render is safe - the same
+   * approach `applyPassthroughAttributes()` already uses.
+   */
+  protected applyShadowParts(): void {
+    const root = this.shadowRoot;
+    if (!root) return;
+
+    for (const [selector, part] of Object.entries(this.getShadowParts())) {
+      for (const el of root.querySelectorAll(selector)) {
+        if (el.getAttribute('part') !== part) el.setAttribute('part', part);
+      }
+    }
   }
 
   /**

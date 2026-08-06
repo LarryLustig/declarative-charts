@@ -188,6 +188,15 @@ Use `getPaletteColors(count, colorType)` in chart code to resolve palette colors
 
 **Hidden Attribute**: Standard HTML `hidden` on data elements (`<dc-line>`, `<dc-bar>`, etc.) hides them. Toggling it re-renders the chart automatically — see **Child Reactivity** below.
 
+**CSS Hooks (`::part` and `--dc-*`)**: Two complementary layers, documented in **API.md → Styling with CSS**.
+
+- **Custom properties** are declared in `BaseChart.static styles` as `var(--dc-name, fallback)`. They inherit through the shadow boundary, which is what lets a page theme every chart at once. Add new ones the same way — a token with a fallback, never a bare `var()`.
+  - `--dc-font-family` is set on the `<svg>`, **not** on `<text>`. Presentation attributes beat *inherited* values, so an explicit `font-family` on `<dc-title>` still wins.
+  - Do **not** tokenize `fill` on the `<svg>`: fill is inherited in SVG, so it would tint every shape lacking an explicit fill, not just text.
+- **Parts** are stamped after render by `BaseChart.applyShadowParts()`, driven by `getShadowParts()` (selector → part name). Override it in a chart type and spread `...super.getShadowParts()`. Done post-render rather than in ~50 templates because a selector map is auditable in one place; Lit does not manage `part`, so re-stamping is safe — the same approach as `applyPassthroughAttributes()`.
+  - Shapes sharing a tag need a discriminator: points and bubbles are both circles, so bubbles carry `class="bubble-shape"` and point markers are wrapped in `<g class="point-marker">` (point markers can render as any of several shapes, so the wrapper is their only stable hook).
+  - **Part names are a public contract** — renaming one breaks consumer CSS. `test/component/shadow-parts.test.ts` guards them.
+
 **Events**: Charts emit `dc-click`, `dc-mouseenter`, `dc-mouseleave` (payload `ChartInteractionDetail`) and `dc-render` (`ChartRenderDetail`). Emitted via `BaseChart.emitInteraction()`, which dispatches from the *authored* element (`<dc-bar>`) when one is available so consumers can listen on it directly; those are light-DOM children, so the event still bubbles to the chart. `composed: true` is required — without it the event dies at the shadow boundary.
 
 `dc-click` is cancelable; `emitInteraction()` returns `false` when cancelled and the caller must skip its default behaviour, which also calls `preventDefault()` on the originating MouseEvent to stop `href` navigation. Each chart builds its payload in a small `*Detail()` helper (`barDetail`, `sliceDetail`, `stageDetail`, …) — add one when adding a chart type. `percent` is a **decimal** (0.25 = 25%), matching the library's percent convention, and `null` rather than 0 when a share is undefined. Event names are declared on `HTMLElementEventMap` in `base-chart.ts` so consumers get a typed `detail` without a cast.

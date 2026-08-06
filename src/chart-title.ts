@@ -265,6 +265,7 @@ export class ChartTitle extends BaseChartElement {
       height: dimensions.height,
       svg: svg`
         <text
+          part="title"
           x="${x}"
           y="${y}"
           text-anchor="${textAnchor}"

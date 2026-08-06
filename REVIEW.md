@@ -658,7 +658,30 @@ this.dispatchEvent(new CustomEvent('dc-click', {
 - Make them cancelable where it makes sense (`preventDefault()` on `dc-click` suppresses
   `href` navigation and popup display).
 
-### 4.4 `::part()` and CSS custom properties
+### 4.4 `::part()` and CSS custom properties — ✅ FIXED
+
+> **Fixed, as both layers rather than one.** 19 custom properties (chart frame, typography,
+> focus ring, popup) and 21 shadow parts. Verified in Chromium that every part resolves and
+> every token applies.
+>
+> The hardcoded `:host` frame this section criticised — white background, grey border, drop
+> shadow — is now tokenised, so a chart can sit on a dark page without fighting the library.
+>
+> Two SVG-specific traps worth recording, since both would have caused silent breakage:
+> `--dc-font-family` is applied to the `<svg>` rather than to `<text>`, because presentation
+> attributes beat *inherited* values — so an explicit `font-family` on `<dc-title>` still wins.
+> And `fill` is deliberately **not** tokenised on the `<svg>`: fill inherits in SVG, so a rule
+> there would tint every shape lacking an explicit fill, not just the text.
+>
+> Parts are stamped post-render from a selector map rather than written into ~50 templates.
+> Shapes sharing a tag needed discriminators — points and bubbles are both circles, and point
+> markers can render as any of eight shapes, so they are wrapped in a `<g class="point-marker">`.
+>
+> One honest caveat now documented: because CSS beats presentation attributes, a broad
+> `::part(bar) { fill: … }` overrides even bars with an explicit `fill`. The precedence table in
+> API.md states this rather than pretending otherwise.
+>
+> Original finding below.
 
 `grep -rn "part=\|--dc-\|::part" src/` → **no matches.** There is no styling escape hatch of any
 kind.
