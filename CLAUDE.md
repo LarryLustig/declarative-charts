@@ -188,6 +188,12 @@ Use `getPaletteColors(count, colorType)` in chart code to resolve palette colors
 
 **Hidden Attribute**: Standard HTML `hidden` on data elements (`<dc-line>`, `<dc-bar>`, etc.) hides them. Toggling it re-renders the chart automatically — see **Child Reactivity** below.
 
+**Bar Layout**: `computeBarLayout()` in `chart.ts` is the single source of bar positions. It walks the structure once and returns `{ slots, units }` — each bar's `start`/`size`/`center` along the category axis, and each unit's true extent for centring group labels.
+
+It is **orientation-agnostic**: the traversal only ever moves along the category axis, so `start`/`size` are x/width vertically and y/height horizontally. The value axis is the caller's business.
+
+**Do not reintroduce a local walk.** This logic previously existed as six copies — two drawing bars, two placing category labels, two placing group labels — and they had drifted. The label copies lacked the `allBarsHaveWidth` branch, so a group with differing bar widths drew labels from the group average (15 units off); the group-label copies ignored gutters entirely. Both bugs were invisible to the visual baselines because the grouped fixture uses auto-width bars, where every version agrees. `test/component/bar-layout.test.ts` pins it with differing widths in both orientations.
+
 **Missing Values**: `<dc-point>` overrides `value` with `optionalNumberConverter`, defaulting to **NaN** rather than 0, so "no data" stays distinguishable from a real zero. `<dc-line>`/`<dc-area>` take `missing="gap"` (default) | `"skip"` | `"zero"`.
 
 The policy is resolved **once**, in `getLines()`/`getAreas()`, which set a `missing: boolean` on each point. Downstream code tests that flag rather than re-checking `Number.isFinite` — keep it that way, or the two will drift.

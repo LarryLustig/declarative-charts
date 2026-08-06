@@ -2306,6 +2306,99 @@ export class Chart extends AxisChart {
     return { x: labelX, y: labelY, anchor };
   }
 
+  /**
+   * Walk the bar structure once and return each bar's position along the
+   * category axis.
+   *
+   * Orientation-agnostic: the traversal only ever moves along the category axis,
+   * so `start`/`size` are x/width for a vertical chart and y/height for a
+   * horizontal one. The value axis is the caller's business.
+   *
+   * This exists because the walk used to be written out four times - twice to
+   * draw bars and twice to place their category labels - and the copies had
+   * drifted. The label copies never gained the branch that honours an explicit
+   * per-bar `width`, so a group of bars with differing widths drew its labels
+   * from the group average: 15 units of drift, every label off its bar. One
+   * traversal makes that class of bug impossible rather than merely fixed.
+   */
+  private computeBarLayout(
+    bars: FlattenedBar[],
+    structure: BarOrGroup[],
+    unitSizes: number[],
+    gutterScale: number,
+    origin: number
+  ): {
+    slots: Array<{ start: number; size: number; center: number }>;
+    units: Array<{ start: number; end: number; center: number }>;
+  } {
+    const layout: Array<{ start: number; size: number; center: number }> = [];
+    const unitBounds = new Map<number, { start: number; end: number }>();
+    let barIndex = 0;
+    let unitIndex = 0;
+    let cursor = origin;
+
+    for (let i = 0; i < bars.length; i++) {
+      const unit = structure[unitIndex];
+      if (!unit) break;
+
+      const unitSize = unitSizes[unitIndex];
+      const gutter = this.unitGutter(unit, gutterScale);
+      let start: number;
+      let size: number;
+
+      if (barIndex === 0) cursor += gutter / 2;
+
+      if (unit.isGroup) {
+        const groupBarCount = unit.bars.length;
+        const allBarsHaveWidth = unit.bars.every(b => this.parseCSSUnit(b.width) !== undefined);
+
+        if (allBarsHaveWidth) {
+          size = this.parseCSSUnit(bars[i].width)!;
+          start = cursor;
+          cursor += size;
+        } else {
+          size = unitSize / groupBarCount;
+          start = cursor + barIndex * size;
+        }
+
+        barIndex++;
+        if (barIndex >= groupBarCount) {
+          barIndex = 0;
+          if (!allBarsHaveWidth) cursor += unitSize;
+          cursor += gutter / 2;
+          unitIndex++;
+        }
+      } else {
+        start = cursor;
+        size = unitSize;
+        cursor += unitSize + gutter / 2;
+        barIndex = 0;
+        unitIndex++;
+      }
+
+      layout.push({ start, size, center: start + size / 2 });
+
+      // Track each unit's true extent so a group label can sit over the group
+      // it names. Derived from the bars themselves rather than re-walked, which
+      // is how the old group-label loops came to ignore gutters entirely.
+      const owner = unit.isGroup ? unitIndex - (barIndex === 0 ? 1 : 0) : unitIndex - 1;
+      const bounds = unitBounds.get(owner);
+      if (bounds) {
+        bounds.start = Math.min(bounds.start, start);
+        bounds.end = Math.max(bounds.end, start + size);
+      } else {
+        unitBounds.set(owner, { start, end: start + size });
+      }
+    }
+
+    const units = structure.map((_, i) => {
+      const bounds = unitBounds.get(i) ?? { start: origin, end: origin };
+      return { ...bounds, center: (bounds.start + bounds.end) / 2 };
+    });
+
+    return { slots: layout, units };
+  }
+
   private renderVerticalBars(
     bars: FlattenedBar[],
     structure: BarOrGroup[],
@@ -2334,9 +2427,7 @@ export class Chart extends AxisChart {
       ? padding.top + ((0 - min) / totalRange) * chartHeight
       : this.height - padding.bottom - ((0 - min) / totalRange) * chartHeight;
 
-    let barIndex = 0;
-    let unitIndex = 0;
-    let cumulativeX = padding.left;
+    const { slots } = this.computeBarLayout(bars, structure, finalUnitWidths, gutterScale, padding.left);
 
     return svg`
       ${bars.map((bar, index) => {
@@ -2368,47 +2459,9 @@ export class Chart extends AxisChart {
           }
         }
 
-        const currentUnit = structure[unitIndex];
-        const currentUnitWidth = finalUnitWidths[unitIndex];
-        const currentGutter = this.unitGutter(currentUnit, gutterScale);
-        let x: number;
-        let barWidth: number;
-
-        if (barIndex === 0) {
-          cumulativeX += currentGutter / 2;
-        }
-
-        if (currentUnit.isGroup) {
-          const groupBarCount = currentUnit.bars.length;
-          const allBarsHaveWidth = currentUnit.bars.every(b => this.parseCSSUnit(b.width) !== undefined);
-
-          if (allBarsHaveWidth) {
-            const parsedWidth = this.parseCSSUnit(bar.width)!;
-            barWidth = parsedWidth;
-            x = cumulativeX;
-            cumulativeX += barWidth;
-          } else {
-            const barWidthInGroup = currentUnitWidth / groupBarCount;
-            x = cumulativeX + barIndex * barWidthInGroup;
-            barWidth = barWidthInGroup;
-          }
-
-          barIndex++;
-          if (barIndex >= groupBarCount) {
-            barIndex = 0;
-            if (!allBarsHaveWidth) {
-              cumulativeX += currentUnitWidth;
-            }
-            cumulativeX += currentGutter / 2;
-            unitIndex++;
-          }
-        } else {
-          x = cumulativeX;
-          barWidth = currentUnitWidth;
-          cumulativeX += currentUnitWidth + currentGutter / 2;
-          barIndex = 0;
-          unitIndex++;
-        }
+        const slot = slots[index];
+        const x = slot.start;
+        const barWidth = slot.size;
 
         const percent = total > 0 ? (Math.abs(bar.value) / total) * 100 : 0;
         const shouldShowValue = this.evaluateShowCondition(bar.showValue, bar.value, percent);
@@ -2479,9 +2532,7 @@ export class Chart extends AxisChart {
       ? this.width - padding.right - ((0 - min) / totalRange) * chartWidth
       : padding.left + ((0 - min) / totalRange) * chartWidth;
 
-    let barIndex = 0;
-    let unitIndex = 0;
-    let cumulativeY = padding.top;
+    const { slots } = this.computeBarLayout(bars, structure, finalUnitHeights, gutterScale, padding.top);
 
     return svg`
       ${bars.map((bar, index) => {
@@ -2513,47 +2564,9 @@ export class Chart extends AxisChart {
           }
         }
 
-        const currentUnit = structure[unitIndex];
-        const currentUnitHeight = finalUnitHeights[unitIndex];
-        const currentGutter = this.unitGutter(currentUnit, gutterScale);
-        let y: number;
-        let barHeight: number;
-
-        if (barIndex === 0) {
-          cumulativeY += currentGutter / 2;
-        }
-
-        if (currentUnit.isGroup) {
-          const groupBarCount = currentUnit.bars.length;
-          const allBarsHaveHeight = currentUnit.bars.every(b => this.parseCSSUnit(b.width) !== undefined);
-
-          if (allBarsHaveHeight) {
-            const parsedHeight = this.parseCSSUnit(bar.width)!;
-            barHeight = parsedHeight;
-            y = cumulativeY;
-            cumulativeY += barHeight;
-          } else {
-            const barHeightInGroup = currentUnitHeight / groupBarCount;
-            y = cumulativeY + barIndex * barHeightInGroup;
-            barHeight = barHeightInGroup;
-          }
-
-          barIndex++;
-          if (barIndex >= groupBarCount) {
-            barIndex = 0;
-            if (!allBarsHaveHeight) {
-              cumulativeY += currentUnitHeight;
-            }
-            cumulativeY += currentGutter / 2;
-            unitIndex++;
-          }
-        } else {
-          y = cumulativeY;
-          barHeight = currentUnitHeight;
-          cumulativeY += currentUnitHeight + currentGutter / 2;
-          barIndex = 0;
-          unitIndex++;
-        }
+        const slot = slots[index];
+        const y = slot.start;
+        const barHeight = slot.size;
 
         const percent = total > 0 ? (Math.abs(bar.value) / total) * 100 : 0;
         const shouldShowValue = this.evaluateShowCondition(bar.showValue, bar.value, percent);
@@ -3294,43 +3307,16 @@ export class Chart extends AxisChart {
     const allNegative = !range.hasPositives;
     const labelsAtTop = !isHorizontal && !isReverse && allNegative;
 
+    // The same traversal the bars are drawn from, so a label can never sit
+    // anywhere other than on its bar.
+    const { slots, units: unitSpans } = this.computeBarLayout(
+      bars, structure, unitSizes, gutterScale, isHorizontal ? padding.top : padding.left);
+
     if (isHorizontal) {
       // Horizontal bars: labels on the left (or right if reverse)
-      let barIndex = 0;
-      let unitIndex = 0;
-      let cumulativeY = padding.top;
-
       return svg`
         ${bars.map((bar, index) => {
-          const currentUnit = structure[unitIndex];
-          const currentUnitHeight = unitSizes[unitIndex];
-          const currentGutter = this.unitGutter(currentUnit, gutterScale);
-          let y: number;
-          let barHeight: number;
-
-          if (barIndex === 0) {
-            cumulativeY += currentGutter / 2;
-          }
-
-          if (currentUnit.isGroup) {
-            const groupBarCount = currentUnit.bars.length;
-            const barHeightInGroup = currentUnitHeight / groupBarCount;
-            y = cumulativeY + barIndex * barHeightInGroup;
-            barHeight = barHeightInGroup;
-
-            barIndex++;
-            if (barIndex >= groupBarCount) {
-              barIndex = 0;
-              cumulativeY += currentUnitHeight + currentGutter / 2;
-              unitIndex++;
-            }
-          } else {
-            y = cumulativeY;
-            barHeight = currentUnitHeight;
-            cumulativeY += currentUnitHeight + currentGutter / 2;
-            barIndex = 0;
-            unitIndex++;
-          }
+          const slot = slots[index];
 
           if (!bar.label || !this.shouldShowLabel(index, bars.length)) return '';
 
@@ -3342,7 +3328,7 @@ export class Chart extends AxisChart {
             <text
               part="label"
               x="${labelX}"
-              y="${y + barHeight / 2 + 4}"
+              y="${slot.center + 4}"
               text-anchor="${isReverse ? 'start' : 'end'}"
               font-size="${this.fontSize(12)}" fill="#666"
             >${bar.label}</text>
@@ -3351,11 +3337,8 @@ export class Chart extends AxisChart {
 
         <!-- Group labels -->
         ${(() => {
-          let cY = padding.top;
           return structure.map((item, uIndex) => {
-            const unitHeight = unitSizes[uIndex];
-            const groupCenterY = cY + unitHeight / 2;
-            cY += unitHeight;
+            const groupCenterY = unitSpans[uIndex].center;
 
             if (!item.isGroup) return '';
 
@@ -3377,41 +3360,9 @@ export class Chart extends AxisChart {
       `;
     } else {
       // Vertical bars: labels at the bottom (or top if reverse)
-      let barIndex = 0;
-      let unitIndex = 0;
-      let cumulativeX = padding.left;
-
       return svg`
         ${bars.map((bar, index) => {
-          const currentUnit = structure[unitIndex];
-          const currentUnitWidth = unitSizes[unitIndex];
-          const currentGutter = this.unitGutter(currentUnit, gutterScale);
-          let x: number;
-          let barWidth: number;
-
-          if (barIndex === 0) {
-            cumulativeX += currentGutter / 2;
-          }
-
-          if (currentUnit.isGroup) {
-            const groupBarCount = currentUnit.bars.length;
-            const barWidthInGroup = currentUnitWidth / groupBarCount;
-            x = cumulativeX + barIndex * barWidthInGroup;
-            barWidth = barWidthInGroup;
-
-            barIndex++;
-            if (barIndex >= groupBarCount) {
-              barIndex = 0;
-              cumulativeX += currentUnitWidth + currentGutter / 2;
-              unitIndex++;
-            }
-          } else {
-            x = cumulativeX;
-            barWidth = currentUnitWidth;
-            cumulativeX += currentUnitWidth + currentGutter / 2;
-            barIndex = 0;
-            unitIndex++;
-          }
+          const slot = slots[index];
 
           if (!bar.label || !this.shouldShowLabel(index, bars.length)) return '';
 
@@ -3423,7 +3374,7 @@ export class Chart extends AxisChart {
           return svg`
             <text
               part="label"
-              x="${x + barWidth / 2}"
+              x="${slot.center}"
               y="${labelY}"
               text-anchor="middle"
               font-size="${this.fontSize(12)}" fill="#666"
@@ -3433,11 +3384,8 @@ export class Chart extends AxisChart {
 
         <!-- Group labels -->
         ${(() => {
-          let cX = padding.left;
           return structure.map((item, uIndex) => {
-            const unitWidth = unitSizes[uIndex];
-            const groupCenterX = cX + unitWidth / 2;
-            cX += unitWidth;
+            const groupCenterX = unitSpans[uIndex].center;
 
             if (!item.isGroup) return '';
 

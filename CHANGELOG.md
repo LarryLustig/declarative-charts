@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Category and group labels misaligned from their bars**
+  - Bar positions and label positions were computed by six separate copies of the same
+    traversal, and the copies had drifted. The label copies never gained the branch that
+    honours an explicit per-bar `width`, so a group of bars with differing widths drew its
+    labels from the group average — **15 units of drift, every label off its bar**, in both
+    orientations
+  - The two group-label copies ignored gutters entirely, so a group label sat off-centre from
+    the group it named on *every* grouped chart — also up to 15 units
+  - All six now derive from a single `computeBarLayout()` traversal, which returns each bar's
+    slot and each unit's true extent. The class of bug is now impossible rather than fixed
+  - Regression tests in `test/component/bar-layout.test.ts` cover both orientations, differing
+    widths, mixed explicit/auto groups, and group centring; verified to fail without the fix
+
 - **Missing values in lines and areas**
   - `value` was `0` by default, so `<dc-point label="Mar">` — what a template emits for a month
     with no data — plotted at zero. The line dived to the axis and the chart asserted the value

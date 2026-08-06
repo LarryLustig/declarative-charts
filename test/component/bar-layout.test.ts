@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { fixture } from './setup';
 import '../../src/chart';
 import '../../src/chart-bar';
+import '../../src/chart-bar-group';
 import { Chart } from '../../src/chart';
 
 /**
@@ -67,5 +68,108 @@ describe('bar layout: width never degenerates', () => {
 
     // 200 bars at the 1-unit floor is 200 units — must still fit a 900-unit chart.
     expect(total).toBeLessThanOrEqual(900);
+  });
+});
+
+/**
+ * Bars and their category labels used to be positioned by four separate copies
+ * of the same traversal, and the copies had drifted: the label ones never gained
+ * the branch that honours an explicit per-bar `width`. A group of bars with
+ * differing widths therefore drew its labels from the group average - measured
+ * at 15 units of drift, every label off its bar. Group labels were positioned by
+ * two further copies that ignored gutters entirely.
+ *
+ * All six now derive from `computeBarLayout()`, so this class of bug is
+ * impossible rather than merely fixed. See REVIEW.md 3.2.
+ */
+describe('bar and label positions come from one traversal', () => {
+  const groupedWithDifferingWidths = `
+    <dc-bar-group label="Q1">
+      <dc-bar value="30" width="20" label="A"></dc-bar>
+      <dc-bar value="50" width="80" label="B"></dc-bar>
+    </dc-bar-group>
+    <dc-bar-group label="Q2">
+      <dc-bar value="40" width="20" label="C"></dc-bar>
+      <dc-bar value="60" width="80" label="D"></dc-bar>
+    </dc-bar-group>`;
+
+  const chartOf = (markup: string, attrs: Record<string, string> = {}) =>
+    fixture<Chart>('dc-chart',
+      { width: '600', height: '400', 'show-value': 'false', ...attrs }, markup);
+
+  /** Bar centres and category-label positions along the category axis. */
+  const positions = (chart: Chart, vertical: boolean) => {
+    const root = chart.shadowRoot!;
+    const bars = Array.from(root.querySelectorAll('rect[part="bar"]'));
+    const labels = Array.from(root.querySelectorAll('text[part="label"]'));
+    return {
+      barCentres: bars.map(b => vertical
+        ? parseFloat(b.getAttribute('x')!) + parseFloat(b.getAttribute('width')!) / 2
+        : parseFloat(b.getAttribute('y')!) + parseFloat(b.getAttribute('height')!) / 2),
+      labelPositions: labels.map(l => vertical
+        ? parseFloat(l.getAttribute('x')!)
+        : parseFloat(l.getAttribute('y')!) - 4),
+      barEdges: bars.map(b => vertical
+        ? [parseFloat(b.getAttribute('x')!), parseFloat(b.getAttribute('x')!) + parseFloat(b.getAttribute('width')!)]
+        : [parseFloat(b.getAttribute('y')!), parseFloat(b.getAttribute('y')!) + parseFloat(b.getAttribute('height')!)]),
+    };
+  };
+
+  for (const [name, attrs, vertical] of [
+    ['vertical', {}, true],
+    ['horizontal', { orientation: 'horizontal' }, false],
+  ] as const) {
+    it(`aligns every category label with its bar (${name}, differing widths)`, async () => {
+      const chart = await chartOf(groupedWithDifferingWidths, attrs);
+      const { barCentres, labelPositions } = positions(chart, vertical);
+
+      expect(barCentres).toHaveLength(4);
+      barCentres.forEach((centre, i) => {
+        expect(labelPositions[i]).toBeCloseTo(centre, 1);
+      });
+    });
+
+    it(`centres each group label over its own group (${name})`, async () => {
+      const chart = await chartOf(groupedWithDifferingWidths, attrs);
+      const { barCentres, labelPositions, barEdges } = positions(chart, vertical);
+
+      // Group labels follow the per-bar labels in document order.
+      const groupLabels = labelPositions.slice(barCentres.length);
+      expect(groupLabels).toHaveLength(2);
+
+      for (let g = 0; g < 2; g++) {
+        const first = barEdges[g * 2][0];
+        const last = barEdges[g * 2 + 1][1];
+        expect(groupLabels[g]).toBeCloseTo((first + last) / 2, 1);
+      }
+    });
+  }
+
+  it('still aligns plain bars with no explicit width', async () => {
+    const chart = await chartOf(`
+      <dc-bar value="30" label="A"></dc-bar>
+      <dc-bar value="50" label="B"></dc-bar>
+      <dc-bar value="20" label="C"></dc-bar>`);
+    const { barCentres, labelPositions } = positions(chart, true);
+
+    expect(barCentres).toHaveLength(3);
+    barCentres.forEach((centre, i) => expect(labelPositions[i]).toBeCloseTo(centre, 1));
+  });
+
+  it('aligns when only some groups use explicit widths', async () => {
+    const chart = await chartOf(`
+      <dc-bar-group label="Q1">
+        <dc-bar value="30" width="20" label="A"></dc-bar>
+        <dc-bar value="50" width="80" label="B"></dc-bar>
+      </dc-bar-group>
+      <dc-bar-group label="Q2">
+        <dc-bar value="40" label="C"></dc-bar>
+        <dc-bar value="60" label="D"></dc-bar>
+      </dc-bar-group>
+      <dc-bar value="25" label="E"></dc-bar>`);
+    const { barCentres, labelPositions } = positions(chart, true);
+
+    expect(barCentres).toHaveLength(5);
+    barCentres.forEach((centre, i) => expect(labelPositions[i]).toBeCloseTo(centre, 1));
   });
 });

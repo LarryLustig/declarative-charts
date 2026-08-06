@@ -336,7 +336,29 @@ protected updated() {
 Then delete the manual `requestUpdate()` calls from the integration tests, so reactivity is
 genuinely asserted rather than papered over.
 
-### 3.2 Category labels misalign from bars when bars carry explicit `width`
+### 3.2 Category labels misalign from bars when bars carry explicit `width` — ✅ FIXED
+
+> **Fixed**, and the finding was understated in two ways.
+>
+> First, the trigger is narrower than described: bars with *equal* explicit widths still line up,
+> because the group average happens to equal each bar's width. The drift needs bars of
+> **differing** widths within a group. Measured at **15 units** in both orientations.
+>
+> Second, there were **six** copies of the walk, not four. Two more sit in the group-label
+> loops, and those ignore gutters entirely — so a group label sat off-centre from the group it
+> named on *every* grouped chart, again by up to 15 units. That one was live for far more users
+> than the explicit-width case.
+>
+> All six now derive from `computeBarLayout()`, which walks once and returns each bar's slot
+> plus each unit's true extent. Both drifts measure 0.0 units afterwards. The extraction is
+> orientation-agnostic — the traversal only ever moves along the category axis — so vertical and
+> horizontal share it rather than having a copy each.
+>
+> Five regression tests in `test/component/bar-layout.test.ts`, verified to fail without the
+> fix. All 23 visual baselines unchanged, because the existing grouped fixture uses auto-width
+> bars where the old and new code agree — which is precisely why this survived so long.
+>
+> Original finding below.
 
 `renderVerticalBars` (`chart.ts:2155-2298`) and `renderHorizontalBars` (`chart.ts:2300-2442`)
 are ~85% identical. The same group-walking traversal is copied a **third and fourth time** into
