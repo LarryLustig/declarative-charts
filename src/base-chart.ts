@@ -252,28 +252,40 @@ export abstract class BaseChart extends LitElement {
 
   /**
    * Controls logging level for capturing calculation details during rendering.
-   * - 'false' (default): No logging, best performance
+   * - 'false': No logging at all
    * - 'error': Only errors (calculation failures, invalid inputs)
-   * - 'warning': Warnings and errors (fallbacks used, deprecated attributes)
+   * - 'warning' (default): Warnings and errors (fallbacks used, deprecated attributes)
    * - 'info' or 'true': All messages including derivation details
+   *
+   * Defaults to 'warning' so that misconfiguration is visible. It used to be
+   * 'false', which meant a chart could silently draw the wrong thing: a typo in
+   * `palette` fell back to generated colours, an unparseable value became 0, and
+   * the DC-coded warning explaining why went nowhere. Silent misconfiguration is
+   * the worst failure mode for a declarative API, because the markup *looks*
+   * right.
+   *
+   * The verbose derivation logging stays off at this level, so the performance
+   * characteristics of the default are unchanged.
    */
   @property({ type: String })
-  logging: 'false' | 'error' | 'warning' | 'info' | 'true' = 'false';
+  logging: 'false' | 'error' | 'warning' | 'info' | 'true' = 'warning';
 
   /**
    * Controls which log messages are also echoed to the browser console.
-   * This is independent of the `logging` attribute which controls capture.
-   * - 'none' (default): No console output
+   * - 'none': No console output
    * - 'error': Echo errors to console.error()
-   * - 'warning': Echo warnings and errors to console.warn()/error()
+   * - 'warning' (default): Echo warnings and errors to console.warn()/error()
    * - 'info': Echo all messages to console.log()/warn()/error()
    *
-   * Note: A message must first pass the `logging` level filter before
-   * the `console-log` filter is applied. Set `logging="info"` to capture
-   * all messages, then use `console-log` to control which appear in DevTools.
+   * A message must first pass the `logging` level filter before this one is
+   * applied, so `console-log` can only narrow what `logging` captured. To see
+   * derivation details in DevTools, set both: `logging="info" console-log="info"`.
+   *
+   * Set `console-log="none"` to silence a chart you know is misconfigured, or
+   * `logging="false"` to switch the whole system off.
    */
   @property({ type: String, attribute: 'console-log' })
-  consoleLog: 'none' | 'error' | 'warning' | 'info' = 'none';
+  consoleLog: 'none' | 'error' | 'warning' | 'info' = 'warning';
 
   /**
    * Log entries captured during the last render cycle.
@@ -886,17 +898,25 @@ export abstract class BaseChart extends LitElement {
    * @returns Identifier string like "dc-chart#my-id" or "dc-chart \"Sales\""
    */
   private getConsoleIdentifier(): string {
-    const tagName = this.tagName.toLowerCase();
-    if (this.id) {
-      return `${tagName}#${this.id}`;
+    // This label is cosmetic, so it must never be the reason a render fails.
+    // An instance constructed directly rather than upgraded from markup has no
+    // tagName and no DOM methods; with console echo now on by default, throwing
+    // here would take the whole render with it.
+    try {
+      const tagName = this.tagName?.toLowerCase() ?? 'chart';
+      if (this.id) {
+        return `${tagName}#${this.id}`;
+      }
+      const title = this.getTitle();
+      if (title) {
+        // Truncate long titles for console readability
+        const truncatedTitle = title.length > 30 ? title.substring(0, 27) + '...' : title;
+        return `${tagName} "${truncatedTitle}"`;
+      }
+      return tagName;
+    } catch {
+      return 'chart';
     }
-    const title = this.getTitle();
-    if (title) {
-      // Truncate long titles for console readability
-      const truncatedTitle = title.length > 30 ? title.substring(0, 27) + '...' : title;
-      return `${tagName} "${truncatedTitle}"`;
-    }
-    return tagName;
   }
 
   /**
@@ -967,7 +987,11 @@ export abstract class BaseChart extends LitElement {
 
       // Also echo to browser console if configured
       if (this.shouldEchoToConsole(level)) {
-        this.echoToConsole(level, path, message, value, code);
+        const key = `${level}|${code ?? ''}|${path}|${message}`;
+        if (!this.echoedMessages.has(key)) {
+          this.echoedMessages.add(key);
+          this.echoToConsole(level, path, message, value, code);
+        }
       }
     }
   }
@@ -1014,6 +1038,21 @@ export abstract class BaseChart extends LitElement {
     this.endConsoleGroup();
     this.logEntries = [];
   }
+
+  /**
+   * Messages already echoed to the console by this chart.
+   *
+   * Scoped to the element's lifetime rather than to a render. One
+   * misconfiguration is hit from several places - palette resolution runs for
+   * fills and again for strokes - and charts commonly render more than once, so
+   * a single typo produced a stream of identical warnings. Repeating an
+   * identical message tells the developer nothing new; fixing the markup stops
+   * it at the source.
+   *
+   * Every entry is still recorded for `<dc-log-console>`. Only the console echo
+   * is deduplicated, because that is the part a developer reads.
+   */
+  private echoedMessages = new Set<string>();
 
   // ============================================================================
   // Color System Utilities

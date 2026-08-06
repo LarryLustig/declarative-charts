@@ -135,7 +135,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     without a cast. `ChartInteractionDetail` and `ChartRenderDetail` are exported
   - Documented in **API.md → Events**, with a live demo in `examples/interactive.html`
 
+### Changed
+
+- **Warnings and errors now appear in the browser console by default**
+  - `logging` defaults to `'warning'` (was `'false'`) and `console-log` to `'warning'`
+    (was `'none'`), so the DC### system finally produces output without opting in
+  - Previously the entire diagnostic system was silent unless a developer already suspected a
+    problem and knew to enable it. That is how the palette documentation came to name 18
+    palettes that do not exist, with 44 references to them in the shipped examples — an unknown
+    `palette` falls back to generated colours, so nothing could contradict the docs
+  - An unknown palette name now surfaces as
+    `[DC201] colors.palette: Palette "tableau10" not found` instead of silently
+    drawing auto-generated colours
+  - Verbose `info` derivation logging still requires opting in, so the default costs nothing
+  - Console echo is **deduplicated per element**: one misconfiguration is reached from several
+    code paths and charts re-render, which would otherwise produce a stream of identical
+    warnings. Every entry is still captured for `<dc-log-console>`
+  - `console-log="none"` silences one chart; `logging="false"` switches the system off entirely
+  - Verified that all 23 visual fixtures and the examples pages emit no warnings, so ordinary
+    charts stay quiet
+
 ### Fixed
+
+- **A diagnostic could break a render**
+  - `getConsoleIdentifier()` assumed `tagName` and `querySelector` were available. Harmless
+    while console echo was off; with it on by default, an instance constructed directly rather
+    than upgraded from markup threw during render. The label is cosmetic and is now fail-safe
 
 - **Documented palette names were largely fictional**
   - CLAUDE.md and API.md both listed 25 built-in palettes, of which **18 did not exist**

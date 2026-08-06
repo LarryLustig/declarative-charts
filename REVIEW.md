@@ -1049,7 +1049,35 @@ and `"100"` thresholds (`converters.ts:24`), but on `<dc-legend>` it's `booleanC
 (`chart-legend.ts:142-149`), so `<dc-legend show-value="10%">` silently evaluates to `true`.
 One attribute name, two meanings.
 
-### 6.3 Diagnostics are invisible by default
+### 6.3 Diagnostics are invisible by default — ✅ FIXED
+
+> **Fixed.** `logging` now defaults to `'warning'` and `console-log` to `'warning'`, so warnings
+> and errors reach the console without opting in. Verbose `info` logging still requires asking,
+> so the default costs nothing.
+>
+> This section called silent misconfiguration "the worst failure mode for a declarative API".
+> The palette episode is the proof: the docs named 18 palettes that do not exist and the shipped
+> examples referenced them **44 times**, for months, because an unknown `palette` falls back to
+> generated colours in silence. Nothing in the system could contradict the documentation. That
+> is not a coincidence of two bugs — the second was *caused* by the first.
+>
+> Worth noting the raise was never missing. `DC201` was already being logged correctly at
+> `color-resolver.ts:456`, with a good message. Only the visibility was broken, which is a
+> useful reminder that "add an error" and "make the error reach someone" are different tasks.
+>
+> Two refinements the change forced:
+>
+> - **Console echo is deduplicated per element.** One misconfiguration is reached from several
+>   code paths (palette resolution runs for fills and again for strokes) and charts re-render, so
+>   a single typo produced a stream of identical warnings. Entries are still captured in full for
+>   `<dc-log-console>`; only the echo is deduplicated.
+> - **A diagnostic must never break a render.** Turning echo on exposed
+>   `getConsoleIdentifier()` assuming `tagName` and `querySelector` exist — it threw for an
+>   instance constructed directly rather than upgraded from markup. The label is cosmetic and is
+>   now fail-safe.
+>
+> Verified that all 23 visual fixtures and the examples pages emit no warnings, so ordinary
+> charts stay quiet. 12 tests in `test/component/diagnostics.test.ts`. Original finding below.
 
 `logging` defaults to `'false'` (`base-chart.ts:209`), `console-log` to `'none'` (`:224`), and
 `logError()` routes everything through `log()` (`:900-907`). The entire DC001–DC499 system —

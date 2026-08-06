@@ -196,8 +196,8 @@ All chart components (`<dc-chart>`, `<dc-pie-chart>`, `<dc-funnel-chart>`, `<dc-
 - `auto-popup` (boolean) - When present or `true`, automatically shows hover popups with label, value, and percentage on all chart elements. See [Auto-Popups](#auto-popups) for details.
 
 ### Logging
-- `logging` (string) - Controls log capture level: `'false'` (default, no logging), `'error'`, `'warning'`, `'info'`, or `'true'` (same as `'info'`). See [Logging & Debugging](#logging--debugging) for details.
-- `console-log` (string) - Controls which captured logs are echoed to browser console: `'none'` (default), `'error'`, `'warning'`, or `'info'`. See [Browser Console Output](#browser-console-output) for details.
+- `logging` (string) - Controls log capture level: `'warning'` (default), `'false'` (off), `'error'`, `'info'`, or `'true'` (same as `'info'`). See [Logging & Debugging](#logging--debugging) for details.
+- `console-log` (string) - Controls which captured logs are echoed to browser console: `'warning'` (default), `'none'` (silent), `'error'`, or `'info'`. See [Browser Console Output](#browser-console-output) for details.
 
 ### Animation
 - `animations` (string) - Enable entry animations when the chart first renders. See [Animations](#animations) for details.
@@ -2388,7 +2388,26 @@ Add the `logging` attribute to any chart:
 
 ### Browser Console Output
 
-By default, log messages are only captured internally and displayed via `<dc-log-console>`. To also echo messages to the browser's developer console, use the `console-log` attribute:
+**Warnings and errors appear in the browser console by default.** A chart that is
+misconfigured says so, rather than quietly drawing something wrong — a typo in
+`palette` used to fall back to auto-generated colours in silence:
+
+```
+[DC201] colors.palette: Palette "tableau10" not found (no DOM element or built-in with that name)
+```
+
+Each distinct message is echoed once per chart, however many times it re-renders.
+Verbose derivation logging stays off unless you ask for it.
+
+To silence a chart you know about, or to widen what you see, use `console-log`:
+
+```html
+<dc-chart console-log="none">...</dc-chart>       <!-- silence this chart -->
+<dc-chart logging="false">...</dc-chart>          <!-- switch the system off -->
+<dc-chart logging="info" console-log="info">...</dc-chart>  <!-- everything -->
+```
+
+To echo messages at a different level than the default, use the `console-log` attribute:
 
 ```html
 <dc-chart logging="info" console-log="warning" width="600" height="400">

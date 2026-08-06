@@ -259,7 +259,13 @@ Two constraints when working on this:
 
 In tests, `elementUpdated()` yields to a macrotask before awaiting `updateComplete`, because observer records arrive after `updateComplete` would otherwise resolve. Do not "simplify" it back to a bare `await updateComplete` — mutation tests will pass against broken behaviour.
 
-**Logging**: `this.log(level, path, message, value?)` records calculations. Set `logging` attribute to enable.
+**Logging**: `this.log(level, path, message, value?)` records calculations. `logging` defaults to `'warning'` and `console-log` to `'warning'`, so **warnings and errors reach the browser console by default**; verbose `info` derivation logging still requires opting in.
+
+Both previously defaulted to off, which meant the entire DC### system produced no output unless a developer already suspected a problem. That is how the documented palette list came to name 18 palettes that do not exist, with 44 references to them in the shipped examples: an unknown `palette` falls back to generated colours, so nothing could contradict the docs. **Silent misconfiguration is the worst failure mode for a declarative API, because the markup looks right.**
+
+Console echo is deduplicated per element for the element's lifetime — one misconfiguration is often reached from several code paths, and charts re-render. Every entry is still captured for `<dc-log-console>`; only the echo is deduplicated.
+
+`getConsoleIdentifier()` is wrapped in try/catch: the label is cosmetic, and now that echo is on by default a throw there would take the render with it.
 
 **Error Handling**: Use structured error codes for all warnings and errors. See [Error Handling System](#error-handling-system) section below.
 
