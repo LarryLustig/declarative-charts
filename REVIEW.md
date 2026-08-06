@@ -924,7 +924,39 @@ computed layout accessor). For a large fraction of potential users the front doo
 
 Not broken, but expensive to change after publishing.
 
-### 5.1 `BaseChart` is a 3,145-line god class that knows its own subclasses
+### 5.1 `BaseChart` is a god class — 🔶 IN PROGRESS (1 of ~5 extracted)
+
+> **`ColorResolver` extracted** — `src/color-resolver.ts`, 551 lines. `base-chart.ts` is down
+> from 3,724 to 3,386, and colour resolution is now readable and testable on its own.
+>
+> Note the file had grown *during* this session, from the 3,145 below to 3,724, because every
+> feature added went into `BaseChart` — events, CSS parts, both observers, the memo cache, text
+> scaling, container fit, empty/loading. Each was individually reasonable; collectively they made
+> this finding more true, not less.
+>
+> Method: 42 characterization tests written and committed **before** the refactor, pinning
+> current behaviour rather than intended behaviour. That was not ceremony. Five of my initial
+> expectations about the colour system were simply wrong, and the first version of the extraction
+> silently removed a seam — `getContrastingTextColor` stopped routing through the overridable
+> `getLuminance` — which a *pre-existing* test caught, not one of my new ones. The seam is now
+> explicit via `contrastForLuminance()`.
+>
+> No API change: `BaseChart` holds the resolver behind a lazy getter and delegates, so subclasses
+> call exactly what they always did. It is built with an explicit `ColorHost` adapter rather than
+> `this`, because `log` and `getMeasureContext` are not public and widening them would enlarge
+> the API this extraction exists to shrink.
+>
+> Deliberately left behind: pattern registration and `<defs>` rendering — a separate
+> responsibility that merely lived in the same region of the file.
+>
+> Still to extract, in rough order of payoff: `KeyboardNavController` (~265 lines),
+> `ChartLogger` (~165), `PopupController` (~100), `SvgExporter`. Both abstraction leaks named
+> below — the `orientation` cast and the `tagName` sniffing in `getAnimatableChartType()` — are
+> **still open**.
+>
+> Original finding below.
+
+### 5.1 (original) `BaseChart` is a 3,145-line god class that knows its own subclasses
 
 It owns padding math, colour/palette resolution, the pattern registry, luminance/contrast, text
 measurement, logging plus console echo, error codes, popups, title, legend, accessibility

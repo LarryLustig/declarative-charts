@@ -24,6 +24,8 @@ export type {
   ChartRenderDetail
 } from './base-chart.js';
 export { AxisChart } from './axis-chart.js';
+export { ColorResolver } from './color-resolver.js';
+export type { ColorHost } from './color-resolver.js';
 
 // Export error handling
 export { ErrorCode, formatErrorMessage, getErrorByCode, createErrorLog } from './errors.js';

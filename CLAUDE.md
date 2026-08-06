@@ -188,6 +188,14 @@ Use `getPaletteColors(count, colorType)` in chart code to resolve palette colors
 
 **Hidden Attribute**: Standard HTML `hidden` on data elements (`<dc-line>`, `<dc-bar>`, etc.) hides them. Toggling it re-renders the chart automatically — see **Child Reactivity** below.
 
+**Colour System**: Lives in `src/color-resolver.ts`, not `BaseChart`. `ColorResolver` owns palette lookup, contrast, and the priority between an element's own colour, a matched palette entry, a positional palette colour, and a generated fallback.
+
+`BaseChart` holds it behind a lazy `colors` getter and its existing `protected` methods delegate, so subclasses call exactly what they always did. It is constructed with an explicit `ColorHost` adapter rather than `this`, because `log` and `getMeasureContext` are not public and widening them would enlarge the API the extraction exists to shrink. The adapter uses getters so values stay live.
+
+**One seam is deliberate:** `BaseChart.getContrastingTextColor()` routes through `this.getLuminance()` and then `colors.contrastForLuminance()`, rather than calling the resolver directly — so a subclass overriding `getLuminance` still changes the contrast decision, as it did before. An existing test caught that when the first version of the extraction removed it.
+
+Pattern registration and `<defs>` rendering stayed in `BaseChart`: a separate responsibility that merely lived in the same region. `test/component/color-resolution.test.ts` holds 42 characterization tests pinning colour behaviour — treat a change there as a behaviour change, not a refactor detail.
+
 **Empty & Loading States**: `BaseChart.renderPlaceholder()` returns a placeholder instead of the plot when `loading` is set or `getDataElementCount()` is 0. `render()` then skips `renderChart()` *and* the focus indicator, and drops `tabindex` to -1 — axes, grid and legend all describe data, so drawing them around nothing is noise. The title is deliberately kept.
 
 `getDataElementCount()` defaults to the focusable count, but **`Chart` must override it**: areas are not focusable, so an area-only chart would otherwise report as empty. Any new chart type whose data is not all focusable needs the same override.

@@ -137,6 +137,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Colour resolution extracted from `BaseChart` into `ColorResolver`**
+  - `BaseChart` had accumulated colour resolution alongside logging, popups, keyboard navigation,
+    accessibility, layout and SVG export. Colour is the first of those responsibilities to move
+    out: `src/color-resolver.ts`, 551 lines, with `base-chart.ts` down from 3,724 to 3,386
+  - No API change. `BaseChart` holds the resolver behind a lazy getter and its existing
+    `protected` methods delegate, so subclasses call exactly what they always did
+  - Constructed with an explicit `ColorHost` adapter rather than `this`, because `log` and
+    `getMeasureContext` are not public and widening them would enlarge the API the extraction
+    exists to shrink
+  - `ColorResolver` and `ColorHost` are exported for anyone building on the library
+  - 42 characterization tests were written and committed **before** the refactor
+    (`test/component/color-resolution.test.ts`), so any behaviour change would surface
+
 - **Render is no longer quadratic in datapoint count — 1,000 bars went from 44.6s to 0.29s**
   - Profiling (V8 CPU profile + call counting, not inspection) found that `shouldShowLabel()` is
     called once per label from inside the render loop, and each call reached
