@@ -598,7 +598,28 @@ nothing useful.
 - Reserve layout while empty — don't collapse to zero height and cause layout shift when data
   lands.
 
-### 4.3 Events
+### 4.3 Events — ✅ FIXED
+
+> **Fixed.** `dc-click`, `dc-mouseenter`, `dc-mouseleave` on data elements, plus `dc-render`
+> after each draw. Emitted through `BaseChart.emitInteraction()` and wired into all 24 existing
+> interaction handlers across the four chart types.
+>
+> Dispatched from the **authored element** (`<dc-bar>`) rather than the chart, so a listener can
+> attach directly to it — those are light-DOM children, so the event still bubbles to the chart
+> and the document. `composed: true` as this section warned is non-negotiable.
+>
+> `dc-click` is cancelable, and `preventDefault()` suppresses both the popup and `href`
+> navigation (the latter by cancelling the originating MouseEvent, since the shape sits inside
+> an `<a>` wrapper). `percent` is a decimal, matching the library convention.
+>
+> `PointData`, `BubbleData` and the funnel/stage data structures gained an `element` reference,
+> which they had lacked — without it the payload would have been inconsistent across chart types.
+>
+> Names are declared on `HTMLElementEventMap` so `event.detail` types without a cast.
+> Documented in **API.md → Events**; live demo in `examples/interactive.html`, verified in
+> Chromium with real pointer input. 10 tests in `test/integration/events.test.ts`.
+>
+> Original finding below.
 
 `grep -rn "dispatchEvent\|CustomEvent" src/` returns **nothing**. Not one event in 20,677 lines.
 

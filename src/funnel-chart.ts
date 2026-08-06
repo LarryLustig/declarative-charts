@@ -124,6 +124,7 @@ export class FunnelChart extends BaseChart {
       const effectiveFill = stage.getEffectiveFill();
 
       return {
+        element: stage,
         value: stage.value,
         label: stage.label,
         fill: effectiveFill || undefined,
@@ -841,10 +842,29 @@ export class FunnelChart extends BaseChart {
     return `<strong>${stage.label}</strong><br>Value: ${stage.value}<br>${percentage}%`;
   }
 
+  private stageDetail(
+    stage: { element?: Element; label: string; value: number },
+    index: number,
+    stages: Array<{ value: number }>
+  ) {
+    // Stages are a funnel: share is measured against the first (widest) stage.
+    const base = stages.length > 0 ? Math.abs(stages[0].value) : 0;
+    return {
+      element: stage.element ?? null,
+      label: stage.label,
+      value: stage.value,
+      percent: this.shareOf(stage.value, base),
+      index,
+      seriesLabel: null,
+      seriesIndex: null
+    };
+  }
+
   private handleStageMouseEnter(e: MouseEvent, index: number) {
     const stages = this.getStages();
     const stage = stages[index];
 
+    this.emitInteraction('dc-mouseenter', this.stageDetail(stage, index, stages), e);
     // Explicit popup takes precedence over auto-popup
     if (stage.popup?.trigger === 'hover') {
       this.showPopup(stage.popup.content, e.clientX, e.clientY);
@@ -857,7 +877,9 @@ export class FunnelChart extends BaseChart {
   }
 
   private handleStageMouseLeave(index: number) {
-    const stage = this.getStages()[index];
+    const stages = this.getStages();
+    const stage = stages[index];
+    this.emitInteraction('dc-mouseleave', this.stageDetail(stage, index, stages));
 
     // Hide popup if it's a hover-triggered popup (explicit or auto) and not clicked
     const isHoverPopup = stage.popup?.trigger === 'hover' ||
@@ -869,7 +891,9 @@ export class FunnelChart extends BaseChart {
   }
 
   private handleStageClick(e: MouseEvent, index: number) {
-    const stage = this.getStages()[index];
+    const stages = this.getStages();
+    const stage = stages[index];
+    if (!this.emitInteraction('dc-click', this.stageDetail(stage, index, stages), e)) return;
 
     // Only explicit click-triggered popups respond to clicks
     if (stage.popup?.trigger === 'click') {

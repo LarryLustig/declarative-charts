@@ -191,6 +191,7 @@ export class StageChart extends BaseChart {
       const effectiveFill = stage.getEffectiveFill();
 
       return {
+        element: stage,
         value: stage.value,
         label: stage.label,
         fill: effectiveFill || undefined,
@@ -1425,6 +1426,22 @@ export class StageChart extends BaseChart {
     return content;
   }
 
+  private stageDetail(
+    stage: { element?: Element; label: string; value: number },
+    index: number,
+    total: number
+  ) {
+    return {
+      element: stage.element ?? null,
+      label: stage.label,
+      value: stage.value,
+      percent: this.shareOf(stage.value, total),
+      index,
+      seriesLabel: null,
+      seriesIndex: null
+    };
+  }
+
   private handleStageMouseEnter(e: MouseEvent, index: number) {
     if (!this.cachedLayout) return;
 
@@ -1432,6 +1449,7 @@ export class StageChart extends BaseChart {
     if (!stage) return;
 
     const total = this.cachedLayout.total;
+    this.emitInteraction('dc-mouseenter', this.stageDetail(stage, index, total), e);
 
     if (stage.popup?.trigger === 'hover') {
       this.showPopup(stage.popup.content, e.clientX, e.clientY);
@@ -1451,6 +1469,7 @@ export class StageChart extends BaseChart {
     const stage = this.cachedLayout.stages[index];
     if (!stage) return;
 
+    this.emitInteraction('dc-mouseleave', this.stageDetail(stage, index, this.cachedLayout.total));
     const isHoverPopup = stage.popup?.trigger === 'hover' ||
       (!stage.popup && this.shouldShowAutoPopup(stage.autoPopup));
 
@@ -1465,6 +1484,7 @@ export class StageChart extends BaseChart {
     const stage = this.cachedLayout.stages[index];
     if (!stage) return;
 
+    if (!this.emitInteraction('dc-click', this.stageDetail(stage, index, this.cachedLayout.total), e)) return;
     if (stage.popup?.trigger === 'click') {
       if (this.clickedStageIndex === index) {
         this.hidePopup();

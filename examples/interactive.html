@@ -379,6 +379,41 @@
         </dc-chart>
     </div>
 
+    <div class="example">
+        <h2>Interaction Events</h2>
+        <p>
+            Charts emit <code>dc-click</code>, <code>dc-mouseenter</code>, <code>dc-mouseleave</code>
+            and <code>dc-render</code>. Events are dispatched from the element in your markup
+            (the <code>&lt;dc-bar&gt;</code>) and bubble up, so you can listen on the element, the
+            chart, or the document. Click and hover the bars below.
+        </p>
+
+        <pre><code>&lt;dc-chart id="events-demo"&gt;
+  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;
+
+&lt;script&gt;
+  document.querySelector('#events-demo')
+    .addEventListener('dc-click', (event) =&gt; {
+      const { label, value, percent } = event.detail;
+      // percent is a decimal: 0.25 means 25%
+      showDetail(label, value, percent);
+    });
+&lt;/script&gt;</code></pre>
+
+        <dc-chart id="events-demo" width="600" height="400">
+            <dc-title>Monthly Sales</dc-title>
+            <dc-bar value="120" fill="#4CAF50" label="Jan"></dc-bar>
+            <dc-bar value="180" fill="#2196F3" label="Feb"></dc-bar>
+            <dc-bar value="95" fill="#FF9800" label="Mar"></dc-bar>
+            <dc-bar value="210" fill="#9C27B0" label="Apr"></dc-bar>
+        </dc-chart>
+
+        <p><strong>Selected:</strong> <span id="events-selected">nothing yet - click a bar</span></p>
+        <p><strong>Event log</strong> (most recent first):</p>
+        <pre id="events-log" style="max-height: 180px; overflow-y: auto;">waiting for events...</pre>
+    </div>
+
     <script type="module" src="../src/index.ts"></script>
     <script src="examples.js"></script>
 
@@ -420,6 +455,35 @@
                 bar.setAttribute('color', colors[Math.floor(Math.random() * colors.length)]);
             });
         }
+
+        // ------------------------------------------------------------------
+        // Interaction events
+        // ------------------------------------------------------------------
+        const eventsChart = document.getElementById('events-demo');
+        const selectedEl = document.getElementById('events-selected');
+        const logEl = document.getElementById('events-log');
+        const logLines = [];
+
+        function logEvent(name, detail) {
+            const value = detail.value === null ? '-' : detail.value;
+            const percent = detail.percent === null ? '-' : (detail.percent * 100).toFixed(1) + '%';
+            logLines.unshift(`${name.padEnd(14)} label=${String(detail.label).padEnd(6)} value=${String(value).padEnd(6)} percent=${percent}`);
+            logEl.textContent = logLines.slice(0, 12).join('\n');
+        }
+
+        eventsChart.addEventListener('dc-click', (event) => {
+            const { label, value, percent } = event.detail;
+            selectedEl.textContent = `${label} - ${value} (${(percent * 100).toFixed(1)}% of total)`;
+            logEvent('dc-click', event.detail);
+        });
+
+        eventsChart.addEventListener('dc-mouseenter', (event) => logEvent('dc-mouseenter', event.detail));
+        eventsChart.addEventListener('dc-mouseleave', (event) => logEvent('dc-mouseleave', event.detail));
+
+        eventsChart.addEventListener('dc-render', (event) => {
+            logEvent('dc-render', { label: '(chart)', value: event.detail.count, percent: null });
+        });
+
     </script>
 </body>
 </html>

@@ -188,6 +188,10 @@ Use `getPaletteColors(count, colorType)` in chart code to resolve palette colors
 
 **Hidden Attribute**: Standard HTML `hidden` on data elements (`<dc-line>`, `<dc-bar>`, etc.) hides them. Toggling it re-renders the chart automatically — see **Child Reactivity** below.
 
+**Events**: Charts emit `dc-click`, `dc-mouseenter`, `dc-mouseleave` (payload `ChartInteractionDetail`) and `dc-render` (`ChartRenderDetail`). Emitted via `BaseChart.emitInteraction()`, which dispatches from the *authored* element (`<dc-bar>`) when one is available so consumers can listen on it directly; those are light-DOM children, so the event still bubbles to the chart. `composed: true` is required — without it the event dies at the shadow boundary.
+
+`dc-click` is cancelable; `emitInteraction()` returns `false` when cancelled and the caller must skip its default behaviour, which also calls `preventDefault()` on the originating MouseEvent to stop `href` navigation. Each chart builds its payload in a small `*Detail()` helper (`barDetail`, `sliceDetail`, `stageDetail`, …) — add one when adding a chart type. `percent` is a **decimal** (0.25 = 25%), matching the library's percent convention, and `null` rather than 0 when a share is undefined. Event names are declared on `HTMLElementEventMap` in `base-chart.ts` so consumers get a typed `detail` without a cast.
+
 **Child Reactivity**: `BaseChart` watches its own light-DOM subtree with a `MutationObserver` (`observeChildren()`), so any change to child elements — attributes, `hidden`, additions, removals, text content, innerHTML swaps — triggers a re-render. Callers never need `requestUpdate()` for markup changes.
 
 Two constraints when working on this:

@@ -105,6 +105,7 @@ interface FlattenedBar extends BarData {
 // ============================================================================
 
 interface PointData {
+  element?: ChartPoint;
   value: number;
   label: string;
   fill?: string;
@@ -183,6 +184,7 @@ interface AreaData {
 // ============================================================================
 
 interface BubbleData {
+  element?: ChartBubble;
   value: number;
   sizeValue: number;
   label: string;
@@ -892,6 +894,7 @@ export class Chart extends AxisChart {
           const shape = point.hasAttribute('shape') ? point.shape : linePointShape;
           const effectiveFill = point.getEffectiveFill();
           return {
+            element: point,
             value: point.value,
             label: point.label,
             fill: effectiveFill || undefined,
@@ -1092,6 +1095,7 @@ export class Chart extends AxisChart {
       const passthroughAttrs = bubble.getPassthroughAttributes(knownAttrs);
 
       return {
+        element: bubble,
         value: bubble.value,
         sizeValue: bubble.sizeValue,
         label: bubble.label,
@@ -3446,9 +3450,91 @@ export class Chart extends AxisChart {
   // Bar Event Handlers
   // ============================================================================
 
+  // ==========================================================================
+  // Interaction event details
+  // ==========================================================================
+
+  private barDetail(bar: FlattenedBar, index: number, bars: FlattenedBar[]) {
+    const total = bars.reduce((sum, b) => sum + Math.abs(b.value), 0);
+    return {
+      element: bar.element ?? null,
+      label: bar.label,
+      value: bar.value,
+      percent: this.shareOf(bar.value, total),
+      index,
+      seriesLabel: bar.groupLabel ?? null,
+      seriesIndex: bar.groupIndex ?? null
+    };
+  }
+
+  private segmentDetail(
+    segment: { element?: Element; label: string; value: number },
+    segmentIndex: number,
+    bar: FlattenedBar,
+    barIndex: number
+  ) {
+    const total = (bar.segments ?? []).reduce((sum, sg) => sum + Math.abs(sg.value), 0);
+    return {
+      element: segment.element ?? null,
+      label: segment.label,
+      value: segment.value,
+      percent: this.shareOf(segment.value, total),
+      index: segmentIndex,
+      seriesLabel: bar.label,
+      seriesIndex: barIndex
+    };
+  }
+
+  private lineDetail(line: LineData, lineIndex: number) {
+    return {
+      element: line.element ?? null,
+      label: line.label,
+      // A line as a whole has no single value.
+      value: null,
+      percent: null,
+      index: lineIndex,
+      seriesLabel: null,
+      seriesIndex: null
+    };
+  }
+
+  private pointDetail(
+    point: PointData,
+    pointIndex: number,
+    line: LineData,
+    lineIndex: number,
+    lines: LineData[]
+  ) {
+    const total = lines.reduce(
+      (sum, l) => sum + l.points.reduce((s, pt) => s + Math.abs(pt.value), 0), 0);
+    return {
+      element: point.element ?? null,
+      label: point.label,
+      value: point.value,
+      percent: this.shareOf(point.value, total),
+      index: pointIndex,
+      seriesLabel: line.label,
+      seriesIndex: lineIndex
+    };
+  }
+
+  private bubbleDetail(bubble: BubbleData, index: number, bubbles: BubbleData[]) {
+    const total = bubbles.reduce((sum, b) => sum + Math.abs(b.value), 0);
+    return {
+      element: bubble.element ?? null,
+      label: bubble.label,
+      value: bubble.value,
+      percent: this.shareOf(bubble.value, total),
+      index,
+      seriesLabel: null,
+      seriesIndex: null
+    };
+  }
+
   private handleBarMouseEnter(e: MouseEvent, index: number) {
     const bars = this.getFlattenedBars();
     const bar = bars[index];
+    this.emitInteraction('dc-mouseenter', this.barDetail(bar, index, bars), e);
     if (bar.popup?.trigger === 'hover') {
       this.showPopup(bar.popup.content, e.clientX, e.clientY);
     } else if (!bar.popup && this.shouldShowAutoPopup(bar.autoPopup)) {
@@ -3461,6 +3547,7 @@ export class Chart extends AxisChart {
   private handleBarMouseLeave(index: number) {
     const bars = this.getFlattenedBars();
     const bar = bars[index];
+    this.emitInteraction('dc-mouseleave', this.barDetail(bar, index, bars));
     const isHoverPopup = bar.popup?.trigger === 'hover' || (!bar.popup && this.shouldShowAutoPopup(bar.autoPopup));
     if (isHoverPopup && this.clickedBarIndex !== index) {
       this.hidePopup();
@@ -3470,6 +3557,7 @@ export class Chart extends AxisChart {
   private handleBarClick(e: MouseEvent, index: number) {
     const bars = this.getFlattenedBars();
     const bar = bars[index];
+    if (!this.emitInteraction('dc-click', this.barDetail(bar, index, bars), e)) return;
     if (bar.popup?.trigger === 'click') {
       if (this.clickedBarIndex === index) {
         this.hidePopup();
@@ -3490,6 +3578,7 @@ export class Chart extends AxisChart {
     const segment = bar.segments?.[segmentIndex];
     if (!segment) return;
 
+    this.emitInteraction('dc-mouseenter', this.segmentDetail(segment, segmentIndex, bar, barIndex), e);
     if (segment.popup?.trigger === 'hover') {
       this.showPopup(segment.popup.content, e.clientX, e.clientY);
     } else if (!segment.popup && this.shouldShowAutoPopup(segment.autoPopup)) {
@@ -3505,6 +3594,7 @@ export class Chart extends AxisChart {
     const segment = bar.segments?.[segmentIndex];
     if (!segment) return;
 
+    this.emitInteraction('dc-mouseleave', this.segmentDetail(segment, segmentIndex, bar, barIndex));
     const isHoverPopup = segment.popup?.trigger === 'hover' || (!segment.popup && this.shouldShowAutoPopup(segment.autoPopup));
     if (isHoverPopup) {
       this.hidePopup();
@@ -3517,6 +3607,7 @@ export class Chart extends AxisChart {
     const segment = bar.segments?.[segmentIndex];
     if (!segment) return;
 
+    if (!this.emitInteraction('dc-click', this.segmentDetail(segment, segmentIndex, bar, barIndex), e)) return;
     if (segment.popup?.trigger === 'click') {
       const clickKey = barIndex * 1000 + segmentIndex;
       if (this.clickedBarIndex === clickKey) {
@@ -3539,6 +3630,7 @@ export class Chart extends AxisChart {
   private handleLineMouseEnter(e: MouseEvent, lineIndex: number) {
     const lines = this.getLines();
     const line = lines[lineIndex];
+    this.emitInteraction('dc-mouseenter', this.lineDetail(line, lineIndex), e);
     if (line.popup?.trigger === 'hover') {
       this.showPopup(line.popup.content, e.clientX, e.clientY);
     } else if (!line.popup && this.shouldShowAutoPopup(line.autoPopup)) {
@@ -3550,6 +3642,7 @@ export class Chart extends AxisChart {
   private handleLineMouseLeave(lineIndex: number) {
     const lines = this.getLines();
     const line = lines[lineIndex];
+    this.emitInteraction('dc-mouseleave', this.lineDetail(line, lineIndex));
     const isHoverPopup = line.popup?.trigger === 'hover' || (!line.popup && this.shouldShowAutoPopup(line.autoPopup));
     if (isHoverPopup && this.clickedPointIndex.lineIndex !== lineIndex) {
       this.hidePopup();
@@ -3559,6 +3652,7 @@ export class Chart extends AxisChart {
   private handleLineClick(e: MouseEvent, lineIndex: number) {
     const lines = this.getLines();
     const line = lines[lineIndex];
+    if (!this.emitInteraction('dc-click', this.lineDetail(line, lineIndex), e)) return;
     if (line.popup?.trigger === 'click') {
       if (this.clickedPointIndex.lineIndex === lineIndex && this.clickedPointIndex.pointIndex === -1) {
         this.hidePopup();
@@ -3574,6 +3668,7 @@ export class Chart extends AxisChart {
     const lines = this.getLines();
     const line = lines[lineIndex];
     const point = line.points[pointIndex];
+    this.emitInteraction('dc-mouseenter', this.pointDetail(point, pointIndex, line, lineIndex, lines), e);
     if (point.popup?.trigger === 'hover') {
       this.showPopup(point.popup.content, e.clientX, e.clientY);
     } else if (!point.popup && this.shouldShowAutoPopup(point.autoPopup, line.autoPopup)) {
@@ -3588,6 +3683,7 @@ export class Chart extends AxisChart {
     const lines = this.getLines();
     const line = lines[lineIndex];
     const point = line.points[pointIndex];
+    this.emitInteraction('dc-mouseleave', this.pointDetail(point, pointIndex, line, lineIndex, lines));
     const isHoverPopup = point.popup?.trigger === 'hover' || (!point.popup && this.shouldShowAutoPopup(point.autoPopup, line.autoPopup));
     if (isHoverPopup && (this.clickedPointIndex.lineIndex !== lineIndex || this.clickedPointIndex.pointIndex !== pointIndex)) {
       this.hidePopup();
@@ -3597,6 +3693,8 @@ export class Chart extends AxisChart {
   private handlePointClick(e: MouseEvent, lineIndex: number, pointIndex: number) {
     const lines = this.getLines();
     const point = lines[lineIndex].points[pointIndex];
+    if (!this.emitInteraction('dc-click',
+      this.pointDetail(point, pointIndex, lines[lineIndex], lineIndex, lines), e)) return;
     if (point.popup?.trigger === 'click') {
       if (this.clickedPointIndex.lineIndex === lineIndex && this.clickedPointIndex.pointIndex === pointIndex) {
         this.hidePopup();
@@ -3618,6 +3716,7 @@ export class Chart extends AxisChart {
   private handleBubbleMouseEnter(e: MouseEvent, bubbleIndex: number) {
     const bubbles = this.getBubbles();
     const bubble = bubbles[bubbleIndex];
+    this.emitInteraction('dc-mouseenter', this.bubbleDetail(bubble, bubbleIndex, bubbles), e);
     if (bubble.popup?.trigger === 'hover') {
       this.showPopup(bubble.popup.content, e.clientX, e.clientY);
     } else if (!bubble.popup && this.shouldShowAutoPopup(bubble.autoPopup)) {
@@ -3630,6 +3729,7 @@ export class Chart extends AxisChart {
   private handleBubbleMouseLeave(bubbleIndex: number) {
     const bubbles = this.getBubbles();
     const bubble = bubbles[bubbleIndex];
+    this.emitInteraction('dc-mouseleave', this.bubbleDetail(bubble, bubbleIndex, bubbles));
     const isHoverPopup = bubble.popup?.trigger === 'hover' || (!bubble.popup && this.shouldShowAutoPopup(bubble.autoPopup));
     if (isHoverPopup && this.clickedBubbleIndex !== bubbleIndex) {
       this.hidePopup();
@@ -3639,6 +3739,7 @@ export class Chart extends AxisChart {
   private handleBubbleClick(e: MouseEvent, bubbleIndex: number) {
     const bubbles = this.getBubbles();
     const bubble = bubbles[bubbleIndex];
+    if (!this.emitInteraction('dc-click', this.bubbleDetail(bubble, bubbleIndex, bubbles), e)) return;
     if (bubble.popup?.trigger === 'click') {
       if (this.clickedBubbleIndex === bubbleIndex) {
         this.hidePopup();

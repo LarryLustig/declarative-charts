@@ -537,6 +537,25 @@ export class PieChart extends BaseChart {
     return `<strong>${slice.label}</strong><br>Value: ${slice.value}<br>${percentage}%`;
   }
 
+  private sliceDetail(
+    slice: { element?: Element; label: string; value: number },
+    index: number,
+    slices?: Array<{ value: number }>
+  ) {
+    const all = slices ?? this.getSlices();
+    const total = all.reduce((sum, sl) => sum + Math.abs(sl.value), 0);
+    return {
+      element: slice.element ?? null,
+      label: slice.label,
+      value: slice.value,
+      // Decimal, matching the library's percent convention (0.25 means 25%).
+      percent: this.shareOf(slice.value, total),
+      index,
+      seriesLabel: null,
+      seriesIndex: null
+    };
+  }
+
   private handleSliceMouseEnter(e: MouseEvent, index: number) {
     const layout = this.calculateSliceLayout();
     if (!layout) return;
@@ -544,6 +563,7 @@ export class PieChart extends BaseChart {
     const slice = layout.slices[index];
     const sliceData = this.getSlices()[index];
 
+    this.emitInteraction('dc-mouseenter', this.sliceDetail(sliceData, index), e);
     // Explicit popup takes precedence over auto-popup
     if (sliceData.popup?.trigger === 'hover') {
       this.showPopup(sliceData.popup.content, e.clientX, e.clientY);
@@ -556,6 +576,7 @@ export class PieChart extends BaseChart {
 
   private handleSliceMouseLeave(index: number) {
     const sliceData = this.getSlices()[index];
+    this.emitInteraction('dc-mouseleave', this.sliceDetail(sliceData, index));
 
     // Hide popup if it's a hover-triggered popup (explicit or auto) and not clicked
     const isHoverPopup = sliceData.popup?.trigger === 'hover' ||
@@ -568,6 +589,7 @@ export class PieChart extends BaseChart {
 
   private handleSliceClick(e: MouseEvent, index: number) {
     const sliceData = this.getSlices()[index];
+    if (!this.emitInteraction('dc-click', this.sliceDetail(sliceData, index), e)) return;
 
     // Only explicit click-triggered popups respond to clicks
     if (sliceData.popup?.trigger === 'click') {

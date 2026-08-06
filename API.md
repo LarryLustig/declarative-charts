@@ -9,12 +9,15 @@ Complete documentation for all elements and attributes in the Declarative Chart 
 - [Color System](#color-system)
 - [Palettes and Pattern Fills](#palettes-and-pattern-fills)
 - [Controlling Labels, Values, and Percentages](#controlling-labels-values-and-percentages)
+- [Label Positioning](#label-positioning)
 - [Negative Values](#negative-values)
 - [Number Formatting](#number-formatting)
 - [Components](#components)
 - [Dynamic Updates](#dynamic-updates)
+- [Events](#events)
 - [Integration with htmx and Other Libraries](#integration-with-htmx-and-other-libraries)
 - [Logging & Debugging](#logging--debugging)
+- [Animations](#animations)
 - [Accessibility](#accessibility)
 
 ---
@@ -1771,6 +1774,134 @@ chart.removeChild(firstBar);
 ```
 
 ---
+
+## Events
+
+Charts emit DOM events describing what the user interacted with, so you can respond
+to a click without reaching into the chart's shadow DOM.
+
+| Event | Fires when | Cancelable |
+|-------|-----------|------------|
+| `dc-click` | A data element is clicked | Yes |
+| `dc-mouseenter` | The pointer enters a data element | No |
+| `dc-mouseleave` | The pointer leaves a data element | No |
+| `dc-render` | The chart has finished drawing | No |
+
+### Listening
+
+Events are dispatched from the element in **your** markup — the `<dc-bar>`, the
+`<dc-pie-slice>` — and bubble up through the chart and out to the document. So all
+three of these work:
+
+```javascript
+// on the individual element
+document.querySelector('dc-bar').addEventListener('dc-click', onClick);
+
+// on the chart
+document.querySelector('dc-chart').addEventListener('dc-click', onClick);
+
+// delegated at the document, which keeps working across htmx swaps
+document.addEventListener('dc-click', onClick);
+```
+
+Events are `composed`, so they also cross a shadow boundary if you nest a chart
+inside another web component.
+
+### `event.detail`
+
+`dc-click`, `dc-mouseenter` and `dc-mouseleave` all carry the same shape:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `chart` | `Element` | The chart the interaction happened in |
+| `element` | `Element \| null` | The source element from your markup, e.g. the `<dc-bar>` |
+| `label` | `string` | The element's label, or `''` |
+| `value` | `number \| null` | The element's value. `null` for shapes with no single value, such as a whole line |
+| `percent` | `number \| null` | Share of the total **as a decimal** — `0.25` means 25%. `null` when undefined |
+| `index` | `number` | Position among siblings |
+| `seriesLabel` | `string \| null` | Parent line or stacked bar, for nested shapes |
+| `seriesIndex` | `number \| null` | Index of that parent |
+| `originalEvent` | `MouseEvent \| null` | The DOM event behind this |
+
+> **Note:** `percent` follows the same decimal convention as `value-format="percent"` —
+> see [Number Formatting](#number-formatting).
+
+`dc-render` carries `{ chart, count }`, where `count` is the number of data elements drawn.
+
+### Click a bar to filter a table
+
+The common dashboard interaction, with no chart internals involved:
+
+```html
+<dc-chart id="sales" width="600" height="400">
+  <dc-bar value="120" label="Jan"></dc-bar>
+  <dc-bar value="180" label="Feb"></dc-bar>
+</dc-chart>
+<table id="detail"></table>
+
+<script>
+  document.querySelector('#sales').addEventListener('dc-click', (event) => {
+    const { label, value, percent } = event.detail;
+    document.querySelector('#detail').innerHTML =
+      `<tr><td>${label}</td><td>${value}</td><td>${(percent * 100).toFixed(1)}%</td></tr>`;
+  });
+</script>
+```
+
+### Cancelling the default behaviour
+
+`dc-click` is cancelable. Calling `preventDefault()` suppresses the chart's own
+response to the click — both the popup and any `href` navigation:
+
+```javascript
+chart.addEventListener('dc-click', (event) => {
+  if (!isUnlocked(event.detail.label)) {
+    event.preventDefault();   // no popup, no navigation
+    showUpgradePrompt();
+  }
+});
+```
+
+The hover events are notifications only and cannot be cancelled.
+
+### Reacting to renders
+
+`dc-render` fires after every draw, including redraws caused by data changes. Useful
+for measuring the SVG, syncing an external legend, or knowing that a server-driven
+swap has painted:
+
+```javascript
+document.addEventListener('dc-render', (event) => {
+  console.log(`${event.detail.chart.id} drew ${event.detail.count} elements`);
+});
+```
+
+Because it fires on *every* render, avoid doing anything inside the handler that
+mutates the chart's markup — that would schedule another render and loop.
+
+Note that showing or hiding a popup is itself a state change, so hovering a chart
+with popups enabled produces `dc-render` events as well as `dc-mouseenter`. If you
+only care about data changes, compare `detail.count` or track your own state rather
+than treating every `dc-render` as new data.
+
+### TypeScript
+
+The event names are declared on `HTMLElementEventMap`, so `event.detail` is typed
+without a cast:
+
+```typescript
+import type { ChartInteractionDetail } from 'declarative-charts';
+
+chart.addEventListener('dc-click', (event) => {
+  event.detail.value;   // number | null — no cast needed
+});
+```
+
+### Notes
+
+- Hover events fire at pointer speed. Throttle or debounce anything expensive.
+- Events fire for data elements only, not for axes, gridlines, titles, or legends.
+- Elements hidden with `hidden` are not rendered, so they emit nothing.
 
 ## Integration with htmx and Other Libraries
 

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Interaction events**
+  - `dc-click`, `dc-mouseenter`, `dc-mouseleave` on data elements, and `dc-render` after each draw
+  - Previously the only ways to respond to a click were `href` navigation and a declarative
+    popup. "Click a bar, filter the table below" required reaching into the chart's shadow DOM
+    for a selector the library never promised
+  - Dispatched from the element in *your* markup (the `<dc-bar>`), so listeners can attach there,
+    to the chart, or to the document. `bubbles` and `composed` are set, so delegation survives
+    shadow boundaries and htmx swaps
+  - `detail` carries `chart`, `element`, `label`, `value`, `percent`, `index`, `seriesLabel`,
+    `seriesIndex`, and `originalEvent`. `percent` is a **decimal** (0.25 = 25%), matching the
+    library's percent convention, and `null` rather than 0 where a share is undefined
+  - `dc-click` is cancelable — `preventDefault()` suppresses both the popup and `href` navigation
+  - Event names are declared on `HTMLElementEventMap`, so TypeScript infers `event.detail`
+    without a cast. `ChartInteractionDetail` and `ChartRenderDetail` are exported
+  - Documented in **API.md → Events**, with a live demo in `examples/interactive.html`
+
 ### Changed
 
 - **Render is no longer quadratic in datapoint count — 1,000 bars went from 44.6s to 0.29s**

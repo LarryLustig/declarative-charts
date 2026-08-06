@@ -5,11 +5,12 @@ A modern Web Components-based chart library built with Lit that allows you to cr
 ## Features
 
 - **Declarative Syntax** - Define charts with nested HTML elements
-- **Multiple Chart Types** - Bar, Line, Bubble, Pie, and Funnel charts
+- **Multiple Chart Types** - Bar, Line, Area, Bubble, Pie, Funnel, and Stage charts
 - **Rich Styling** - Colors, gradients, patterns, and high contrast mode
 - **Number Formatting** - Currency, compact (1.2M), percentages, locale-aware
 - **Fully Accessible** - ARIA labels, keyboard navigation, screen reader support
 - **Interactive** - Popups, clickable elements, dynamic updates
+- **Events** - `dc-click`, `dc-mouseenter`, `dc-mouseleave`, `dc-render` with typed detail
 - **Lightweight** - Built on Lit (~5KB overhead)
 - **TypeScript** - Full type definitions included
 - **Framework-agnostic** - Works with React, Vue, Angular, or plain HTML

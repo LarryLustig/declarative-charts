@@ -85,6 +85,62 @@ export interface PaddingContentItem {
  * - 'warning': Fallbacks used, deprecated attributes
  * - 'info': Normal derivation messages
  */
+/**
+ * Payload of the `dc-click`, `dc-mouseenter` and `dc-mouseleave` events.
+ *
+ * ```js
+ * document.querySelector('dc-chart').addEventListener('dc-click', e => {
+ *   console.log(e.detail.label, e.detail.value);
+ * });
+ * ```
+ */
+export interface ChartInteractionDetail {
+  /** The chart the interaction happened in. */
+  chart: Element;
+  /** The element from your markup, e.g. the `<dc-bar>`. Null if the shape has no backing element. */
+  element: Element | null;
+  /** The element's label, or '' if unlabelled. */
+  label: string;
+  /** The element's value. Null for shapes that carry no value, such as a whole line. */
+  value: number | null;
+  /**
+   * Share of the chart total, as a decimal (0.38 means 38%), matching the
+   * library's percent convention. Null when a share is undefined - a zero total,
+   * or a shape for which it is meaningless.
+   */
+  percent: number | null;
+  /** Index of the element among its siblings. */
+  index: number;
+  /** For nested shapes - the parent line or stacked bar. Null at the top level. */
+  seriesLabel: string | null;
+  /** Index of the parent series, or null at the top level. */
+  seriesIndex: number | null;
+  /** The DOM event behind this, when there was one. */
+  originalEvent: MouseEvent | null;
+}
+
+/**
+ * Payload of the `dc-render` event, fired after each successful render.
+ */
+export interface ChartRenderDetail {
+  chart: Element;
+  /** Number of data elements drawn. */
+  count: number;
+}
+
+declare global {
+  /**
+   * Types the chart events so `addEventListener` infers `event.detail`
+   * without a cast.
+   */
+  interface HTMLElementEventMap {
+    'dc-click': CustomEvent<ChartInteractionDetail>;
+    'dc-mouseenter': CustomEvent<ChartInteractionDetail>;
+    'dc-mouseleave': CustomEvent<ChartInteractionDetail>;
+    'dc-render': CustomEvent<ChartRenderDetail>;
+  }
+}
+
 export type LogLevel = 'error' | 'warning' | 'info';
 
 /**
@@ -2015,6 +2071,62 @@ export abstract class BaseChart extends LitElement {
     }
   `;
 
+  /**
+   * Emit an interaction event describing the data element the user touched.
+   *
+   * Dispatched from the author's own element (the `<dc-bar>`, `<dc-slice>`, ...)
+   * when there is one, so a listener can be attached directly to it. Those are
+   * light-DOM children of the chart, so the event still bubbles to the chart,
+   * and `composed` carries it past any outer shadow boundary.
+   *
+   * `dc-click` is cancelable. Calling `preventDefault()` suppresses the chart's
+   * own response - popup and `href` navigation - which is why the originating
+   * MouseEvent is cancelled too.
+   *
+   * @returns false if a listener cancelled the event, in which case the caller
+   *          must not perform its default behaviour.
+   */
+  protected emitInteraction(
+    name: 'dc-click' | 'dc-mouseenter' | 'dc-mouseleave',
+    detail: Partial<ChartInteractionDetail>,
+    originalEvent?: MouseEvent
+  ): boolean {
+    const full: ChartInteractionDetail = {
+      chart: this,
+      element: null,
+      label: '',
+      value: null,
+      percent: null,
+      index: -1,
+      seriesLabel: null,
+      seriesIndex: null,
+      originalEvent: originalEvent ?? null,
+      ...detail
+    };
+
+    const target: EventTarget = full.element ?? this;
+    const notCancelled = target.dispatchEvent(
+      new CustomEvent<ChartInteractionDetail>(name, {
+        detail: full,
+        bubbles: true,
+        composed: true,
+        cancelable: name === 'dc-click'
+      })
+    );
+
+    // Stop the anchor wrapper from navigating when the click was cancelled.
+    if (!notCancelled && originalEvent) originalEvent.preventDefault();
+    return notCancelled;
+  }
+
+  /**
+   * Fraction of a total, guarding the zero-total case. Returns null rather than
+   * a misleading 0 when there is nothing to take a share of.
+   */
+  protected shareOf(value: number, total: number): number | null {
+    return total > 0 ? Math.abs(value) / total : null;
+  }
+
   protected showPopup(content: string, x: number, y: number) {
     this.popupContent = content;
     // Position popup offset from cursor (relative to host element)
@@ -2304,6 +2416,24 @@ export abstract class BaseChart extends LitElement {
         this.playEntryAnimation();
       });
     });
+  }
+
+  protected updated(_changedProperties: Map<string, unknown>): void {
+    this.emitRender();
+  }
+
+  /**
+   * Announce that the chart has drawn. Useful for measuring the SVG, wiring up
+   * external legends, or knowing a server-driven swap has finished rendering.
+   */
+  protected emitRender(): void {
+    this.dispatchEvent(
+      new CustomEvent<ChartRenderDetail>('dc-render', {
+        detail: { chart: this, count: this.getFocusableElements().length },
+        bubbles: true,
+        composed: true
+      })
+    );
   }
 
   /**
