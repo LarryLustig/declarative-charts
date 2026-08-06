@@ -98,6 +98,18 @@ export class ChartArea extends BaseFilledShape {
    *
    * @attr curve-fit
    */
+  /**
+   * How to draw positions that have no data.
+   *
+   * - `gap` (default) - break the series. The absence is visible, which is the
+   *   honest rendering: a chart should not imply a value it does not have.
+   * - `skip` - join the neighbouring points, ignoring the gap.
+   * - `zero` - treat missing as 0. Only correct when absent genuinely means
+   *   zero, which is rarely true of real data.
+   */
+  @property({ type: String })
+  missing: 'gap' | 'skip' | 'zero' = 'gap';
+
   @property({ type: String, attribute: 'curve-fit' })
   curveFit?: CurveFit;
 

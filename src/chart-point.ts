@@ -1,13 +1,14 @@
 import { customElement, property } from 'lit/decorators.js';
 import { BaseFilledShape } from './base-filled-shape.js';
 import { showConditionConverter, type ShowCondition } from './base-chart.js';  // for showValue override
+import { optionalNumberConverter } from './converters.js';
 
 /**
  * Individual point element for line charts
  *
  * @element dc-point
  *
- * @attr {number} value - The numeric value for this point
+ * @attr {number} value - The numeric value for this point. Omit it, or use "null", to mark the point as having no data
  * @attr {string} label - The label to display below this point (inherited from BaseChartElement)
  * @attr {string} fill - Fill color for this point, overrides line color (SVG standard, inherited from BaseChartElement)
  * @attr {string} color - @deprecated Use fill instead. Optional color for this specific point (inherited from BaseChartElement)
@@ -37,7 +38,21 @@ import { showConditionConverter, type ShowCondition } from './base-chart.js';  /
  */
 @customElement('dc-point')
 export class ChartPoint extends BaseFilledShape {
-  // value is inherited from BaseFilledShape
+  /**
+   * The point's value, or NaN when there is no data for this position.
+   *
+   * Overrides the inherited property so that a point with no value stays
+   * distinguishable from a point whose value is zero. Missing points are not
+   * plotted; see the `missing` attribute on `<dc-line>` and `<dc-area>` for how
+   * the gap is drawn.
+   */
+  @property({ converter: optionalNumberConverter })
+  override value = NaN;
+
+  /** True when this point carries no data. */
+  get isMissing(): boolean {
+    return !Number.isFinite(this.value);
+  }
 
   // Override showValue to default to true for points (inherited from BaseChartElement)
   @property({ attribute: 'show-value', converter: showConditionConverter })

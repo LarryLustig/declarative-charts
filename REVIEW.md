@@ -762,7 +762,37 @@ but it should be tokens, not defaults.
 - Keep per-element SVG attributes as the highest-precedence override. Documented order:
   element attribute > `::part` rule > `--dc-*` token > built-in default.
 
-### 4.5 Null-gap handling in lines
+### 4.5 Null-gap handling in lines — ✅ FIXED
+
+> **Fixed**, along the lines this section proposed. `<dc-point>` overrides `value` with a
+> converter defaulting to NaN, so absent and zero are finally distinguishable; `<dc-line>` and
+> `<dc-area>` take `missing="gap"` (default) | `"skip"` | `"zero"`. Paths split into unbroken
+> runs and each run is fitted **independently**, which is what stops a `smooth` or `monotone`
+> spline overshooting across a gap — the compounding problem this section identified.
+>
+> The interesting part was how much of the fallout was invisible from the path data. Lines,
+> single areas, and stacked areas are three separate render paths, each with its own markers and
+> label pass. After the line tests passed and a browser check of the path `d` came back clean, a
+> sweep of the entire shadow DOM still found `<circle cy="NaN">` from area point markers, a NaN
+> in the area top-edge stroke (a second path I had not noticed), and a `<text>NaN</text>` from
+> the stacked-area label pass. `getInsights()` was separately announcing
+> *"highest at undefined (NaN)"* to screen readers.
+>
+> The general lesson, now in CLAUDE.md: **anything consuming point values must be NaN-safe**,
+> because one NaN poisons `Math.max`/`Math.min` and takes the whole axis with it. Guarded in the
+> range calculations, `getAllValues()`, stacked maximums, the focusable total, and insights.
+>
+> 23 tests in `test/component/missing-values.test.ts`, asserting on rendered output rather than
+> path data. Verified across 12 configurations in Chromium — every curve type, stacked and
+> single areas, combo charts, leading and trailing gaps, and an all-missing series — with no NaN
+> and every case still rendering.
+>
+> Bars are **not** covered: a `<dc-bar>` with no value is still a zero-height bar. That is a
+> smaller problem (a bar chart's absence reads as "nothing there" more naturally than a line
+> plunging to the axis) and touches the shared `BaseFilledShape.value` default, so it is left
+> deliberately rather than half-done.
+>
+> Original finding below.
 
 A line's path is built from `point.value` with no null concept anywhere:
 

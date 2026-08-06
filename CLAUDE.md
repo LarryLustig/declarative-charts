@@ -188,6 +188,16 @@ Use `getPaletteColors(count, colorType)` in chart code to resolve palette colors
 
 **Hidden Attribute**: Standard HTML `hidden` on data elements (`<dc-line>`, `<dc-bar>`, etc.) hides them. Toggling it re-renders the chart automatically — see **Child Reactivity** below.
 
+**Missing Values**: `<dc-point>` overrides `value` with `optionalNumberConverter`, defaulting to **NaN** rather than 0, so "no data" stays distinguishable from a real zero. `<dc-line>`/`<dc-area>` take `missing="gap"` (default) | `"skip"` | `"zero"`.
+
+The policy is resolved **once**, in `getLines()`/`getAreas()`, which set a `missing: boolean` on each point. Downstream code tests that flag rather than re-checking `Number.isFinite` — keep it that way, or the two will drift.
+
+**Anything that consumes point values must be NaN-safe.** A single NaN poisons `Math.max`/`Math.min` and takes the whole axis with it. Already guarded: the line/area range calculations, `getAllValues()`, stacked maximums, the focusable total, and `getInsights()` (which otherwise announces "highest at undefined (NaN)" to screen readers).
+
+Rendering splits at gaps via `splitAtGaps()`, shared by `generatePathData()` and `generateAreaPath()`. Each run is fitted **independently** — a spline fitted across a gap overshoots and corrupts the segments on both sides.
+
+Note that lines, single areas, and stacked areas are three separate render paths, each with its own markers and label pass. A fix to one is not a fix to the others: the area top-edge stroke, area point markers, and the stacked-area label pass each leaked NaN after the line path was already correct. `test/component/missing-values.test.ts` asserts on rendered output, not just path data, for exactly this reason.
+
 **Text Scaling**: `text-scaling="proportional"` (default) | `"fixed"`. A viewBox scales text along with everything else, so the same chart shows 4.7px axis labels at 300px wide and 21.2px at 1200px. `fixed` mode reinterprets font sizes as CSS pixels.
 
 `BaseChart` tracks rendered width with a `ResizeObserver` and exposes `fontScale` (viewBox units per CSS px, 1 when proportional) and `fontSize(nominal)`.

@@ -63,6 +63,33 @@ export const showConditionConverter = {
 };
 
 /**
+ * Converter for numeric attributes where "no value" is meaningful and must stay
+ * distinguishable from zero.
+ *
+ * A template rendering a month with no data emits `<dc-point label="Mar">` or
+ * `value="null"`. Treated as 0 the chart would dive to the axis and claim the
+ * value *was* zero, which for anything financial or clinical is not a cosmetic
+ * bug - it is the chart stating something false. NaN carries "absent" through
+ * the layout, where callers test it explicitly.
+ *
+ * Accepts the spellings a server template is likely to produce: an absent
+ * attribute, an empty string, `null`, `none`, `na`, `n/a`, or `-`.
+ */
+export const optionalNumberConverter = {
+  fromAttribute: (value: string | null): number => {
+    if (value === null) return NaN;
+    const normalized = value.trim().toLowerCase();
+    if (normalized === '' || ['null', 'none', 'na', 'n/a', '-', 'undefined', 'nan'].includes(normalized)) {
+      return NaN;
+    }
+    const parsed = Number(normalized);
+    return Number.isFinite(parsed) ? parsed : NaN;
+  },
+  toAttribute: (value: number): string | null =>
+    Number.isFinite(value) ? String(value) : null
+};
+
+/**
  * Converter for boolean attributes.
  * Handles standard HTML boolean attribute behavior.
  */

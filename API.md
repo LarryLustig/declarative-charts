@@ -13,6 +13,7 @@ Complete documentation for all elements and attributes in the Declarative Chart 
 - [Filling a Container](#filling-a-container)
 - [Controlling Labels, Values, and Percentages](#controlling-labels-values-and-percentages)
 - [Label Positioning](#label-positioning)
+- [Missing Values](#missing-values)
 - [Negative Values](#negative-values)
 - [Number Formatting](#number-formatting)
 - [Components](#components)
@@ -948,6 +949,62 @@ To set the height directly instead, use `--dc-height`:
 ```css
 dc-chart[fit="fill"] { --dc-height: 240px; }
 ```
+
+---
+
+## Missing Values
+
+Real data has holes. A month with no reading, a sensor that dropped out, a metric
+that did not exist yet.
+
+Omit the value, or set it to `null`, and the chart treats that position as having
+**no data** — distinct from a value of zero:
+
+```html
+<dc-line label="Revenue">
+  <dc-point value="120" label="Jan"></dc-point>
+  <dc-point label="Feb"></dc-point>               <!-- no data -->
+  <dc-point value="null" label="Mar"></dc-point>  <!-- also no data -->
+  <dc-point value="0" label="Apr"></dc-point>     <!-- a real zero -->
+  <dc-point value="180" label="May"></dc-point>
+</dc-line>
+```
+
+Accepted as "no data": an omitted `value`, an empty string, `null`, `none`, `na`,
+`n/a`, `-`, or any non-numeric text. These are the spellings a server template
+tends to produce when interpolating an absent value.
+
+> **Why this matters.** Treated as zero, the line would dive to the axis and the
+> chart would state that the value *was* zero. For financial, clinical, or
+> operational data that is not a cosmetic flaw — it is the chart asserting
+> something false.
+
+### Choosing how the gap is drawn
+
+`missing` on `<dc-line>` and `<dc-area>`:
+
+| Value | Behaviour |
+|-------|-----------|
+| `gap` (default) | Break the series. The absence is visible. |
+| `skip` | Join the neighbouring points, ignoring the gap. |
+| `zero` | Treat missing as 0. Only correct when absent really means zero. |
+
+```html
+<dc-line label="Revenue" missing="skip">…</dc-line>
+```
+
+### What a gap suppresses
+
+At a position with no data the chart draws no marker and no label, omits the point
+from keyboard navigation, and leaves it out of the screen-reader description and
+the axis range — so a gap cannot drag the minimum down to zero.
+
+Curve fitting is applied to each unbroken run separately. That matters for `smooth`
+and `monotone`: fitted across a gap, a spline would overshoot and distort the
+segments on *both* sides of it.
+
+Area fills close per run as well, so a gap is a genuine hole rather than fill drawn
+down to the baseline.
 
 ## Negative Values
 

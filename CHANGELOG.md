@@ -9,6 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Missing values in lines and areas**
+  - `value` was `0` by default, so `<dc-point label="Mar">` — what a template emits for a month
+    with no data — plotted at zero. The line dived to the axis and the chart asserted the value
+    *was* zero, which for financial, clinical, or operational data is not cosmetic
+  - `<dc-point>` now defaults to NaN and treats an omitted `value`, an empty string, `null`,
+    `none`, `na`, `n/a`, `-`, or non-numeric text as "no data". A real `0` is still a real 0
+  - `missing` on `<dc-line>`/`<dc-area>`: `gap` (default, breaks the series), `skip` (joins the
+    neighbours), or `zero` (the old behaviour, now opt-in)
+  - Curve fitting applies per unbroken run, so a `smooth` or `monotone` spline can no longer
+    overshoot across a gap and distort the segments on both sides
+  - Area fills close per run, so a gap is a hole rather than fill drawn to the baseline
+  - A gap draws no marker and no label, is skipped by keyboard navigation, and is excluded from
+    the axis range and the screen-reader description — which previously read
+    "highest at undefined (NaN)"
+  - Documented in **API.md → Missing Values**
+
+### Changed
+
+- **`<dc-point>` with no `value` no longer renders as zero.** It is now a gap. Set
+  `missing="zero"` on the line or area to keep the old behaviour.
+
+### Added
+
 - **`fit` attribute for filling a container**
   - A viewBox locks a chart to the ratio implied by `width` and `height`, so a 600×400 chart
     dropped into an 800×200 dashboard tile rendered 800×533 — overflowing — and in a tall tile

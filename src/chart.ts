@@ -106,6 +106,8 @@ interface FlattenedBar extends BarData {
 
 interface PointData {
   element?: ChartPoint;
+  /** True when this position has no data. `value` is not meaningful. */
+  missing?: boolean;
   value: number;
   label: string;
   fill?: string;
@@ -125,7 +127,10 @@ interface PointData {
   labelFill?: string;
 }
 
+type MissingPolicy = 'gap' | 'skip' | 'zero';
+
 interface LineData {
+  missing: MissingPolicy;
   stroke: string;
   elementStroke?: string;
   label: string;
@@ -150,6 +155,7 @@ interface LineData {
 // ============================================================================
 
 interface AreaData {
+  missing: MissingPolicy;
   fill: string;
   fillOpacity: number;
   stroke: string;
@@ -419,14 +425,14 @@ export class Chart extends AxisChart {
 
   private getLineMaxValue(): number {
     const lines = this.getLines();
-    const allValues = lines.flatMap(line => line.points.map(p => p.value));
+    const allValues = lines.flatMap(line => line.points.map(p => p.value)).filter(Number.isFinite);
     if (allValues.length === 0) return 0;
     return Math.max(...allValues);
   }
 
   private getLineMinValue(): number {
     const lines = this.getLines();
-    const allValues = lines.flatMap(line => line.points.map(p => p.value));
+    const allValues = lines.flatMap(line => line.points.map(p => p.value)).filter(Number.isFinite);
     if (allValues.length === 0) return 0;
     return Math.min(...allValues, 0);
   }
@@ -449,7 +455,8 @@ export class Chart extends AxisChart {
 
     // For stacked areas, we need to include the cumulative maximum
     const stackedMaximums = this.getAreaStackedMaximums();
-    const individualMax = Math.max(...areas.flatMap(a => a.points.map(p => p.value)));
+    const areaValues = areas.flatMap(a => a.points.map(p => p.value)).filter(Number.isFinite);
+    const individualMax = areaValues.length > 0 ? Math.max(...areaValues) : 0;
     const stackedMax = stackedMaximums.length > 0 ? Math.max(...stackedMaximums) : 0;
 
     return Math.max(individualMax, stackedMax);
@@ -458,15 +465,15 @@ export class Chart extends AxisChart {
   private getAreaMinValue(): number {
     const areas = this.getAreas();
     if (areas.length === 0) return 0;
-    const allValues = areas.flatMap(area => area.points.map(p => p.value));
+    const allValues = areas.flatMap(area => area.points.map(p => p.value)).filter(Number.isFinite);
     return Math.min(...allValues, 0);
   }
 
   protected getAllValues(): number[] {
     const barValues = this.getFlattenedBars().map(b => b.value);
-    const lineValues = this.getLines().flatMap(line => line.points.map(p => p.value));
+    const lineValues = this.getLines().flatMap(line => line.points.map(p => p.value)).filter(Number.isFinite);
     const bubbleValues = this.getBubbles().map(b => b.value);
-    const areaValues = this.getAreas().flatMap(area => area.points.map(p => p.value));
+    const areaValues = this.getAreas().flatMap(area => area.points.map(p => p.value)).filter(Number.isFinite);
     // Include stacked area maximums for proper axis scaling
     const stackedMaximums = this.getAreaStackedMaximums();
     return [...barValues, ...lineValues, ...bubbleValues, ...areaValues, ...stackedMaximums];
@@ -685,7 +692,46 @@ export class Chart extends AxisChart {
    * @param curveFit The curve fitting method to use
    * @returns SVG path data string
    */
-  private generatePathData(points: Array<{ x: number; y: number }>, curveFit: CurveFit): string {
+  /**
+   * Build the `d` for a series, breaking it wherever data is missing.
+   *
+   * Emits one subpath per unbroken run, so a gap is a genuine break rather than
+   * a line drawn through nothing. Each run is fitted independently, which also
+   * stops a spline from overshooting *across* a gap and corrupting the segments
+   * on either side of it.
+   */
+  private generatePathData(
+    points: Array<{ x: number; y: number; missing?: boolean }>,
+    curveFit: CurveFit
+  ): string {
+    return this.splitAtGaps(points)
+      .map(segment => this.generateSubpath(segment, curveFit))
+      .filter(Boolean)
+      .join(' ');
+  }
+
+  /**
+   * Break a series into its unbroken runs. A run is a stretch of consecutive
+   * positions that all have data; the gaps between them are what the caller
+   * must not draw across.
+   */
+  private splitAtGaps<T extends { missing?: boolean }>(points: T[]): T[][] {
+    const runs: T[][] = [];
+    let run: T[] = [];
+
+    for (const point of points) {
+      if (point.missing) {
+        if (run.length > 0) runs.push(run);
+        run = [];
+      } else {
+        run.push(point);
+      }
+    }
+    if (run.length > 0) runs.push(run);
+    return runs;
+  }
+
+  private generateSubpath(points: Array<{ x: number; y: number }>, curveFit: CurveFit): string {
     if (points.length === 0) return '';
     if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
 
@@ -856,6 +902,7 @@ export class Chart extends AxisChart {
       const lineShowPercent = line.hasAttribute('show-percent') ? line.showPercent! : this.showPercent;
       const linePointShape = line.hasAttribute('point-shape') ? line.pointShape : this.pointShape;
       const lineCurveFit = line.hasAttribute('curve-fit') ? line.curveFit! : this.curveFit;
+      const linePolicy: MissingPolicy = line.missing ?? 'gap';
 
       const linePopupEl = Array.from(line.children).find(
         child => child.tagName.toLowerCase() === 'dc-popup'
@@ -875,6 +922,7 @@ export class Chart extends AxisChart {
         stroke: lineStroke,
         elementStroke: elementStroke || undefined,
         label: line.label,
+        missing: linePolicy,
         curveFit: lineCurveFit,
         href: line.href || undefined,
         target: line.target || undefined,
@@ -893,9 +941,14 @@ export class Chart extends AxisChart {
           const showPercent = point.hasAttribute('show-percent') ? point.showPercent! : lineShowPercent;
           const shape = point.hasAttribute('shape') ? point.shape : linePointShape;
           const effectiveFill = point.getEffectiveFill();
+          // Resolve absence once, here, so nothing downstream has to think
+          // about NaN. Under `zero` a missing point becomes a real 0.
+          const isMissing = !Number.isFinite(point.value);
+          const missing = isMissing && linePolicy !== 'zero';
           return {
             element: point,
-            value: point.value,
+            missing,
+            value: missing ? NaN : (isMissing ? 0 : point.value),
             label: point.label,
             fill: effectiveFill || undefined,
             href: point.href || undefined,
@@ -955,6 +1008,7 @@ export class Chart extends AxisChart {
       const areaShowValue = area.hasAttribute('show-value') ? area.showValue : this.showValue;
       const areaShowPercent = area.hasAttribute('show-percent') ? area.showPercent! : this.showPercent;
       const areaCurveFit = area.hasAttribute('curve-fit') ? area.curveFit! : this.curveFit;
+      const areaPolicy: MissingPolicy = area.missing ?? 'gap';
 
       const areaPopupEl = Array.from(area.children).find(
         child => child.tagName.toLowerCase() === 'dc-popup'
@@ -977,6 +1031,7 @@ export class Chart extends AxisChart {
         strokeWidth: area.strokeWidth ?? 2,
         label: area.label || `Area ${areaIndex + 1}`,
         curveFit: areaCurveFit,
+        missing: areaPolicy,
         href: area.href || undefined,
         target: area.target || undefined,
         popup: areaPopupEl ? { content: areaPopupEl.content, trigger: areaPopupEl.trigger } : undefined,
@@ -1005,8 +1060,11 @@ export class Chart extends AxisChart {
           const pointLabelOffsetR = point.labelOffsetR ?? areaLabelOffsetR;
           const pointLabelFill = point.labelFill ?? areaLabelFill;
 
+          const isMissing = !Number.isFinite(point.value);
+          const missing = isMissing && areaPolicy !== 'zero';
           return {
-            value: point.value,
+            missing,
+            value: missing ? NaN : (isMissing ? 0 : point.value),
             label: point.label,
             fill: point.fill || undefined,
             href: point.href || undefined,
@@ -1071,7 +1129,9 @@ export class Chart extends AxisChart {
     areas.forEach(area => {
       area.points.forEach((point, pointIndex) => {
         const current = cumulativeByIndex.get(pointIndex) || 0;
-        cumulativeByIndex.set(pointIndex, current + point.value);
+        // A missing point contributes nothing to the stack rather than NaN,
+        // which would otherwise wipe out the axis range.
+        cumulativeByIndex.set(pointIndex, current + (Number.isFinite(point.value) ? point.value : 0));
       });
     });
 
@@ -2659,8 +2719,12 @@ export class Chart extends AxisChart {
           return { x, y, ...point };
         });
 
-        // Generate path using the line's curve fitting method
-        const pathData = this.generatePathData(pointPositions, line.curveFit);
+        // `skip` joins the neighbours, so the missing positions are dropped
+        // before fitting. `gap` keeps them, and generatePathData breaks there.
+        const pathPoints = line.missing === 'skip'
+          ? pointPositions.filter(p => !p.missing)
+          : pointPositions;
+        const pathData = this.generatePathData(pathPoints, line.curveFit);
 
         const lineHasPopup = line.href || line.popup || this.shouldShowAutoPopup(line.autoPopup);
 
@@ -2682,6 +2746,10 @@ export class Chart extends AxisChart {
         return svg`
           ${line.href ? svg`<a href="${line.href}" target="${line.target || '_self'}">${linePath}</a>` : linePath}
           ${pointPositions.map((pos, pointIndex) => {
+            // No marker and no label where there is no data - drawing either
+            // would assert a value, and the y coordinate is not meaningful.
+            if (pos.missing) return '';
+
             const pointHasPopup = pos.href || pos.popup || this.shouldShowAutoPopup(pos.autoPopup, line.autoPopup);
             const pointColor = pos.fill || line.stroke;
 
@@ -2749,25 +2817,31 @@ export class Chart extends AxisChart {
    * @param curveFit The curve fitting method (for top edge consistency)
    * @returns SVG path data string for a closed area shape
    */
+  /**
+   * Build an area fill, closing each unbroken run separately.
+   *
+   * Closing the whole series in one shape would fill straight across a gap and
+   * hide the very absence the gap exists to show.
+   */
   private generateAreaPath(
-    points: Array<{ x: number; y: number }>,
+    points: Array<{ x: number; y: number; missing?: boolean }>,
     zeroY: number,
     curveFit: CurveFit
   ): string {
-    if (points.length === 0) return '';
-    if (points.length === 1) {
-      // Single point: small vertical line
-      return `M ${points[0].x} ${zeroY} L ${points[0].x} ${points[0].y} Z`;
-    }
-
-    // Generate the top edge using the same curve fitting as the line
-    const topEdge = this.generatePathData(points, curveFit);
-
-    // Close the path along the bottom (zero line)
-    const firstPoint = points[0];
-    const lastPoint = points[points.length - 1];
-
-    return `${topEdge} L ${lastPoint.x} ${zeroY} L ${firstPoint.x} ${zeroY} Z`;
+    return this.splitAtGaps(points)
+      .map(run => {
+        if (run.length === 0) return '';
+        if (run.length === 1) {
+          // Single point: small vertical line
+          return `M ${run[0].x} ${zeroY} L ${run[0].x} ${run[0].y} Z`;
+        }
+        const topEdge = this.generateSubpath(run, curveFit);
+        const first = run[0];
+        const last = run[run.length - 1];
+        return `${topEdge} L ${last.x} ${zeroY} L ${first.x} ${zeroY} Z`;
+      })
+      .filter(Boolean)
+      .join(' ');
   }
 
   /**
@@ -2830,7 +2904,9 @@ export class Chart extends AxisChart {
           x = labelPositions.get(point.label)!;
         }
 
-        const valueHeight = (point.value / totalRange) * chartHeight;
+        const valueHeight = Number.isFinite(point.value)
+          ? (point.value / totalRange) * chartHeight
+          : 0;
 
         // Get the baseline for this x position
         const baseY = cumulativeY.get(pointIndex) ?? zeroY;
@@ -2906,22 +2982,27 @@ export class Chart extends AxisChart {
 
           const y = this.height - padding.bottom - ((point.value - min) / totalRange) * chartHeight;
 
-          return { x, y, point };
+          return { x, y, point, missing: point.missing };
         });
 
+        const fillPositions = area.missing === 'skip'
+          ? positions.filter(p => !p.missing)
+          : positions;
         const areaPath = this.generateAreaPath(
-          positions.map(p => ({ x: p.x, y: p.y })),
+          fillPositions.map(p => ({ x: p.x, y: p.y, missing: p.missing })),
           zeroY,
           area.curveFit
         );
 
         const strokePath = this.generatePathData(
-          positions.map(p => ({ x: p.x, y: p.y })),
+          fillPositions.map(p => ({ x: p.x, y: p.y, missing: p.missing })),
           area.curveFit
         );
 
         // Add deferred labels for points
         positions.forEach(pos => {
+          if (pos.missing) return;
+
           const percent = total > 0 ? (pos.point.value / total) * 100 : 0;
           const shouldShowValue = this.evaluateShowCondition(pos.point.showValue, pos.point.value, percent);
           const shouldShowPercent = this.evaluateShowCondition(pos.point.showPercent, pos.point.value, percent);
@@ -2967,6 +3048,8 @@ export class Chart extends AxisChart {
           />
           <!-- Points -->
           ${positions.map((pos, pointIndex) => {
+            if (pos.missing) return '';
+
             const pointFill = pos.point.fill || area.originalFill || area.fill;
             return svg`
               <circle
@@ -3016,6 +3099,8 @@ export class Chart extends AxisChart {
         topPoints.forEach((pos, pointIndex) => {
           const point = area.points[pointIndex];
           if (!point) return;
+          // Stacked areas have their own label pass; a gap has nothing to label.
+          if (point.missing) return;
 
           const percent = total > 0 ? (point.value / total) * 100 : 0;
           const shouldShowValue = this.evaluateShowCondition(point.showValue, point.value, percent);
@@ -4007,7 +4092,11 @@ export class Chart extends AxisChart {
     if (lines.length > 0) {
       const lineData: InsightLineData[] = lines.map(line => ({
         label: line.label,
-        points: line.points.map(p => ({ value: p.value, label: p.label }))
+        // Missing points are excluded: a trend analysis over NaN produces
+        // "highest at undefined (NaN)" in the screen-reader description.
+        points: line.points
+          .filter(p => !p.missing)
+          .map(p => ({ value: p.value, label: p.label }))
       }));
       const lineInsight = analyzeLines(lineData, formatValue);
       if (lineInsight) {
@@ -4054,8 +4143,11 @@ export class Chart extends AxisChart {
     const bars = this.getFlattenedBars();
     const lines = this.getLines();
     const bubbles = this.getBubbles();
+    // Missing points contribute nothing; adding NaN would make every announced
+    // percentage NaN.
     const total = bars.reduce((sum, b) => sum + b.value, 0) +
-                  lines.flatMap(l => l.points).reduce((sum, p) => sum + p.value, 0) +
+                  lines.flatMap(l => l.points)
+                       .reduce((sum, p) => sum + (Number.isFinite(p.value) ? p.value : 0), 0) +
                   bubbles.reduce((sum, b) => sum + b.value, 0);
 
     let index = 0;
@@ -4078,6 +4170,10 @@ export class Chart extends AxisChart {
     // Add line points as focusable elements (lines are navigable but points are the targets)
     lines.forEach((line) => {
       line.points.forEach((point) => {
+        // Nothing is drawn at a gap, so there is nothing to focus - and a screen
+        // reader should not announce a value that does not exist.
+        if (point.missing) return;
+
         const hasAction = !!(point.href || point.popup || this.shouldShowAutoPopup(point.autoPopup));
         elements.push({
           index,
