@@ -2042,6 +2042,19 @@ export abstract class BaseChart extends LitElement {
       font-family: var(--dc-font-family, inherit);
     }
 
+    /*
+     * fit="fill": take the host's height instead of deriving one from the
+     * viewBox aspect, so the plot fills a container of any shape. The viewBox is
+     * reshaped to match (see applyFit), so nothing is stretched.
+     */
+    :host([fit='fill']) {
+      height: var(--dc-height, 100%);
+    }
+
+    :host([fit='fill']) svg {
+      height: 100%;
+    }
+
     /* Focus styles for keyboard navigation */
     svg:focus {
       outline: var(--dc-focus-ring, 2px solid #005fcc);
@@ -2348,6 +2361,29 @@ export abstract class BaseChart extends LitElement {
   textScaling: 'proportional' | 'fixed' = 'proportional';
 
   /**
+   * How the chart fits its container.
+   *
+   * - `aspect` (default) - the chart keeps the ratio implied by `width` and
+   *   `height`. Its rendered height follows from its width, so in a container of
+   *   a different shape it leaves space or overflows.
+   * - `fill` - the chart adopts the container's shape. `width` stays the
+   *   coordinate scale, and the layout height is recomputed from the container's
+   *   measured aspect, so the plot fills the space with nothing distorted.
+   *
+   * `fill` needs the container to have a height of its own. Given an
+   * auto-height container there is nothing to fill, and the chart keeps its
+   * authored ratio.
+   */
+  @property({ type: String })
+  fit: 'aspect' | 'fill' = 'aspect';
+
+  /**
+   * The `height` as authored, before `fit="fill"` adapted it. Kept so the chart
+   * can go back to its own proportions if fill mode is turned off.
+   */
+  private authoredHeight?: number;
+
+  /**
    * viewBox units per CSS pixel, or 1 when text should scale with the chart.
    *
    * Multiplying a nominal font size by this converts "CSS pixels I want on
@@ -2403,15 +2439,59 @@ export abstract class BaseChart extends LitElement {
     if (typeof ResizeObserver === 'undefined') return;
 
     this.sizeObserver = new ResizeObserver(entries => {
-      const width = entries[0]?.contentRect.width ?? 0;
+      const box = entries[0]?.contentRect;
+      const width = box?.width ?? 0;
       if (!width) return;
 
-      const changed = Math.abs(width - this.renderedWidth) > 0.5;
+      const widthChanged = Math.abs(width - this.renderedWidth) > 0.5;
       this.renderedWidth = width;
-      if (changed && this.textScaling === 'fixed') this.requestUpdate();
+
+      const reshaped = this.applyFit(width, box?.height ?? 0);
+      if (reshaped) return;                                    // already re-rendering
+      if (widthChanged && this.textScaling === 'fixed') this.requestUpdate();
     });
 
     this.sizeObserver.observe(this);
+  }
+
+  /**
+   * Reshape the layout to the container under `fit="fill"`.
+   *
+   * `width` is left alone: it is the coordinate scale, and changing it would
+   * move every percentage padding and font size. Only the layout height is
+   * recomputed, from the container's measured aspect, so the viewBox comes to
+   * match the container's shape and the plot fills it without stretching.
+   *
+   * Adapting `this.height` rather than threading a separate layout height
+   * through the ~55 places that read it means every existing calculation - and
+   * every future one - is correct by default.
+   *
+   * This settles rather than oscillates. With an auto-height container the
+   * measured aspect already equals the viewBox aspect, so the computed height is
+   * the one in use and nothing changes: fill mode is correctly a no-op when
+   * there is no fixed height to fill.
+   *
+   * @returns true if a re-render was requested.
+   */
+  private applyFit(measuredWidth: number, measuredHeight: number): boolean {
+    if (this.fit !== 'fill') {
+      // Restore the authored proportions if fill mode was switched off.
+      if (this.authoredHeight !== undefined && this.height !== this.authoredHeight) {
+        this.height = this.authoredHeight;
+        return true;
+      }
+      return false;
+    }
+
+    if (!measuredHeight || !measuredWidth || !this.width) return false;
+    if (this.authoredHeight === undefined) this.authoredHeight = this.height;
+
+    const target = this.width * (measuredHeight / measuredWidth);
+    if (!Number.isFinite(target) || target <= 0) return false;
+    if (Math.abs(target - this.height) <= 0.5) return false;
+
+    this.height = target;
+    return true;
   }
 
   /**

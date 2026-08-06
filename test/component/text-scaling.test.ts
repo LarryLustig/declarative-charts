@@ -73,3 +73,48 @@ describe('text-scaling', () => {
     expect(sizes.every(n => Number.isFinite(n) && n > 0)).toBe(true);
   });
 });
+
+/**
+ * `fit` controls whether the chart keeps its authored proportions or adopts the
+ * container's shape. See REVIEW.md 4.1(b).
+ *
+ * happy-dom has no layout and no ResizeObserver, so nothing is ever measured and
+ * `fill` cannot reshape anything here. These cover the contract and, importantly,
+ * that a chart still renders when the mode can do nothing. Real reshaping is
+ * measured in Chromium: an 800x200 tile yields viewBox "0 0 600 150" with equal
+ * x/y scale, i.e. filled and undistorted.
+ */
+describe('fit', () => {
+  const chartWith = (attrs: Record<string, string>) =>
+    fixture<Chart>('dc-chart', { width: '600', height: '400', ...attrs }, `
+      <dc-bar value="10" label="A"></dc-bar>
+      <dc-bar value="30" label="B"></dc-bar>
+    `);
+
+  it('defaults to aspect', async () => {
+    expect((await chartWith({})).fit).toBe('aspect');
+  });
+
+  it('reads the attribute', async () => {
+    expect((await chartWith({ fit: 'fill' })).fit).toBe('fill');
+  });
+
+  it('keeps the authored viewBox when nothing can be measured', async () => {
+    const chart = await chartWith({ fit: 'fill' });
+    const svg = chart.shadowRoot!.querySelector('svg')!;
+
+    // No layout to fill, so the chart must keep its own proportions rather than
+    // collapsing to a zero-height viewBox.
+    expect(svg.getAttribute('viewBox')).toBe('0 0 600 400');
+  });
+
+  it('still renders its data in fill mode', async () => {
+    const chart = await chartWith({ fit: 'fill' });
+    expect(chart.shadowRoot!.querySelectorAll('rect[data-shape-index]')).toHaveLength(2);
+  });
+
+  it('leaves height untouched unless fill actually applies', async () => {
+    const chart = await chartWith({ fit: 'fill' });
+    expect(chart.height).toBe(400);
+  });
+});

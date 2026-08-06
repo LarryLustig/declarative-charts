@@ -510,7 +510,7 @@ represent.
 
 These are the things that stand between "impressive demo" and "I put this in production."
 
-### 4.1 Responsive sizing — ✅ (a) FIXED · (b) OPEN · (c) WAS WRONG
+### 4.1 Responsive sizing — ✅ (a) FIXED · (b) FIXED · (c) WAS WRONG
 
 > **(a) Text scaling — fixed.** New `text-scaling="fixed"` reinterprets font sizes as CSS
 > pixels, held constant by a `ResizeObserver` on the host. `proportional` stays the default so
@@ -532,9 +532,24 @@ These are the things that stand between "impressive demo" and "I put this in pro
 > documented in CLAUDE.md — is simply that the size passed to `measureText()` must equal the
 > size emitted as the `font-size` attribute; both now go through `fontSize()`.
 >
-> **(b) aspect ratio remains open.** `preserveAspectRatio="xMidYMid meet"` still locks the chart
-> to its authored `width:height`, so a 16:9 tile letterboxes a 600×400 chart. Unlike (a), that
-> needs a layout-level answer — recomputing at the rendered size — rather than a text tweak.
+> **(b) aspect ratio — fixed**, and with the layout-level answer this section called for rather
+> than a `preserveAspectRatio="none"` stretch. New `fit="fill"` recomputes the layout height
+> from the container's measured aspect, leaving `width` alone as the coordinate scale.
+> Measured in Chromium for one chart authored 600×400:
+>
+> | container | `aspect` (default) | `fill` | viewBox under fill |
+> |---|---|---|---|
+> | 800×200 | 800×533 (overflows) | **800×200** | `0 0 600 150` |
+> | 400×600 | 400×267 (gap) | **400×600** | `0 0 600 900` |
+> | 500×500 | 500×333 (gap) | **500×500** | `0 0 600 600` |
+>
+> Horizontal and vertical scale stay equal throughout, so nothing is distorted.
+>
+> Implemented by assigning `this.height` rather than threading a separate layout height through
+> the ~55 sites that read it — every existing calculation is then correct by construction. It
+> settles rather than oscillates, because with an auto-height container the measured aspect
+> already equals the viewBox aspect. Consequently `fill` is a no-op when there is no definite
+> height to fill, and can never produce a zero-height chart.
 >
 > Original finding below, with (c) left in place as written so the correction is legible.
 

@@ -198,6 +198,12 @@ Use `getPaletteColors(count, colorType)` in chart code to resolve palette colors
 
 Note `measureText()` is **not** unit-confused, despite what an earlier draft of REVIEW.md claimed: it returns viewBox units, because text width and font size scale together and the px/unit factors cancel. Verified in Chromium (197.86 canvas vs 197.87 `getBBox`). Do not "fix" it.
 
+**Container Fit**: `fit="aspect"` (default) | `"fill"`. A viewBox locks the chart to its authored `width:height`, so a 600×400 chart in an 800×200 tile overflows. Under `fill`, `applyFit()` recomputes the **layout height** from the container's measured aspect — `width` is deliberately left alone because it is the coordinate scale, and changing it would move every percentage padding and font size.
+
+It works by assigning `this.height` rather than threading a separate layout height through the ~55 places that read it, so every existing and future calculation is correct by default. The authored value is kept in `authoredHeight` and restored if fill mode is switched off.
+
+This settles rather than oscillates: with an auto-height container the measured aspect already equals the viewBox aspect, so the computed height is the one in use and nothing changes. Two consequences worth knowing — `fill` is correctly a no-op when there is no definite height to fill (including `display:grid` with no `grid-template-rows`, whose row is content-sized), and it can never produce a zero-height chart.
+
 **CSS Hooks (`::part` and `--dc-*`)**: Two complementary layers, documented in **API.md → Styling with CSS**.
 
 - **Custom properties** are declared in `BaseChart.static styles` as `var(--dc-name, fallback)`. They inherit through the shadow boundary, which is what lets a page theme every chart at once. Add new ones the same way — a token with a fallback, never a bare `var()`.

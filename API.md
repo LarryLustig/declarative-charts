@@ -10,6 +10,7 @@ Complete documentation for all elements and attributes in the Declarative Chart 
 - [Palettes and Pattern Fills](#palettes-and-pattern-fills)
 - [Styling with CSS](#styling-with-css)
 - [Responsive Text](#responsive-text)
+- [Filling a Container](#filling-a-container)
 - [Controlling Labels, Values, and Percentages](#controlling-labels-values-and-percentages)
 - [Label Positioning](#label-positioning)
 - [Negative Values](#negative-values)
@@ -895,8 +896,58 @@ drawn at a sensible size rather than disappearing.
 - Only *text* is affected. Bars, strokes, and padding still scale with the chart, which
   is almost always what you want — a 2px stroke in a large chart should look like a 2px
   stroke.
-- This does not change the chart's aspect ratio, which is still fixed by `width` and
-  `height`.
+
+## Filling a Container
+
+`width` and `height` set the chart's coordinate space, and by default its *shape*:
+a chart authored `600 x 400` is always 3:2, so in a wide dashboard tile it overflows
+or leaves a gap.
+
+`fit="fill"` makes the chart adopt the container's shape instead. `width` stays the
+coordinate scale; the layout height is recomputed from the container's measured
+aspect, so the plot fills the space with **nothing stretched**.
+
+```html
+<div style="width: 800px; height: 200px;">
+  <dc-chart width="600" height="400" fit="fill">
+    <dc-bar value="45" label="Q1"></dc-bar>
+    <dc-bar value="72" label="Q2"></dc-bar>
+  </dc-chart>
+</div>
+```
+
+Measured in Chromium, one chart authored `600 x 400` in three tiles:
+
+| Container | `fit="aspect"` (default) | `fit="fill"` | viewBox under fill |
+|-----------|--------------------------|--------------|--------------------|
+| 800 x 200 | 800 x 533 (overflows) | 800 x 200 | `0 0 600 150` |
+| 400 x 600 | 400 x 267 (gap below) | 400 x 600 | `0 0 600 900` |
+| 500 x 500 | 500 x 333 (gap below) | 500 x 500 | `0 0 600 600` |
+
+Horizontal and vertical scale stay equal in every case, so text and shapes keep their
+proportions — this is not `preserveAspectRatio="none"` stretching.
+
+### The container needs a definite height
+
+`fill` works by taking the container's height, so the container must actually have
+one. These do:
+
+```css
+.tile      { height: 200px; }
+.flex-col  { height: 300px; display: flex; flex-direction: column; }
+.grid      { height: 250px; grid-template-rows: 1fr; }   /* note the explicit row */
+```
+
+A `display: grid` with no `grid-template-rows` sizes its row from content, so the
+percentage height cannot resolve — as with any auto-height container, the chart keeps
+its authored proportions rather than collapsing. That is the safe fallback, not a
+failure: **`fill` never produces a zero-height chart.**
+
+To set the height directly instead, use `--dc-height`:
+
+```css
+dc-chart[fit="fill"] { --dc-height: 240px; }
+```
 
 ## Negative Values
 

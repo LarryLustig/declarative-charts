@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`fit` attribute for filling a container**
+  - A viewBox locks a chart to the ratio implied by `width` and `height`, so a 600×400 chart
+    dropped into an 800×200 dashboard tile rendered 800×533 — overflowing — and in a tall tile
+    left a gap
+  - `fit="fill"` makes the chart adopt the container's shape. `width` stays the coordinate
+    scale; the layout height is recomputed from the container's measured aspect, so the plot
+    fills the space with **nothing stretched** — unlike `preserveAspectRatio="none"`, the
+    horizontal and vertical scales stay equal
+  - `fit="aspect"` remains the default
+  - Measured in Chromium for one chart authored 600×400: an 800×200 tile yields viewBox
+    `0 0 600 150`, 400×600 yields `0 0 600 900`, 500×500 yields `0 0 600 600` — each filling
+    exactly, each with equal x/y scale
+  - Needs a container with a definite height. Where there is none — including `display: grid`
+    with no `grid-template-rows`, whose row is content-sized — the chart keeps its authored
+    proportions. **`fill` never produces a zero-height chart.** `--dc-height` sets the height
+    directly if preferred
+  - Documented in **API.md → Filling a Container**
+
 - **`text-scaling` attribute for responsive text**
   - A viewBox scales everything uniformly, text included, so a `font-size` of 14 is
     14/600ths of the chart's width. The same chart rendered 4.7px axis labels in a 300px
