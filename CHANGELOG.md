@@ -135,6 +135,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     without a cast. `ChartInteractionDetail` and `ChartRenderDetail` are exported
   - Documented in **API.md → Events**, with a live demo in `examples/interactive.html`
 
+### Fixed
+
+- **Documented palette names were largely fictional**
+  - CLAUDE.md and API.md both listed 25 built-in palettes, of which **18 did not exist**
+    (`blue`, `green`, `red`, `orange`, `purple`, `gray`, `plasma`, `turbo`, `tableau10`, `set1`,
+    `set2`, `set3`, `accent`, `dark2`, `paired`, `spectral`, `pink-green`, `purple-green`), while
+    **13 real ones were missing** (`default`, `vivid`, `earth`, `ocean`, `colorblind-safe`,
+    `high-contrast`, `cool-to-warm`, `blues`, `greens`, `reds`, `purples`, `sunset`,
+    `purple-orange`)
+  - Nothing caught it because an unrecognised name resolves to `undefined` and falls back to
+    generated colours, so a wrong name looks like "the colours are odd", never like an error
+  - **44 references in the shipped examples pointed at names that do not exist** — those demos
+    were showing auto-generated colours while claiming to demonstrate a palette. All corrected
+  - Both docs now list the real 20, grouped by type, with a note about the silent fallback
+  - `test/unit/palette-docs.test.ts` parses the lists out of both files and compares them to
+    `BUILTIN_PALETTES`, so they cannot drift again
+
 ### Changed
 
 - **Colour resolution extracted from `BaseChart` into `ColorResolver`**

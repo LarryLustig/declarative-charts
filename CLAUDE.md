@@ -168,10 +168,12 @@ Color priority: element fill/stroke > custom palette match > palette by index > 
 <dc-chart palette="status">...</dc-chart>
 ```
 
-**Built-in Palettes** (in `src/builtin-palettes.ts`):
-- **Categorical**: `category10`, `accent`, `dark2`, `paired`, `pastel`, `set1`, `set2`, `set3`, `tableau10`
-- **Sequential**: `blue`, `green`, `red`, `orange`, `purple`, `gray`, `viridis`, `plasma`, `warm`, `cool`, `turbo`
-- **Diverging**: `red-blue`, `purple-green`, `brown-teal`, `pink-green`, `spectral`
+**Built-in Palettes** — 20, defined in `BUILTIN_PALETTES` in `src/builtin-palettes.ts`:
+- **Categorical** (8): `default`, `category10`, `pastel`, `vivid`, `earth`, `ocean`, `colorblind-safe`, `high-contrast`
+- **Sequential** (9): `blues`, `greens`, `reds`, `purples`, `warm`, `cool`, `sunset`, `viridis`, `cool-to-warm`
+- **Diverging** (3): `red-blue`, `brown-teal`, `purple-orange`
+
+`src/builtin-palettes.ts` is the single source of truth. `test/unit/palette-docs.test.ts` asserts these lists match it, because they previously drifted badly — the documented set named 18 palettes that did not exist (`blue`, `plasma`, `turbo`, `tableau10`, `set1`…) while omitting 13 that did. An unrecognised name resolves to `undefined` silently and falls back to generated colours, so a typo shows up as "the colours look wrong", never as an error.
 
 Use `getPaletteColors(count, colorType)` in chart code to resolve palette colors.
 

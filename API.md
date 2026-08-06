@@ -309,9 +309,45 @@ Reference a custom `<dc-palette>` or a built-in palette name using the `palette`
 ```
 
 **Built-in palettes:**
-- **Categorical:** `category10`, `accent`, `dark2`, `paired`, `pastel`, `set1`, `set2`, `set3`, `tableau10`
-- **Sequential:** `blue`, `green`, `red`, `orange`, `purple`, `gray`, `viridis`, `plasma`, `warm`, `cool`, `turbo`
-- **Diverging:** `red-blue`, `purple-green`, `brown-teal`, `pink-green`, `spectral`
+
+*Categorical* — a fixed set of distinct colours, for unrelated categories:
+
+| Name | Colours | |
+|------|---------|---|
+| `default` | 10 | Balanced, professional colours suitable for most charts |
+| `category10` | 10 | Classic D3 categorical palette |
+| `pastel` | 10 | Soft, muted colours for gentle visualizations |
+| `vivid` | 10 | High saturation for maximum visual impact |
+| `earth` | 10 | Natural, organic colours |
+| `ocean` | 10 | Blues and teals |
+| `colorblind-safe` | 8 | Optimized for colour vision deficiency |
+| `high-contrast` | 8 | Maximum visual distinction for accessibility |
+
+*Sequential* — a gradient sampled to the number of elements, for ordered data:
+
+| Name | |
+|------|---|
+| `blues` | Light to dark blue |
+| `greens` | Light to dark green |
+| `reds` | Light to dark red |
+| `purples` | Light to dark purple |
+| `warm` | Yellow to red |
+| `cool` | Cyan to blue |
+| `sunset` | Warm oranges and pinks |
+| `viridis` | Perceptually uniform, colourblind-friendly |
+| `cool-to-warm` | Blue to red, a temperature scale |
+
+*Diverging* — two ramps either side of a midpoint, for data with a meaningful centre:
+
+| Name | |
+|------|---|
+| `red-blue` | Classic diverging palette for positive/negative values |
+| `brown-teal` | For environmental data |
+| `purple-orange` | Colourblind-friendly diverging |
+
+> An unrecognised palette name is ignored silently and the chart falls back to
+> auto-generated colours. If your colours look unexpected, check the spelling
+> against this list first.
 
 See [Palettes and Pattern Fills](#palettes-and-pattern-fills) for more details.
 
