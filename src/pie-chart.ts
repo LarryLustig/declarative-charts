@@ -482,7 +482,7 @@ export class PieChart extends BaseChart {
               y="${slice.labelY - (valueString ? 8 : 0)}"
               text-anchor="${slice.textAnchor}"
               dominant-baseline="middle"
-              font-size="14"
+              font-size="${this.fontSize(14)}"
               font-weight="bold"
               fill="${labelFill}"
             >
@@ -498,7 +498,7 @@ export class PieChart extends BaseChart {
               y="${slice.labelY + (shouldShowLabel ? 10 : 0)}"
               text-anchor="${slice.textAnchor}"
               dominant-baseline="middle"
-              font-size="12"
+              font-size="${this.fontSize(12)}"
               fill="${labelFill}"
             >
               ${valueString}

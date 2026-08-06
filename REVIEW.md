@@ -510,6 +510,34 @@ represent.
 
 These are the things that stand between "impressive demo" and "I put this in production."
 
+### 4.1 Responsive sizing — ✅ (a) FIXED · (b) OPEN · (c) WAS WRONG
+
+> **(a) Text scaling — fixed.** New `text-scaling="fixed"` reinterprets font sizes as CSS
+> pixels, held constant by a `ResizeObserver` on the host. `proportional` stays the default so
+> no existing chart changes. Measured in Chromium at 300px and 1200px container widths:
+>
+> | | proportional @300 | proportional @1200 | fixed @300 | fixed @1200 |
+> |---|---|---|---|---|
+> | axis label | 4.7px | 21.2px | **11px** | **11px** |
+> | title | 8.5px | 38.5px | **20px** | **20px** |
+> | data label | 6px | 27px | **14px** | **14px** |
+> | legend | 5.5px | 25px | **13px** | **13px** |
+>
+> **(c) was wrong, and I am retracting it.** This section claimed `measureText` mixes
+> coordinate systems — returning CSS pixels that are consumed as viewBox units. It does not.
+> Text width and font size scale together, so the factors cancel and the returned value *is* in
+> viewBox units. Verified directly in Chromium: canvas `measureText` gave **197.86** for text
+> that `getBBox()` measured at **197.87** user units in a 2×-scaled SVG. Had I "fixed" this, I
+> would have broken every label-fitting calculation in the library. The real invariant — now
+> documented in CLAUDE.md — is simply that the size passed to `measureText()` must equal the
+> size emitted as the `font-size` attribute; both now go through `fontSize()`.
+>
+> **(b) aspect ratio remains open.** `preserveAspectRatio="xMidYMid meet"` still locks the chart
+> to its authored `width:height`, so a 16:9 tile letterboxes a 600×400 chart. Unlike (a), that
+> needs a layout-level answer — recomputing at the rendered size — rather than a text tweak.
+>
+> Original finding below, with (c) left in place as written so the correction is legible.
+
 ### 4.1 Responsive sizing — *the received diagnosis is wrong; the real problem is subtler*
 
 **Correction first.** The market review claimed "no responsive mode; sizing is fixed pixels."

@@ -154,6 +154,16 @@ export class ChartTitle extends BaseChartElement {
   static readonly DEFAULT_FONT_SIZE = 20;
 
   /**
+   * viewBox units per CSS pixel, set by the parent chart.
+   *
+   * 1 normally. Under `text-scaling="fixed"` the chart supplies the factor that
+   * keeps this title the same size on screen however large the chart is drawn.
+   * Not a reactive property - the chart writes it immediately before measuring
+   * or rendering, and a title renders nothing on its own.
+   */
+  fontScale = 1;
+
+  /**
    * Get the effective font size for this title.
    * @returns Font size in viewBox units
    */
@@ -162,10 +172,10 @@ export class ChartTitle extends BaseChartElement {
     if (svgStyles['font-size']) {
       const parsed = parseFloat(svgStyles['font-size']);
       if (!isNaN(parsed)) {
-        return parsed;
+        return parsed * this.fontScale;
       }
     }
-    return ChartTitle.DEFAULT_FONT_SIZE;
+    return ChartTitle.DEFAULT_FONT_SIZE * this.fontScale;
   }
 
   /**

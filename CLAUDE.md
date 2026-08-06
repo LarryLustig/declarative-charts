@@ -188,6 +188,16 @@ Use `getPaletteColors(count, colorType)` in chart code to resolve palette colors
 
 **Hidden Attribute**: Standard HTML `hidden` on data elements (`<dc-line>`, `<dc-bar>`, etc.) hides them. Toggling it re-renders the chart automatically — see **Child Reactivity** below.
 
+**Text Scaling**: `text-scaling="proportional"` (default) | `"fixed"`. A viewBox scales text along with everything else, so the same chart shows 4.7px axis labels at 300px wide and 21.2px at 1200px. `fixed` mode reinterprets font sizes as CSS pixels.
+
+`BaseChart` tracks rendered width with a `ResizeObserver` and exposes `fontScale` (viewBox units per CSS px, 1 when proportional) and `fontSize(nominal)`.
+
+**The invariant: any font size passed to `measureText()` must be the same value emitted as the `font-size` attribute.** `measureText(text, f)` returns a width in units of `f`, so passing the nominal size to one and the scaled size to the other silently mis-fits every label. Both go through `this.fontSize(x)`.
+
+`<dc-title>` and `<dc-legend>` compute their own sizes, so `BaseChart` assigns them a `fontScale` property immediately before measuring or rendering — see `renderTitle()`, `getTitleDimensions()`, and the two `legend.*` call sites.
+
+Note `measureText()` is **not** unit-confused, despite what an earlier draft of REVIEW.md claimed: it returns viewBox units, because text width and font size scale together and the px/unit factors cancel. Verified in Chromium (197.86 canvas vs 197.87 `getBBox`). Do not "fix" it.
+
 **CSS Hooks (`::part` and `--dc-*`)**: Two complementary layers, documented in **API.md → Styling with CSS**.
 
 - **Custom properties** are declared in `BaseChart.static styles` as `var(--dc-name, fallback)`. They inherit through the shadow boundary, which is what lets a page theme every chart at once. Add new ones the same way — a token with a fallback, never a bare `var()`.

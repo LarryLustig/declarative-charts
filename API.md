@@ -9,6 +9,7 @@ Complete documentation for all elements and attributes in the Declarative Chart 
 - [Color System](#color-system)
 - [Palettes and Pattern Fills](#palettes-and-pattern-fills)
 - [Styling with CSS](#styling-with-css)
+- [Responsive Text](#responsive-text)
 - [Controlling Labels, Values, and Percentages](#controlling-labels-values-and-percentages)
 - [Label Positioning](#label-positioning)
 - [Negative Values](#negative-values)
@@ -837,6 +838,65 @@ Settings cascade from chart to element:
 ```
 
 ---
+
+## Responsive Text
+
+Charts scale to fit their container: the SVG has a `viewBox` and `width: 100%`, so
+dropping one into a flex or grid cell just works. But a viewBox scales *everything*
+uniformly, text included.
+
+`width="600"` is not a pixel size — it is the coordinate space. A `font-size` of 14
+is 14/600ths of the chart's width, so **the same chart renders 28px labels in a wide
+dashboard and 7px labels in a narrow sidebar**.
+
+The `text-scaling` attribute chooses which behaviour you want.
+
+| Value | Font sizes are | Use when |
+|-------|---------------|----------|
+| `proportional` (default) | viewBox units — scale with the chart | The chart is always drawn at roughly one size |
+| `fixed` | CSS pixels — constant on screen | The chart is in a responsive layout |
+
+```html
+<!-- Labels stay 12px however wide this is drawn -->
+<dc-chart width="600" height="400" text-scaling="fixed">
+  <dc-title font-size="20">Quarterly Revenue</dc-title>
+  <dc-bar value="45" label="Q1"></dc-bar>
+  <dc-bar value="72" label="Q2"></dc-bar>
+</dc-chart>
+```
+
+Measured in Chromium, the same chart at two container widths:
+
+| | `proportional` @300px | `proportional` @1200px | `fixed` @300px | `fixed` @1200px |
+|---|---|---|---|---|
+| Axis label | 4.7px | 21.2px | 11px | 11px |
+| Title | 8.5px | 38.5px | 20px | 20px |
+| Data label | 6px | 27px | 14px | 14px |
+| Legend | 5.5px | 25px | 13px | 13px |
+
+Under `fixed`, a `font-size` you write anywhere — on `<dc-title>`, `<dc-axis>`, a data
+element — is read as CSS pixels and converted for you.
+
+### How it works
+
+The chart observes its own rendered width with a `ResizeObserver` and converts
+nominal sizes into viewBox units. Re-rendering only happens in `fixed` mode, and only
+when the width actually changes by more than half a pixel, so resizing does not
+thrash.
+
+Where there is no layout to measure — server-side rendering, a detached element, an
+environment without `ResizeObserver` — sizes pass through unscaled, so text is always
+drawn at a sensible size rather than disappearing.
+
+### Notes
+
+- `proportional` remains the default: switching would silently resize text in every
+  existing chart.
+- Only *text* is affected. Bars, strokes, and padding still scale with the chart, which
+  is almost always what you want — a 2px stroke in a large chart should look like a 2px
+  stroke.
+- This does not change the chart's aspect ratio, which is still fixed by `width` and
+  `height`.
 
 ## Negative Values
 

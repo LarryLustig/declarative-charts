@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`text-scaling` attribute for responsive text**
+  - A viewBox scales everything uniformly, text included, so a `font-size` of 14 is
+    14/600ths of the chart's width. The same chart rendered 4.7px axis labels in a 300px
+    container and 21.2px in a 1200px one — unreadable at one end, oversized at the other
+  - `text-scaling="fixed"` reinterprets font sizes as CSS pixels, so text stays the same size
+    on screen however large the chart is drawn. Applies to titles, axis labels and titles, data
+    labels, and the legend
+  - `proportional` remains the default — switching would silently resize text in every existing
+    chart
+  - Charts observe their own rendered width with a `ResizeObserver`, re-rendering only in
+    `fixed` mode and only when the width changes by more than half a pixel
+  - Degrades safely: with no layout to measure (SSR, detached elements, no `ResizeObserver`)
+    sizes pass through unscaled rather than collapsing to zero
+  - Measured in Chromium at 300px and 1200px: `fixed` holds axis labels at 11px, title 20px,
+    data labels 14px, legend 13px at both widths
+  - Documented in **API.md → Responsive Text**
+
 - **CSS styling hooks: `::part()` and `--dc-*` custom properties**
   - The library had no styling escape hatch at all — no parts, no custom properties — while
     actively warning against CSS conventions. A design system had no way to theme charts once;

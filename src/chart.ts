@@ -1166,8 +1166,8 @@ export class Chart extends AxisChart {
     const maxValueStr = this.formatValue(range.max);
     const minValueStr = this.formatValue(range.min);
     const maxValueWidth = Math.max(
-      this.measureText(maxValueStr, 11),
-      this.measureText(minValueStr, 11)
+      this.measureText(maxValueStr, this.fontSize(11)),
+      this.measureText(minValueStr, this.fontSize(11))
     ) + 15;
 
     const hasGroups = structure.some(item => item.isGroup);
@@ -1193,13 +1193,13 @@ export class Chart extends AxisChart {
         (bar.label?.length || 0) > (longest?.length || 0) ? bar.label : longest,
         ''
       ) || '';
-      const baseLabelWidth = this.measureText(longestLabel, 12) + 15;
+      const baseLabelWidth = this.measureText(longestLabel, this.fontSize(12)) + 15;
       const longestGroupLabelWidth = hasGroups
-        ? Math.max(...structure.filter(s => s.isGroup).map(s => this.measureText((s as BarGroupData).label, 13))) + 20
+        ? Math.max(...structure.filter(s => s.isGroup).map(s => this.measureText((s as BarGroupData).label, this.fontSize(13)))) + 20
         : 0;
       const valueWidth = Math.max(
-        this.measureText(maxValueStr, 14),
-        this.measureText(minValueStr, 14)
+        this.measureText(maxValueStr, this.fontSize(14)),
+        this.measureText(minValueStr, this.fontSize(14))
       ) + 15;
 
       return {
@@ -1474,7 +1474,7 @@ export class Chart extends AxisChart {
           <text
             x="${x}" y="${y}"
             text-anchor="middle" dominant-baseline="middle"
-            font-size="${size * 2.5}" fill="${color}"
+            font-size="${this.fontSize(size * 2.5)}" fill="${color}"
             style="cursor: ${cursor}"
             @mouseenter="${handlers.mouseenter}"
             @mouseleave="${handlers.mouseleave}"
@@ -1585,7 +1585,7 @@ export class Chart extends AxisChart {
                 part="label"
                 x="${rect.x + rect.width / 2}"
                 y="${currentY + segmentHeight / 2 + 4}"
-                text-anchor="middle" font-size="12" fill="#fff"
+                text-anchor="middle" font-size="${this.fontSize(12)}" fill="#fff"
               >${segValueString}</text>
             ` : ''}
           `;
@@ -1637,7 +1637,7 @@ export class Chart extends AxisChart {
                 part="label"
                 x="${currentX + segmentWidth / 2}"
                 y="${rect.y + rect.height / 2 + 4}"
-                text-anchor="middle" font-size="12" fill="#fff"
+                text-anchor="middle" font-size="${this.fontSize(12)}" fill="#fff"
               >${segValueString}</text>
             ` : ''}
           `;
@@ -1781,7 +1781,7 @@ export class Chart extends AxisChart {
           x="${label.x}"
           y="${label.y}"
           text-anchor="${label.anchor || 'middle'}"
-          font-size="${label.fontSize || 14}"
+          font-size="${this.fontSize(label.fontSize || 14)}"
           fill="${label.fill || '#333'}"
         >${label.text}</text>
       `)}
@@ -3259,7 +3259,7 @@ export class Chart extends AxisChart {
               x="${labelX}"
               y="${y + barHeight / 2 + 4}"
               text-anchor="${isReverse ? 'start' : 'end'}"
-              font-size="12" fill="#666"
+              font-size="${this.fontSize(12)}" fill="#666"
             >${bar.label}</text>
           `;
         })}
@@ -3284,7 +3284,7 @@ export class Chart extends AxisChart {
                 x="${labelX}"
                 y="${groupCenterY + 4}"
                 text-anchor="${isReverse ? 'start' : 'end'}"
-                font-size="13" font-weight="bold" fill="#333"
+                font-size="${this.fontSize(13)}" font-weight="bold" fill="#333"
               >${item.label}</text>
             `;
           });
@@ -3341,7 +3341,7 @@ export class Chart extends AxisChart {
               x="${x + barWidth / 2}"
               y="${labelY}"
               text-anchor="middle"
-              font-size="12" fill="#666"
+              font-size="${this.fontSize(12)}" fill="#666"
             >${bar.label}</text>
           `;
         })}
@@ -3367,7 +3367,7 @@ export class Chart extends AxisChart {
                 x="${groupCenterX}"
                 y="${labelY}"
                 text-anchor="middle"
-                font-size="13" font-weight="bold" fill="#333"
+                font-size="${this.fontSize(13)}" font-weight="bold" fill="#333"
               >${item.label}</text>
             `;
           });
@@ -3401,7 +3401,7 @@ export class Chart extends AxisChart {
             x="${x}"
             y="${labelY}"
             text-anchor="middle"
-            font-size="12" fill="#666"
+            font-size="${this.fontSize(12)}" fill="#666"
           >${point.label}</text>
         `;
       })}
@@ -3433,7 +3433,7 @@ export class Chart extends AxisChart {
             x="${x}"
             y="${labelY}"
             text-anchor="middle"
-            font-size="12" fill="#666"
+            font-size="${this.fontSize(12)}" fill="#666"
           >${bubble.label}</text>
         `;
       })}

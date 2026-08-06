@@ -978,7 +978,7 @@ export class StageChart extends BaseChart {
 
     // Check if label fits
     if (canShowLabel && label) {
-      const labelWidth = this.measureText(label, labelFontSize);
+      const labelWidth = this.measureText(label, this.fontSize(labelFontSize));
       const labelHeight = labelFontSize * 1.2;
 
       if (labelWidth > availableWidth || labelHeight > availableHeight) {
@@ -988,7 +988,7 @@ export class StageChart extends BaseChart {
 
     // Check if value fits (considering label if both are shown)
     if (canShowValue && valueString) {
-      const valueWidth = this.measureText(valueString, valueFontSize);
+      const valueWidth = this.measureText(valueString, this.fontSize(valueFontSize));
       const valueHeight = valueFontSize * 1.2;
 
       // Calculate total height needed
@@ -1237,7 +1237,7 @@ export class StageChart extends BaseChart {
               y="${labelY - (textFit.canShowValue ? 8 : 0)}"
               text-anchor="${textAnchor}"
               dominant-baseline="middle"
-              font-size="14"
+              font-size="${this.fontSize(14)}"
               font-weight="bold"
               fill="${textColor}"
               opacity="${opacity}"
@@ -1254,7 +1254,7 @@ export class StageChart extends BaseChart {
               y="${labelY + (textFit.canShowLabel ? 10 : 0)}"
               text-anchor="${textAnchor}"
               dominant-baseline="middle"
-              font-size="12"
+              font-size="${this.fontSize(12)}"
               fill="${textColor}"
               opacity="${opacity}"
               pointer-events="none"

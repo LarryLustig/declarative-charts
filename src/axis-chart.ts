@@ -574,7 +574,7 @@ export abstract class AxisChart extends BaseChart {
     const labels = this.getCategoryLabels();
     if (labels.length === 0) return 1;
 
-    const maxLabelWidth = Math.max(...labels.map(l => this.measureText(l, 12)));
+    const maxLabelWidth = Math.max(...labels.map(l => this.measureText(l, this.fontSize(12))));
     const padding = this.getChartPadding();
     const chartWidth = this.width - padding.left - padding.right;
 
@@ -593,7 +593,7 @@ export abstract class AxisChart extends BaseChart {
     const labels = this.getCategoryLabels();
     if (labels.length === 0) return 1;
 
-    const maxLabelWidth = Math.max(...labels.map(l => this.measureText(l, 12)));
+    const maxLabelWidth = Math.max(...labels.map(l => this.measureText(l, this.fontSize(12))));
     const padding = this.getChartPadding();
     const chartWidth = this.width - padding.left - padding.right;
 
@@ -670,8 +670,8 @@ export abstract class AxisChart extends BaseChart {
       ? parseFloat(config.titleStyles['font-size'])
       : 14;
 
-    const textWidth = this.measureText(config.title, fontSize);
-    const textHeight = fontSize * 1.2;
+    const textWidth = this.measureText(config.title, this.fontSize(fontSize));
+    const textHeight = this.fontSize(fontSize) * 1.2;
 
     // For left/right axes, title is rotated 90 degrees
     if (position === 'left' || position === 'right') {
@@ -729,11 +729,11 @@ export abstract class AxisChart extends BaseChart {
         const x = titleMargin + fontSizeNum / 2;
         return svg`
           <text
-            part="axis-label"
+            part="axis-title"
             x="${x}"
             y="${centerY}"
             text-anchor="middle"
-            font-size="${fontSize}"
+            font-size="${this.fontSize(fontSizeNum)}"
             font-family="${fontFamily}"
             font-weight="${fontWeight}"
             fill="${fill}"
@@ -749,11 +749,11 @@ export abstract class AxisChart extends BaseChart {
         const x = this.width - titleMargin - fontSizeNum / 2;
         return svg`
           <text
-            part="axis-label"
+            part="axis-title"
             x="${x}"
             y="${centerY}"
             text-anchor="middle"
-            font-size="${fontSize}"
+            font-size="${this.fontSize(fontSizeNum)}"
             font-family="${fontFamily}"
             font-weight="${fontWeight}"
             fill="${fill}"
@@ -769,11 +769,11 @@ export abstract class AxisChart extends BaseChart {
         const y = titleMargin + fontSizeNum;
         return svg`
           <text
-            part="axis-label"
+            part="axis-title"
             x="${centerX}"
             y="${y}"
             text-anchor="middle"
-            font-size="${fontSize}"
+            font-size="${this.fontSize(fontSizeNum)}"
             font-family="${fontFamily}"
             font-weight="${fontWeight}"
             fill="${fill}"
@@ -789,11 +789,11 @@ export abstract class AxisChart extends BaseChart {
         const y = this.height - titleMargin;
         return svg`
           <text
-            part="axis-label"
+            part="axis-title"
             x="${centerX}"
             y="${y}"
             text-anchor="middle"
-            font-size="${fontSize}"
+            font-size="${this.fontSize(fontSizeNum)}"
             font-family="${fontFamily}"
             font-weight="${fontWeight}"
             fill="${fill}"
@@ -825,8 +825,8 @@ export abstract class AxisChart extends BaseChart {
     const maxValueStr = this.formatValue(range.max);
     const minValueStr = this.formatValue(range.min);
     const maxValueWidth = Math.max(
-      this.measureText(maxValueStr, 11),
-      this.measureText(minValueStr, 11)
+      this.measureText(maxValueStr, this.fontSize(11)),
+      this.measureText(minValueStr, this.fontSize(11))
     ) + 15; // 11px font + margin
 
     // Height for axis labels
@@ -1161,7 +1161,7 @@ export abstract class AxisChart extends BaseChart {
                 x="${padding.left - 10}"
                 y="${y + 4}"
                 text-anchor="end"
-                font-size="11"
+                font-size="${this.fontSize(11)}"
                 fill="#666"
               >
                 ${this.formatValue(value, format)}
@@ -1180,7 +1180,7 @@ export abstract class AxisChart extends BaseChart {
                 x="${padding.left - 10}"
                 y="${y + 4}"
                 text-anchor="end"
-                font-size="11"
+                font-size="${this.fontSize(11)}"
                 fill="#666"
               >
                 ${this.formatValue(value, format)}
@@ -1201,7 +1201,7 @@ export abstract class AxisChart extends BaseChart {
                 x="${x}"
                 y="${this.height - padding.bottom + 20}"
                 text-anchor="middle"
-                font-size="11"
+                font-size="${this.fontSize(11)}"
                 fill="#666"
               >
                 ${this.formatValue(value, format)}
@@ -1220,7 +1220,7 @@ export abstract class AxisChart extends BaseChart {
                 x="${x}"
                 y="${this.height - padding.bottom + 20}"
                 text-anchor="middle"
-                font-size="11"
+                font-size="${this.fontSize(11)}"
                 fill="#666"
               >
                 ${this.formatValue(value, format)}
@@ -1330,7 +1330,7 @@ export abstract class AxisChart extends BaseChart {
             x="${x}"
             y="${this.height - padding.bottom + 20}"
             text-anchor="middle"
-            font-size="11"
+            font-size="${this.fontSize(11)}"
             fill="#666"
           >${label}</text>
         `;

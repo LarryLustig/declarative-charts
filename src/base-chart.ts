@@ -2200,6 +2200,8 @@ export abstract class BaseChart extends LitElement {
     // Get the title element directly
     const titleEl = this.querySelector(':scope > dc-title') as ChartTitle | null;
     if (!titleEl || !titleEl.text) return svg``;
+    // Supply the scale before anything measures or draws the title.
+    titleEl.fontScale = this.fontScale;
 
     // Log any style warnings
     const warnings = titleEl.getStyleWarnings();
@@ -2323,6 +2325,53 @@ export abstract class BaseChart extends LitElement {
    */
   private childObserver?: MutationObserver;
 
+  /** Watches the host's rendered size. See {@link observeSize}. */
+  private sizeObserver?: ResizeObserver;
+
+  /** The host's last observed width in CSS pixels. 0 until first measured. */
+  private renderedWidth = 0;
+
+  /**
+   * How text responds to the chart being scaled to fit its container.
+   *
+   * The SVG scales to its container via its viewBox, which scales *everything*
+   * uniformly - text included. A `font-size` of 14 is 14/600ths of the chart's
+   * width, so the same chart renders 28px labels in a wide dashboard and 7px
+   * labels in a narrow sidebar.
+   *
+   * - `proportional` (default) - font sizes are viewBox units and scale with the
+   *   chart. Predictable, and correct when the chart is always about one size.
+   * - `fixed` - font sizes are CSS pixels and stay constant on screen however
+   *   large the chart is drawn.
+   */
+  @property({ type: String, attribute: 'text-scaling' })
+  textScaling: 'proportional' | 'fixed' = 'proportional';
+
+  /**
+   * viewBox units per CSS pixel, or 1 when text should scale with the chart.
+   *
+   * Multiplying a nominal font size by this converts "CSS pixels I want on
+   * screen" into "viewBox units to write into the attribute".
+   */
+  protected get fontScale(): number {
+    if (this.textScaling !== 'fixed') return 1;
+    if (!this.renderedWidth || !this.width) return 1;
+    return this.width / this.renderedWidth;
+  }
+
+  /**
+   * Convert a nominal font size into viewBox units for the current mode.
+   *
+   * Use for *both* the emitted `font-size` attribute and the `measureText()`
+   * call that measures it. `measureText(text, f)` returns a width in units of
+   * `f`, so passing the same effective size to both keeps measurement and
+   * rendering in agreement - which is what stops labels from being mis-fitted.
+   */
+  protected fontSize(nominal: number): number {
+    const scale = this.fontScale;
+    return scale === 1 ? nominal : nominal * scale;
+  }
+
   connectedCallback() {
     super.connectedCallback();
     // Apply defaults from <dc-defaults> elements before first render
@@ -2330,12 +2379,39 @@ export abstract class BaseChart extends LitElement {
     // Add data attribute to host element for identification
     this.setAttribute('data-chart-type', this.tagName.toLowerCase());
     this.observeChildren();
+    this.observeSize();
   }
 
   disconnectedCallback() {
     this.childObserver?.disconnect();
     this.childObserver = undefined;
+    this.sizeObserver?.disconnect();
+    this.sizeObserver = undefined;
     super.disconnectedCallback();
+  }
+
+  /**
+   * Track the host's rendered width so `fixed` text scaling knows how far the
+   * viewBox is being stretched.
+   *
+   * Only triggers a re-render in `fixed` mode: in the default mode nothing about
+   * the output depends on rendered size, so observing is free and re-rendering
+   * would be waste. The half-pixel threshold keeps sub-pixel reflow noise from
+   * causing a render per frame during a resize drag.
+   */
+  private observeSize(): void {
+    if (typeof ResizeObserver === 'undefined') return;
+
+    this.sizeObserver = new ResizeObserver(entries => {
+      const width = entries[0]?.contentRect.width ?? 0;
+      if (!width) return;
+
+      const changed = Math.abs(width - this.renderedWidth) > 0.5;
+      this.renderedWidth = width;
+      if (changed && this.textScaling === 'fixed') this.requestUpdate();
+    });
+
+    this.sizeObserver.observe(this);
   }
 
   /**
@@ -2599,6 +2675,7 @@ export abstract class BaseChart extends LitElement {
     const titleEl = this.querySelector(':scope > dc-title') as ChartTitle | null;
     if (!titleEl || !titleEl.text) return null;
 
+    titleEl.fontScale = this.fontScale;
     const dims = titleEl.getDimensions();
     if (dims.width === 0 && dims.height === 0) return null;
 
@@ -2769,6 +2846,7 @@ export abstract class BaseChart extends LitElement {
     // Convert ShowCondition to boolean (threshold conditions count as "show")
     const showValue = this.showValue !== false;
     const showPercent = this.showPercent !== false;
+    legend.fontScale = this.fontScale;
     const dims = legend.getDimensions(
       items, this.width, showValue, showPercent,
       this.valueFormat, this.percentFormat, this.locale
@@ -2798,6 +2876,7 @@ export abstract class BaseChart extends LitElement {
     // Convert ShowCondition to boolean (threshold conditions count as "show")
     const showValue = this.showValue !== false;
     const showPercent = this.showPercent !== false;
+    legend.fontScale = this.fontScale;
     const result = legend.generateSvg(
       items, this.width, showValue, showPercent,
       this.valueFormat, this.percentFormat, this.locale

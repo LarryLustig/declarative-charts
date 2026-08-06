@@ -783,7 +783,7 @@ export class FunnelChart extends BaseChart {
               y="${labelY}"
               text-anchor="${textAnchor}"
               dominant-baseline="middle"
-              font-size="16"
+              font-size="${this.fontSize(16)}"
               font-weight="bold"
               fill="${textColor}"
               pointer-events="none"
@@ -800,7 +800,7 @@ export class FunnelChart extends BaseChart {
               y="${valueY}"
               text-anchor="${textAnchor}"
               dominant-baseline="middle"
-              font-size="14"
+              font-size="${this.fontSize(14)}"
               fill="${textColor}"
               pointer-events="none"
             >

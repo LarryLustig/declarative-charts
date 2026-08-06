@@ -326,6 +326,13 @@ export class ChartLegend extends LitElement {
     padding: 10, // padding inside background box
   };
 
+  /**
+   * viewBox units per CSS pixel, set by the parent chart before measuring or
+   * drawing. 1 normally; under `text-scaling="fixed"` the chart supplies the
+   * factor that keeps legend text a constant size on screen.
+   */
+  fontScale = 1;
+
   /** Layout constants for wrapped legend */
   static readonly WRAPPED = {
     lineHeight: 20,
@@ -473,7 +480,8 @@ export class ChartLegend extends LitElement {
     const isHorizontalPosition = this.position.startsWith('top') || this.position.startsWith('bottom');
 
     // Calculate text widths
-    const { fontSize, colorBoxWidth, colorBoxGap, labelValueGap, itemPadding, columnGap, itemHeight, padding } = ChartLegend.TABULAR;
+    const { fontSize: baseFontSize, colorBoxWidth, colorBoxGap, labelValueGap, itemPadding, columnGap, itemHeight, padding } = ChartLegend.TABULAR;
+    const fontSize = baseFontSize * this.fontScale;
     const labelWidth = showLabel
       ? Math.max(...itemsWithDisplay.map(item => this.measureText(item.label || '', fontSize)))
       : 0;
@@ -505,7 +513,8 @@ export class ChartLegend extends LitElement {
     if (this.columns === '*') {
       // Wrapped layout
       const { lineHeight, colorBoxWidth: wrappedColorBoxWidth, colorBoxGap: wrappedColorBoxGap,
-              itemGap: wrappedItemGap, fontSize: wrappedFontSize, padding: wrappedPadding } = ChartLegend.WRAPPED;
+              itemGap: wrappedItemGap, fontSize: baseWrappedFontSize, padding: wrappedPadding } = ChartLegend.WRAPPED;
+      const wrappedFontSize = baseWrappedFontSize * this.fontScale;
 
       // Calculate maxWidth for wrapping
       let maxWidth: number;
@@ -664,7 +673,8 @@ export class ChartLegend extends LitElement {
     titleInfo: { text: string; position: string; svgStyles: Record<string, string> } | null,
     isHorizontalPosition: boolean
   ): { width: number; height: number; svg: SVGTemplateResult } {
-    const { itemHeight, colorBoxWidth, colorBoxGap, labelValueGap, itemPadding, fontSize, columnGap, padding } = ChartLegend.TABULAR;
+    const { itemHeight, colorBoxWidth, colorBoxGap, labelValueGap, itemPadding, fontSize: baseFontSize, columnGap, padding } = ChartLegend.TABULAR;
+    const fontSize = baseFontSize * this.fontScale;
     const titleFontSize = ChartLegend.DEFAULT_TITLE_FONT_SIZE;
     const titleHeight = 25;
 
@@ -870,7 +880,8 @@ export class ChartLegend extends LitElement {
     titleInfo: { text: string; position: string; svgStyles: Record<string, string> } | null,
     isHorizontalPosition: boolean
   ): { width: number; height: number; svg: SVGTemplateResult } {
-    const { lineHeight, colorBoxWidth, colorBoxGap, itemGap, fontSize, padding } = ChartLegend.WRAPPED;
+    const { lineHeight, colorBoxWidth, colorBoxGap, itemGap, fontSize: baseFontSize, padding } = ChartLegend.WRAPPED;
+    const fontSize = baseFontSize * this.fontScale;
     const titleFontSize = ChartLegend.DEFAULT_TITLE_FONT_SIZE;
     const titleHeight = 20;
 
