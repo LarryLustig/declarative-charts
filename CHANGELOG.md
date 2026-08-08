@@ -179,6 +179,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Logging extracted from `BaseChart` into `ChartLogger`**
+  - Third of the god-class extractions. `src/chart-logger.ts`, 283 lines; `base-chart.ts` down
+    to 3,273 (from 3,724 before this work began)
+  - The logger owns the captured entries, both level filters, the console group, the echo
+    dedup set and `logError()`'s message formatting
+  - No API change. The public `getLogEntries()` still returns the live array `<dc-log-console>`
+    expects, `logEntries` remains a writable protected accessor, and `log()`, `logError()` and
+    `clearLog()` still delegate — including for the other extracted controllers, since
+    `ColorResolver` takes `log`/`logError` on its own host
+  - `logError()` and the console identifier deliberately dispatch back through the host, so a
+    subclass overriding `log()` or `getTitle()` still sees them — the same seam that
+    `getLuminance` and `focusElement` needed in the two earlier extractions
+  - `ChartLogger` and `ChartLoggerHost` are exported
+  - 89 characterization tests were written and committed **before** the refactor
+    (`test/component/logging.test.ts`)
+
 - **Keyboard navigation extracted from `BaseChart` into `KeyboardNavController`**
   - Second of the god-class extractions. `src/keyboard-nav-controller.ts`, 221 lines;
     `base-chart.ts` down to 3,330 (from 3,724 before this work began)

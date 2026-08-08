@@ -276,6 +276,17 @@ Console echo is deduplicated per element for the element's lifetime — one misc
 
 `getConsoleIdentifier()` is wrapped in try/catch: the label is cosmetic, and now that echo is on by default a throw there would take the render with it.
 
+The implementation lives in `src/chart-logger.ts`, not `BaseChart`. `ChartLogger` owns the captured entries, both level filters, the console group, the echo dedup set and `logError()`'s placeholder substitution. `BaseChart` holds it behind a lazy `logger` getter, built with an explicit `ChartLoggerHost` adapter, and every member that existed before — `log()`, `logError()`, `clearLog()`, the public `getLogEntries()`, the protected `logEntries` accessor, and the private `shouldLog()`/`shouldEchoToConsole()`/`getConsoleIdentifier()` — delegates to it, so nothing else in the codebase changed.
+
+Four things a future contributor must not undo:
+
+- `logError()` dispatches through **`host.log()`**, not the logger's own `log()`. `BaseChart.log()` is a protected extension point that subclasses and test spies override; calling the logger's copy severs every one of them silently. Same for `getConsoleIdentifier()`, which reads the title through **`host.getTitle()`**.
+- `shouldLog()`, `shouldEchoToConsole()` and `getConsoleIdentifier()` also round-trip through the host — logger → host → `BaseChart`'s private method → logger. It looks redundant and is not: it keeps those three the live path rather than leaving vestigial methods that no longer decide anything, and it is the same shape `KeyboardNavHost` uses for `focusElement`.
+- `BaseChart.getConsoleIdentifier()` has a try/catch of its own *around the delegation*, separate from the one inside `ChartLogger`. Reaching the logger needs a real chart instance, so borrowing the method off the prototype is what throws. A test pins `Chart.prototype.getConsoleIdentifier.call({}) === 'chart'`.
+- `clearLog()` **replaces** the entries array rather than emptying it, because `getLogEntries()` hands the live array out and `<dc-log-console>` holds what it was given.
+
+`test/component/logging.test.ts` holds 89 characterization tests pinning all of this — including several behaviours that are arguably wrong (the dedup key ignores `value`; the console group is closed by the *next* render; an unrecognised `logging` value silently disables capture). Treat a change there as a behaviour change, not a refactor detail.
+
 **Error Handling**: Use structured error codes for all warnings and errors. See [Error Handling System](#error-handling-system) section below.
 
 **Accessibility**: Charts auto-generate ARIA attributes. Implement `getInsights()` for descriptions. Use utilities from `src/accessibility/insights.ts`.

@@ -8,6 +8,7 @@ import type { ChartPalette, PaletteColorResult } from './chart-palette.js';
 import type { ChartFill } from './chart-fill.js';
 import { ColorResolver } from './color-resolver.js';
 import { KeyboardNavController } from './keyboard-nav-controller.js';
+import { ChartLogger } from './chart-logger.js';
 import {
   PatternConfig,
   ResolvedPattern,
@@ -30,7 +31,6 @@ import {
 } from './chart-defaults.js';
 import {
   type ErrorDefinition,
-  formatErrorMessage,
   ErrorCode
 } from './errors.js';
 
@@ -291,14 +291,17 @@ export abstract class BaseChart extends LitElement {
   /**
    * Log entries captured during the last render cycle.
    * Cleared at the start of each render.
+   *
+   * The array lives on {@link logger}; this stays a writable protected accessor
+   * because it was a writable protected field before the extraction.
    */
-  protected logEntries: LogEntry[] = [];
+  protected get logEntries(): LogEntry[] {
+    return this.logger.entries;
+  }
 
-  /**
-   * Whether a console group is currently open for this render cycle.
-   * Used to group related log messages in the browser console.
-   */
-  private consoleGroupOpen = false;
+  protected set logEntries(value: LogEntry[]) {
+    this.logger.entries = value;
+  }
 
   /**
    * Whether to show numeric values on chart elements.
@@ -855,7 +858,43 @@ export abstract class BaseChart extends LitElement {
 
   // ============================================================================
   // Logging System
+  //
+  // The work lives in ChartLogger; these thin wrappers keep the API that
+  // subclasses, <dc-log-console> and the other controllers already call.
+  // See src/chart-logger.ts.
   // ============================================================================
+
+  private _logger?: ChartLogger;
+
+  /**
+   * Diagnostics for this chart: capture, console echo, filtering, formatting.
+   *
+   * Built with an explicit adapter rather than passing `this`, for the same
+   * reason as {@link colors}: several members it needs are not public. The
+   * getters keep `logging` and `console-log` live, so changing either attribute
+   * takes effect on the next message.
+   *
+   * `getTitle` and `log` are forwarded back to the chart on purpose - both are
+   * `protected` extension points that subclasses override, and having the logger
+   * call its own copies would sever those overrides silently.
+   */
+  protected get logger(): ChartLogger {
+    if (!this._logger) {
+      const chart = this;
+      this._logger = new ChartLogger({
+        get logging() { return chart.logging; },
+        get consoleLog() { return chart.consoleLog; },
+        get tagName() { return chart.tagName; },
+        get id() { return chart.id; },
+        getTitle: () => chart.getTitle(),
+        log: (level, path, message, value, code) => chart.log(level, path, message, value, code),
+        shouldLog: (level) => chart.shouldLog(level),
+        shouldEchoToConsole: (level) => chart.shouldEchoToConsole(level),
+        getConsoleIdentifier: () => chart.getConsoleIdentifier()
+      });
+    }
+    return this._logger;
+  }
 
   /**
    * Check if a log message at the given level should be captured.
@@ -863,11 +902,7 @@ export abstract class BaseChart extends LitElement {
    * @returns true if the message should be logged
    */
   private shouldLog(level: LogLevel): boolean {
-    if (this.logging === 'false') return false;
-    if (this.logging === 'true' || this.logging === 'info') return true;
-    if (this.logging === 'warning') return level === 'warning' || level === 'error';
-    if (this.logging === 'error') return level === 'error';
-    return false;
+    return this.logger.shouldLog(level);
   }
 
   /**
@@ -876,11 +911,7 @@ export abstract class BaseChart extends LitElement {
    * @returns true if the message should be echoed to console
    */
   private shouldEchoToConsole(level: LogLevel): boolean {
-    if (this.consoleLog === 'none') return false;
-    if (this.consoleLog === 'info') return true;
-    if (this.consoleLog === 'warning') return level === 'warning' || level === 'error';
-    if (this.consoleLog === 'error') return level === 'error';
-    return false;
+    return this.logger.shouldEchoToConsole(level);
   }
 
   /**
@@ -889,74 +920,15 @@ export abstract class BaseChart extends LitElement {
    * @returns Identifier string like "dc-chart#my-id" or "dc-chart \"Sales\""
    */
   private getConsoleIdentifier(): string {
-    // This label is cosmetic, so it must never be the reason a render fails.
-    // An instance constructed directly rather than upgraded from markup has no
-    // tagName and no DOM methods; with console echo now on by default, throwing
-    // here would take the whole render with it.
+    // The try/catch is not redundant with the one inside ChartLogger. This label
+    // is cosmetic and must never be the reason a render fails, and reaching the
+    // logger at all needs a real chart instance - an object that was never
+    // upgraded from markup has no `_logger` and no accessors, so the delegation
+    // itself is what throws.
     try {
-      const tagName = this.tagName?.toLowerCase() ?? 'chart';
-      if (this.id) {
-        return `${tagName}#${this.id}`;
-      }
-      const title = this.getTitle();
-      if (title) {
-        // Truncate long titles for console readability
-        const truncatedTitle = title.length > 30 ? title.substring(0, 27) + '...' : title;
-        return `${tagName} "${truncatedTitle}"`;
-      }
-      return tagName;
+      return this.logger.getConsoleIdentifier();
     } catch {
       return 'chart';
-    }
-  }
-
-  /**
-   * Start a console group for this render cycle if not already open.
-   * Groups all log messages together under a collapsible header.
-   */
-  private startConsoleGroup(): void {
-    if (!this.consoleGroupOpen && this.consoleLog !== 'none') {
-      const identifier = this.getConsoleIdentifier();
-      console.groupCollapsed(`${identifier} render`);
-      this.consoleGroupOpen = true;
-    }
-  }
-
-  /**
-   * End the console group for this render cycle if open.
-   */
-  private endConsoleGroup(): void {
-    if (this.consoleGroupOpen) {
-      console.groupEnd();
-      this.consoleGroupOpen = false;
-    }
-  }
-
-  /**
-   * Echo a log message to the browser console with appropriate formatting.
-   * Messages are grouped by render cycle under a collapsible header.
-   * @param level The log level
-   * @param path The path identifier
-   * @param message The log message
-   * @param value Optional value
-   * @param code Optional error code (e.g., "DC001")
-   */
-  private echoToConsole(level: LogLevel, path: string, message: string, value?: unknown, code?: string): void {
-    // Start a group for this render cycle if not already open
-    this.startConsoleGroup();
-
-    // Format: "[DC001] path: message" or "path: message" if no code
-    const prefix = code ? `[${code}] ` : '';
-    const fullMessage = `${prefix}${path}: ${message}`;
-
-    const consoleFn = level === 'error' ? console.error
-                    : level === 'warning' ? console.warn
-                    : console.log;
-
-    if (value !== undefined) {
-      consoleFn(fullMessage, value);
-    } else {
-      consoleFn(fullMessage);
     }
   }
 
@@ -973,18 +945,7 @@ export abstract class BaseChart extends LitElement {
    * @param code Optional error code (e.g., "DC001")
    */
   protected log(level: LogLevel, path: string, message: string, value?: unknown, code?: string): void {
-    if (this.shouldLog(level)) {
-      this.logEntries.push({ level, path, message, value, code });
-
-      // Also echo to browser console if configured
-      if (this.shouldEchoToConsole(level)) {
-        const key = `${level}|${code ?? ''}|${path}|${message}`;
-        if (!this.echoedMessages.has(key)) {
-          this.echoedMessages.add(key);
-          this.echoToConsole(level, path, message, value, code);
-        }
-      }
-    }
+    this.logger.log(level, path, message, value, code);
   }
 
   /**
@@ -1007,8 +968,7 @@ export abstract class BaseChart extends LitElement {
     values: Record<string, string | number | undefined> = {},
     value?: unknown
   ): void {
-    const message = formatErrorMessage(error.message, values);
-    this.log(error.level, error.path, message, value, error.code);
+    this.logger.logError(error, values, value);
   }
 
   /**
@@ -1017,7 +977,7 @@ export abstract class BaseChart extends LitElement {
    * @returns Array of log entries in the order they were captured
    */
   public getLogEntries(): LogEntry[] {
-    return this.logEntries;
+    return this.logger.getLogEntries();
   }
 
   /**
@@ -1025,25 +985,8 @@ export abstract class BaseChart extends LitElement {
    * Also closes any open console group from the previous render cycle.
    */
   protected clearLog(): void {
-    // Close any open console group from previous render
-    this.endConsoleGroup();
-    this.logEntries = [];
+    this.logger.clearLog();
   }
-
-  /**
-   * Messages already echoed to the console by this chart.
-   *
-   * Scoped to the element's lifetime rather than to a render. One
-   * misconfiguration is hit from several places - palette resolution runs for
-   * fills and again for strokes - and charts commonly render more than once, so
-   * a single typo produced a stream of identical warnings. Repeating an
-   * identical message tells the developer nothing new; fixing the markup stops
-   * it at the source.
-   *
-   * Every entry is still recorded for `<dc-log-console>`. Only the console echo
-   * is deduplicated, because that is the part a developer reads.
-   */
-  private echoedMessages = new Set<string>();
 
   // ============================================================================
   // Color System Utilities

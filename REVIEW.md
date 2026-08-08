@@ -924,7 +924,7 @@ computed layout accessor). For a large fraction of potential users the front doo
 
 Not broken, but expensive to change after publishing.
 
-### 5.1 `BaseChart` is a god class — 🔶 IN PROGRESS (2 of ~5 extracted)
+### 5.1 `BaseChart` is a god class — 🔶 IN PROGRESS (3 of ~5 extracted)
 
 > **`ColorResolver` extracted** — `src/color-resolver.ts`, 551 lines. `base-chart.ts` is down
 > from 3,724 to 3,386, and colour resolution is now readable and testable on its own.
@@ -969,10 +969,45 @@ Not broken, but expensive to change after publishing.
 >   through the host. This is the *same* class of break as `getLuminance` during the colour
 >   extraction — a general hazard when moving methods out of a class, not a one-off.
 >
-> Still to extract, in rough order of payoff: `ChartLogger` (~165 lines),
-> `PopupController` (~100), `SvgExporter`. Both abstraction leaks named below — the
-> `orientation` cast and the `tagName` sniffing in `getAnimatableChartType()` — are
-> **still open**.
+> **`ChartLogger` extracted too** — `src/chart-logger.ts`, 283 lines. `base-chart.ts` is now
+> 3,273. The logger owns the captured entries, the two level filters (`logging` decides what is
+> captured, `console-log` can only narrow that), the console group, the per-element echo dedup
+> set, and `logError()`'s placeholder substitution.
+>
+> What stayed behind, deliberately: the `logging` and `console-log` reactive properties, which
+> are part of the element's attribute surface and belong on the element; `logEntries` as a
+> writable protected accessor, because it was a writable protected field; and the DC-code
+> registry in `errors.ts`, which was never `BaseChart`'s to begin with.
+>
+> The boundary here is unusual and worth recording. Almost nothing in this region is a subclass
+> extension point — the three predicates were `private` — yet the logger still dispatches back
+> through the host in five places, for two different reasons:
+>
+> - `logError()` → `host.log()` and `getConsoleIdentifier()` → `host.getTitle()` are the
+>   **override seam**, the same hazard as `getLuminance` and `focusElement` before it. Both are
+>   protected members that a subclass overrides today; calling the logger's own copies severs
+>   them with nothing in the type system objecting. A mutation check confirmed each: bypassing
+>   `host.log` failed 2 tests, bypassing `host.getTitle` failed 5.
+> - `shouldLog`, `shouldEchoToConsole` and `getConsoleIdentifier` round-trip through the host
+>   for a different reason. Tests reach all three by cast, so they had to stay on `BaseChart`;
+>   but once the policy moved, `tsc --noEmit` flagged all three as unused privates — an honest
+>   signal that thin delegations nothing calls are dead code kept alive by tests. Routing the
+>   logger back through them makes them load-bearing again instead. `KeyboardNavHost` already
+>   had exactly this shape for `focusElement`.
+>
+> One thing worth flagging to a human rather than fixing here: `BaseChart.getConsoleIdentifier()`
+> needs a try/catch of its own *around* the delegation, because a test borrows the method off
+> `Chart.prototype` and calls it on `{}` — reaching `this.logger` is what throws in that case,
+> before the logger's own guard can run. Two nested try/catches for a cosmetic label is a smell;
+> the underlying question is whether the "never throws" guarantee should be there at all.
+>
+> No test broke on the first run of the full suite — 2,044 passed unchanged, which is the first
+> time in these three extractions that has happened. The mutation checks above are why that is
+> reported as a result rather than as luck.
+>
+> Still to extract, in rough order of payoff: `PopupController` (~100 lines), `TextMeasurer`
+> (~60), `SvgExporter`. Both abstraction leaks named below — the `orientation` cast and the
+> `tagName` sniffing in `getAnimatableChartType()` — are **still open**.
 >
 > Original finding below.
 

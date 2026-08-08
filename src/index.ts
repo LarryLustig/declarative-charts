@@ -28,6 +28,8 @@ export { ColorResolver } from './color-resolver.js';
 export type { ColorHost } from './color-resolver.js';
 export { KeyboardNavController } from './keyboard-nav-controller.js';
 export type { KeyboardNavHost } from './keyboard-nav-controller.js';
+export { ChartLogger } from './chart-logger.js';
+export type { ChartLoggerHost } from './chart-logger.js';
 
 // Export error handling
 export { ErrorCode, formatErrorMessage, getErrorByCode, createErrorLog } from './errors.js';
