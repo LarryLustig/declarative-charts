@@ -393,10 +393,7 @@ export class FunnelChart extends BaseChart {
   } | null {
     const stagesData = this.getStages();
     if (stagesData.length === 0) {
-      this.logError(ErrorCode.DATA_EMPTY, {
-        chartType: 'Funnel chart',
-        expectedElements: 'dc-funnel-stage children'
-      });
+      // DC001 comes from BaseChart's empty-state path; see getEmptyStateDiagnostic().
       return null;
     }
 
@@ -611,6 +608,10 @@ export class FunnelChart extends BaseChart {
       chartCenterX,
       heightMode
     };
+  }
+
+  protected override getEmptyStateDiagnostic(): { chartType: string; expectedElements: string } {
+    return { chartType: 'Funnel chart', expectedElements: 'dc-funnel-stage children' };
   }
 
   protected override getShadowParts(): Record<string, string> {

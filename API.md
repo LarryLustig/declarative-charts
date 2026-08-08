@@ -20,6 +20,7 @@ Complete documentation for all elements and attributes in the Declarative Chart 
 - [Components](#components)
 - [Dynamic Updates](#dynamic-updates)
 - [Events](#events)
+- [Exporting a Chart](#exporting-a-chart)
 - [Integration with htmx and Other Libraries](#integration-with-htmx-and-other-libraries)
 - [Logging & Debugging](#logging--debugging)
 - [Animations](#animations)
@@ -2302,6 +2303,49 @@ chart.addEventListener('dc-click', (event) => {
 - Hover events fire at pointer speed. Throttle or debounce anything expensive.
 - Events fire for data elements only, not for axes, gridlines, titles, or legends.
 - Elements hidden with `hidden` are not rendered, so they emit nothing.
+
+---
+
+## Exporting a Chart
+
+Every chart exposes `downloadSvg()`, which serializes the rendered chart and
+triggers a download:
+
+```javascript
+document.querySelector('#sales').downloadSvg();              // chart.svg
+document.querySelector('#sales').downloadSvg('q3-sales');    // q3-sales.svg
+```
+
+The `.svg` extension is added if you omit it. Path separators and characters
+filesystems reject are replaced, and an empty or unusable filename falls back to
+`chart.svg` with a `DC108` warning — so a bad argument never writes outside the
+download directory and never throws.
+
+### What the exported file contains
+
+The chart's shapes, text, and accessible description, as a standalone SVG with an
+XML declaration. Anything the library expresses as an SVG attribute — fills,
+strokes, positions, font sizes — is in the file, because those live on the elements
+themselves.
+
+### What it does not contain
+
+**CSS styling is not exported.** The rendered chart lives in a shadow root and
+leans on the host page for anything expressed as CSS, and a standalone file has no
+host page. Concretely:
+
+- `::part()` rules you wrote — `dc-chart::part(bar) { fill: … }` — are **lost**
+- `--dc-*` custom properties are **lost**, except that the resolved
+  `font-family` is inlined onto text elements so the file keeps the page's typeface
+
+If the exported file matters, express appearance through element attributes
+(`fill`, `stroke`, `font-size`) or a `palette` rather than through CSS. Those are
+carried; CSS is not.
+
+> This is a real limitation rather than a temporary one: capturing `::part()` rules
+> would mean walking the host document's stylesheets and mapping every matching
+> selector onto the shadow tree. It is documented here rather than partially
+> implemented, so what you get is predictable.
 
 ## Integration with htmx and Other Libraries
 

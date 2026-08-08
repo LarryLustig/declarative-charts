@@ -146,6 +146,12 @@ export class PopupController {
    */
   hidePopup(): void {
     this.visible = false;
+    // Clear the content too. Hiding used to flip the flag only, leaving the last
+    // popup's markup in the shadow DOM between hovers - still reachable through
+    // ::part(popup) and still announced by assistive technology, which is the
+    // part that matters. The fade-out is a CSS opacity transition on a container
+    // that stays mounted, so emptying it does not break the animation.
+    this.content = '';
   }
 
   /**
@@ -159,6 +165,11 @@ export class PopupController {
    * @returns true if popup was shown, false if SVG element not found
    */
   showPopupAtBounds(content: string, bounds: ShapeBounds): boolean {
+    // Match the standalone showPopupAtBounds() in chart-utils.ts, which has
+    // always bailed on empty content. The two did the same job and disagreed;
+    // this one would happily show an empty box.
+    if (!content || !bounds) return false;
+
     const svgEl = this.host.shadowRoot?.querySelector('svg');
     if (!svgEl) return false;
 

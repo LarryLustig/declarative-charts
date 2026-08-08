@@ -134,13 +134,28 @@ describe('shouldLog level filtering', () => {
     });
   }
 
-  it('captures nothing for an unrecognised logging value', async () => {
-    // No validation and no DC-coded warning: a typo silently disables logging.
+  // A typo used to switch diagnostics off silently - the same failure mode that
+  // hid the palette bug for months. It now warns (DC109) and falls back to the
+  // default level. Fixed deliberately.
+  it('falls back to the default for an unrecognised logging value', async () => {
     const chart = await chartWith({ logging: 'verbose' });
     const a = api(chart);
-    expect(a.shouldLog('error')).toBe(false);
-    expect(a.shouldLog('warning')).toBe(false);
+    expect(a.shouldLog('error')).toBe(true);
+    expect(a.shouldLog('warning')).toBe(true);
     expect(a.shouldLog('info')).toBe(false);
+  });
+
+  it('warns once about an unrecognised logging value', async () => {
+    warnSpy.mockClear();
+    const chart = await chartWith({ logging: 'verbose' });
+    const a = api(chart);
+    a.shouldLog('warning');
+    a.shouldLog('warning');
+    a.shouldLog('error');
+
+    const dc109 = warnSpy.mock.calls.filter(c => c.join(' ').includes('DC109'));
+    expect(dc109).toHaveLength(1);
+    expect(dc109[0].join(' ')).toContain('verbose');
   });
 
   it('drops filtered messages entirely rather than recording them', async () => {
@@ -219,9 +234,10 @@ describe('shouldEchoToConsole level filtering', () => {
     });
   }
 
-  it('echoes nothing for an unrecognised console-log value', async () => {
+  it('falls back to the default for an unrecognised console-log value', async () => {
     const chart = await chartWith({ 'console-log': 'all' });
-    expect(api(chart).shouldEchoToConsole('error')).toBe(false);
+    expect(api(chart).shouldEchoToConsole('error')).toBe(true);
+    expect(api(chart).shouldEchoToConsole('info')).toBe(false);
   });
 
   it('applies the capture filter first, so console-log can only narrow it', async () => {
@@ -546,13 +562,17 @@ describe('log entries', () => {
     expect(copied).toEqual(api(chart).logEntries);
   });
 
-  it('returns the live internal array, not a defensive copy', async () => {
-    // Characterization: <dc-log-console> spreads the result precisely because
-    // of this. Callers can mutate the chart's log.
+  // Used to hand out the live array, so a caller could mutate the chart's own
+  // log - <dc-log-console> spreads the result precisely because of that. Now a
+  // copy, which makes the defensive spread unnecessary rather than customary.
+  it('returns a copy, so a caller cannot mutate the chart log', async () => {
     const chart = await chartWith();
     const entries = chart.getLogEntries();
     api(chart).log('warning', 'e.live', 'appended');
-    expect(entries.some(e => e.path === 'e.live')).toBe(true);
+    expect(entries.some(e => e.path === 'e.live')).toBe(false);
+
+    entries.push({ level: 'error', path: 'e.injected', message: 'x' } as never);
+    expect(chart.getLogEntries().some(e => e.path === 'e.injected')).toBe(false);
   });
 
   it('clears entries at the start of each render', async () => {
@@ -563,13 +583,16 @@ describe('log entries', () => {
     expect(api(chart).getLogEntries().some(e => e.path === 'e.stale')).toBe(false);
   });
 
-  it('replaces the array on clear rather than emptying it in place', async () => {
+  it('leaves an already-returned snapshot alone when cleared', async () => {
     const chart = await chartWith();
-    const before = chart.getLogEntries();
     api(chart).log('warning', 'e.detach', 'x');
+    const snapshot = chart.getLogEntries();
+    expect(snapshot.some(e => e.path === 'e.detach')).toBe(true);
+
     api(chart).clearLog();
-    expect(chart.getLogEntries()).not.toBe(before);
-    expect(before.some(e => e.path === 'e.detach')).toBe(true);
+
+    // The caller's snapshot still reads as it did; the chart's log is empty.
+    expect(snapshot.some(e => e.path === 'e.detach')).toBe(true);
     expect(chart.getLogEntries()).toHaveLength(0);
   });
 });
@@ -798,18 +821,30 @@ describe('edge cases', () => {
     expect(warnSpy).toHaveBeenCalledWith(': ');
   });
 
-  it('logs nothing at all for a chart with no data elements', async () => {
-    // Surprise, pinned as-is. DC001 (DATA_EMPTY) and DC002 (DATA_ALL_HIDDEN)
-    // live in Chart.renderChart(), but BaseChart.render() substitutes the
-    // empty-state placeholder and never calls renderChart() when
-    // getDataElementCount() is 0. Both codes are therefore unreachable for
-    // <dc-chart> today and the log comes back empty. Whether the placeholder
-    // should also log is a decision for a human, not for this refactor.
+  // This test previously pinned a regression: introducing the empty-state
+  // placeholder made BaseChart.render() skip renderChart() entirely, which is
+  // where DC001/DC002 lived, so both codes became unreachable and an empty chart
+  // logged nothing. The diagnostics now come from the empty-state path itself,
+  // via getEmptyStateDiagnostic(). Updated deliberately - this is a behaviour
+  // change, not a refactor artefact.
+  it('reports DC001 for a chart with no data elements', async () => {
     const empty = await chartWith({}, '');
-    expect(api(empty).getLogEntries()).toEqual([]);
+    const codes = api(empty).getLogEntries().map(e => e.code);
+    expect(codes).toContain('DC001');
+  });
 
+  it('reports DC002 when every data element is hidden', async () => {
     const allHidden = await chartWith({}, '<dc-bar value="10" label="A" hidden></dc-bar>');
-    expect(api(allHidden).getLogEntries()).toEqual([]);
+    const entry = api(allHidden).getLogEntries().find(e => e.code === 'DC002');
+    expect(entry).toBeDefined();
+    // The message should name what is hidden, not just that something is.
+    expect(entry!.message).toContain('dc-bar');
+  });
+
+  it('names the elements the author probably meant to add', async () => {
+    const empty = await chartWith({}, '');
+    const dc001 = api(empty).getLogEntries().find(e => e.code === 'DC001');
+    expect(dc001!.message).toContain('dc-bar');
   });
 
   it('keeps logging after the element is disconnected', async () => {

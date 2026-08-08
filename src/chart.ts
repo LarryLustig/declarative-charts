@@ -1743,25 +1743,9 @@ export class Chart extends AxisChart {
     const structure = this.getBarStructure();
 
     if (bars.length === 0 && lines.length === 0 && areas.length === 0 && bubbles.length === 0) {
-      // Check if there are any data elements at all (including hidden ones)
-      const allBars = this.querySelectorAll('dc-bar, dc-bar-group');
-      const allLines = this.querySelectorAll('dc-line');
-      const allAreas = this.querySelectorAll('dc-area');
-      const allBubbles = this.querySelectorAll('dc-bubble');
-      const totalElements = allBars.length + allLines.length + allAreas.length + allBubbles.length;
-
-      if (totalElements > 0) {
-        this.logError(ErrorCode.DATA_ALL_HIDDEN, {
-          chartType: 'Chart',
-          count: totalElements,
-          elementTypes: 'dc-bar, dc-line, dc-area, or dc-bubble elements'
-        });
-      } else {
-        this.logError(ErrorCode.DATA_EMPTY, {
-          chartType: 'Chart',
-          expectedElements: 'dc-bar, dc-line, dc-area, or dc-bubble children'
-        });
-      }
+      // DC001/DC002 are emitted from the empty-state path in BaseChart, which
+      // replaces this method entirely when there is no data - see
+      // getEmptyStateDiagnostic().
       return svg``;
     }
 
@@ -4090,6 +4074,10 @@ export class Chart extends AxisChart {
    * Areas are not focusable, so the inherited focusable count would report an
    * area-only chart as empty. Count the data itself instead.
    */
+  protected override getEmptyStateDiagnostic(): { chartType: string; expectedElements: string } {
+    return { chartType: 'Chart', expectedElements: 'dc-bar, dc-line, dc-area, or dc-bubble children' };
+  }
+
   protected override getDataElementCount(): number {
     return this.getFlattenedBars().length
       + this.getBubbles().length

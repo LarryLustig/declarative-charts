@@ -183,6 +183,26 @@ export const ErrorCode = {
   // ===========================================================================
 
   /**
+   * An unrecognised value was given for the logging or console-log attribute
+   */
+  LOG_LEVEL_INVALID: {
+    code: 'DC109',
+    level: 'warning',
+    path: 'logging.level',
+    message: 'Unrecognised {attribute} value "{value}"; using the default instead'
+  },
+
+  /**
+   * A filename passed to downloadSvg() was unusable and had to be adjusted
+   */
+  EXPORT_FILENAME_INVALID: {
+    code: 'DC108',
+    level: 'warning',
+    path: 'export.filename',
+    message: 'Filename "{value}" is not usable as-is and was adjusted'
+  },
+
+  /**
    * Palette not found
    */
   PALETTE_NOT_FOUND: {

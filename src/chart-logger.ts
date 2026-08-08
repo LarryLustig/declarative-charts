@@ -1,6 +1,6 @@
 import type { LogEntry, LogLevel } from './base-chart.js';
 import type { ErrorDefinition } from './errors.js';
-import { formatErrorMessage } from './errors.js';
+import { ErrorCode, formatErrorMessage } from './errors.js';
 
 /**
  * The slice of a chart that logging needs.
@@ -111,7 +111,13 @@ export class ChartLogger {
     if (this.host.logging === 'true' || this.host.logging === 'info') return true;
     if (this.host.logging === 'warning') return level === 'warning' || level === 'error';
     if (this.host.logging === 'error') return level === 'error';
-    return false;
+
+    // An unrecognised value used to fall through to `false`, silently switching
+    // diagnostics off - the same failure mode that hid the palette bug for
+    // months, reached this time by a typo like logging="verbose". Warn once and
+    // fall back to the default rather than going quiet.
+    this.warnUnrecognisedLevel('logging', this.host.logging);
+    return level === 'warning' || level === 'error';
   }
 
   /**
@@ -124,7 +130,31 @@ export class ChartLogger {
     if (this.host.consoleLog === 'info') return true;
     if (this.host.consoleLog === 'warning') return level === 'warning' || level === 'error';
     if (this.host.consoleLog === 'error') return level === 'error';
-    return false;
+
+    this.warnUnrecognisedLevel('console-log', this.host.consoleLog);
+    return level === 'warning' || level === 'error';
+  }
+
+  /** Levels already reported as unrecognised, so a typo warns once, not per message. */
+  private readonly reportedBadLevels = new Set<string>();
+
+  /**
+   * Report an unrecognised `logging` / `console-log` value.
+   *
+   * Written straight to the console rather than through `log()`: the value being
+   * reported is the one that decides whether logging happens at all, so routing
+   * it through the filter it is complaining about could swallow the complaint.
+   */
+  private warnUnrecognisedLevel(attribute: string, value: string): void {
+    const key = `${attribute}=${value}`;
+    if (this.reportedBadLevels.has(key)) return;
+    this.reportedBadLevels.add(key);
+
+    const code = ErrorCode.LOG_LEVEL_INVALID;
+    console.warn(
+      `[${code.code}] ${code.path}: ` +
+      formatErrorMessage(code.message, { attribute, value: String(value) })
+    );
   }
 
   /**
@@ -264,7 +294,11 @@ export class ChartLogger {
    * @returns Array of log entries in the order they were captured
    */
   getLogEntries(): LogEntry[] {
-    return this.entries;
+    // A copy. This used to hand out the live array, so a caller could mutate the
+    // chart's own log - src/log-console.ts spreads the result precisely because
+    // of that. Returning a copy makes the defensive spread unnecessary rather
+    // than merely customary.
+    return [...this.entries];
   }
 
   /**
@@ -275,6 +309,18 @@ export class ChartLogger {
    * the end of the render that opened it, so an idle chart leaves one group
    * open. Characterized as-is.
    */
+  /**
+   * Close the console group opened during this render, if any.
+   *
+   * Called at the END of a render. Previously the group was only closed by
+   * `clearLog()` at the start of the *next* one, so a chart that rendered once
+   * and then sat idle left a group open in DevTools indefinitely, swallowing
+   * every unrelated console message that followed into it.
+   */
+  endRender(): void {
+    this.endConsoleGroup();
+  }
+
   clearLog(): void {
     // Close any open console group from previous render
     this.endConsoleGroup();

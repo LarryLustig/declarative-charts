@@ -186,10 +186,7 @@ export class PieChart extends BaseChart {
   } | null {
     const sliceData = this.getSlices();
     if (sliceData.length === 0) {
-      this.logError(ErrorCode.DATA_EMPTY, {
-        chartType: 'Pie chart',
-        expectedElements: 'dc-pie-slice children'
-      });
+      // DC001 comes from BaseChart's empty-state path; see getEmptyStateDiagnostic().
       return null;
     }
 
@@ -413,6 +410,10 @@ export class PieChart extends BaseChart {
 
       return `M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} L ${ix2} ${iy2} A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${ix1} ${iy1} Z`;
     }
+  }
+
+  protected override getEmptyStateDiagnostic(): { chartType: string; expectedElements: string } {
+    return { chartType: 'Pie chart', expectedElements: 'dc-pie-slice children' };
   }
 
   protected override getShadowParts(): Record<string, string> {

@@ -1846,7 +1846,48 @@ export abstract class BaseChart extends LitElement {
    * nowhere. The reader was left to guess whether the data was empty, still
    * loading, or broken.
    */
+  /**
+   * Identifies this chart type for the DC001/DC002 diagnostics.
+   *
+   * Return null to stay silent. Every chart type should provide one: the
+   * message names the elements the author probably meant to add, which is the
+   * whole value of the warning.
+   */
+  protected getEmptyStateDiagnostic(): { chartType: string; expectedElements: string } | null {
+    return null;
+  }
+
+  /**
+   * Emit DC001/DC002 for a chart with nothing to draw.
+   *
+   * Called from the empty-state path rather than from `renderChart()`. When the
+   * placeholder was introduced it replaced `renderChart()` entirely, which
+   * silently made both codes unreachable - a chart could be empty for the wrong
+   * reason and say nothing about it. The visible "No data" message tells a
+   * reader something is absent; the warning tells a developer *what* is missing.
+   */
+  private logEmptyState(): void {
+    const info = this.getEmptyStateDiagnostic();
+    if (!info) return;
+
+    const hiddenCount = this.countHiddenDataElements();
+    if (hiddenCount > 0) {
+      this.logError(ErrorCode.DATA_ALL_HIDDEN, {
+        chartType: info.chartType,
+        count: hiddenCount,
+        elementTypes: info.expectedElements
+      });
+    } else {
+      this.logError(ErrorCode.DATA_EMPTY, {
+        chartType: info.chartType,
+        expectedElements: info.expectedElements
+      });
+    }
+  }
+
   protected renderEmptyState(): SVGTemplateResult {
+    this.logEmptyState();
+
     const custom = this.querySelector(':scope > dc-empty') as ChartEmpty | null;
     const hidden = this.hasHiddenDataElements();
     const message = custom?.text
@@ -1914,7 +1955,12 @@ export abstract class BaseChart extends LitElement {
    * because "no data" and "you hid everything" call for different reactions.
    */
   protected hasHiddenDataElements(): boolean {
-    return this.querySelector(':scope > [hidden], :scope > * > [hidden]') !== null;
+    return this.countHiddenDataElements() > 0;
+  }
+
+  /** How many data elements are present but hidden. */
+  protected countHiddenDataElements(): number {
+    return this.querySelectorAll(':scope > [hidden], :scope > * > [hidden]').length;
   }
 
   // ============================================================================
@@ -2389,6 +2435,9 @@ export abstract class BaseChart extends LitElement {
   protected updated(_changedProperties: Map<string, unknown>): void {
     this.applyShadowParts();
     this.emitRender();
+    // Close the console group this render opened, rather than leaving it for the
+    // next clearLog() that may never come.
+    this.logger.endRender();
   }
 
   /**
@@ -3241,7 +3290,8 @@ export abstract class BaseChart extends LitElement {
         get width() { return chart.width; },
         get height() { return chart.height; },
         get hostElement() { return chart; },
-        prepareSvgForExport: (el: SVGElement) => chart.prepareSvgForExport(el)
+        prepareSvgForExport: (el: SVGElement) => chart.prepareSvgForExport(el),
+        logError: (code, params, value) => chart.logError(code, params, value)
       });
     }
     return this._svgExport;

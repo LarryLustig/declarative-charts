@@ -207,22 +207,34 @@ describe('SVG export (characterization)', () => {
       expect(capture.filenames).toEqual(['REPORT.SVG', 'a.b.SvG']);
     });
 
-    it("turns an empty filename into '.svg'", async () => {
+    // Previously produced the dotfile '.svg', because a default parameter only
+    // fires for undefined. Fixed deliberately.
+    it('falls back to the default for an empty or whitespace filename', async () => {
       const chart = await pieFixture();
       const capture = captureDownload();
-      // SURPRISE: '' is falsy but is NOT replaced by the default - only
-      // `undefined` triggers the default parameter. The result is a dotfile.
       chart.downloadSvg('');
-      expect(capture.filenames).toEqual(['.svg']);
+      chart.downloadSvg('   ');
+      expect(capture.filenames).toEqual(['chart.svg', 'chart.svg']);
     });
 
-    it('does not sanitize path separators or spaces', async () => {
+    // Previously passed straight through, so 'reports/q3' asked the browser to
+    // write outside the download directory. Fixed deliberately.
+    it('replaces path separators and reserved characters', async () => {
       const chart = await pieFixture();
       const capture = captureDownload();
-      // SURPRISE: no sanitization at all. Browsers sanitize `download` themselves,
-      // which is presumably why this has never bitten.
       chart.downloadSvg('my chart/name');
-      expect(capture.filenames).toEqual(['my chart/name.svg']);
+      chart.downloadSvg('reports' + String.fromCharCode(92) + 'q3');
+      // Spaces are legal in filenames and are left alone.
+      expect(capture.filenames).toEqual(['my chart-name.svg', 'reports-q3.svg']);
+    });
+
+    it('warns when it had to adjust the filename', async () => {
+      const chart = await pieFixture({ logging: 'warning' });
+      captureDownload();
+      chart.downloadSvg('reports/q3');
+      const codes = (chart as unknown as { getLogEntries(): Array<{ code?: string }> })
+        .getLogEntries().map(e => e.code);
+      expect(codes).toContain('DC108');
     });
 
     it('explicit undefined still gets the default', async () => {
@@ -232,17 +244,20 @@ describe('SVG export (characterization)', () => {
       expect(capture.filenames).toEqual(['chart.svg']);
     });
 
-    it('throws on a non-string filename (no argument guard)', async () => {
-      const chart = await pieFixture();
-      captureDownload();
-      // SURPRISE: there is no type guard, so a JS caller passing null or a
-      // number gets a TypeError out of `filename.toLowerCase()` rather than a
-      // DC-coded warning. Pinned as-is; the SVG has already been located by
-      // this point, so nothing is cleaned up either.
-      expect(() => (chart as unknown as { downloadSvg(f: unknown): void }).downloadSvg(null))
-        .toThrow(TypeError);
-      expect(() => (chart as unknown as { downloadSvg(f: unknown): void }).downloadSvg(123))
-        .toThrow(TypeError);
+    // Previously threw a raw TypeError from filename.toLowerCase(), after the
+    // SVG had already been located. Now warns and uses the default.
+    it('handles a non-string filename without throwing', async () => {
+      const chart = await pieFixture({ logging: 'warning' });
+      const capture = captureDownload();
+      const dl = chart as unknown as { downloadSvg(f: unknown): void };
+
+      expect(() => dl.downloadSvg(null)).not.toThrow();
+      expect(() => dl.downloadSvg(123)).not.toThrow();
+
+      expect(capture.filenames).toEqual(['chart.svg', 'chart.svg']);
+      const codes = (chart as unknown as { getLogEntries(): Array<{ code?: string }> })
+        .getLogEntries().map(e => e.code);
+      expect(codes).toContain('DC108');
     });
   });
 
@@ -251,28 +266,39 @@ describe('SVG export (characterization)', () => {
   // ==========================================================================
 
   describe('missing SVG element', () => {
-    it('warns with the exact DC204 message and returns', async () => {
+    it('warns and returns', async () => {
       const chart = await pieFixture();
       chart.shadowRoot?.querySelector('svg')?.remove();
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       chart.downloadSvg();
 
-      expect(warn).toHaveBeenCalledWith('[DC204] No SVG element found in chart shadow DOM');
+      expect(warn.mock.calls.flat().join(' ')).toContain('DC204');
     });
 
-    it('warns via console.warn directly, not through the DC logging system', async () => {
-      // The message is built inline from ErrorCode.SVG_NOT_FOUND rather than
-      // routed through this.logError(), so no log entry is recorded and the
-      // `logging` attribute has no effect on it.
-      const chart = await pieFixture({ logging: 'all' });
+    // Previously written straight to console.warn with an inline-built message,
+    // so it bypassed the logging system entirely and `logging` had no effect on
+    // it. Now routed through logError like every other diagnostic.
+    it('reports DC204 through the logging system', async () => {
+      const chart = await pieFixture();
       chart.shadowRoot?.querySelector('svg')?.remove();
-      const logError = vi.spyOn(chart as unknown as { logError: () => void }, 'logError');
       vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       chart.downloadSvg();
 
-      expect(logError).not.toHaveBeenCalled();
+      const codes = (chart as unknown as { getLogEntries(): Array<{ code?: string }> })
+        .getLogEntries().map(e => e.code);
+      expect(codes).toContain('DC204');
+    });
+
+    it('can be silenced like any other diagnostic', async () => {
+      const chart = await pieFixture({ logging: 'false' });
+      chart.shadowRoot?.querySelector('svg')?.remove();
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      chart.downloadSvg();
+
+      expect(warn.mock.calls.flat().join(' ')).not.toContain('DC204');
     });
 
     it('creates no blob, no object URL and no anchor', async () => {
@@ -452,15 +478,16 @@ describe('SVG export (characterization)', () => {
       expect(clone.getAttribute('height')).toBe('300');
     });
 
-    it('overwrites BOTH when only one is missing', async () => {
+    // Previously the guard was `!hasWidth || !hasHeight` while the body set
+    // both, so a pre-existing width of 999 was silently clobbered. Each is now
+    // filled in independently. Fixed deliberately.
+    it('fills in only the dimension that is missing', async () => {
       const chart = await pieFixture({ width: '500', height: '350' });
       const clone = chart.shadowRoot!.querySelector('svg')!.cloneNode(true) as SVGElement;
       clone.setAttribute('width', '999');
       clone.removeAttribute('height');
       prepare(chart, clone);
-      // SURPRISE: the guard is `!hasWidth || !hasHeight` but the body sets both,
-      // so a pre-existing width of 999 is clobbered by the chart's width.
-      expect(clone.getAttribute('width')).toBe('500');
+      expect(clone.getAttribute('width')).toBe('999');
       expect(clone.getAttribute('height')).toBe('350');
     });
 
@@ -646,15 +673,19 @@ describe('SVG export (characterization)', () => {
       expect(text).not.toContain('<style');
     });
 
-    it('carries Lit template marker comments into the exported file', async () => {
+    // Previously lit-html's binding markers shipped inside the downloaded file.
+    // Harmless to a renderer, but noise to anyone who opens it. Now stripped
+    // from the clone, which is detached and never re-rendered.
+    it('strips Lit template marker comments from the exported file', async () => {
       const chart = await pieFixture();
       const capture = captureDownload();
       chart.downloadSvg();
       const text = await exportedText(capture);
-      // SURPRISE: the clone is not scrubbed, so lit-html's binding markers ship
-      // inside the downloaded SVG. Harmless to renderers, but visible to anyone
-      // who opens the file in a text editor.
-      expect(text).toMatch(/<!--\?lit\$\d+\$-->/);
+      expect(text).not.toMatch(/<!--\?lit\$\d+\$-->/);
+      expect(text).not.toContain('<!--');
+      // The chart itself must still be there.
+      expect(text).toContain('<svg');
+      expect(text).toContain('</svg>');
     });
 
     it('carries the accessibility description and a resolvable aria-describedby', async () => {

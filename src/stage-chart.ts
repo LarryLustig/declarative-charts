@@ -618,10 +618,7 @@ export class StageChart extends BaseChart {
   } | null {
     const stagesData = this.getStages();
     if (stagesData.length === 0) {
-      this.logError(ErrorCode.DATA_EMPTY, {
-        chartType: 'Stage chart',
-        expectedElements: 'dc-stage children'
-      });
+      // DC001 comes from BaseChart's empty-state path; see getEmptyStateDiagnostic().
       return null;
     }
 
@@ -1018,6 +1015,10 @@ export class StageChart extends BaseChart {
       (shouldShowValue && !!valueString && !canShowValue);
 
     return { canShowLabel, canShowValue, labelsSuppressed };
+  }
+
+  protected override getEmptyStateDiagnostic(): { chartType: string; expectedElements: string } {
+    return { chartType: 'Stage chart', expectedElements: 'dc-stage children' };
   }
 
   protected override getShadowParts(): Record<string, string> {

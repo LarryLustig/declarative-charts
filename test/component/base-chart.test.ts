@@ -640,7 +640,9 @@ describe('BaseChart component', () => {
 
       chart.downloadSvg();
 
-      expect(warnSpy).toHaveBeenCalledWith('[DC204] No SVG element found in chart shadow DOM');
+      // DC204 now goes through the logging system, so the console line carries
+      // the standard [code] path: message shape rather than an inline string.
+      expect(warnSpy.mock.calls.flat().join(' ')).toContain('DC204');
     });
 
     it('downloadSvg method exists and is callable', async () => {

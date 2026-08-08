@@ -205,13 +205,17 @@ describe('hidePopup', () => {
   // Deliberately *not* cleared: only the visible flag flips, so the content and
   // position survive a hide. The CSS opacity transition needs the content to
   // stay put while it fades out.
-  it('leaves the content and coordinates in place', async () => {
+  // hidePopup used to flip the visible flag only, leaving the last popup's
+  // markup mounted between hovers - reachable via ::part(popup) and still
+  // announced by assistive technology. It now clears the content. Coordinates
+  // are left alone: they are harmless and are overwritten on the next show.
+  it('clears the content but keeps the coordinates', async () => {
     const chart = await barChart();
     stubRects(chart);
     const c = pop(chart);
     c.showPopup('Hello', 200, 120);
     c.hidePopup();
-    expect(c.popupContent).toBe('Hello');
+    expect(c.popupContent).toBe('');
     expect(c.popupX).toBe(115);
     expect(c.popupY).toBe(60);
   });
@@ -263,13 +267,18 @@ describe('rendering', () => {
 
   // Consequence of hidePopup keeping the content: the markup stays in the DOM
   // while hidden.
-  it('keeps the rendered content in the DOM while hidden', async () => {
+  it('removes the content from the DOM once hidden', async () => {
     const chart = await barChart();
     pop(chart).showPopup('Still here', 10, 10);
     await elementUpdated(chart);
+    expect(popupDiv(chart).textContent).toContain('Still here');
+
     pop(chart).hidePopup();
     await elementUpdated(chart);
-    expect(popupDiv(chart).textContent).toContain('Still here');
+
+    // The container stays mounted for the CSS fade; only its content goes.
+    expect(popupDiv(chart)).not.toBeNull();
+    expect(popupDiv(chart).textContent).not.toContain('Still here');
   });
 
   it('re-stamps part="popup" after a re-render', async () => {
@@ -419,12 +428,14 @@ describe('showPopupAtBounds', () => {
   // Note the asymmetry with the standalone showPopupAtBounds() helper in
   // chart-utils.ts, which bails out on empty content. BaseChart's method has no
   // such guard: it reports success and shows an empty box.
-  it('reports success for empty content', async () => {
+  // Used to return true and show an empty box, while the standalone
+  // showPopupAtBounds() in chart-utils.ts - same job, exported from index.ts -
+  // bailed. The two now agree.
+  it('declines empty content instead of showing an empty box', async () => {
     const chart = await barChart();
     stubRects(chart);
-    expect(pop(chart).showPopupAtBounds('', { x: 0, y: 0, width: 10, height: 10 })).toBe(true);
-    expect(pop(chart).popupVisible).toBe(true);
-    expect(pop(chart).popupContent).toBe('');
+    expect(pop(chart).showPopupAtBounds('', { x: 0, y: 0, width: 10, height: 10 })).toBe(false);
+    expect(pop(chart).popupVisible).toBe(false);
   });
 
   it('collapses to the offsets when the svg has no measured size', async () => {

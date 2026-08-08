@@ -1,4 +1,4 @@
-import { ErrorCode } from './errors.js';
+import { ErrorCode, type ErrorDefinition } from './errors.js';
 
 /** Filename used when `downloadSvg()` is called with no argument. */
 export const DEFAULT_SVG_FILENAME = 'chart.svg';
@@ -35,6 +35,12 @@ export interface SvgExportHost {
    * that silently. Same hazard as `getLuminance` and the keyboard nav actions.
    */
   prepareSvgForExport(svgElement: SVGElement): void;
+  /** Report a problem through the chart's logging system. */
+  logError(
+    code: ErrorDefinition,
+    params?: Record<string, string | number | undefined>,
+    value?: unknown
+  ): void;
 }
 
 /**
@@ -70,14 +76,13 @@ export class SvgExporter {
   downloadSvg(filename: string = DEFAULT_SVG_FILENAME): void {
     const svg = this.host.shadowRoot?.querySelector('svg');
     if (!svg) {
-      console.warn(`[${ErrorCode.SVG_NOT_FOUND.code}] ${ErrorCode.SVG_NOT_FOUND.message}`);
+      // Through the logging system, so `logging`/`console-log` govern it like
+      // every other diagnostic. It used to write straight to console.warn.
+      this.host.logError(ErrorCode.SVG_NOT_FOUND, {});
       return;
     }
 
-    // Ensure filename has .svg extension
-    if (!filename.toLowerCase().endsWith('.svg')) {
-      filename += '.svg';
-    }
+    const safeName = this.resolveFilename(filename);
 
     // Clone the SVG so we don't modify the live DOM
     const svgClone = svg.cloneNode(true) as SVGElement;
@@ -98,7 +103,7 @@ export class SvgExporter {
 
     const link = document.createElement('a');
     link.href = url;
-    link.download = filename;
+    link.download = safeName;
     // Firefox historically required the anchor be in the document for a
     // programmatic download click, so it is attached, clicked, and removed.
     document.body.appendChild(link);
@@ -108,6 +113,38 @@ export class SvgExporter {
     // Clean up the object URL. Safe synchronously: the browser snapshots the
     // URL when the click is dispatched.
     URL.revokeObjectURL(url);
+  }
+
+  /**
+   * Turn whatever was passed in into a usable filename.
+   *
+   * Previously `filename.toLowerCase()` threw a raw TypeError for a non-string,
+   * *after* the SVG had been found, and an empty string produced a `.svg`
+   * dotfile because a default parameter only fires for `undefined`. Path
+   * separators passed straight through, so 'reports/q3' asked the browser to
+   * write outside the download directory.
+   */
+  private resolveFilename(filename: unknown): string {
+    let name = typeof filename === 'string' ? filename.trim() : '';
+
+    if (typeof filename !== 'string' && filename !== undefined) {
+      this.host.logError(ErrorCode.EXPORT_FILENAME_INVALID, {
+        value: String(filename)
+      });
+    }
+
+    // Strip anything that would steer the write somewhere else, or that a
+    // filesystem is likely to reject.
+    const cleaned = name.replace(/[\\/:*?"<>|]/g, '-').trim();
+    if (cleaned !== name && name !== '') {
+      this.host.logError(ErrorCode.EXPORT_FILENAME_INVALID, { value: name });
+    }
+    name = cleaned;
+
+    // An empty or extension-only name is not a filename.
+    if (name === '' || name === '.svg') return DEFAULT_SVG_FILENAME;
+
+    return name.toLowerCase().endsWith('.svg') ? name : `${name}.svg`;
   }
 
   /**
@@ -136,11 +173,39 @@ export class SvgExporter {
       }
     });
 
-    // Set explicit width/height attributes based on viewBox for better compatibility
-    // with image editors and viewers that don't handle viewBox-only sizing well
-    if (!svgElement.hasAttribute('width') || !svgElement.hasAttribute('height')) {
+    // Set explicit width/height for viewers that do not handle viewBox-only
+    // sizing. Each is filled in only if missing: the guard used to be
+    // `!hasWidth || !hasHeight` while the body set both, so an SVG carrying
+    // width="999" and no height silently lost the 999.
+    if (!svgElement.hasAttribute('width')) {
       svgElement.setAttribute('width', String(this.host.width));
+    }
+    if (!svgElement.hasAttribute('height')) {
       svgElement.setAttribute('height', String(this.host.height));
     }
+
+    // Strip lit-html's binding markers. They are comments, so they render
+    // harmlessly, but they are noise in a file a user may open or hand on.
+    this.removeBindingComments(svgElement);
+  }
+
+  /**
+   * Remove lit-html binding marker comments from a cloned subtree.
+   *
+   * Safe because the clone is detached and never re-rendered - the markers only
+   * matter to the live template instance.
+   */
+  private removeBindingComments(root: Element): void {
+    const doc = root.ownerDocument;
+    if (!doc || typeof doc.createTreeWalker !== 'function') return;
+
+    const walker = doc.createTreeWalker(root, NodeFilter.SHOW_COMMENT);
+    const comments: Comment[] = [];
+    let node = walker.nextNode();
+    while (node) {
+      comments.push(node as Comment);
+      node = walker.nextNode();
+    }
+    comments.forEach(c => c.remove());
   }
 }

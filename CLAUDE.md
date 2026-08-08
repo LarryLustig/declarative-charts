@@ -229,6 +229,8 @@ Two things a future contributor must not undo:
 
 Pattern registration and `<defs>` rendering stayed in `BaseChart`: a separate responsibility that merely lived in the same region. `test/component/color-resolution.test.ts` holds 42 characterization tests pinning colour behaviour — treat a change there as a behaviour change, not a refactor detail.
 
+**Empty-state diagnostics**: DC001/DC002 are emitted from `BaseChart`'s empty-state path via the `getEmptyStateDiagnostic()` hook, **not** from `renderChart()`. Adding the placeholder once made both codes unreachable, because the placeholder replaces `renderChart()` entirely — a chart could be empty for the wrong reason and say nothing. Any new chart type must implement the hook or it will be silently undiagnosable.
+
 **Empty & Loading States**: `BaseChart.renderPlaceholder()` returns a placeholder instead of the plot when `loading` is set or `getDataElementCount()` is 0. `render()` then skips `renderChart()` *and* the focus indicator, and drops `tabindex` to -1 — axes, grid and legend all describe data, so drawing them around nothing is noise. The title is deliberately kept.
 
 `getDataElementCount()` defaults to the focusable count, but **`Chart` must override it**: areas are not focusable, so an area-only chart would otherwise report as empty. Any new chart type whose data is not all focusable needs the same override.
@@ -434,6 +436,8 @@ export const ErrorCode = {
 | DC105 | FORMAT_INVALID | Invalid format string |
 | DC106 | TIME_AXIS_FEW_DATES | Time axis has insufficient dates |
 | DC107 | BAR_SPACE_EXHAUSTED | Too many bars for plot width; gutters compressed |
+| DC108 | EXPORT_FILENAME_INVALID | downloadSvg() filename was unusable and was adjusted |
+| DC109 | LOG_LEVEL_INVALID | Unrecognised logging/console-log value; default used |
 | DC201 | PALETTE_NOT_FOUND | Palette not found |
 | DC202 | PATTERN_NOT_FOUND | Pattern not found or invalid |
 | DC203 | ZERO_FILL_NOT_FOUND | Zero-fill element not found |

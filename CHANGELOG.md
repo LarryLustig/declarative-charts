@@ -7,6 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **DC001/DC002 became unreachable when the empty-state placeholder was added**
+  - The placeholder replaces `renderChart()` entirely, which is where both codes were logged, so
+    an empty chart drew "No data" and reported nothing — a chart could be empty for the wrong
+    reason and say nothing about it
+  - Both now come from the empty-state path via a `getEmptyStateDiagnostic()` hook each chart
+    type implements, so the message still names the elements the author probably meant to add.
+    The unreachable copies inside `renderChart()` are gone
+
+- **`downloadSvg()` filename handling**
+  - `downloadSvg('')` produced a `.svg` dotfile — a default parameter only fires for `undefined`
+  - `downloadSvg(null)` threw a raw `TypeError`, *after* the SVG had been located
+  - Path separators passed straight through, so `'reports/q3'` asked the browser to write
+    outside the download directory
+  - All three now fall back to `chart.svg` and warn with the new `DC108`
+
+- **`downloadSvg()` clobbered an existing width.** The guard was `!hasWidth || !hasHeight` while
+  the body set both, so an SVG carrying `width="999"` and no height silently lost the 999. Each
+  dimension is now filled in independently
+
+- **`DC204` bypassed the logging system**, going straight to `console.warn` with an inline
+  message, so `logging`/`console-log` had no effect on it. Now routed through `logError()`
+
+- **lit-html binding markers shipped inside the exported SVG.** Stripped from the clone
+
+- **`hidePopup()` left stale content in the shadow DOM**, still reachable through
+  `::part(popup)` and still announced by assistive technology between hovers. The content is now
+  cleared; the container stays mounted for the CSS fade
+
+- **`showPopupAtBounds('')` showed an empty box**, while the standalone `showPopupAtBounds()` in
+  `chart-utils.ts` — same job, also exported — declined it. The two now agree
+
+- **An unrecognised `logging` or `console-log` value silently switched diagnostics off.**
+  `logging="verbose"` disabled logging with no warning — the same silent-fallback failure mode
+  that hid the palette bug for months. Now warns once with the new `DC109` and falls back to the
+  default level. That warning is written directly rather than through `log()`, since the value
+  being reported is the one that decides whether logging happens at all
+
+- **`getLogEntries()` returned the live internal array**, so a caller could mutate the chart's
+  own log. `<dc-log-console>` spread the result precisely because of this. Now a copy
+
+- **The console group opened by an echo was closed by the *next* render**, so an idle chart could
+  leave one open in DevTools indefinitely, swallowing unrelated messages. It is now closed at the
+  end of the render that opened it
+
+### Added
+
+- **`downloadSvg()` is documented** for the first time, in **API.md → Exporting a Chart**,
+  including that CSS styling — `::part()` rules and `--dc-*` properties — is *not* carried into
+  the exported file. Stated as a real limitation rather than partially implemented
+
+
 ### Added
 
 - **Category and group labels misaligned from their bars**

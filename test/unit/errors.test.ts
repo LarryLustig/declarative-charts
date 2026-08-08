@@ -359,8 +359,8 @@ describe('createErrorLog', () => {
 describe('Error code count', () => {
   it('has expected number of error codes', () => {
     const count = Object.keys(ErrorCode).length;
-    // 6 data + 7 config + 4 reference + 3 style + 1 info = 21
-    expect(count).toBe(21);
+    // 6 data + 9 config + 4 reference + 3 style + 1 info = 23
+    expect(count).toBe(23);
   });
 
   it('data errors count', () => {
@@ -376,7 +376,7 @@ describe('Error code count', () => {
       const num = parseInt(e.code.slice(2), 10);
       return num >= 100 && num <= 199;
     });
-    expect(configErrors.length).toBe(7);
+    expect(configErrors.length).toBe(9);
   });
 
   it('reference errors count', () => {
