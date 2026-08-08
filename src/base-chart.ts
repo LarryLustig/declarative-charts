@@ -8,6 +8,7 @@ import type { ChartPalette, PaletteColorResult } from './chart-palette.js';
 import type { ChartFill } from './chart-fill.js';
 import { ColorResolver } from './color-resolver.js';
 import { KeyboardNavController } from './keyboard-nav-controller.js';
+import { TextMeasurer } from './text-measurer.js';
 import { SvgExporter, DEFAULT_SVG_FILENAME } from './svg-exporter.js';
 import { PopupController } from './popup-controller.js';
 import { ChartLogger } from './chart-logger.js';
@@ -139,6 +140,8 @@ declare global {
     'dc-render': CustomEvent<ChartRenderDetail>;
   }
 }
+
+export type { AnimatableChartType } from './animation.js';
 
 export type LogLevel = 'error' | 'warning' | 'info';
 
@@ -845,50 +848,30 @@ export abstract class BaseChart extends LitElement {
     return undefined;
   }
 
-  /**
-   * Canvas context used for text measurement (cached for performance)
-   */
-  private _measureCanvas: CanvasRenderingContext2D | null = null;
 
-  /**
-   * Get or create a canvas context for text measurement
-   */
-  private getMeasureContext(): CanvasRenderingContext2D | null {
-    if (!this._measureCanvas) {
-      const canvas = document.createElement('canvas');
-      this._measureCanvas = canvas.getContext('2d');
+
+  private _textMeasurer?: TextMeasurer;
+
+  /** Text measurement for this chart. */
+  protected get textMeasurer(): TextMeasurer {
+    if (!this._textMeasurer) {
+      const chart = this;
+      this._textMeasurer = new TextMeasurer({
+        get hostElement() { return chart; },
+        cachePerRender: (key, compute) => chart.cachePerRender(key, compute)
+      });
     }
-    return this._measureCanvas;
+    return this._textMeasurer;
   }
 
   /**
-   * Measure the width of text using Canvas API
-   * @param text The text to measure
-   * @param fontSize Font size in pixels (default: 12)
-   * @param fontFamily Font family (default: computed from element or 'sans-serif')
-   * @returns The width of the text in pixels
+   * Width of `text` at `fontSize`, in units of `fontSize`.
+   *
+   * Delegates to {@link TextMeasurer}. Kept on `BaseChart` because subclasses
+   * and the axis code call it everywhere, and because it must stay overridable.
    */
   protected measureText(text: string, fontSize: number = 12, fontFamily?: string): number {
-    // Measuring the same string at the same size always gives the same answer,
-    // and label-fitting asks repeatedly. getComputedStyle() below is itself a
-    // layout read, so this cache avoids more than the canvas call.
-    return this.cachePerRender(`text:${fontSize}:${fontFamily ?? ''}:${text}`, () => {
-      const ctx = this.getMeasureContext();
-      if (!ctx) {
-        // Fallback to estimation if canvas not available
-        return text.length * fontSize * 0.6;
-      }
-
-      let family = fontFamily;
-      // If no font family specified, try to get computed style from this element
-      if (!family) {
-        const computedStyle = window.getComputedStyle(this);
-        family = computedStyle.fontFamily || 'sans-serif';
-      }
-
-      ctx.font = `${fontSize}px ${family}`;
-      return ctx.measureText(text).width;
-    });
+    return this.textMeasurer.measureText(text, fontSize, fontFamily);
   }
 
   // ============================================================================
@@ -1055,7 +1038,6 @@ export abstract class BaseChart extends LitElement {
         get strokeWidth() { return chart.strokeWidth; },
         get chartInstanceId() { return chart.chartInstanceId; },
         querySelector: (selectors: string) => chart.querySelector(selectors),
-        getMeasureContext: () => chart.getMeasureContext(),
         log: (level, path, message, value) => chart.log(level, path, message, value),
         logError: (code, params, value) => chart.logError(code, params, value)
       });
@@ -2510,7 +2492,7 @@ export abstract class BaseChart extends LitElement {
     const chartType = this.getAnimatableChartType();
 
     // Determine orientation (for bar charts)
-    const horizontal = (this as unknown as { orientation?: string }).orientation === 'horizontal';
+    const horizontal = this.isHorizontalChart();
 
     // Trigger animations
     animateChartEntry(
@@ -2522,15 +2504,25 @@ export abstract class BaseChart extends LitElement {
   }
 
   /**
-   * Get the chart type for animation purposes.
-   * Override in subclasses if needed.
+   * Which animation this chart type wants on entry.
+   *
+   * Abstract on purpose. This used to sniff `this.tagName` for 'pie', 'funnel'
+   * and 'stage' — a base class enumerating its own subclasses by name, which
+   * inverts the relationship and fails silently: a new chart type simply fell
+   * through to 'mixed' with nothing to notice it. Declaring it abstract makes a
+   * missing implementation a compile error instead.
    */
-  protected getAnimatableChartType(): AnimatableChartType {
-    const tagName = this.tagName.toLowerCase();
-    if (tagName.includes('pie')) return 'pie';
-    if (tagName.includes('funnel')) return 'funnel';
-    if (tagName.includes('stage')) return 'stage';
-    return 'mixed'; // dc-chart can have bars, lines, areas, etc.
+  protected abstract getAnimatableChartType(): AnimatableChartType;
+
+  /**
+   * Whether this chart lays out along the horizontal axis.
+   *
+   * Also abstract rather than reaching for an `orientation` property that only
+   * `Chart` defines. `AxisChart` already had a `getChartOrientation()` hook for
+   * exactly this; the animation path was casting around it.
+   */
+  protected isHorizontalChart(): boolean {
+    return false;
   }
 
   render() {
@@ -3167,6 +3159,53 @@ export abstract class BaseChart extends LitElement {
   }
 
   /**
+   * Draw the keyboard focus ring around the focused shape.
+   *
+   * Lives here rather than in each chart type. All four had a copy of this, and
+   * they differed only in a comment - the shape lookup is already virtual via
+   * getShapeBounds(), so there was never anything chart-specific to say.
+   */
+  protected renderFocusIndicator(): SVGTemplateResult {
+    if (!this.keyboardActive || this.focusedIndex < 0) {
+      return svg``;
+    }
+
+    const bounds = this.getShapeBounds(this.focusedIndex);
+    if (!bounds) return svg``;
+
+    const padding = 3;
+    return svg`
+      <rect
+        class="focus-indicator"
+        x="${bounds.x - padding}"
+        y="${bounds.y - padding}"
+        width="${bounds.width + padding * 2}"
+        height="${bounds.height + padding * 2}"
+        fill="none"
+        stroke="var(--dc-focus-ring-color, #005fcc)"
+        stroke-width="2"
+        stroke-dasharray="4 2"
+        pointer-events="none"
+      />
+    `;
+  }
+
+  /**
+   * Whether auto-popup applies, taking the first level that expresses an
+   * opinion and falling back to the chart's own setting.
+   *
+   * Variadic because the levels differ by chart type: `<dc-chart>` has an
+   * intermediate `<dc-line>` between point and chart, the others go straight to
+   * the chart. All four previously carried their own near-identical copy.
+   */
+  protected shouldShowAutoPopup(...levels: Array<boolean | undefined>): boolean {
+    for (const level of levels) {
+      if (level !== undefined) return level;
+    }
+    return this.autoPopup;
+  }
+
+  /**
    * Show popup for the focused element.
    * Override in subclasses to provide chart-specific popup content.
    */
@@ -3179,8 +3218,19 @@ export abstract class BaseChart extends LitElement {
    * Toggle popup for the focused element (for click-triggered popups).
    * Override in subclasses to provide chart-specific popup handling.
    */
-  protected togglePopupForFocusedElement(_index: number): void {
-    // Default implementation - subclasses should override
+  /**
+   * Show the focused element's popup, or hide it if one is already showing.
+   *
+   * Hoisted from all four chart types, which carried byte-identical copies. The
+   * chart-specific part is `showPopupForFocusedElement()`, which stays an
+   * extension point and is still dispatched virtually from here.
+   */
+  protected togglePopupForFocusedElement(index: number): void {
+    if (this.popupVisible) {
+      this.hidePopup();
+    } else {
+      this.showPopupForFocusedElement(index);
+    }
   }
 
   /**
@@ -3221,18 +3271,6 @@ export abstract class BaseChart extends LitElement {
     return focusable[index].label;
   }
 
-  /**
-   * Render a focus indicator for the currently focused shape.
-   * This draws a visible focus ring around the focused element.
-   * Override in subclasses to provide chart-specific focus indicators.
-   *
-   * @returns SVG template for the focus indicator, or empty if nothing focused
-   */
-  protected renderFocusIndicator(): SVGTemplateResult {
-    // Default implementation returns nothing
-    // Subclasses should override to render a focus ring around the focused shape
-    return svg``;
-  }
 
   /**
    * Get the bounding box of a shape element by its index.

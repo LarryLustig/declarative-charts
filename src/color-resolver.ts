@@ -29,8 +29,7 @@ export interface ColorHost {
   readonly chartInstanceId: string;
   /** Scoped lookup, for finding a `<dc-palette high-contrast>` child. */
   querySelector(selectors: string): Element | null;
-  /** Canvas context used to normalise CSS colour strings to RGB. */
-  getMeasureContext(): CanvasRenderingContext2D | null;
+
   log(level: LogLevel, path: string, message: string, value?: unknown): void;
   logError(
     code: ErrorDefinition,
@@ -53,7 +52,24 @@ export interface ColorHost {
  * are a separate concern that merely lived in the same region of the file.
  */
 export class ColorResolver {
+  /**
+   * Canvas context used to normalise CSS colour strings to RGB.
+   *
+   * Its own, rather than borrowed from text measurement. Colour parsing and
+   * label fitting both happen to want a 2D context; sharing one coupled two
+   * unrelated concerns and meant this class could not be used without a chart
+   * that measures text.
+   */
+  private parseContext: CanvasRenderingContext2D | null = null;
+
   constructor(private readonly host: ColorHost) {}
+
+  private getParseContext(): CanvasRenderingContext2D | null {
+    if (!this.parseContext) {
+      this.parseContext = document.createElement('canvas').getContext('2d');
+    }
+    return this.parseContext;
+  }
 
   /**
    * Get the palette element referenced by the paletteId attribute.
@@ -147,7 +163,7 @@ export class ColorResolver {
    * @returns RGB values as [r, g, b] where each component is 0-255, or null if invalid
    */
   parseColor(color: string): [number, number, number] | null {
-    const ctx = this.host.getMeasureContext();
+    const ctx = this.getParseContext();
     if (!ctx) return null;
 
     // Set the color and read it back as normalized RGB

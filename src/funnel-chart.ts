@@ -1,6 +1,6 @@
 import { customElement, property } from 'lit/decorators.js';
 import { svg, SVGTemplateResult } from 'lit';
-import { BaseChart, type ShowCondition, type FocusableElement } from './base-chart.js';
+import { BaseChart, type ShowCondition, type FocusableElement, type AnimatableChartType } from './base-chart.js';
 import { ErrorCode } from './errors.js';
 import type { LegendItem } from './chart-legend.js';
 import type { ChartFunnelStage } from './chart-funnel-stage.js';
@@ -610,6 +610,10 @@ export class FunnelChart extends BaseChart {
     };
   }
 
+  protected override getAnimatableChartType(): AnimatableChartType {
+    return 'funnel';
+  }
+
   protected override getEmptyStateDiagnostic(): { chartType: string; expectedElements: string } {
     return { chartType: 'Funnel chart', expectedElements: 'dc-funnel-stage children' };
   }
@@ -824,19 +828,6 @@ export class FunnelChart extends BaseChart {
     `;
   }
 
-  /**
-   * Determine if auto-popup should be shown for a shape.
-   * @param elementAutoPopup The auto-popup setting from the element (undefined = inherit, true/false = explicit)
-   * @returns true if auto-popup should be shown
-   */
-  private shouldShowAutoPopup(elementAutoPopup?: boolean): boolean {
-    // Element-level setting takes precedence
-    if (elementAutoPopup !== undefined) {
-      return elementAutoPopup;
-    }
-    // Otherwise inherit from chart
-    return this.autoPopup;
-  }
 
   /**
    * Generate default popup content for a funnel stage.
@@ -1033,34 +1024,6 @@ export class FunnelChart extends BaseChart {
     });
   }
 
-  /**
-   * Render a focus indicator for the currently focused stage.
-   */
-  protected override renderFocusIndicator(): SVGTemplateResult {
-    if (!this.keyboardActive || this.focusedIndex < 0) {
-      return svg``;
-    }
-
-    const bounds = this.getShapeBounds(this.focusedIndex);
-    if (!bounds) return svg``;
-
-    // Draw a focus ring around the stage
-    const padding = 3;
-    return svg`
-      <rect
-        class="focus-indicator"
-        x="${bounds.x - padding}"
-        y="${bounds.y - padding}"
-        width="${bounds.width + padding * 2}"
-        height="${bounds.height + padding * 2}"
-        fill="none"
-        stroke="#005fcc"
-        stroke-width="2"
-        stroke-dasharray="4 2"
-        pointer-events="none"
-      />
-    `;
-  }
 
   /**
    * Show popup for the focused stage.
@@ -1089,16 +1052,6 @@ export class FunnelChart extends BaseChart {
     }
   }
 
-  /**
-   * Toggle popup for the focused stage.
-   */
-  protected override togglePopupForFocusedElement(index: number): void {
-    if (this.popupVisible) {
-      this.hidePopup();
-    } else {
-      this.showPopupForFocusedElement(index);
-    }
-  }
 
 }
 

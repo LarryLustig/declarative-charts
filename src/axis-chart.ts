@@ -3,7 +3,9 @@ import { BaseChart } from './base-chart.js';
 import { ErrorCode } from './errors.js';
 import type { ChartAxis, AxisPosition, AxisType } from './chart-axis.js';
 import type { GridConfig } from './chart-grid.js';
-import { calculateLabelLines, calculateLabelInterval, calculateTicks } from './chart-utils.js';
+import { calculateLabelLines, calculateLabelInterval, calculateTicks,
+  niceNumber
+} from './chart-utils.js';
 import { parseDateLabels, calculateTimeTicks, formatDate, dateToPosition } from './date-utils.js';
 import type { ParsedDates } from './date-utils.js';
 
@@ -312,36 +314,6 @@ export abstract class AxisChart extends BaseChart {
   // Nice Numbers for Value Axis
   // ============================================================================
 
-  /**
-   * Calculate a "nice" number for axis scaling.
-   * Nice numbers are 1, 2, 5, or 10 multiplied by a power of 10.
-   * @param value The raw value to round
-   * @param round If true, round to nearest nice number; if false, ceiling
-   * @returns A nice number >= value (or nearest if round=true)
-   */
-  protected niceNumber(value: number, round: boolean = false): number {
-    if (value === 0) return 0;
-
-    const exponent = Math.floor(Math.log10(value));
-    const fraction = value / Math.pow(10, exponent);
-
-    let niceFraction: number;
-    if (round) {
-      // Round to nearest nice number
-      if (fraction < 1.5) niceFraction = 1;
-      else if (fraction < 3) niceFraction = 2;
-      else if (fraction < 7) niceFraction = 5;
-      else niceFraction = 10;
-    } else {
-      // Ceiling to next nice number
-      if (fraction <= 1) niceFraction = 1;
-      else if (fraction <= 2) niceFraction = 2;
-      else if (fraction <= 5) niceFraction = 5;
-      else niceFraction = 10;
-    }
-
-    return niceFraction * Math.pow(10, exponent);
-  }
 
   /**
    * Get a "nice" maximum value for the value axis.
@@ -353,10 +325,10 @@ export abstract class AxisChart extends BaseChart {
     if (rawMax <= 0) return 1;
 
     // Calculate the range we need to cover
-    const range = this.niceNumber(rawMax, false);
+    const range = niceNumber(rawMax, false);
 
     // Calculate nice tick spacing
-    const tickSpacing = this.niceNumber(range / this.gridSteps, true);
+    const tickSpacing = niceNumber(range / this.gridSteps, true);
 
     // Calculate nice max that's a multiple of tick spacing
     const niceMax = Math.ceil(rawMax / tickSpacing) * tickSpacing;
@@ -464,8 +436,8 @@ export abstract class AxisChart extends BaseChart {
     if (effectiveMax <= 0) {
       // Calculate nice minimum (negative value)
       const absMin = Math.abs(effectiveMin);
-      const range = this.niceNumber(absMin, false);
-      const tickSpacing = this.niceNumber(range / this.gridSteps, true);
+      const range = niceNumber(absMin, false);
+      const tickSpacing = niceNumber(range / this.gridSteps, true);
       const niceAbsMin = Math.ceil(absMin / tickSpacing) * tickSpacing;
 
       const niceMin = typeof explicitMin === 'number' ? explicitMin : -niceAbsMin;
@@ -484,7 +456,7 @@ export abstract class AxisChart extends BaseChart {
     // Case 3: Mixed positive and negative
     // Calculate tick spacing based on the larger absolute value to get consistent intervals
     const maxAbsValue = Math.max(effectiveMax, Math.abs(effectiveMin));
-    const tickSpacing = this.niceNumber(maxAbsValue / this.gridSteps, true);
+    const tickSpacing = niceNumber(maxAbsValue / this.gridSteps, true);
 
     // Round max up and min down to tick spacing multiples
     const niceMax = typeof explicitMax === 'number' ? explicitMax : Math.ceil(effectiveMax / tickSpacing) * tickSpacing;

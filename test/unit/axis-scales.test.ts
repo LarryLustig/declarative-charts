@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { AxisChart, ValueRange } from '../../src/axis-chart';
 import { LegendItem } from '../../src/base-chart';
+import { niceNumber } from '../../src/chart-utils';
 
 /**
  * Concrete test implementation of AxisChart that exposes protected methods
@@ -50,9 +51,11 @@ class TestAxisChart extends AxisChart {
     return null as any;
   }
 
-  // Expose protected methods for testing
+  // AxisChart used to carry a byte-identical private copy of niceNumber; it now
+  // uses the shared one from chart-utils. These cases are kept because they
+  // cover the axis-scaling contract, not just the utility in isolation.
   public testNiceNumber(value: number, round: boolean = false): number {
-    return this.niceNumber(value, round);
+    return niceNumber(value, round);
   }
 
   public testGetNiceMax(): number {

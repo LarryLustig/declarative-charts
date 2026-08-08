@@ -26,6 +26,8 @@ export type {
 export { AxisChart } from './axis-chart.js';
 export { ColorResolver } from './color-resolver.js';
 export type { ColorHost } from './color-resolver.js';
+export { TextMeasurer } from './text-measurer.js';
+export type { TextMeasurerHost } from './text-measurer.js';
 export { KeyboardNavController } from './keyboard-nav-controller.js';
 export type { KeyboardNavHost } from './keyboard-nav-controller.js';
 export { PopupController } from './popup-controller.js';

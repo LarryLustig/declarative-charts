@@ -1,7 +1,7 @@
 import { customElement, property } from 'lit/decorators.js';
 import { svg, SVGTemplateResult } from 'lit';
 import { AxisChart, type ValueRange } from './axis-chart.js';
-import { type ShowCondition, type FocusableElement } from './base-chart.js';
+import { type ShowCondition, type FocusableElement, type AnimatableChartType } from './base-chart.js';
 import { ErrorCode } from './errors.js';
 import { analyzeLines, analyzeBars, analyzeBubbles, type LineData as InsightLineData, type BarData as InsightBarData, type BubbleData as InsightBubbleData } from './accessibility/index.js';
 import type { LegendItem, DimensionlessLegendItem } from './chart-legend.js';
@@ -3461,11 +3461,6 @@ export class Chart extends AxisChart {
   // Auto-Popup Helper
   // ============================================================================
 
-  private shouldShowAutoPopup(elementAutoPopup?: boolean, lineAutoPopup?: boolean): boolean {
-    if (elementAutoPopup !== undefined) return elementAutoPopup;
-    if (lineAutoPopup !== undefined) return lineAutoPopup;
-    return this.autoPopup;
-  }
 
   // ============================================================================
   // Popup Content Generators
@@ -4074,6 +4069,15 @@ export class Chart extends AxisChart {
    * Areas are not focusable, so the inherited focusable count would report an
    * area-only chart as empty. Count the data itself instead.
    */
+  /** bars, lines, areas and bubbles can all appear in one <dc-chart>. */
+  protected override isHorizontalChart(): boolean {
+    return this.getChartOrientation() === 'horizontal';
+  }
+
+  protected override getAnimatableChartType(): AnimatableChartType {
+    return 'mixed';
+  }
+
   protected override getEmptyStateDiagnostic(): { chartType: string; expectedElements: string } {
     return { chartType: 'Chart', expectedElements: 'dc-bar, dc-line, dc-area, or dc-bubble children' };
   }
@@ -4151,34 +4155,6 @@ export class Chart extends AxisChart {
     return elements;
   }
 
-  /**
-   * Render a focus indicator for the currently focused shape.
-   */
-  protected override renderFocusIndicator(): SVGTemplateResult {
-    if (!this.keyboardActive || this.focusedIndex < 0) {
-      return svg``;
-    }
-
-    const bounds = this.getShapeBounds(this.focusedIndex);
-    if (!bounds) return svg``;
-
-    // Draw a focus ring around the shape
-    const padding = 3;
-    return svg`
-      <rect
-        class="focus-indicator"
-        x="${bounds.x - padding}"
-        y="${bounds.y - padding}"
-        width="${bounds.width + padding * 2}"
-        height="${bounds.height + padding * 2}"
-        fill="none"
-        stroke="#005fcc"
-        stroke-width="2"
-        stroke-dasharray="4 2"
-        pointer-events="none"
-      />
-    `;
-  }
 
   /**
    * Get the bounds of a shape by index, accounting for different element types.
@@ -4259,16 +4235,6 @@ export class Chart extends AxisChart {
     }
   }
 
-  /**
-   * Toggle popup for the focused element (for click-triggered popups).
-   */
-  protected override togglePopupForFocusedElement(index: number): void {
-    if (this.popupVisible) {
-      this.hidePopup();
-    } else {
-      this.showPopupForFocusedElement(index);
-    }
-  }
 
   /**
    * Get popup content for a bar.

@@ -1267,7 +1267,7 @@ describe('BaseChart component', () => {
       chart = await fixture<PieChart>('dc-pie-chart', {}, `
         <dc-pie-slice value="100" label="A"></dc-pie-slice>
       `);
-      vi.spyOn(chart as any, 'getMeasureContext').mockReturnValue(null);
+      vi.spyOn((chart as any).colors, 'getParseContext').mockReturnValue(null);
       expect((chart as any).parseColor('#ff0000')).toBeNull();
     });
 
@@ -1291,7 +1291,7 @@ describe('BaseChart component', () => {
         },
         _fillStyle: ''
       };
-      vi.spyOn(chart as any, 'getMeasureContext').mockReturnValue(mockCtx);
+      vi.spyOn((chart as any).colors, 'getParseContext').mockReturnValue(mockCtx);
       const result = (chart as any).parseColor('#ff0000');
       expect(result).toEqual([255, 0, 0]);
     });
@@ -1310,7 +1310,7 @@ describe('BaseChart component', () => {
         },
         _fillStyle: ''
       };
-      vi.spyOn(chart as any, 'getMeasureContext').mockReturnValue(mockCtx);
+      vi.spyOn((chart as any).colors, 'getParseContext').mockReturnValue(mockCtx);
       const result = (chart as any).parseColor('#f00');
       expect(result).toEqual([255, 0, 0]);
     });
@@ -1329,7 +1329,7 @@ describe('BaseChart component', () => {
         },
         _fillStyle: ''
       };
-      vi.spyOn(chart as any, 'getMeasureContext').mockReturnValue(mockCtx);
+      vi.spyOn((chart as any).colors, 'getParseContext').mockReturnValue(mockCtx);
       const result = (chart as any).parseColor('#00ff00');
       expect(result).toEqual([0, 255, 0]);
     });

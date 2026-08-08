@@ -924,7 +924,7 @@ computed layout accessor). For a large fraction of potential users the front doo
 
 Not broken, but expensive to change after publishing.
 
-### 5.1 `BaseChart` is a god class — 🔶 IN PROGRESS (5 of ~6 extracted)
+### 5.1 `BaseChart` is a god class — ✅ FIXED (6 extracted, both leaks closed)
 
 > **`ColorResolver` extracted** — `src/color-resolver.ts`, 551 lines. `base-chart.ts` is down
 > from 3,724 to 3,386, and colour resolution is now readable and testable on its own.
@@ -1087,10 +1087,23 @@ Not broken, but expensive to change after publishing.
 > the DC204 warning goes straight to `console.warn` rather than through `logError()`, so the
 > `logging` attribute has no effect on it.
 >
-> Still to extract, in rough order of payoff: `TextMeasurer` (~60 lines). Both abstraction leaks
-> named below — the `orientation` cast and the `tagName` sniffing in `getAnimatableChartType()` —
-> are **still open**.
+> **Complete.** Six responsibilities now live outside `BaseChart`: `ColorResolver` (567),
+> `KeyboardNavController` (221), `ChartLogger` (329), `PopupController` (191), `SvgExporter` (211)
+> and `TextMeasurer` (73) — 1,592 lines in modules that can be read, tested and reasoned about on
+> their own.
 >
+> **Both abstraction leaks are closed.** `getAnimatableChartType()` was a base class enumerating
+> its own subclasses by tag name, which failed *silently* for a new chart type — it just fell
+> through to `'mixed'`. It is now `protected abstract`, so a missing implementation is a compile
+> error; making it abstract immediately produced four errors, which is the point. The
+> `orientation` cast is replaced by an `isHorizontalChart()` hook that `Chart` answers using the
+> `getChartOrientation()` seam `AxisChart` already had.
+>
+> `base-chart.ts` itself is 3,380 lines, barely below the 3,145 the finding names — because
+> preserving the API costs lines, and because this session added a great deal to the class while
+> extracting from it. Line count was never the point: the file no longer *decides* how colours
+> resolve, how focus moves, what gets logged, how popups position, how export works, or how text
+> is measured. What remains is a chart element that coordinates those things.
 > Original finding below.
 
 ### 5.1 (original) `BaseChart` is a 3,145-line god class that knows its own subclasses
@@ -1112,7 +1125,24 @@ inheritance — `ColorResolver` (~450 lines, 936–1630), `TextMeasurer` (~60, 7
 Make `getAnimatableChartType()` `protected abstract`, and use the `getChartOrientation()` hook
 that `axis-chart.ts:165` already defines instead of the cast.
 
-### 5.2 ~1,050 duplicated lines across the four chart files (~15%)
+### 5.2 ~1,050 duplicated lines across the four chart files — ✅ FIXED
+
+> **Fixed.** `renderFocusIndicator`, `togglePopupForFocusedElement` and `shouldShowAutoPopup` are
+> hoisted into `BaseChart`; twelve copies became three implementations. The chart files lost 164
+> lines between them.
+>
+> Two corrections to the finding. `renderFocusIndicator` was described as byte-identical across
+> all four — it is not, but the only differences are comments, so hoisting was still safe. And
+> `shouldShowAutoPopup` genuinely differed: `<dc-chart>` takes an intermediate `<dc-line>` level
+> the others do not. The hoisted version is variadic, which is a strict generalisation of all
+> four rather than a compromise between them.
+>
+> `showPopupForFocusedElement` deliberately stayed per chart — it is the extension point the
+> hoisted `togglePopupForFocusedElement` dispatches to, and it is genuinely chart-specific.
+>
+> Original finding below.
+
+### 5.2 (original) ~1,050 duplicated lines across the four chart files (~15%)
 
 Byte-identical in all four: `renderFocusIndicator` (`pie-chart.ts:689-713`,
 `funnel-chart.ts:1008-1032`, `stage-chart.ts:1576-1599`, `chart.ts:3916-3940`) and
@@ -1126,7 +1156,21 @@ of the clicked-index field. `getSlices`/`getStages` (`pie-chart.ts:57-129`,
 Hoist the quartet into `BaseChart` and route all popup/ARIA text through `this.formatValue()` —
 which resolves §3.3 in one place, permanently. ~600 lines removed.
 
-### 5.3 No layout phase
+### 5.3 No layout phase — 🔶 PARTIALLY FIXED
+
+> **Bars are fixed** — `computeBarLayout()` walks once and returns geometry, which is what let
+> §3.2's misalignment bug be fixed by construction rather than patched. See that section.
+>
+> **`stage-chart.ts` is not.** `calculateStageLayout()` still interleaves geometry with
+> emission across ~360 lines, and it remains the worst-covered file in the repo. Extracting it
+> into a pure `layout/stage-layout.ts` taking `(stages, width, height, padding)` is still the
+> right move and is still outstanding. Left rather than half-done: it is the one piece of this
+> section that needs its own characterization suite first, on the least-tested code in the
+> project.
+>
+> Original finding below.
+
+### 5.3 (original) No layout phase
 
 Covered in §3.2 — layout and emission are interleaved everywhere, which is why the four bar
 traversals could drift without any test noticing. `stage-chart.ts:565-925`
@@ -1134,7 +1178,17 @@ traversals could drift without any test noticing. `stage-chart.ts:565-925`
 `layout/*.ts` modules taking `(data, width, height, padding)` and returning geometry is the
 single highest-leverage refactor available, both for correctness and for testability.
 
-### 5.4 Per-render caching exists in exactly one chart
+### 5.4 Per-render caching exists in exactly one chart — ✅ FIXED
+
+> **Fixed at the base-class level** by `BaseChart.cachePerRender()`, added while fixing the
+> quadratic render in §3.4 — so every chart type gets it rather than each reimplementing
+> `cachedLayout`. The hover-cost argument in this section did not survive measurement and is
+> retracted there; the staleness argument did, and is now moot because the cache deliberately
+> outlives `render()`.
+>
+> Original finding below.
+
+### 5.4 (original) Per-render caching exists in exactly one chart
 
 `cachedLayout` appears only in `stage-chart.ts` (declared 146, set 1080, read 1429/1449/1463) —
 the pattern `CLAUDE.md` documents as standard. The others recompute on every mouse event:
@@ -1149,7 +1203,27 @@ DOM mutation outside Lit's control, which Lit may revert on its next render.
 Combined with §3.1, this is a staleness hazard: a handler's recomputed data can disagree with
 what is on screen.
 
-### 5.5 Maintenance debt
+### 5.5 Maintenance debt — ✅ FIXED
+
+> - **Duplicated `niceNumber` removed.** `axis-chart.ts`'s private copy is gone; it imports the
+>   shared one from `chart-utils.ts`. The bodies were byte-identical, confirmed before deleting.
+> - **`calculateNiceTicks` / `calculateTicksByInterval` kept.** The finding called them dead
+>   because nothing in `src/` calls them — but both are exported from `index.ts` and tested, so
+>   they are public API, not dead code. Deleting them would have been a breaking change made by
+>   mistake.
+> - **Custom-elements manifest added.** `npm run analyze` generates `custom-elements.json`
+>   (all 26 elements), it is wired into the build, referenced by the `customElements` field, and
+>   shipped. The package smoke test asserts every element is present. For an HTML-first library
+>   this is the difference between editor autocomplete on `<dc-bar …>` and none.
+> - **Per-chart subpath exports deliberately not added.** Every chart type imports `BaseChart`
+>   and the whole controller set, so `declarative-charts/pie-chart` would still deliver ~90% of
+>   the library — and `sideEffects: ["*.js"]`, which element registration requires, disables the
+>   tree-shaking that would make it meaningful. It would look like a saving and not be one. The
+>   `.` and `./standalone` entries stay.
+>
+> Original finding below.
+
+### 5.5 (original) Maintenance debt
 
 `src/chart-utils.ts:20-41` exports `niceNumber`; `src/axis-chart.ts:322-346` holds a
 **byte-identical private copy**, and that copy is the one `getNiceMax()`/`getNiceRange()`

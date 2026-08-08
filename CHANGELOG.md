@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **`BaseChart` god-class work completed** (REVIEW.md §5)
+  - `TextMeasurer` extracted, the sixth and last responsibility to move out. Six modules now hold
+    1,592 lines that used to be inside the base class
+  - **Both abstraction leaks closed.** `getAnimatableChartType()` sniffed `this.tagName` for
+    'pie'/'funnel'/'stage' — a base class enumerating its own subclasses, which failed silently
+    for a new chart type by falling through to `'mixed'`. It is now `protected abstract`, so the
+    compiler demands it. The `orientation` cast is replaced by an `isHorizontalChart()` hook
+  - `ColorResolver` now creates its own canvas for colour parsing instead of borrowing the
+    text-measuring one — two unrelated concerns that happened to want a 2D context
+  - **Twelve duplicated methods collapsed to three.** `renderFocusIndicator`,
+    `togglePopupForFocusedElement` and `shouldShowAutoPopup` are hoisted into `BaseChart`; the
+    four chart files lost 164 lines. `shouldShowAutoPopup` is now variadic, which generalises all
+    four variants rather than compromising between them
+  - `axis-chart.ts`'s byte-identical private copy of `niceNumber` removed in favour of the shared
+    one in `chart-utils.ts`
+
+### Added
+
+- **Custom-elements manifest.** `npm run analyze` generates `custom-elements.json` covering all
+  26 elements; it is built automatically, referenced by the `customElements` field, and shipped.
+  For an HTML-first library this is the difference between editor autocomplete on `<dc-bar …>`
+  and none. The package smoke test asserts every element appears in it
+
+
 ### Fixed
 
 - **DC001/DC002 became unreachable when the empty-state placeholder was added**

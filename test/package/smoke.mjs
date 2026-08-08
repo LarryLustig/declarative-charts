@@ -79,6 +79,24 @@ check(
 check(!/YOUR_USERNAME|your\.email@example\.com|Your Name/.test(JSON.stringify(pkg)),
   'no placeholder metadata');
 
+// An HTML-first library lives or dies by editor autocomplete on its tags.
+const manifestPath = path.join(ROOT, 'custom-elements.json');
+check(pkg.customElements === 'custom-elements.json',
+  'package.json points at the custom-elements manifest');
+check(fs.existsSync(manifestPath), 'custom-elements.json exists', 'run `npm run analyze`');
+if (fs.existsSync(manifestPath)) {
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const tags = (manifest.modules || [])
+    .flatMap(m => m.declarations || [])
+    .filter(d => d.tagName)
+    .map(d => d.tagName);
+  check(tags.length >= 25,
+    `manifest documents every element (${tags.length} found)`,
+    'an element is missing from the manifest');
+  check(tags.includes('dc-chart') && tags.includes('dc-pie-chart'),
+    'manifest includes the chart elements');
+}
+
 // --------------------------------------------------------------- lit handling
 console.log('\nlit externalization');
 const esm = read('declarative-charts.js');

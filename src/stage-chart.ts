@@ -1,6 +1,6 @@
 import { customElement, property } from 'lit/decorators.js';
 import { svg, SVGTemplateResult } from 'lit';
-import { BaseChart, type ShowCondition, type FocusableElement } from './base-chart.js';
+import { BaseChart, type ShowCondition, type FocusableElement, type AnimatableChartType } from './base-chart.js';
 import { ErrorCode } from './errors.js';
 import type { LegendItem } from './chart-legend.js';
 import type { ChartStage, StageShape } from './chart-stage.js';
@@ -1017,6 +1017,10 @@ export class StageChart extends BaseChart {
     return { canShowLabel, canShowValue, labelsSuppressed };
   }
 
+  protected override getAnimatableChartType(): AnimatableChartType {
+    return 'stage';
+  }
+
   protected override getEmptyStateDiagnostic(): { chartType: string; expectedElements: string } {
     return { chartType: 'Stage chart', expectedElements: 'dc-stage children' };
   }
@@ -1401,15 +1405,6 @@ export class StageChart extends BaseChart {
     `;
   }
 
-  /**
-   * Determine if auto-popup should be shown for a shape.
-   */
-  private shouldShowAutoPopup(elementAutoPopup?: boolean): boolean {
-    if (elementAutoPopup !== undefined) {
-      return elementAutoPopup;
-    }
-    return this.autoPopup;
-  }
 
   /**
    * Generate default popup content for a stage.
@@ -1600,30 +1595,6 @@ export class StageChart extends BaseChart {
       });
   }
 
-  protected override renderFocusIndicator(): SVGTemplateResult {
-    if (!this.keyboardActive || this.focusedIndex < 0) {
-      return svg``;
-    }
-
-    const bounds = this.getShapeBounds(this.focusedIndex);
-    if (!bounds) return svg``;
-
-    const padding = 3;
-    return svg`
-      <rect
-        class="focus-indicator"
-        x="${bounds.x - padding}"
-        y="${bounds.y - padding}"
-        width="${bounds.width + padding * 2}"
-        height="${bounds.height + padding * 2}"
-        fill="none"
-        stroke="#005fcc"
-        stroke-width="2"
-        stroke-dasharray="4 2"
-        pointer-events="none"
-      />
-    `;
-  }
 
   protected override showPopupForFocusedElement(index: number): void {
     const stages = this.getStages();
@@ -1648,13 +1619,6 @@ export class StageChart extends BaseChart {
     }
   }
 
-  protected override togglePopupForFocusedElement(index: number): void {
-    if (this.popupVisible) {
-      this.hidePopup();
-    } else {
-      this.showPopupForFocusedElement(index);
-    }
-  }
 }
 
 declare global {

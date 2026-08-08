@@ -221,6 +221,17 @@ Two things a future contributor must not undo:
 
 `test/component/svg-export.test.ts` holds 61 characterization tests. Several pin behaviour that is arguably wrong and was deliberately left alone: only the `<svg>` subtree is cloned, so the shadow root's `<style>` is dropped and `font-family` is the *only* style that reaches the file; lit-html binding marker comments ship inside it; `downloadSvg('')` produces `.svg`; a non-string filename throws a raw `TypeError`; and the width/height guard is `!hasWidth || !hasHeight` while the body sets both.
 
+**Extracted responsibilities**: six modules hold what `BaseChart` used to do — `color-resolver.ts`, `keyboard-nav-controller.ts`, `chart-logger.ts`, `popup-controller.ts`, `svg-exporter.ts`, `text-measurer.ts`. Each takes a narrow `XHost` interface and is built by `BaseChart` with an **explicit adapter object, never `this`** (several members are private/protected and widening them would enlarge the API the extraction shrinks). `BaseChart` keeps thin delegations so subclasses and tests are unaffected.
+
+**When extracting another one, three hazards, all invisible to the type system:**
+1. **Dispatch** — moving a method severs every override of it. Route calls back through the host.
+2. **Receiver** — `getComputedStyle(this)` means the *chart*; moved verbatim, `this` becomes the controller. Same code, wrong object.
+3. **Reactivity** — `@state()` fields re-render automatically; plain fields do not. Every mutation needs `host.requestUpdate()`, and `@state()` with `useDefineForClassFields:false` installs prototype accessors, so replacing them with plain fields silently stops scheduling renders.
+
+Always write characterization tests **first** and commit them separately. Across six extractions, roughly one initial expectation in eight turned out to be wrong.
+
+**Chart type hooks**: `getAnimatableChartType()` is `protected abstract` — a new chart type will not compile without it. It used to sniff `this.tagName`, which failed silently. `isHorizontalChart()` and `getEmptyStateDiagnostic()` are the other per-type hooks; implement all three.
+
 **Colour System**: Lives in `src/color-resolver.ts`, not `BaseChart`. `ColorResolver` owns palette lookup, contrast, and the priority between an element's own colour, a matched palette entry, a positional palette colour, and a generated fallback.
 
 `BaseChart` holds it behind a lazy `colors` getter and its existing `protected` methods delegate, so subclasses call exactly what they always did. It is constructed with an explicit `ColorHost` adapter rather than `this`, because `log` and `getMeasureContext` are not public and widening them would enlarge the API the extraction exists to shrink. The adapter uses getters so values stay live.

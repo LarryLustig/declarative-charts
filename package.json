@@ -6,6 +6,7 @@
   "main": "./dist/declarative-charts.umd.cjs",
   "module": "./dist/declarative-charts.js",
   "types": "./dist/index.d.ts",
+  "customElements": "custom-elements.json",
   "unpkg": "./dist/declarative-charts.standalone.js",
   "jsdelivr": "./dist/declarative-charts.standalone.js",
   "exports": {
@@ -26,12 +27,13 @@
   ],
   "files": [
     "dist",
+    "custom-elements.json",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && vite build --config vite.config.standalone.ts && tsc -p tsconfig.build.json",
+    "build": "tsc && vite build && vite build --config vite.config.standalone.ts && tsc -p tsconfig.build.json && npm run analyze",
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
@@ -40,6 +42,7 @@
     "test:visual:update": "playwright test --update-snapshots",
     "test:visual:report": "playwright show-report test/visual/report",
     "bench": "node test/visual/bench.mjs",
+    "analyze": "cem analyze --litelement --globs \"src/**/*.ts\" --outdir .",
     "test:package": "node test/package/smoke.mjs",
     "prepublishOnly": "npm run test:run && npm run build && npm run test:package"
   },
@@ -67,13 +70,15 @@
     "lit": "^3.1.0"
   },
   "devDependencies": {
-    "lit": "^3.1.0",
-    "esbuild": "^0.21.5",
+    "@custom-elements-manifest/analyzer": "^0.11.0",
     "@playwright/test": "^1.57.0",
     "@vitest/coverage-v8": "^4.0.16",
+    "esbuild": "^0.21.5",
     "happy-dom": "^20.0.11",
+    "lit": "^3.1.0",
     "typescript": "^5.3.3",
     "vite": "^5.0.8",
     "vitest": "^4.0.16"
-  }
+  },
+  "customElements": "custom-elements.json"
 }
