@@ -287,7 +287,7 @@ describe('ChartPalette component', () => {
           fill="#fee2e2"
           stroke="#dc2626"
           pattern="crosshatch"
-          scale="1.5"
+          pattern-scale="1.5"
         ></dc-fill>
         `
       );
@@ -312,7 +312,7 @@ describe('ChartPalette component', () => {
           fill="#fee2e2"
           stroke="#dc2626"
           pattern="crosshatch"
-          scale="1.2"
+          pattern-scale="1.2"
         ></dc-fill>
         <dc-fill
           min-value="30"

@@ -14,17 +14,17 @@ import { analyzeFunnel, type StageData as InsightStageData } from './accessibili
  *
  * @attr {number} width - Width of the chart in pixels (default: 600)
  * @attr {number} height - Height of the chart in pixels (default: 400)
- * @attr {string} segment-height - Height mode: omit for equal heights, use values like "50px"/"2rem" for fixed heights, "value" for proportional scaling, "log-value" for logarithmic scaling, or "value 50px 300px" to include min/max constraints
- * @attr {string} segment-min-height - Minimum height for any segment (e.g., "50px")
- * @attr {string} segment-max-height - Maximum height for any segment (e.g., "300px")
- * @attr {string} chevron - Chevron depth for V-shaped segments: use values like "20px", "2rem", or "10%" (percentage of segment width). Omit or use "0" for straight edges.
+ * @attr {string} stage-height - Height mode: omit for equal heights, use values like "50px"/"2rem" for fixed heights, "value" for proportional scaling, "log-value" for logarithmic scaling, or "value 50px 300px" to include min/max constraints
+ * @attr {string} stage-min-height - Minimum height for any stage (e.g., "50px")
+ * @attr {string} stage-max-height - Maximum height for any stage (e.g., "300px")
+ * @attr {string} chevron - Chevron depth for V-shaped stages: use values like "20px", "2rem", or "10%" (percentage of stage width). Omit or use "0" for straight edges.
  * @attr {number} funnel-factor - Percentage controlling funnel narrowing (default: 70). Positive values narrow from top to bottom (e.g., 70 = bottom is 70% of top width). Negative values narrow from bottom to top (e.g., -70 = top is 70% of bottom width).
  * @attr {string} palette - Palette for stage colors. Can be an ID of a user-defined <dc-palette> or a built-in palette name (default: cool-to-warm gradient).
  * @attr {string} stroke - Shorthand for stroke color and width (e.g., "2 #333" or "#333 2"). Overridden by explicit stroke-color/stroke-width.
  * @attr {string} stroke-color - Stroke color for stage borders (default: #e0e0e0). Can be overridden per stage.
  * @attr {number} stroke-width - Stroke width for stage borders in pixels (default: 0). Can be overridden per stage.
- * @attr {boolean} flat-top - When true and chevron is set, makes the top edge of the first segment horizontal (default: false)
- * @attr {boolean} flat-bottom - When true and chevron is set, makes the bottom edge of the last segment horizontal (default: false)
+ * @attr {boolean} flat-top - When true and chevron is set, makes the top edge of the first stage horizontal (default: false)
+ * @attr {boolean} flat-bottom - When true and chevron is set, makes the bottom edge of the last stage horizontal (default: false)
  *
  * @slot - Child elements: dc-title and dc-funnel-stage elements
  *
@@ -50,14 +50,14 @@ import { analyzeFunnel, type StageData as InsightStageData } from './accessibili
  */
 @customElement('dc-funnel-chart')
 export class FunnelChart extends BaseChart {
-  @property({ type: String, attribute: 'segment-height' })
-  segmentHeight?: string;
+  @property({ type: String, attribute: 'stage-height' })
+  stageHeight?: string;
 
-  @property({ type: String, attribute: 'segment-min-height' })
-  segmentMinHeight?: string;
+  @property({ type: String, attribute: 'stage-min-height' })
+  stageMinHeight?: string;
 
-  @property({ type: String, attribute: 'segment-max-height' })
-  segmentMaxHeight?: string;
+  @property({ type: String, attribute: 'stage-max-height' })
+  stageMaxHeight?: string;
 
   @property({ type: String })
   chevron?: string;
@@ -231,22 +231,22 @@ export class FunnelChart extends BaseChart {
   }
 
   /**
-   * Calculate the height for each segment based on the segment-height mode
+   * Calculate the height for each stage based on the stage-height mode
    * @param stages Array of stage data
-   * @param chartHeight Total available height for all segments
-   * @returns Array of heights for each segment
+   * @param chartHeight Total available height for all stages
+   * @returns Array of heights for each stage
    */
   private calculateSegmentHeights(
     stages: Array<{ value: number; label: string; color?: string }>,
     chartHeight: number
   ): number[] {
-    // Parse segment-height to extract mode and optional min/max
+    // Parse stage-height to extract mode and optional min/max
     let mode = '';
     let minFromAttr: number | undefined;
     let maxFromAttr: number | undefined;
 
-    if (this.segmentHeight) {
-      const parts = this.segmentHeight.trim().split(/\s+/);
+    if (this.stageHeight) {
+      const parts = this.stageHeight.trim().split(/\s+/);
       mode = parts[0].toLowerCase();
 
       // If there are additional parts, they are min and max
@@ -259,8 +259,8 @@ export class FunnelChart extends BaseChart {
     }
 
     // Get min/max from separate attributes (combined format takes precedence)
-    const minHeight = minFromAttr ?? (this.segmentMinHeight ? parseFloat(this.segmentMinHeight) : undefined);
-    const maxHeight = maxFromAttr ?? (this.segmentMaxHeight ? parseFloat(this.segmentMaxHeight) : undefined);
+    const minHeight = minFromAttr ?? (this.stageMinHeight ? parseFloat(this.stageMinHeight) : undefined);
+    const maxHeight = maxFromAttr ?? (this.stageMaxHeight ? parseFloat(this.stageMaxHeight) : undefined);
 
     // Calculate initial heights based on mode
     let heights: number[];
@@ -312,8 +312,8 @@ export class FunnelChart extends BaseChart {
     }
 
     // Log the height calculation
-    this.log('info', 'segmentHeights.mode', `Height calculation mode: ${heightMode}`, heightMode);
-    this.log('info', 'segmentHeights.chartHeight', `Available height for segments`, chartHeight);
+    this.log('info', 'stageHeights.mode', `Height calculation mode: ${heightMode}`, heightMode);
+    this.log('info', 'stageHeights.chartHeight', `Available height for stages`, chartHeight);
 
     // Apply min/max constraints
     let constraintsApplied = 0;
@@ -332,13 +332,13 @@ export class FunnelChart extends BaseChart {
       });
 
       if (minHeight !== undefined) {
-        this.log('info', 'segmentHeights.minHeight', `Minimum height constraint`, minHeight);
+        this.log('info', 'stageHeights.minHeight', `Minimum height constraint`, minHeight);
       }
       if (maxHeight !== undefined) {
-        this.log('info', 'segmentHeights.maxHeight', `Maximum height constraint`, maxHeight);
+        this.log('info', 'stageHeights.maxHeight', `Maximum height constraint`, maxHeight);
       }
       if (constraintsApplied > 0) {
-        this.log('info', 'segmentHeights.constrained', `${constraintsApplied} segment(s) hit min/max constraints`, constraintsApplied);
+        this.log('info', 'stageHeights.constrained', `${constraintsApplied} stage(s) hit min/max constraints`, constraintsApplied);
       }
     }
 
@@ -475,15 +475,15 @@ export class FunnelChart extends BaseChart {
 
     // Parse height mode
     let heightMode = 'equal';
-    if (this.segmentHeight) {
-      const mode = this.segmentHeight.trim().split(/\s+/)[0].toLowerCase();
+    if (this.stageHeight) {
+      const mode = this.stageHeight.trim().split(/\s+/)[0].toLowerCase();
       if (mode === 'value') heightMode = 'proportional';
       else if (mode === 'log-value') heightMode = 'logarithmic';
       else if (!isNaN(parseFloat(mode))) heightMode = 'fixed (' + mode + ')';
     }
 
-    // Calculate heights for each segment
-    const segmentHeights = this.calculateSegmentHeights(stagesData, chartHeight);
+    // Calculate heights for each stage
+    const stageHeights = this.calculateSegmentHeights(stagesData, chartHeight);
 
     // Calculate funnel factor and widths
     const factor = this.funnelFactor ?? 70;
@@ -523,9 +523,9 @@ export class FunnelChart extends BaseChart {
     let cumulativeY = padding.top;
     const stages = stagesData.map((stage, index) => {
       const y = cumulativeY;
-      let stageHeight = segmentHeights[index];
+      let stageHeight = stageHeights[index];
 
-      // When flat-top is enabled with chevron, the first segment has a flat top
+      // When flat-top is enabled with chevron, the first stage has a flat top
       if (index === 0 && chevronDepth > 0 && this.flatTop) {
         stageHeight = stageHeight - chevronDepth;
       }
@@ -645,7 +645,7 @@ export class FunnelChart extends BaseChart {
         // Create polygon points based on whether chevron is enabled
         let polygonPoints: string;
         if (chevronDepth > 0) {
-          // Determine if this segment should have flat top or bottom
+          // Determine if this stage should have flat top or bottom
           const isFirstSegment = stage.index === 0;
           const isLastSegment = stage.index === stages.length - 1;
           const useFlatTop = isFirstSegment && this.flatTop;

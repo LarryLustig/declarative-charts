@@ -85,12 +85,12 @@ describe('bar layout: width never degenerates', () => {
 describe('bar and label positions come from one traversal', () => {
   const groupedWithDifferingWidths = `
     <dc-bar-group label="Q1">
-      <dc-bar value="30" width="20" label="A"></dc-bar>
-      <dc-bar value="50" width="80" label="B"></dc-bar>
+      <dc-bar value="30" bar-width="20" label="A"></dc-bar>
+      <dc-bar value="50" bar-width="80" label="B"></dc-bar>
     </dc-bar-group>
     <dc-bar-group label="Q2">
-      <dc-bar value="40" width="20" label="C"></dc-bar>
-      <dc-bar value="60" width="80" label="D"></dc-bar>
+      <dc-bar value="40" bar-width="20" label="C"></dc-bar>
+      <dc-bar value="60" bar-width="80" label="D"></dc-bar>
     </dc-bar-group>`;
 
   const chartOf = (markup: string, attrs: Record<string, string> = {}) =>
@@ -159,8 +159,8 @@ describe('bar and label positions come from one traversal', () => {
   it('aligns when only some groups use explicit widths', async () => {
     const chart = await chartOf(`
       <dc-bar-group label="Q1">
-        <dc-bar value="30" width="20" label="A"></dc-bar>
-        <dc-bar value="50" width="80" label="B"></dc-bar>
+        <dc-bar value="30" bar-width="20" label="A"></dc-bar>
+        <dc-bar value="50" bar-width="80" label="B"></dc-bar>
       </dc-bar-group>
       <dc-bar-group label="Q2">
         <dc-bar value="40" label="C"></dc-bar>
@@ -171,5 +171,46 @@ describe('bar and label positions come from one traversal', () => {
 
     expect(barCentres).toHaveLength(5);
     barCentres.forEach((centre, i) => expect(labelPositions[i]).toBeCloseTo(centre, 1));
+  });
+});
+
+describe('bar-width (REVIEW.md 6.4)', () => {
+  /** Widths of the rendered bars, in document order. */
+  const widths = (chart: Chart): number[] =>
+    Array.from(chart.shadowRoot!.querySelectorAll('rect[data-shape-index]'))
+      .map(r => parseFloat(r.getAttribute('width') || '0'));
+
+  it('sizes a single bar with bar-width', async () => {
+    const chart = await fixture<Chart>('dc-chart', { width: '600', height: '400' }, `
+      <dc-bar value="50" label="A" bar-width="80"></dc-bar>
+      <dc-bar value="50" label="B"></dc-bar>
+    `);
+    expect(widths(chart)[0]).toBeCloseTo(80, 1);
+  });
+
+  // <dc-bar> used to spell this `width`, a homonym of <dc-chart width> and
+  // inconsistent with <dc-bar-group bar-width>, which already used this name.
+  //
+  // The old name must stay *listed* as known even though it does nothing:
+  // unrecognised attributes are passed through onto the SVG shape, so a
+  // leftover width="80" would otherwise land on the <rect> and override the
+  // computed geometry - failing silently and worse than being ignored.
+  it('ignores the old width attribute instead of leaking it onto the rect', async () => {
+    const chart = await fixture<Chart>('dc-chart', { width: '600', height: '400' }, `
+      <dc-bar value="50" label="A" width="80"></dc-bar>
+      <dc-bar value="50" label="B"></dc-bar>
+    `);
+    const [a, b] = widths(chart);
+    expect(a).not.toBeCloseTo(80, 1);
+    expect(a).toBeCloseTo(b, 1);
+  });
+
+  it('warns that width was renamed rather than ignoring it silently', async () => {
+    const chart = await fixture<Chart>('dc-chart',
+      { width: '600', height: '400', logging: 'warning' },
+      '<dc-bar value="50" label="A" width="80"></dc-bar>');
+    const logged = JSON.stringify((chart as any).logEntries ?? []);
+    expect(logged).toContain('DC104');
+    expect(logged).toContain('bar-width');
   });
 });

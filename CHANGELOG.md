@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **BREAKING: naming collisions resolved** (REVIEW.md §6.4)
+  - `<dc-bar width>` → `<dc-bar bar-width>`. `width` was a homonym of `<dc-chart width>` (the
+    width of the whole chart) and the odd one of three: `<dc-chart>` and `<dc-bar-group>` already
+    spelled this `bar-width`. A leftover `width` is now ignored with a `DC104` rather than passed
+    through onto the `<rect>`, where it would have silently overridden the computed geometry
+  - `<dc-funnel-chart segment-height|segment-min-height|segment-max-height>` → `stage-height`,
+    `stage-min-height`, `stage-max-height`. The attributes size `<dc-funnel-stage>` children, so
+    they now use that noun — while `<dc-bar-segment>` keeps "segment" for the different thing it
+    means. The surrounding prose used the wrong noun throughout and was corrected with it
+  - `<dc-fill scale>` → `<dc-fill pattern-scale>`, matching the attribute of the same meaning on
+    shapes. Bare `scale` also read as though it scaled the fill rather than the pattern inside it
+
 - **BREAKING: `<dc-grid>` attributes renamed** (REVIEW.md §6.1). `style` → `stroke-dasharray`,
   `color` → `stroke`. `style` is a global HTML attribute on every element, so the old name
   shadowed it and put an unparseable CSS declaration in the DOM. The new names match the SVG

@@ -538,8 +538,8 @@ export class Chart extends AxisChart {
     const showPercent = bar.hasAttribute('show-percent') ? bar.showPercent! : this.showPercent;
 
     let width: string | undefined;
-    if (bar.hasAttribute('width')) {
-      width = bar.width;
+    if (bar.hasAttribute('bar-width')) {
+      width = bar.barWidth;
     } else if (groupBarWidth) {
       width = groupBarWidth;
     } else if (this.barWidth) {
@@ -547,7 +547,20 @@ export class Chart extends AxisChart {
     }
 
     const gutter = groupGutter !== undefined ? groupGutter : this.gutter;
-    const knownAttrs = new Set(['value', 'href', 'target', 'show-value', 'show-percent', 'width']);
+    // 'width' stays listed even though it no longer does anything. Unknown
+    // attributes are passed through onto the SVG shape, so dropping it from
+    // this set would let a leftover width="80" land on the <rect> and silently
+    // override the computed geometry - a worse failure than being ignored.
+    if (bar.hasAttribute('width')) {
+      this.logError(ErrorCode.PARSE_ERROR, {
+        attribute: 'width on <dc-bar>',
+        value: bar.getAttribute('width') ?? '',
+        default: 'ignored - it was renamed to bar-width'
+      });
+    }
+    const knownAttrs = new Set([
+      'value', 'href', 'target', 'show-value', 'show-percent', 'bar-width', 'width'
+    ]);
     const passthroughAttrs = bar.getPassthroughAttributes(knownAttrs);
 
     const segmentElements = Array.from(bar.querySelectorAll('dc-bar-segment')) as ChartBarSegment[];

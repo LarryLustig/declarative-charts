@@ -48,8 +48,16 @@ export class ChartBar extends BaseFilledShape {
 
   // showPercent is inherited from BaseChartElement
 
-  @property({ type: String })
-  width?: string;
+  /**
+   * Thickness of this bar, e.g. "40" or "12%".
+   *
+   * Named `bar-width`, not `width`: `<dc-chart width>` is the width of the whole
+   * chart and `<dc-bar-group bar-width>` already spelled the same idea this way,
+   * so `<dc-bar width>` was the odd one of three - and a homonym of a chart
+   * attribute a reader already knows.
+   */
+  @property({ type: String, attribute: 'bar-width' })
+  barWidth?: string;
 }
 
 declare global {

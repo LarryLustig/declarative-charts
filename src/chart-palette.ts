@@ -116,7 +116,7 @@ export class ChartPalette extends LitElement {
               type: fill.pattern!,
               stroke: fill.stroke || '#000',
               fill: fill.fill,
-              scale: fill.scale
+              scale: fill.patternScale
             }
           };
         }
@@ -134,7 +134,7 @@ export class ChartPalette extends LitElement {
               type: fill.pattern!,
               stroke: fill.stroke || '#000',
               fill: fill.fill,
-              scale: fill.scale
+              scale: fill.patternScale
             }
           };
         }

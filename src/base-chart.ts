@@ -1221,7 +1221,7 @@ export abstract class BaseChart extends LitElement {
         type: fillEl.pattern!,
         stroke: elementStroke || fillEl.stroke || '#000',
         fill: elementFill || fillEl.fill,
-        scale: elementScale ?? fillEl.scale
+        scale: elementScale ?? fillEl.patternScale
       };
     }
 

@@ -74,7 +74,7 @@ export function resolveDasharray(value: string | undefined): string | undefined 
  * @attr {StrokeLinejoin} stroke-linejoin - Line join style: "miter", "round", "bevel"
  * @attr {number} stroke-miterlimit - Miter limit for stroke-linejoin="miter"
  * @attr {PatternType} pattern - Pattern type (if set, creates a pattern fill)
- * @attr {number} scale - Pattern size multiplier (default: 1, only applies with pattern)
+ * @attr {number} pattern-scale - Pattern size multiplier (default: 1, only applies with pattern)
  * @attr {string} label - Label to match (for use in palettes)
  * @attr {number} value - Exact value to match (shorthand for min-value and max-value)
  * @attr {number} min-value - Minimum value for range matching (inclusive)
@@ -209,9 +209,14 @@ export class ChartFill extends LitElement {
    * Only applies when `pattern` is set.
    *
    * Larger values create bigger pattern elements.
+   *
+   * Named `pattern-scale`, matching the attribute of the same meaning on
+   * shapes. It was `scale` here and `pattern-scale` there - one concept, two
+   * names, on elements routinely written next to each other. Bare `scale` also
+   * suggested it scaled the fill rather than only the pattern inside it.
    */
-  @property({ type: Number })
-  scale?: number;
+  @property({ type: Number, attribute: 'pattern-scale' })
+  patternScale?: number;
 
   /**
    * Label to match. If specified, elements with this exact label will use this fill.

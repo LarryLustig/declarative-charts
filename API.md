@@ -1383,7 +1383,7 @@ Defines a single bar in a bar chart. Can contain `<dc-bar-segment>` children for
 - `target` (string) - Optional target for the link (e.g., "_blank")
 - `show-value` (boolean|string) - Whether to display the numeric value
 - `show-percent` (boolean|string) - Whether to display the percentage
-- `width` (string) - Width for this specific bar (e.g., "50px", "2rem")
+- `bar-width` (string) - Width for this specific bar (e.g., "50px", "2rem"). Overrides `bar-width` on `<dc-chart>` or `<dc-bar-group>`
 
 **Child Elements:**
 - `<dc-bar-segment>` - Optional segments for stacked bars
@@ -1577,9 +1577,9 @@ Renders a funnel chart with customizable stage heights, colors, and shapes.
 - `palette` (string) - Reference to a custom `<dc-palette>` ID or built-in palette name
 - `stroke` (string) - Shorthand for stroke color and width (e.g., "2 #333")
 - `stroke-width` (number) - Stroke width for stage borders in pixels (default: 0)
-- `segment-height` (string) - Height mode: omit for equal heights, "value" for proportional scaling, "log-value" for logarithmic scaling, or fixed values like "50px"/"2rem"
-- `segment-min-height` (string) - Minimum height for any segment
-- `segment-max-height` (string) - Maximum height for any segment
+- `stage-height` (string) - Height mode: omit for equal heights, "value" for proportional scaling, "log-value" for logarithmic scaling, or fixed values like "50px"/"2rem"
+- `stage-min-height` (string) - Minimum height for any segment
+- `stage-max-height` (string) - Maximum height for any segment
 - `chevron` (string) - Chevron depth for V-shaped segments (e.g., "20px", "10%")
 - `funnel-factor` (number) - Percentage controlling funnel narrowing (default: 70)
 - `flat-top` (boolean) - Makes the top edge of the first segment horizontal
@@ -2089,7 +2089,7 @@ Defines a fill style (solid color and/or pattern) within a palette, or standalon
 - `stroke-linejoin` (string) - Line join style: "miter", "round", "bevel"
 - `stroke-miterlimit` (number) - Miter limit for stroke-linejoin="miter"
 - `pattern` (string) - Pattern type
-- `scale` (number) - Pattern scale multiplier (default: 1)
+- `pattern-scale` (number) - Pattern scale multiplier (default: 1). Same name and meaning as `pattern-scale` on shapes
 - `min-value` (number) - Minimum value for range matching (inclusive)
 - `max-value` (number) - Maximum value for range matching (exclusive)
 

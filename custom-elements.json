@@ -10650,7 +10650,7 @@
       "declarations": [
         {
           "kind": "class",
-          "description": "Individual bar element for bar charts\n\nSupports attribute passthrough for integration with htmx and other libraries.\nAny attributes not explicitly defined (like hx-get, hx-target, data-*, etc.)\nwill be passed through to the rendered SVG element.",
+          "description": "Individual bar element for bar charts\r\n\r\nSupports attribute passthrough for integration with htmx and other libraries.\r\nAny attributes not explicitly defined (like hx-get, hx-target, data-*, etc.)\r\nwill be passed through to the rendered SVG element.",
           "name": "ChartBar",
           "members": [
             {
@@ -10669,11 +10669,12 @@
             },
             {
               "kind": "field",
-              "name": "width",
+              "name": "barWidth",
               "type": {
                 "text": "string | undefined"
               },
-              "attribute": "width"
+              "description": "Thickness of this bar, e.g. \"40\" or \"12%\".\r\n\r\nNamed `bar-width`, not `width`: `<dc-chart width>` is the width of the whole\r\nchart and `<dc-bar-group bar-width>` already spelled the same idea this way,\r\nso `<dc-bar width>` was the odd one of three - and a homonym of a chart\r\nattribute a reader already knows.",
+              "attribute": "bar-width"
             },
             {
               "kind": "field",
@@ -11123,11 +11124,12 @@
               }
             },
             {
-              "name": "width",
+              "name": "bar-width",
               "type": {
                 "text": "string | undefined"
               },
-              "fieldName": "width"
+              "description": "Thickness of this bar, e.g. \"40\" or \"12%\".\r\n\r\nNamed `bar-width`, not `width`: `<dc-chart width>` is the width of the whole\r\nchart and `<dc-bar-group bar-width>` already spelled the same idea this way,\r\nso `<dc-bar width>` was the odd one of three - and a homonym of a chart\r\nattribute a reader already knows.",
+              "fieldName": "barWidth"
             },
             {
               "name": "pattern",
@@ -13153,7 +13155,7 @@
         },
         {
           "kind": "class",
-          "description": "Fill definition element for specifying how chart elements should be filled.\n\nThis unified element handles both solid fills and pattern fills:\n- **Solid fill**: Set `fill` (and optionally `stroke`) without `pattern`\n- **Pattern fill**: Set `pattern` to a pattern type, with `fill` as background\n  and `stroke` as the pattern element color\n\nCan be used:\n1. Inside `<dc-palette>` for label/value-based matching\n2. Standalone with an ID, referenced by elements (for patterns)\n\n## Stroke Attribute Semantics\n\nThe `stroke` attribute has different meanings depending on context:\n- **Solid fills**: The stroke/border color of the chart element\n- **Pattern fills**: The color of pattern elements (lines, dots, or squares)\n\nFor line-based patterns (diagonal-lines, crosshatch, grid, etc.), `stroke` is\nthe SVG stroke color of the lines. For shape-based patterns (dots, checkerboard),\n`stroke` is used as the fill color of the shapes.",
+          "description": "Fill definition element for specifying how chart elements should be filled.\r\n\r\nThis unified element handles both solid fills and pattern fills:\r\n- **Solid fill**: Set `fill` (and optionally `stroke`) without `pattern`\r\n- **Pattern fill**: Set `pattern` to a pattern type, with `fill` as background\r\n  and `stroke` as the pattern element color\r\n\r\nCan be used:\r\n1. Inside `<dc-palette>` for label/value-based matching\r\n2. Standalone with an ID, referenced by elements (for patterns)\r\n\r\n## Stroke Attribute Semantics\r\n\r\nThe `stroke` attribute has different meanings depending on context:\r\n- **Solid fills**: The stroke/border color of the chart element\r\n- **Pattern fills**: The color of pattern elements (lines, dots, or squares)\r\n\r\nFor line-based patterns (diagonal-lines, crosshatch, grid, etc.), `stroke` is\r\nthe SVG stroke color of the lines. For shape-based patterns (dots, checkerboard),\r\n`stroke` is used as the fill color of the shapes.",
           "name": "ChartFill",
           "members": [
             {
@@ -13162,7 +13164,7 @@
               "type": {
                 "text": "string | undefined"
               },
-              "description": "Fill color for the element.\n\nFor solid fills, this is the main fill color.\nFor pattern fills, this is the background color behind the pattern.",
+              "description": "Fill color for the element.\r\n\r\nFor solid fills, this is the main fill color.\r\nFor pattern fills, this is the background color behind the pattern.",
               "attribute": "fill"
             },
             {
@@ -13189,7 +13191,7 @@
               "type": {
                 "text": "string | undefined"
               },
-              "description": "Stroke color for the element.\n\nFor solid fills, this is the stroke/border color.\nFor pattern fills, this is the color of the pattern elements:\n- Line patterns: stroke color of the lines\n- Dot/checkerboard patterns: fill color of the shapes\n\nIf not specified for patterns, a contrasting color will be auto-calculated.",
+              "description": "Stroke color for the element.\r\n\r\nFor solid fills, this is the stroke/border color.\r\nFor pattern fills, this is the color of the pattern elements:\r\n- Line patterns: stroke color of the lines\r\n- Dot/checkerboard patterns: fill color of the shapes\r\n\r\nIf not specified for patterns, a contrasting color will be auto-calculated.",
               "attribute": "stroke"
             },
             {
@@ -13216,7 +13218,7 @@
               "type": {
                 "text": "string | undefined"
               },
-              "description": "Stroke dash pattern.\nCan be a numeric pattern (e.g., \"5 3\") or a named pattern:\n- \"solid\" - no dashes\n- \"dashed\" - standard dashes (5 5)\n- \"dotted\" - dots (1 3)\n- \"dash-dot\" - dash-dot pattern (5 3 1 3)\n- \"long-dash\" - long dashes (10 5)",
+              "description": "Stroke dash pattern.\r\nCan be a numeric pattern (e.g., \"5 3\") or a named pattern:\r\n- \"solid\" - no dashes\r\n- \"dashed\" - standard dashes (5 5)\r\n- \"dotted\" - dots (1 3)\r\n- \"dash-dot\" - dash-dot pattern (5 3 1 3)\r\n- \"long-dash\" - long dashes (10 5)",
               "attribute": "stroke-dasharray"
             },
             {
@@ -13261,17 +13263,17 @@
               "type": {
                 "text": "PatternType | undefined"
               },
-              "description": "Pattern type to apply.\n\nIf set, the fill becomes a pattern with `fill` as background and `stroke`\nas the pattern element color.\n\nAvailable patterns: diagonal-lines, diagonal-lines-reverse, horizontal-lines,\nvertical-lines, dots, crosshatch, grid, checkerboard",
+              "description": "Pattern type to apply.\r\n\r\nIf set, the fill becomes a pattern with `fill` as background and `stroke`\r\nas the pattern element color.\r\n\r\nAvailable patterns: diagonal-lines, diagonal-lines-reverse, horizontal-lines,\r\nvertical-lines, dots, crosshatch, grid, checkerboard",
               "attribute": "pattern"
             },
             {
               "kind": "field",
-              "name": "scale",
+              "name": "patternScale",
               "type": {
                 "text": "number | undefined"
               },
-              "description": "Size multiplier for the pattern. Default is 1.\nOnly applies when `pattern` is set.\n\nLarger values create bigger pattern elements.",
-              "attribute": "scale"
+              "description": "Size multiplier for the pattern. Default is 1.\r\nOnly applies when `pattern` is set.\r\n\r\nLarger values create bigger pattern elements.\r\n\r\nNamed `pattern-scale`, matching the attribute of the same meaning on\r\nshapes. It was `scale` here and `pattern-scale` there - one concept, two\r\nnames, on elements routinely written next to each other. Bare `scale` also\r\nsuggested it scaled the fill rather than only the pattern inside it.",
+              "attribute": "pattern-scale"
             },
             {
               "kind": "field",
@@ -13297,7 +13299,7 @@
               "type": {
                 "text": "number | undefined"
               },
-              "description": "Minimum value for range matching (inclusive).\nIf not specified, range extends to negative infinity.",
+              "description": "Minimum value for range matching (inclusive).\r\nIf not specified, range extends to negative infinity.",
               "attribute": "min-value"
             },
             {
@@ -13306,7 +13308,7 @@
               "type": {
                 "text": "number | undefined"
               },
-              "description": "Maximum value for range matching (inclusive).\nIf not specified, range extends to positive infinity.",
+              "description": "Maximum value for range matching (inclusive).\r\nIf not specified, range extends to positive infinity.",
               "attribute": "max-value"
             },
             {
@@ -13327,7 +13329,7 @@
                   "text": ""
                 }
               },
-              "description": "Get the resolved stroke-dasharray value.\nConverts named patterns (e.g., \"dashed\") to numeric values."
+              "description": "Get the resolved stroke-dasharray value.\r\nConverts named patterns (e.g., \"dashed\") to numeric values."
             },
             {
               "kind": "method",
@@ -13373,7 +13375,7 @@
               "type": {
                 "text": "string | undefined"
               },
-              "description": "Fill color for the element.\n\nFor solid fills, this is the main fill color.\nFor pattern fills, this is the background color behind the pattern.",
+              "description": "Fill color for the element.\r\n\r\nFor solid fills, this is the main fill color.\r\nFor pattern fills, this is the background color behind the pattern.",
               "name": "fill",
               "fieldName": "fill"
             },
@@ -13397,7 +13399,7 @@
               "type": {
                 "text": "string | undefined"
               },
-              "description": "Stroke color for the element.\n\nFor solid fills, this is the stroke/border color.\nFor pattern fills, this is the color of the pattern elements:\n- Line patterns: stroke color of the lines\n- Dot/checkerboard patterns: fill color of the shapes\n\nIf not specified for patterns, a contrasting color will be auto-calculated.",
+              "description": "Stroke color for the element.\r\n\r\nFor solid fills, this is the stroke/border color.\r\nFor pattern fills, this is the color of the pattern elements:\r\n- Line patterns: stroke color of the lines\r\n- Dot/checkerboard patterns: fill color of the shapes\r\n\r\nIf not specified for patterns, a contrasting color will be auto-calculated.",
               "name": "stroke",
               "fieldName": "stroke"
             },
@@ -13421,7 +13423,7 @@
               "type": {
                 "text": "string | undefined"
               },
-              "description": "Stroke dash pattern.\nCan be a numeric pattern (e.g., \"5 3\") or a named pattern:\n- \"solid\" - no dashes\n- \"dashed\" - standard dashes (5 5)\n- \"dotted\" - dots (1 3)\n- \"dash-dot\" - dash-dot pattern (5 3 1 3)\n- \"long-dash\" - long dashes (10 5)",
+              "description": "Stroke dash pattern.\r\nCan be a numeric pattern (e.g., \"5 3\") or a named pattern:\r\n- \"solid\" - no dashes\r\n- \"dashed\" - standard dashes (5 5)\r\n- \"dotted\" - dots (1 3)\r\n- \"dash-dot\" - dash-dot pattern (5 3 1 3)\r\n- \"long-dash\" - long dashes (10 5)",
               "name": "stroke-dasharray",
               "fieldName": "strokeDasharray"
             },
@@ -13461,7 +13463,7 @@
               "type": {
                 "text": "PatternType | undefined"
               },
-              "description": "Pattern type to apply.\n\nIf set, the fill becomes a pattern with `fill` as background and `stroke`\nas the pattern element color.\n\nAvailable patterns: diagonal-lines, diagonal-lines-reverse, horizontal-lines,\nvertical-lines, dots, crosshatch, grid, checkerboard",
+              "description": "Pattern type to apply.\r\n\r\nIf set, the fill becomes a pattern with `fill` as background and `stroke`\r\nas the pattern element color.\r\n\r\nAvailable patterns: diagonal-lines, diagonal-lines-reverse, horizontal-lines,\r\nvertical-lines, dots, crosshatch, grid, checkerboard",
               "name": "pattern",
               "fieldName": "pattern"
             },
@@ -13469,9 +13471,9 @@
               "type": {
                 "text": "number | undefined"
               },
-              "description": "Size multiplier for the pattern. Default is 1.\nOnly applies when `pattern` is set.\n\nLarger values create bigger pattern elements.",
-              "name": "scale",
-              "fieldName": "scale"
+              "description": "Size multiplier for the pattern. Default is 1.\r\nOnly applies when `pattern` is set.\r\n\r\nLarger values create bigger pattern elements.\r\n\r\nNamed `pattern-scale`, matching the attribute of the same meaning on\r\nshapes. It was `scale` here and `pattern-scale` there - one concept, two\r\nnames, on elements routinely written next to each other. Bare `scale` also\r\nsuggested it scaled the fill rather than only the pattern inside it.",
+              "name": "pattern-scale",
+              "fieldName": "patternScale"
             },
             {
               "type": {
@@ -13493,7 +13495,7 @@
               "type": {
                 "text": "number | undefined"
               },
-              "description": "Minimum value for range matching (inclusive).\nIf not specified, range extends to negative infinity.",
+              "description": "Minimum value for range matching (inclusive).\r\nIf not specified, range extends to negative infinity.",
               "name": "min-value",
               "fieldName": "minValue"
             },
@@ -13501,7 +13503,7 @@
               "type": {
                 "text": "number | undefined"
               },
-              "description": "Maximum value for range matching (inclusive).\nIf not specified, range extends to positive infinity.",
+              "description": "Maximum value for range matching (inclusive).\r\nIf not specified, range extends to positive infinity.",
               "name": "max-value",
               "fieldName": "maxValue"
             }
@@ -16051,7 +16053,7 @@
       "declarations": [
         {
           "kind": "class",
-          "description": "Palette definition element for defining reusable color schemes.\n\nA palette is a container for `<dc-fill>` elements that define how chart\nelements should be filled. Charts can reference a palette by its ID using\nthe `palette` attribute, and elements will be styled by matching their\nlabel or value against the palette's fill definitions.\n\n**Matching Priority (first match wins):**\n1. Element's own fill/stroke/pattern attributes (explicit override)\n2. Palette match by value range (min-value/max-value or exact value)\n3. Palette match by label (exact string match)\n4. Chart's default color sequence\n\nWithin value/label matching, pattern fills take precedence over solid fills.",
+          "description": "Palette definition element for defining reusable color schemes.\r\n\r\nA palette is a container for `<dc-fill>` elements that define how chart\r\nelements should be filled. Charts can reference a palette by its ID using\r\nthe `palette` attribute, and elements will be styled by matching their\r\nlabel or value against the palette's fill definitions.\r\n\r\n**Matching Priority (first match wins):**\r\n1. Element's own fill/stroke/pattern attributes (explicit override)\r\n2. Palette match by value range (min-value/max-value or exact value)\r\n3. Palette match by label (exact string match)\r\n4. Chart's default color sequence\r\n\r\nWithin value/label matching, pattern fills take precedence over solid fills.",
           "name": "ChartPalette",
           "slots": [
             {
@@ -16067,7 +16069,7 @@
                 "text": "boolean"
               },
               "default": "false",
-              "description": "Marks this palette as a high-contrast palette.\n\nWhen a chart is in high contrast mode (either explicitly via `high-contrast`\nattribute or via OS `prefers-contrast: high` setting), it will look for a\nchild `<dc-palette high-contrast>` to use instead of the built-in high\ncontrast colors.",
+              "description": "Marks this palette as a high-contrast palette.\r\n\r\nWhen a chart is in high contrast mode (either explicitly via `high-contrast`\r\nattribute or via OS `prefers-contrast: high` setting), it will look for a\r\nchild `<dc-palette high-contrast>` to use instead of the built-in high\r\ncontrast colors.",
               "attribute": "high-contrast"
             },
             {
@@ -16106,7 +16108,7 @@
                   "description": "The element's value (optional)"
                 }
               ],
-              "description": "Look up fill styling for an element based on its label and/or value.\n\nMatching priority (first match wins):\n1. dc-fill with pattern + value match\n2. dc-fill with pattern + label match\n3. dc-fill (solid) + value match\n4. dc-fill (solid) + label match"
+              "description": "Look up fill styling for an element based on its label and/or value.\r\n\r\nMatching priority (first match wins):\r\n1. dc-fill with pattern + value match\r\n2. dc-fill with pattern + label match\r\n3. dc-fill (solid) + value match\r\n4. dc-fill (solid) + label match"
             },
             {
               "kind": "method",
@@ -16126,7 +16128,7 @@
                   "text": ""
                 }
               },
-              "description": "Get all fill colors from this palette.\nUseful for getting colors to use in high-contrast mode."
+              "description": "Get all fill colors from this palette.\r\nUseful for getting colors to use in high-contrast mode."
             }
           ],
           "attributes": [
@@ -16136,7 +16138,7 @@
                 "text": "boolean"
               },
               "default": "false",
-              "description": "Marks this palette as a high-contrast palette.\n\nWhen a chart is in high contrast mode (either explicitly via `high-contrast`\nattribute or via OS `prefers-contrast: high` setting), it will look for a\nchild `<dc-palette high-contrast>` to use instead of the built-in high\ncontrast colors.",
+              "description": "Marks this palette as a high-contrast palette.\r\n\r\nWhen a chart is in high contrast mode (either explicitly via `high-contrast`\r\nattribute or via OS `prefers-contrast: high` setting), it will look for a\r\nchild `<dc-palette high-contrast>` to use instead of the built-in high\r\ncontrast colors.",
               "fieldName": "highContrast",
               "attribute": "high-contrast"
             },
@@ -28505,27 +28507,27 @@
           "members": [
             {
               "kind": "field",
-              "name": "segmentHeight",
+              "name": "stageHeight",
               "type": {
                 "text": "string | undefined"
               },
-              "attribute": "segment-height"
+              "attribute": "stage-height"
             },
             {
               "kind": "field",
-              "name": "segmentMinHeight",
+              "name": "stageMinHeight",
               "type": {
                 "text": "string | undefined"
               },
-              "attribute": "segment-min-height"
+              "attribute": "stage-min-height"
             },
             {
               "kind": "field",
-              "name": "segmentMaxHeight",
+              "name": "stageMaxHeight",
               "type": {
                 "text": "string | undefined"
               },
-              "attribute": "segment-max-height"
+              "attribute": "stage-max-height"
             },
             {
               "kind": "field",
@@ -28642,10 +28644,10 @@
                   "type": {
                     "text": "number"
                   },
-                  "description": "Total available height for all segments"
+                  "description": "Total available height for all stages"
                 }
               ],
-              "description": "Calculate the height for each segment based on the segment-height mode"
+              "description": "Calculate the height for each stage based on the stage-height mode"
             },
             {
               "kind": "method",
@@ -32015,30 +32017,30 @@
                 "text": "string | undefined"
               },
               "description": "Height mode: omit for equal heights, use values like \"50px\"/\"2rem\" for fixed heights, \"value\" for proportional scaling, \"log-value\" for logarithmic scaling, or \"value 50px 300px\" to include min/max constraints",
-              "name": "segment-height",
-              "fieldName": "segmentHeight"
+              "name": "stage-height",
+              "fieldName": "stageHeight"
             },
             {
               "type": {
                 "text": "string | undefined"
               },
-              "description": "Minimum height for any segment (e.g., \"50px\")",
-              "name": "segment-min-height",
-              "fieldName": "segmentMinHeight"
+              "description": "Minimum height for any stage (e.g., \"50px\")",
+              "name": "stage-min-height",
+              "fieldName": "stageMinHeight"
             },
             {
               "type": {
                 "text": "string | undefined"
               },
-              "description": "Maximum height for any segment (e.g., \"300px\")",
-              "name": "segment-max-height",
-              "fieldName": "segmentMaxHeight"
+              "description": "Maximum height for any stage (e.g., \"300px\")",
+              "name": "stage-max-height",
+              "fieldName": "stageMaxHeight"
             },
             {
               "type": {
                 "text": "string | undefined"
               },
-              "description": "Chevron depth for V-shaped segments: use values like \"20px\", \"2rem\", or \"10%\" (percentage of segment width). Omit or use \"0\" for straight edges.",
+              "description": "Chevron depth for V-shaped stages: use values like \"20px\", \"2rem\", or \"10%\" (percentage of stage width). Omit or use \"0\" for straight edges.",
               "name": "chevron",
               "fieldName": "chevron"
             },
@@ -32098,7 +32100,7 @@
               "type": {
                 "text": "boolean"
               },
-              "description": "When true and chevron is set, makes the top edge of the first segment horizontal (default: false)",
+              "description": "When true and chevron is set, makes the top edge of the first stage horizontal (default: false)",
               "name": "flat-top",
               "default": "false",
               "fieldName": "flatTop"
@@ -32107,7 +32109,7 @@
               "type": {
                 "text": "boolean"
               },
-              "description": "When true and chevron is set, makes the bottom edge of the last segment horizontal (default: false)",
+              "description": "When true and chevron is set, makes the bottom edge of the last stage horizontal (default: false)",
               "name": "flat-bottom",
               "default": "false",
               "fieldName": "flatBottom"

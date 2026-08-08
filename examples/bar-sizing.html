@@ -21,17 +21,17 @@
                 <h3>Individual Bar Widths</h3>
                 <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-title&gt;Custom Width Bars&lt;/dc-title&gt;
-  &lt;dc-bar value="30" label="Narrow" fill="#E91E63" width="30px"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="50" label="Wide" fill="#2196F3" width="100"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="40" label="Medium" fill="#4CAF50" width="50px"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="35" label="Rem" fill="#FF9800" width="3rem"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="30" label="Narrow" fill="#E91E63" bar-width="30px"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="50" label="Wide" fill="#2196F3" bar-width="100"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="40" label="Medium" fill="#4CAF50" bar-width="50px"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="35" label="Rem" fill="#FF9800" bar-width="3rem"&gt;&lt;/dc-bar&gt;
 &lt;/dc-chart&gt;</code></pre>
                 <dc-chart width="500" height="350">
                     <dc-title>Custom Width Bars</dc-title>
-                    <dc-bar value="30" label="Narrow" fill="#E91E63" width="30px"></dc-bar>
-                    <dc-bar value="50" label="Wide" fill="#2196F3" width="100"></dc-bar>
-                    <dc-bar value="40" label="Medium" fill="#4CAF50" width="50px"></dc-bar>
-                    <dc-bar value="35" label="Rem" fill="#FF9800" width="3rem"></dc-bar>
+                    <dc-bar value="30" label="Narrow" fill="#E91E63" bar-width="30px"></dc-bar>
+                    <dc-bar value="50" label="Wide" fill="#2196F3" bar-width="100"></dc-bar>
+                    <dc-bar value="40" label="Medium" fill="#4CAF50" bar-width="50px"></dc-bar>
+                    <dc-bar value="35" label="Rem" fill="#FF9800" bar-width="3rem"></dc-bar>
                 </dc-chart>
             </div>
 
@@ -100,21 +100,21 @@
   &lt;dc-bar-group label="Group Override" bar-width="30px"&gt;
     &lt;dc-bar value="45" label="A" fill="#2196F3"&gt;&lt;/dc-bar&gt;
     &lt;!-- Individual bar overrides group and chart --&gt;
-    &lt;dc-bar value="38" label="B" fill="#4CAF50" width="80px"&gt;&lt;/dc-bar&gt;
+    &lt;dc-bar value="38" label="B" fill="#4CAF50" bar-width="80px"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="52" label="C" fill="#FF9800"&gt;&lt;/dc-bar&gt;
   &lt;/dc-bar-group&gt;
   &lt;!-- Individual bar overrides chart default --&gt;
-  &lt;dc-bar value="50" label="Override" fill="#9C27B0" width="100px"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="50" label="Override" fill="#9C27B0" bar-width="100px"&gt;&lt;/dc-bar&gt;
 &lt;/dc-chart&gt;</code></pre>
                 <dc-chart width="500" height="350" bar-width="50px">
                     <dc-title>Width Cascade Example</dc-title>
                     <dc-bar value="30" label="Default" fill="#E91E63"></dc-bar>
                     <dc-bar-group label="Group Override" bar-width="30px">
                         <dc-bar value="45" label="A" fill="#2196F3"></dc-bar>
-                        <dc-bar value="38" label="B" fill="#4CAF50" width="80px"></dc-bar>
+                        <dc-bar value="38" label="B" fill="#4CAF50" bar-width="80px"></dc-bar>
                         <dc-bar value="52" label="C" fill="#FF9800"></dc-bar>
                     </dc-bar-group>
-                    <dc-bar value="50" label="Override" fill="#9C27B0" width="100px"></dc-bar>
+                    <dc-bar value="50" label="Override" fill="#9C27B0" bar-width="100px"></dc-bar>
                 </dc-chart>
             </div>
         </div>
@@ -264,15 +264,15 @@
                 <h3>Custom Heights (Horizontal)</h3>
                 <pre><code>&lt;dc-chart width="500" height="400" orientation="horizontal"&gt;
   &lt;dc-title&gt;Custom Heights (Horizontal)&lt;/dc-title&gt;
-  &lt;dc-bar value="65" label="Tall Bar" fill="#2196F3" width="80px"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="48" label="Short Bar" fill="#4CAF50" width="30px"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="55" label="Medium Bar" fill="#FF9800" width="50px"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="65" label="Tall Bar" fill="#2196F3" bar-width="80px"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="48" label="Short Bar" fill="#4CAF50" bar-width="30px"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="55" label="Medium Bar" fill="#FF9800" bar-width="50px"&gt;&lt;/dc-bar&gt;
 &lt;/dc-chart&gt;</code></pre>
                 <dc-chart width="500" height="400" orientation="horizontal">
                     <dc-title>Custom Heights (Horizontal)</dc-title>
-                    <dc-bar value="65" label="Tall Bar" fill="#2196F3" width="80px"></dc-bar>
-                    <dc-bar value="48" label="Short Bar" fill="#4CAF50" width="30px"></dc-bar>
-                    <dc-bar value="55" label="Medium Bar" fill="#FF9800" width="50px"></dc-bar>
+                    <dc-bar value="65" label="Tall Bar" fill="#2196F3" bar-width="80px"></dc-bar>
+                    <dc-bar value="48" label="Short Bar" fill="#4CAF50" bar-width="30px"></dc-bar>
+                    <dc-bar value="55" label="Medium Bar" fill="#FF9800" bar-width="50px"></dc-bar>
                 </dc-chart>
             </div>
 

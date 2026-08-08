@@ -279,38 +279,38 @@ describe('FunnelChart component', () => {
     });
 
     it('supports proportional height mode', async () => {
-      chart = await fixture<FunnelChart>('dc-funnel-chart', { 'segment-height': 'value' }, `
+      chart = await fixture<FunnelChart>('dc-funnel-chart', { 'stage-height': 'value' }, `
         <dc-funnel-stage value="80" label="Large"></dc-funnel-stage>
         <dc-funnel-stage value="20" label="Small"></dc-funnel-stage>
       `);
-      expect(chart.segmentHeight).toBe('value');
+      expect(chart.stageHeight).toBe('value');
       const polygons = chart.shadowRoot?.querySelectorAll('polygon[data-shape-index]');
       expect(polygons).toHaveLength(2);
     });
 
     it('supports logarithmic height mode', async () => {
-      chart = await fixture<FunnelChart>('dc-funnel-chart', { 'segment-height': 'log-value' }, `
+      chart = await fixture<FunnelChart>('dc-funnel-chart', { 'stage-height': 'log-value' }, `
         <dc-funnel-stage value="1000" label="Large"></dc-funnel-stage>
         <dc-funnel-stage value="10" label="Small"></dc-funnel-stage>
       `);
-      expect(chart.segmentHeight).toBe('log-value');
+      expect(chart.stageHeight).toBe('log-value');
       const polygons = chart.shadowRoot?.querySelectorAll('polygon[data-shape-index]');
       expect(polygons).toHaveLength(2);
     });
 
     it('supports fixed height mode', async () => {
-      chart = await fixture<FunnelChart>('dc-funnel-chart', { 'segment-height': '80' }, `
+      chart = await fixture<FunnelChart>('dc-funnel-chart', { 'stage-height': '80' }, `
         <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
         <dc-funnel-stage value="50" label="B"></dc-funnel-stage>
       `);
-      expect(chart.segmentHeight).toBe('80');
+      expect(chart.stageHeight).toBe('80');
       const polygons = chart.shadowRoot?.querySelectorAll('polygon[data-shape-index]');
       expect(polygons).toHaveLength(2);
     });
 
     it('supports min/max height constraints', async () => {
       chart = await fixture<FunnelChart>('dc-funnel-chart', {
-        'segment-height': 'value 30 200',
+        'stage-height': 'value 30 200',
       }, `
         <dc-funnel-stage value="1000" label="Large"></dc-funnel-stage>
         <dc-funnel-stage value="10" label="Small"></dc-funnel-stage>
@@ -321,15 +321,15 @@ describe('FunnelChart component', () => {
 
     it('supports separate min/max attributes', async () => {
       chart = await fixture<FunnelChart>('dc-funnel-chart', {
-        'segment-height': 'value',
-        'segment-min-height': '40',
-        'segment-max-height': '150'
+        'stage-height': 'value',
+        'stage-min-height': '40',
+        'stage-max-height': '150'
       }, `
         <dc-funnel-stage value="1000" label="Large"></dc-funnel-stage>
         <dc-funnel-stage value="10" label="Small"></dc-funnel-stage>
       `);
-      expect(chart.segmentMinHeight).toBe('40');
-      expect(chart.segmentMaxHeight).toBe('150');
+      expect(chart.stageMinHeight).toBe('40');
+      expect(chart.stageMaxHeight).toBe('150');
     });
   });
 
@@ -1010,7 +1010,7 @@ describe('FunnelChart component', () => {
     });
 
     it('handles all zero values with proportional height', async () => {
-      chart = await fixture<FunnelChart>('dc-funnel-chart', { 'segment-height': 'value' }, `
+      chart = await fixture<FunnelChart>('dc-funnel-chart', { 'stage-height': 'value' }, `
         <dc-funnel-stage value="0" label="A"></dc-funnel-stage>
         <dc-funnel-stage value="0" label="B"></dc-funnel-stage>
       `);

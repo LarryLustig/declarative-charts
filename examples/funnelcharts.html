@@ -193,14 +193,14 @@
         <div class="grid">
             <div>
                 <h3>Fixed Heights</h3>
-                <pre><code>&lt;dc-funnel-chart width="450" height="350" segment-height="80px"&gt;
+                <pre><code>&lt;dc-funnel-chart width="450" height="350" stage-height="80px"&gt;
   &lt;dc-title&gt;Marketing Funnel&lt;/dc-title&gt;
   &lt;dc-funnel-stage value="5000" label="Awareness"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="2000" label="Interest"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="800" label="Consider"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="300" label="Convert"&gt;&lt;/dc-funnel-stage&gt;
 &lt;/dc-funnel-chart&gt;</code></pre>
-                <dc-funnel-chart width="450" height="350" segment-height="80px">
+                <dc-funnel-chart width="450" height="350" stage-height="80px">
                     <dc-title>Marketing Funnel</dc-title>
                     <dc-funnel-stage value="5000" label="Awareness"></dc-funnel-stage>
                     <dc-funnel-stage value="2000" label="Interest"></dc-funnel-stage>
@@ -211,7 +211,7 @@
 
             <div>
                 <h3>Proportional to Values</h3>
-                <pre><code>&lt;dc-funnel-chart width="450" height="400" segment-height="value"&gt;
+                <pre><code>&lt;dc-funnel-chart width="450" height="400" stage-height="value"&gt;
   &lt;dc-title&gt;Sales Conversion&lt;/dc-title&gt;
   &lt;dc-funnel-stage value="10000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="5000" label="Views"&gt;&lt;/dc-funnel-stage&gt;
@@ -219,7 +219,7 @@
   &lt;dc-funnel-stage value="1000" label="Checkout"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="750" label="Purchase"&gt;&lt;/dc-funnel-stage&gt;
 &lt;/dc-funnel-chart&gt;</code></pre>
-                <dc-funnel-chart width="450" height="400" segment-height="value">
+                <dc-funnel-chart width="450" height="400" stage-height="value">
                     <dc-title>Sales Conversion</dc-title>
                     <dc-funnel-stage value="10000" label="Visitors"></dc-funnel-stage>
                     <dc-funnel-stage value="5000" label="Views"></dc-funnel-stage>
@@ -231,7 +231,7 @@
 
             <div>
                 <h3>Logarithmic Scale</h3>
-                <pre><code>&lt;dc-funnel-chart width="450" height="400" segment-height="log-value"&gt;
+                <pre><code>&lt;dc-funnel-chart width="450" height="400" stage-height="log-value"&gt;
   &lt;dc-title&gt;User Growth&lt;/dc-title&gt;
   &lt;dc-funnel-stage value="1000000" label="Impressions"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="100000" label="Clicks"&gt;&lt;/dc-funnel-stage&gt;
@@ -239,7 +239,7 @@
   &lt;dc-funnel-stage value="1000" label="Active"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="100" label="Paying"&gt;&lt;/dc-funnel-stage&gt;
 &lt;/dc-funnel-chart&gt;</code></pre>
-                <dc-funnel-chart width="450" height="400" segment-height="log-value">
+                <dc-funnel-chart width="450" height="400" stage-height="log-value">
                     <dc-title>User Growth</dc-title>
                     <dc-funnel-stage value="1000000" label="Impressions"></dc-funnel-stage>
                     <dc-funnel-stage value="100000" label="Clicks"></dc-funnel-stage>
@@ -252,9 +252,9 @@
             <div>
                 <h3>With Constraints</h3>
                 <pre><code>&lt;dc-funnel-chart width="450" height="400"
-                 segment-height="value"
-                 segment-min-height="50px"
-                 segment-max-height="120px"&gt;
+                 stage-height="value"
+                 stage-min-height="50px"
+                 stage-max-height="120px"&gt;
   &lt;dc-title&gt;Constrained Funnel&lt;/dc-title&gt;
   &lt;dc-funnel-stage value="10000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="5000" label="Views"&gt;&lt;/dc-funnel-stage&gt;
@@ -263,9 +263,9 @@
   &lt;dc-funnel-stage value="750" label="Purchase"&gt;&lt;/dc-funnel-stage&gt;
 &lt;/dc-funnel-chart&gt;</code></pre>
                 <dc-funnel-chart width="450" height="400"
-                                 segment-height="value"
-                                 segment-min-height="50px"
-                                 segment-max-height="120px">
+                                 stage-height="value"
+                                 stage-min-height="50px"
+                                 stage-max-height="120px">
                     <dc-title>Constrained Funnel</dc-title>
                     <dc-funnel-stage value="10000" label="Visitors"></dc-funnel-stage>
                     <dc-funnel-stage value="5000" label="Views"></dc-funnel-stage>

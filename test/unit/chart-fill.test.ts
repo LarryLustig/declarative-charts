@@ -392,10 +392,10 @@ describe('ChartFill combined scenarios', () => {
   it('fill with scale property', () => {
     const fill = new ChartFill();
     fill.pattern = 'dots';
-    fill.scale = 2;
+    fill.patternScale = 2;
 
     expect(fill.hasPattern()).toBe(true);
-    expect(fill.scale).toBe(2);
+    expect(fill.patternScale).toBe(2);
   });
 });
 
@@ -411,7 +411,7 @@ describe('ChartFill properties', () => {
     fill.fill = '#ffffff';
     fill.stroke = '#000000';
     fill.pattern = 'dots';
-    fill.scale = 1.5;
+    fill.patternScale = 1.5;
     fill.label = 'Test';
     fill.value = 50;
     fill.minValue = 0;
@@ -421,7 +421,7 @@ describe('ChartFill properties', () => {
     expect(fill.fill).toBe('#ffffff');
     expect(fill.stroke).toBe('#000000');
     expect(fill.pattern).toBe('dots');
-    expect(fill.scale).toBe(1.5);
+    expect(fill.patternScale).toBe(1.5);
     expect(fill.label).toBe('Test');
     expect(fill.value).toBe(50);
     expect(fill.minValue).toBe(0);
@@ -434,7 +434,7 @@ describe('ChartFill properties', () => {
     expect(fill.fill).toBeUndefined();
     expect(fill.stroke).toBeUndefined();
     expect(fill.pattern).toBeUndefined();
-    expect(fill.scale).toBeUndefined();
+    expect(fill.patternScale).toBeUndefined();
     expect(fill.label).toBeUndefined();
     expect(fill.value).toBeUndefined();
     expect(fill.minValue).toBeUndefined();
