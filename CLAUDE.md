@@ -102,6 +102,14 @@ BaseChartElement
 
 **Data Extraction**: Charts query child elements via `querySelector`/`querySelectorAll`.
 
+**⚠️ Do not add a bulk-data attribute** (`values="[10,20,30]"` or similar). It has been considered and declined — see REVIEW.md §4.6. Three reasons, in order of weight:
+
+1. **It concedes the library's only differentiator.** Data living in markup as document structure is what distinguishes this project; a serialized array in an attribute is what `<google-chart data='…'>` and `trendchart-elements` already do, in a category where this library has no advantage.
+2. **The performance case does not exist.** Element creation and upgrade is 6–34ms even at n=1000 — under 0.04% of render time. The bottleneck was the O(n²) render, now fixed. It is not element count.
+3. **It splits the API.** Per-element `fill`, `href`, `hx-*` passthrough, popups, patterns, `hidden` and the `missing` policy cannot follow data into an attribute, so it would be a second-class path supporting half the library.
+
+If a consumer genuinely needs to supply an array from JavaScript, a `.data` **property** is the right shape — natural for JS, adds no attribute, does not invite JSON inside HTML. Build it when someone asks, not before.
+
 **Per-Render Caching**: Expensive computations (layout, text fitting, color resolution) must run once per render and be cached for use by event handlers. This pattern:
 - Avoids redundant DOM queries and calculations within a single render cycle
 - Ensures event handlers (popups, hover effects) use data matching the displayed content

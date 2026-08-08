@@ -872,7 +872,42 @@ segments as well.
   bars, where a missing bar should be absent rather than a zero-height rect that still consumes
   a slot and still renders a category label.
 
-### 4.6 A bulk-data path
+### 4.6 A bulk-data path — ❌ DECLINED
+
+> **Decided against, deliberately.** Recorded as a decision rather than left open, because a
+> standing TODO invites someone to implement it later on reasoning that no longer holds.
+>
+> **The performance argument is gone.** It was the original justification, and profiling killed
+> it: parse and element-upgrade time is 6–34ms across the whole range — under 0.04% of total at
+> n=1000. Creating one custom element per datapoint was never the bottleneck; the O(n²) render
+> was (§3.4). With that fixed, 5,000 bars render in 780ms. `values="[…]"` would remove a cost
+> that is not there.
+>
+> **It concedes the only differentiator.** The argument for this project is that data lives in
+> markup as document structure — that is what puts it in a category with only Charts.css (§1),
+> and what makes `<dc-bar hx-get="…">` possible at all. `values="[10,20,30]"` is a serialized
+> blob in an attribute, which is exactly what `<google-chart data='…'>` and
+> `trendchart-elements` do. Adding it would not extend the idea; it would land the library in the
+> crowded category where it has no advantage.
+>
+> **It splits the API in two.** Every feature would have to answer "does this work with
+> `values`?" — per-element `fill`, `href`, `hx-*` passthrough, popups, patterns, `hidden`, the
+> `missing` policy. Most cannot, so it would be a second-class path that quietly supports half
+> the library.
+>
+> The one real gap this finding identified is the **JS/JSON consumer**: someone holding an array
+> from `fetch` who must currently build DOM element by element. A `.data` property would serve
+> that better than a `values` attribute — it is the natural JavaScript interface, adds no
+> attribute, and does not invite putting JSON inside HTML. Worth doing **if a user asks**; not
+> worth building speculatively.
+>
+> The sweet spot stays what §1 says it is: small-to-medium categorical data emitted by a
+> template. That is a real and common case, and the library should be excellent at it rather than
+> adequate at everything.
+>
+> Original finding below.
+
+### 4.6 (original) A bulk-data path
 
 `grep -rn "JSON.parse" src/` → **nothing**. There is no way to get data in other than one custom
 element per datapoint.
