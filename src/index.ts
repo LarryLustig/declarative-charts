@@ -12,50 +12,38 @@
  *   <dc-bar value="10" fill="red" label="Jan"></dc-bar>
  *   <dc-bar value="20" fill="blue" label="Feb"></dc-bar>
  * </dc-chart>
+ *
+ * ---
+ *
+ * WHAT BELONGS IN THIS FILE
+ *
+ * This is the package's public API, and everything named here is a promise the
+ * project has to keep. The audience writes HTML, so the surface is deliberately
+ * small: the elements, the few JavaScript entry points a page might legitimately
+ * call, and the types needed to work with them.
+ *
+ * Internal machinery stays out even though it is exported from its own module -
+ * axis tick maths, date parsing, animation primitives, insight analysis, pattern
+ * registration, converters, and the controllers `BaseChart` delegates to. Those
+ * modules keep their own exports so they remain unit-testable; they are simply
+ * not part of what the package promises. Adding one here commits the project to
+ * its shape, so add deliberately.
  */
 
-// Export base classes and utilities
-export { BaseChart, booleanConverter, showConditionConverter } from './base-chart.js';
-export type {
-  ShowCondition,
-  LogEntry,
-  LogLevel,
-  ChartInteractionDetail,
-  ChartRenderDetail
-} from './base-chart.js';
-export { AxisChart } from './axis-chart.js';
-export { ColorResolver } from './color-resolver.js';
-export type { ColorHost } from './color-resolver.js';
-export { TextMeasurer } from './text-measurer.js';
-export type { TextMeasurerHost } from './text-measurer.js';
-export { KeyboardNavController } from './keyboard-nav-controller.js';
-export type { KeyboardNavHost } from './keyboard-nav-controller.js';
-export { PopupController } from './popup-controller.js';
-export type { PopupHost } from './popup-controller.js';
-export { ChartLogger } from './chart-logger.js';
-export type { ChartLoggerHost } from './chart-logger.js';
-export { SvgExporter, DEFAULT_SVG_FILENAME } from './svg-exporter.js';
-export type { SvgExportHost } from './svg-exporter.js';
+// ---------------------------------------------------------------------------
+// Chart elements
+// ---------------------------------------------------------------------------
 
-// Export error handling
-export { ErrorCode, formatErrorMessage, getErrorByCode, createErrorLog } from './errors.js';
-export type { ErrorDefinition, ErrorCodeKey, ErrorLevel } from './errors.js';
-export type { AxisConfig, TickConfig, TimeScale } from './axis-chart.js';
-export { BaseChartElement } from './base-chart-element.js';
-export { BaseFilledShape, BaseShape } from './base-filled-shape.js';
-export { ChartAxis } from './chart-axis.js';
-export type { AxisPosition, AxisName, AxisPositionOrName, AxisType } from './chart-axis.js';
-export { ChartGrid } from './chart-grid.js';
-export type { GridConfig, GridLineStyle } from './chart-grid.js';
-
-// Export all chart components
 export { Chart } from './chart.js';
 export { FunnelChart } from './funnel-chart.js';
 export { PieChart } from './pie-chart.js';
 export { StageChart } from './stage-chart.js';
 export type { ConnectorType } from './stage-chart.js';
 
-// Export child element components
+// ---------------------------------------------------------------------------
+// Data elements
+// ---------------------------------------------------------------------------
+
 export { ChartBar } from './chart-bar.js';
 export { ChartBarGroup } from './chart-bar-group.js';
 export { ChartBarSegment } from './chart-bar-segment.js';
@@ -64,47 +52,90 @@ export { ChartLine } from './chart-line.js';
 export type { CurveFit } from './chart-line.js';
 export { ChartArea } from './chart-area.js';
 export { ChartPoint } from './chart-point.js';
-export { ChartPopup } from './chart-popup.js';
 export { ChartFunnelStage } from './chart-funnel-stage.js';
 export { ChartStage } from './chart-stage.js';
 export type { StageShape } from './chart-stage.js';
 export { ChartPieSlice } from './chart-pie-slice.js';
-export { ChartLegend } from './chart-legend.js';
-export { ChartLegendItem } from './chart-legend-item.js';
-export { ChartTitle } from './chart-title.js';
-export { ChartEmpty } from './chart-empty.js';
 
-// Export palette components
-// Side-effect imports ensure elements are always registered when used as children
+// ---------------------------------------------------------------------------
+// Chrome and configuration elements
+// ---------------------------------------------------------------------------
+
+// Side-effect imports ensure these elements register even when a consumer never
+// names the class - they are usually only ever written as markup.
 import './chart-fill.js';
 import './chart-legend-item.js';
 import './chart-defaults.js';
+
+export { ChartAxis } from './chart-axis.js';
+export type { AxisPosition, AxisName, AxisPositionOrName, AxisType } from './chart-axis.js';
+export { ChartGrid } from './chart-grid.js';
+export type { GridConfig, GridLineStyle } from './chart-grid.js';
+export { ChartTitle } from './chart-title.js';
+export { ChartLegend } from './chart-legend.js';
+export { ChartLegendItem } from './chart-legend-item.js';
+export { ChartEmpty } from './chart-empty.js';
+export { ChartPopup } from './chart-popup.js';
 export { ChartPalette } from './chart-palette.js';
-export {
-  ChartDefaults,
-  configure,
-  getConfiguration,
-  getGlobalDefault,
-  findDefaultsElement,
-  getDefault,
-  resolveDefault,
-  DEFAULTABLE_ATTRIBUTES
-} from './chart-defaults.js';
-export type { DefaultableAttribute, ConfigureOptions } from './chart-defaults.js';
 export type { PaletteColorResult } from './chart-palette.js';
 export { ChartFill } from './chart-fill.js';
 export { ChartSwatch, STANDARD_SHAPES } from './chart-swatch.js';
 export type { StandardShape } from './chart-swatch.js';
+export { LogConsole } from './log-console.js';
 
-// Export built-in palettes
+// ---------------------------------------------------------------------------
+// Base classes, for extending the library with a new chart type
+// ---------------------------------------------------------------------------
+
+export { BaseChart } from './base-chart.js';
+export { AxisChart } from './axis-chart.js';
+export { BaseChartElement } from './base-chart-element.js';
+export { BaseFilledShape, BaseShape } from './base-filled-shape.js';
+export type { AxisConfig, TickConfig, TimeScale } from './axis-chart.js';
+
+// ---------------------------------------------------------------------------
+// Types for working with charts from JavaScript
+// ---------------------------------------------------------------------------
+
+export type {
+  ShowCondition,
+  LogEntry,
+  LogLevel,
+  ChartInteractionDetail,
+  ChartRenderDetail
+} from './base-chart.js';
+
+// ---------------------------------------------------------------------------
+// Site-wide configuration
+// ---------------------------------------------------------------------------
+
+export { ChartDefaults, configure, getConfiguration } from './chart-defaults.js';
+export type { DefaultableAttribute, ConfigureOptions } from './chart-defaults.js';
+
+// ---------------------------------------------------------------------------
+// Diagnostics, for anyone reading the log a chart produces
+// ---------------------------------------------------------------------------
+
+export { ErrorCode, formatErrorMessage, getErrorByCode } from './errors.js';
+export type { ErrorDefinition, ErrorCodeKey, ErrorLevel } from './errors.js';
+
+// ---------------------------------------------------------------------------
+// Number formatting, so surrounding text can match a chart's labels
+// ---------------------------------------------------------------------------
+
+export { NumberFormatter, formatNumber } from './format.js';
+export type { FormatPreset, FormatType, ParsedFormat, FormatterConfig } from './format.js';
+
+// ---------------------------------------------------------------------------
+// Built-in palettes, for building a palette picker or validating a name
+// ---------------------------------------------------------------------------
+
 export {
   BUILTIN_PALETTES,
   getBuiltinPalette,
   isBuiltinPalette,
   getBuiltinPaletteNames,
-  getBuiltinPalettesByType,
-  generatePaletteColors,
-  getDefaultPaletteForChart
+  getBuiltinPalettesByType
 } from './builtin-palettes.js';
 export type {
   BuiltinPalette,
@@ -112,85 +143,3 @@ export type {
   SequentialPalette,
   DivergingPalette
 } from './builtin-palettes.js';
-export {
-  PATTERN_DEFINITIONS,
-  HIGH_CONTRAST_PATTERN_SEQUENCE,
-  HIGH_CONTRAST_COLORS,
-  isPatternType,
-  generatePatternId,
-  getHighContrastPattern
-} from './patterns.js';
-export type { PatternType, PatternConfig, ResolvedPattern, ResolvedFillAndPattern } from './patterns.js';
-
-// Export logging/debugging components
-export { LogConsole } from './log-console.js';
-
-// Export accessibility utilities
-export {
-  // Analysis functions
-  average,
-  standardDeviation,
-  findPeaks,
-  findValleys,
-  analyzeLineTrend,
-  analyzeLines,
-  analyzeBars,
-  analyzePie,
-  analyzeFunnel,
-  analyzeBubbles
-} from './accessibility/index.js';
-
-// Export accessibility types
-export type {
-  LinePoint,
-  LineData,
-  BarData,
-  SliceData,
-  StageData,
-  BubbleData
-} from './accessibility/index.js';
-
-// Export formatting utilities
-export { NumberFormatter, formatNumber, parseFormat } from './format.js';
-export type { FormatPreset, FormatType, ParsedFormat, FormatterConfig } from './format.js';
-
-// Export chart calculation utilities (pure functions)
-export {
-  niceNumber,
-  calculateNiceTicks,
-  calculateTicksByInterval,
-  calculateTicks,
-  calculateLabelLines,
-  calculateLabelInterval,
-  calculatePopupPosition,
-  showPopupAtBounds
-} from './chart-utils.js';
-export type { ShapeBounds, ClientRect } from './chart-utils.js';
-
-// Export date utilities (pure functions)
-export {
-  parseDate,
-  formatDate,
-  getTimeRange,
-  dateToPosition,
-  selectTickInterval,
-  calculateTimeTicks,
-  parseDateLabels
-} from './date-utils.js';
-export type { ParsedDates } from './date-utils.js';
-
-// Export animation utilities
-export {
-  animateChartEntry,
-  animateBars,
-  animateLines,
-  animateAreas,
-  animatePieSlices,
-  animatePoints,
-  animateCascade,
-  cancelAnimations,
-  parseAnimateAttribute,
-  prefersReducedMotion,
-  DEFAULT_ANIMATION_OPTIONS
-} from './animation.js';
-export type { AnimationOptions, AnimatableChartType } from './animation.js';

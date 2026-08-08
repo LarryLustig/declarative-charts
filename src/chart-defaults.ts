@@ -495,39 +495,6 @@ export function getDefault(
   return undefined;
 }
 
-/**
- * Get the effective value for an attribute, considering:
- * 1. The element's own attribute (highest priority)
- * 2. The nearest <dc-defaults> ancestor (page/container scope)
- * 3. Global defaults set via `configure()` (site-wide)
- * 4. The provided hardcoded default (lowest priority)
- *
- * @param element - The chart element
- * @param attributeName - The attribute name
- * @param elementValue - The element's own value (may be undefined if not set)
- * @param hardcodedDefault - The library's hardcoded default value
- * @returns The effective value to use
- */
-export function resolveDefault<T>(
-  element: Element,
-  attributeName: DefaultableAttribute,
-  elementValue: T | undefined,
-  hardcodedDefault: T
-): T {
-  // If element has the attribute explicitly set, use that
-  if (element.hasAttribute(attributeName)) {
-    return elementValue as T;
-  }
-
-  // Check for a defaults element
-  const defaultValue = getDefault(element, attributeName);
-  if (defaultValue !== undefined) {
-    return defaultValue as T;
-  }
-
-  // Fall back to hardcoded default
-  return hardcodedDefault;
-}
 
 declare global {
   interface HTMLElementTagNameMap {

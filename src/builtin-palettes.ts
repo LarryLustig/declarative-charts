@@ -649,22 +649,3 @@ function rgbToHex(r: number, g: number, b: number): string {
 // Default Palette for Chart Types
 // ============================================================================
 
-/**
- * Get the default palette name for a chart type.
- *
- * @param chartType The chart element type
- * @returns Default palette name for that chart type
- */
-export function getDefaultPaletteForChart(
-  chartType: 'dc-chart' | 'dc-pie-chart' | 'dc-funnel-chart'
-): string {
-  switch (chartType) {
-    case 'dc-funnel-chart':
-      return 'cool-to-warm';
-    case 'dc-pie-chart':
-      return 'default';
-    case 'dc-chart':
-    default:
-      return 'default';
-  }
-}

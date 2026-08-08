@@ -183,36 +183,6 @@
         },
         {
           "kind": "function",
-          "name": "animateCascade",
-          "return": {
-            "type": {
-              "text": "Animation[]"
-            }
-          },
-          "parameters": [
-            {
-              "name": "container",
-              "type": {
-                "text": "Element"
-              }
-            },
-            {
-              "name": "selector",
-              "type": {
-                "text": "string"
-              }
-            },
-            {
-              "name": "options",
-              "type": {
-                "text": "AnimationOptions"
-              }
-            }
-          ],
-          "description": "Animate elements in a cascading sequence (for funnel and stage charts)."
-        },
-        {
-          "kind": "function",
           "name": "animateChartEntry",
           "return": {
             "type": {
@@ -252,24 +222,6 @@
             }
           ],
           "description": "Main entry point: trigger entry animations for all chart elements.\r\n\r\nThis function detects what types of elements are present in the chart\r\nand applies the appropriate animations. It respects the user's\r\nreduced motion preference."
-        },
-        {
-          "kind": "function",
-          "name": "cancelAnimations",
-          "return": {
-            "type": {
-              "text": "void"
-            }
-          },
-          "parameters": [
-            {
-              "name": "animations",
-              "type": {
-                "text": "Animation[]"
-              }
-            }
-          ],
-          "description": "Cancel all running animations on a chart.\r\nUseful when data changes before animations complete."
         }
       ],
       "exports": [
@@ -347,25 +299,9 @@
         },
         {
           "kind": "js",
-          "name": "animateCascade",
-          "declaration": {
-            "name": "animateCascade",
-            "module": "src/animation.ts"
-          }
-        },
-        {
-          "kind": "js",
           "name": "animateChartEntry",
           "declaration": {
             "name": "animateChartEntry",
-            "module": "src/animation.ts"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "cancelAnimations",
-          "declaration": {
-            "name": "cancelAnimations",
             "module": "src/animation.ts"
           }
         }
@@ -8591,7 +8527,7 @@
             "text": "Record<string, BuiltinPalette>"
           },
           "default": "{ // Categorical 'default': DEFAULT, 'category10': CATEGORY10, 'pastel': PASTEL, 'vivid': VIVID, 'earth': EARTH, 'ocean': OCEAN, 'colorblind-safe': COLORBLIND_SAFE, 'high-contrast': HIGH_CONTRAST, // Sequential (gradients) 'cool-to-warm': COOL_TO_WARM, 'blues': BLUES, 'greens': GREENS, 'reds': REDS, 'purples': PURPLES, 'warm': WARM, 'cool': COOL, 'sunset': SUNSET, 'viridis': VIRIDIS, // Diverging 'red-blue': RED_BLUE, 'brown-teal': BROWN_TEAL, 'purple-orange': PURPLE_ORANGE, }",
-          "description": "All built-in palettes indexed by name.\nNames are lowercase and hyphenated for consistency with HTML attributes."
+          "description": "All built-in palettes indexed by name.\r\nNames are lowercase and hyphenated for consistency with HTML attributes."
         },
         {
           "kind": "function",
@@ -8684,26 +8620,7 @@
               "description": "Number of colors needed"
             }
           ],
-          "description": "Generate colors from a built-in palette for a specific count of elements.\n\n- Categorical: Returns colors in order, cycling if count > palette size\n- Sequential: Interpolates between start and end colors\n- Diverging: Interpolates through start, middle, and end colors"
-        },
-        {
-          "kind": "function",
-          "name": "getDefaultPaletteForChart",
-          "return": {
-            "type": {
-              "text": ""
-            }
-          },
-          "parameters": [
-            {
-              "name": "chartType",
-              "type": {
-                "text": "'dc-chart' | 'dc-pie-chart' | 'dc-funnel-chart'"
-              },
-              "description": "The chart element type"
-            }
-          ],
-          "description": "Get the default palette name for a chart type."
+          "description": "Generate colors from a built-in palette for a specific count of elements.\r\n\r\n- Categorical: Returns colors in order, cycling if count > palette size\r\n- Sequential: Interpolates between start and end colors\r\n- Diverging: Interpolates through start, middle, and end colors"
         }
       ],
       "exports": [
@@ -8752,14 +8669,6 @@
           "name": "generatePaletteColors",
           "declaration": {
             "name": "generatePaletteColors",
-            "module": "src/builtin-palettes.ts"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "getDefaultPaletteForChart",
-          "declaration": {
-            "name": "getDefaultPaletteForChart",
             "module": "src/builtin-palettes.ts"
           }
         }
@@ -12154,10 +12063,10 @@
           "kind": "variable",
           "name": "DEFAULTABLE_ATTRIBUTES",
           "type": {
-            "text": "[\n  // Display options\n  'animations',\n  'palette',\n  'high-contrast',\n\n  // Value/label display\n  'show-value',\n  'show-label',\n  'show-percent',\n  'value-format',\n  'percent-format',\n  'label-position',\n  'label-fill',\n\n  // Styling\n  'stroke',\n  'stroke-width',\n\n  // Behavior\n  'auto-popup',\n  'logging',\n  'console-log',\n\n  // Layout (less common as defaults, but supported)\n  'padding',\n  'padding-top',\n  'padding-right',\n  'padding-bottom',\n  'padding-left',\n]"
+            "text": "[\r\n  // Display options\r\n  'animations',\r\n  'palette',\r\n  'high-contrast',\r\n\r\n  // Value/label display\r\n  'show-value',\r\n  'show-label',\r\n  'show-percent',\r\n  'value-format',\r\n  'percent-format',\r\n  'label-position',\r\n  'label-fill',\r\n\r\n  // Styling\r\n  'stroke',\r\n  'stroke-width',\r\n\r\n  // Behavior\r\n  'auto-popup',\r\n  'logging',\r\n  'console-log',\r\n\r\n  // Layout (less common as defaults, but supported)\r\n  'padding',\r\n  'padding-top',\r\n  'padding-right',\r\n  'padding-bottom',\r\n  'padding-left',\r\n]"
           },
           "default": "[ // Display options 'animations', 'palette', 'high-contrast', // Value/label display 'show-value', 'show-label', 'show-percent', 'value-format', 'percent-format', 'label-position', 'label-fill', // Styling 'stroke', 'stroke-width', // Behavior 'auto-popup', 'logging', 'console-log', // Layout (less common as defaults, but supported) 'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left', ]",
-          "description": "List of attribute names that can be configured via <dc-defaults>.\nThese are the attributes that make sense to set globally or per-container."
+          "description": "List of attribute names that can be configured via <dc-defaults>.\r\nThese are the attributes that make sense to set globally or per-container."
         },
         {
           "kind": "function",
@@ -12176,7 +12085,7 @@
               }
             }
           ],
-          "description": "Configure site-wide default values for all charts.\n\nCall this function from a shared JavaScript module that's loaded on every page\nto establish consistent defaults across your entire site.\n\nPriority order (highest to lowest):\n1. Explicit attribute on the chart element\n2. Nearest `<dc-defaults>` ancestor (page/container scope)\n3. Global defaults set via `configure()` (site-wide)\n4. Library hardcoded defaults"
+          "description": "Configure site-wide default values for all charts.\r\n\r\nCall this function from a shared JavaScript module that's loaded on every page\r\nto establish consistent defaults across your entire site.\r\n\r\nPriority order (highest to lowest):\r\n1. Explicit attribute on the chart element\r\n2. Nearest `<dc-defaults>` ancestor (page/container scope)\r\n3. Global defaults set via `configure()` (site-wide)\r\n4. Library hardcoded defaults"
         },
         {
           "kind": "function",
@@ -12186,7 +12095,7 @@
               "text": "Partial<ConfigureOptions>"
             }
           },
-          "description": "Get the current global configuration.\nReturns a copy of the global defaults map as a plain object."
+          "description": "Get the current global configuration.\r\nReturns a copy of the global defaults map as a plain object."
         },
         {
           "kind": "function",
@@ -12204,11 +12113,11 @@
               }
             }
           ],
-          "description": "Get a global default value by attribute name.\nUsed internally by charts when resolving defaults."
+          "description": "Get a global default value by attribute name.\r\nUsed internally by charts when resolving defaults."
         },
         {
           "kind": "class",
-          "description": "Configuration element that sets default attribute values for descendant charts.\n\nPlace a `<dc-defaults>` element in your HTML to configure defaults:\n- In `<head>` or start of `<body>` for page-wide defaults\n- Inside a container for scoped defaults\n\nCharts resolve defaults by walking up the DOM tree to find the nearest\n`<dc-defaults>` ancestor. If none is found, a document-level `<dc-defaults>`\n(outside any chart container) is used as a fallback.",
+          "description": "Configuration element that sets default attribute values for descendant charts.\r\n\r\nPlace a `<dc-defaults>` element in your HTML to configure defaults:\r\n- In `<head>` or start of `<body>` for page-wide defaults\r\n- Inside a container for scoped defaults\r\n\r\nCharts resolve defaults by walking up the DOM tree to find the nearest\r\n`<dc-defaults>` ancestor. If none is found, a document-level `<dc-defaults>`\r\n(outside any chart container) is used as a fallback.",
           "name": "ChartDefaults",
           "members": [
             {
@@ -12217,7 +12126,7 @@
               "type": {
                 "text": "string | undefined"
               },
-              "description": "Default animation setting for charts.\n- `animations` or `animations=\"true\"` - Enable with default 300ms duration\n- `animations=\"500ms\"` or `animations=\"0.5s\"` - Enable with custom duration\n- `animations=\"false\"` - Explicitly disable animations",
+              "description": "Default animation setting for charts.\r\n- `animations` or `animations=\"true\"` - Enable with default 300ms duration\r\n- `animations=\"500ms\"` or `animations=\"0.5s\"` - Enable with custom duration\r\n- `animations=\"false\"` - Explicitly disable animations",
               "attribute": "animations"
             },
             {
@@ -12226,7 +12135,7 @@
               "type": {
                 "text": "string | undefined"
               },
-              "description": "Default palette for charts.\nCan be a built-in palette name or ID of a custom `<dc-palette>` element.",
+              "description": "Default palette for charts.\r\nCan be a built-in palette name or ID of a custom `<dc-palette>` element.",
               "attribute": "palette"
             },
             {
@@ -12407,7 +12316,7 @@
                   }
                 }
               ],
-              "description": "Get the value of a default attribute.\nReturns undefined if the attribute is not set on this element."
+              "description": "Get the value of a default attribute.\r\nReturns undefined if the attribute is not set on this element."
             },
             {
               "kind": "method",
@@ -12434,7 +12343,7 @@
               "type": {
                 "text": "string | undefined"
               },
-              "description": "Default animation setting for charts.\n- `animations` or `animations=\"true\"` - Enable with default 300ms duration\n- `animations=\"500ms\"` or `animations=\"0.5s\"` - Enable with custom duration\n- `animations=\"false\"` - Explicitly disable animations",
+              "description": "Default animation setting for charts.\r\n- `animations` or `animations=\"true\"` - Enable with default 300ms duration\r\n- `animations=\"500ms\"` or `animations=\"0.5s\"` - Enable with custom duration\r\n- `animations=\"false\"` - Explicitly disable animations",
               "fieldName": "animations"
             },
             {
@@ -12442,7 +12351,7 @@
               "type": {
                 "text": "string | undefined"
               },
-              "description": "Default palette for charts.\nCan be a built-in palette name or ID of a custom `<dc-palette>` element.",
+              "description": "Default palette for charts.\r\nCan be a built-in palette name or ID of a custom `<dc-palette>` element.",
               "fieldName": "palette"
             },
             {
@@ -12613,7 +12522,7 @@
               }
             }
           ],
-          "description": "Find the nearest <dc-defaults> element for a given chart element.\n\nResolution order:\n1. Check previous siblings at each level (nearest sibling wins)\n2. Walk up the DOM tree and repeat\n3. Fall back to document-level <dc-defaults> (first one found in document)\n4. Return null if no defaults element exists"
+          "description": "Find the nearest <dc-defaults> element for a given chart element.\r\n\r\nResolution order:\r\n1. Check previous siblings at each level (nearest sibling wins)\r\n2. Walk up the DOM tree and repeat\r\n3. Fall back to document-level <dc-defaults> (first one found in document)\r\n4. Return null if no defaults element exists"
         },
         {
           "kind": "function",
@@ -12639,47 +12548,7 @@
               "description": "The attribute name to look up"
             }
           ],
-          "description": "Get the default value for an attribute, considering the defaults hierarchy.\n\nResolution order:\n1. Nearest `<dc-defaults>` element (page/container scope)\n2. Global defaults set via `configure()` (site-wide)"
-        },
-        {
-          "kind": "function",
-          "name": "resolveDefault",
-          "return": {
-            "type": {
-              "text": ""
-            }
-          },
-          "parameters": [
-            {
-              "name": "element",
-              "type": {
-                "text": "Element"
-              },
-              "description": "The chart element"
-            },
-            {
-              "name": "attributeName",
-              "type": {
-                "text": "DefaultableAttribute"
-              },
-              "description": "The attribute name"
-            },
-            {
-              "name": "elementValue",
-              "type": {
-                "text": "T | undefined"
-              },
-              "description": "The element's own value (may be undefined if not set)"
-            },
-            {
-              "name": "hardcodedDefault",
-              "type": {
-                "text": "T"
-              },
-              "description": "The library's hardcoded default value"
-            }
-          ],
-          "description": "Get the effective value for an attribute, considering:\n1. The element's own attribute (highest priority)\n2. The nearest <dc-defaults> ancestor (page/container scope)\n3. Global defaults set via `configure()` (site-wide)\n4. The provided hardcoded default (lowest priority)"
+          "description": "Get the default value for an attribute, considering the defaults hierarchy.\r\n\r\nResolution order:\r\n1. Nearest `<dc-defaults>` element (page/container scope)\r\n2. Global defaults set via `configure()` (site-wide)"
         }
       ],
       "exports": [
@@ -12744,14 +12613,6 @@
           "name": "getDefault",
           "declaration": {
             "name": "getDefault",
-            "module": "src/chart-defaults.ts"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "resolveDefault",
-          "declaration": {
-            "name": "resolveDefault",
             "module": "src/chart-defaults.ts"
           }
         }
@@ -32696,350 +32557,6 @@
       "exports": [
         {
           "kind": "js",
-          "name": "BaseChart",
-          "declaration": {
-            "name": "BaseChart",
-            "module": "./base-chart.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "booleanConverter",
-          "declaration": {
-            "name": "booleanConverter",
-            "module": "./base-chart.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "showConditionConverter",
-          "declaration": {
-            "name": "showConditionConverter",
-            "module": "./base-chart.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ShowCondition",
-          "declaration": {
-            "name": "ShowCondition",
-            "module": "./base-chart.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "LogEntry",
-          "declaration": {
-            "name": "LogEntry",
-            "module": "./base-chart.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "LogLevel",
-          "declaration": {
-            "name": "LogLevel",
-            "module": "./base-chart.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ChartInteractionDetail",
-          "declaration": {
-            "name": "ChartInteractionDetail",
-            "module": "./base-chart.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ChartRenderDetail",
-          "declaration": {
-            "name": "ChartRenderDetail",
-            "module": "./base-chart.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "AxisChart",
-          "declaration": {
-            "name": "AxisChart",
-            "module": "./axis-chart.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ColorResolver",
-          "declaration": {
-            "name": "ColorResolver",
-            "module": "./color-resolver.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ColorHost",
-          "declaration": {
-            "name": "ColorHost",
-            "module": "./color-resolver.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "TextMeasurer",
-          "declaration": {
-            "name": "TextMeasurer",
-            "module": "./text-measurer.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "TextMeasurerHost",
-          "declaration": {
-            "name": "TextMeasurerHost",
-            "module": "./text-measurer.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "KeyboardNavController",
-          "declaration": {
-            "name": "KeyboardNavController",
-            "module": "./keyboard-nav-controller.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "KeyboardNavHost",
-          "declaration": {
-            "name": "KeyboardNavHost",
-            "module": "./keyboard-nav-controller.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "PopupController",
-          "declaration": {
-            "name": "PopupController",
-            "module": "./popup-controller.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "PopupHost",
-          "declaration": {
-            "name": "PopupHost",
-            "module": "./popup-controller.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ChartLogger",
-          "declaration": {
-            "name": "ChartLogger",
-            "module": "./chart-logger.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ChartLoggerHost",
-          "declaration": {
-            "name": "ChartLoggerHost",
-            "module": "./chart-logger.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "SvgExporter",
-          "declaration": {
-            "name": "SvgExporter",
-            "module": "./svg-exporter.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "DEFAULT_SVG_FILENAME",
-          "declaration": {
-            "name": "DEFAULT_SVG_FILENAME",
-            "module": "./svg-exporter.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "SvgExportHost",
-          "declaration": {
-            "name": "SvgExportHost",
-            "module": "./svg-exporter.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ErrorCode",
-          "declaration": {
-            "name": "ErrorCode",
-            "module": "./errors.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "formatErrorMessage",
-          "declaration": {
-            "name": "formatErrorMessage",
-            "module": "./errors.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "getErrorByCode",
-          "declaration": {
-            "name": "getErrorByCode",
-            "module": "./errors.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "createErrorLog",
-          "declaration": {
-            "name": "createErrorLog",
-            "module": "./errors.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ErrorDefinition",
-          "declaration": {
-            "name": "ErrorDefinition",
-            "module": "./errors.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ErrorCodeKey",
-          "declaration": {
-            "name": "ErrorCodeKey",
-            "module": "./errors.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ErrorLevel",
-          "declaration": {
-            "name": "ErrorLevel",
-            "module": "./errors.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "AxisConfig",
-          "declaration": {
-            "name": "AxisConfig",
-            "module": "./axis-chart.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "TickConfig",
-          "declaration": {
-            "name": "TickConfig",
-            "module": "./axis-chart.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "TimeScale",
-          "declaration": {
-            "name": "TimeScale",
-            "module": "./axis-chart.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "BaseChartElement",
-          "declaration": {
-            "name": "BaseChartElement",
-            "module": "./base-chart-element.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "BaseFilledShape",
-          "declaration": {
-            "name": "BaseFilledShape",
-            "module": "./base-filled-shape.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "BaseShape",
-          "declaration": {
-            "name": "BaseShape",
-            "module": "./base-filled-shape.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ChartAxis",
-          "declaration": {
-            "name": "ChartAxis",
-            "module": "./chart-axis.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "AxisPosition",
-          "declaration": {
-            "name": "AxisPosition",
-            "module": "./chart-axis.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "AxisName",
-          "declaration": {
-            "name": "AxisName",
-            "module": "./chart-axis.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "AxisPositionOrName",
-          "declaration": {
-            "name": "AxisPositionOrName",
-            "module": "./chart-axis.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "AxisType",
-          "declaration": {
-            "name": "AxisType",
-            "module": "./chart-axis.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ChartGrid",
-          "declaration": {
-            "name": "ChartGrid",
-            "module": "./chart-grid.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "GridConfig",
-          "declaration": {
-            "name": "GridConfig",
-            "module": "./chart-grid.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "GridLineStyle",
-          "declaration": {
-            "name": "GridLineStyle",
-            "module": "./chart-grid.js"
-          }
-        },
-        {
-          "kind": "js",
           "name": "Chart",
           "declaration": {
             "name": "Chart",
@@ -33144,14 +32661,6 @@
         },
         {
           "kind": "js",
-          "name": "ChartPopup",
-          "declaration": {
-            "name": "ChartPopup",
-            "module": "./chart-popup.js"
-          }
-        },
-        {
-          "kind": "js",
           "name": "ChartFunnelStage",
           "declaration": {
             "name": "ChartFunnelStage",
@@ -33184,6 +32693,78 @@
         },
         {
           "kind": "js",
+          "name": "ChartAxis",
+          "declaration": {
+            "name": "ChartAxis",
+            "module": "./chart-axis.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "AxisPosition",
+          "declaration": {
+            "name": "AxisPosition",
+            "module": "./chart-axis.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "AxisName",
+          "declaration": {
+            "name": "AxisName",
+            "module": "./chart-axis.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "AxisPositionOrName",
+          "declaration": {
+            "name": "AxisPositionOrName",
+            "module": "./chart-axis.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "AxisType",
+          "declaration": {
+            "name": "AxisType",
+            "module": "./chart-axis.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ChartGrid",
+          "declaration": {
+            "name": "ChartGrid",
+            "module": "./chart-grid.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "GridConfig",
+          "declaration": {
+            "name": "GridConfig",
+            "module": "./chart-grid.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "GridLineStyle",
+          "declaration": {
+            "name": "GridLineStyle",
+            "module": "./chart-grid.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ChartTitle",
+          "declaration": {
+            "name": "ChartTitle",
+            "module": "./chart-title.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "ChartLegend",
           "declaration": {
             "name": "ChartLegend",
@@ -33200,14 +32781,6 @@
         },
         {
           "kind": "js",
-          "name": "ChartTitle",
-          "declaration": {
-            "name": "ChartTitle",
-            "module": "./chart-title.js"
-          }
-        },
-        {
-          "kind": "js",
           "name": "ChartEmpty",
           "declaration": {
             "name": "ChartEmpty",
@@ -33216,90 +32789,18 @@
         },
         {
           "kind": "js",
+          "name": "ChartPopup",
+          "declaration": {
+            "name": "ChartPopup",
+            "module": "./chart-popup.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "ChartPalette",
           "declaration": {
             "name": "ChartPalette",
             "module": "./chart-palette.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ChartDefaults",
-          "declaration": {
-            "name": "ChartDefaults",
-            "module": "./chart-defaults.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "configure",
-          "declaration": {
-            "name": "configure",
-            "module": "./chart-defaults.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "getConfiguration",
-          "declaration": {
-            "name": "getConfiguration",
-            "module": "./chart-defaults.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "getGlobalDefault",
-          "declaration": {
-            "name": "getGlobalDefault",
-            "module": "./chart-defaults.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "findDefaultsElement",
-          "declaration": {
-            "name": "findDefaultsElement",
-            "module": "./chart-defaults.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "getDefault",
-          "declaration": {
-            "name": "getDefault",
-            "module": "./chart-defaults.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "resolveDefault",
-          "declaration": {
-            "name": "resolveDefault",
-            "module": "./chart-defaults.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "DEFAULTABLE_ATTRIBUTES",
-          "declaration": {
-            "name": "DEFAULTABLE_ATTRIBUTES",
-            "module": "./chart-defaults.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "DefaultableAttribute",
-          "declaration": {
-            "name": "DefaultableAttribute",
-            "module": "./chart-defaults.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ConfigureOptions",
-          "declaration": {
-            "name": "ConfigureOptions",
-            "module": "./chart-defaults.js"
           }
         },
         {
@@ -33344,6 +32845,254 @@
         },
         {
           "kind": "js",
+          "name": "LogConsole",
+          "declaration": {
+            "name": "LogConsole",
+            "module": "./log-console.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "BaseChart",
+          "declaration": {
+            "name": "BaseChart",
+            "module": "./base-chart.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "AxisChart",
+          "declaration": {
+            "name": "AxisChart",
+            "module": "./axis-chart.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "BaseChartElement",
+          "declaration": {
+            "name": "BaseChartElement",
+            "module": "./base-chart-element.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "BaseFilledShape",
+          "declaration": {
+            "name": "BaseFilledShape",
+            "module": "./base-filled-shape.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "BaseShape",
+          "declaration": {
+            "name": "BaseShape",
+            "module": "./base-filled-shape.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "AxisConfig",
+          "declaration": {
+            "name": "AxisConfig",
+            "module": "./axis-chart.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "TickConfig",
+          "declaration": {
+            "name": "TickConfig",
+            "module": "./axis-chart.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "TimeScale",
+          "declaration": {
+            "name": "TimeScale",
+            "module": "./axis-chart.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ShowCondition",
+          "declaration": {
+            "name": "ShowCondition",
+            "module": "./base-chart.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "LogEntry",
+          "declaration": {
+            "name": "LogEntry",
+            "module": "./base-chart.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "LogLevel",
+          "declaration": {
+            "name": "LogLevel",
+            "module": "./base-chart.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ChartInteractionDetail",
+          "declaration": {
+            "name": "ChartInteractionDetail",
+            "module": "./base-chart.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ChartRenderDetail",
+          "declaration": {
+            "name": "ChartRenderDetail",
+            "module": "./base-chart.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ChartDefaults",
+          "declaration": {
+            "name": "ChartDefaults",
+            "module": "./chart-defaults.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "configure",
+          "declaration": {
+            "name": "configure",
+            "module": "./chart-defaults.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "getConfiguration",
+          "declaration": {
+            "name": "getConfiguration",
+            "module": "./chart-defaults.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "DefaultableAttribute",
+          "declaration": {
+            "name": "DefaultableAttribute",
+            "module": "./chart-defaults.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ConfigureOptions",
+          "declaration": {
+            "name": "ConfigureOptions",
+            "module": "./chart-defaults.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ErrorCode",
+          "declaration": {
+            "name": "ErrorCode",
+            "module": "./errors.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "formatErrorMessage",
+          "declaration": {
+            "name": "formatErrorMessage",
+            "module": "./errors.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "getErrorByCode",
+          "declaration": {
+            "name": "getErrorByCode",
+            "module": "./errors.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ErrorDefinition",
+          "declaration": {
+            "name": "ErrorDefinition",
+            "module": "./errors.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ErrorCodeKey",
+          "declaration": {
+            "name": "ErrorCodeKey",
+            "module": "./errors.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ErrorLevel",
+          "declaration": {
+            "name": "ErrorLevel",
+            "module": "./errors.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "NumberFormatter",
+          "declaration": {
+            "name": "NumberFormatter",
+            "module": "./format.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "formatNumber",
+          "declaration": {
+            "name": "formatNumber",
+            "module": "./format.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "FormatPreset",
+          "declaration": {
+            "name": "FormatPreset",
+            "module": "./format.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "FormatType",
+          "declaration": {
+            "name": "FormatType",
+            "module": "./format.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ParsedFormat",
+          "declaration": {
+            "name": "ParsedFormat",
+            "module": "./format.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "FormatterConfig",
+          "declaration": {
+            "name": "FormatterConfig",
+            "module": "./format.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "BUILTIN_PALETTES",
           "declaration": {
             "name": "BUILTIN_PALETTES",
@@ -33384,22 +33133,6 @@
         },
         {
           "kind": "js",
-          "name": "generatePaletteColors",
-          "declaration": {
-            "name": "generatePaletteColors",
-            "module": "./builtin-palettes.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "getDefaultPaletteForChart",
-          "declaration": {
-            "name": "getDefaultPaletteForChart",
-            "module": "./builtin-palettes.js"
-          }
-        },
-        {
-          "kind": "js",
           "name": "BuiltinPalette",
           "declaration": {
             "name": "BuiltinPalette",
@@ -33428,526 +33161,6 @@
           "declaration": {
             "name": "DivergingPalette",
             "module": "./builtin-palettes.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "PATTERN_DEFINITIONS",
-          "declaration": {
-            "name": "PATTERN_DEFINITIONS",
-            "module": "./patterns.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "HIGH_CONTRAST_PATTERN_SEQUENCE",
-          "declaration": {
-            "name": "HIGH_CONTRAST_PATTERN_SEQUENCE",
-            "module": "./patterns.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "HIGH_CONTRAST_COLORS",
-          "declaration": {
-            "name": "HIGH_CONTRAST_COLORS",
-            "module": "./patterns.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "isPatternType",
-          "declaration": {
-            "name": "isPatternType",
-            "module": "./patterns.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "generatePatternId",
-          "declaration": {
-            "name": "generatePatternId",
-            "module": "./patterns.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "getHighContrastPattern",
-          "declaration": {
-            "name": "getHighContrastPattern",
-            "module": "./patterns.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "PatternType",
-          "declaration": {
-            "name": "PatternType",
-            "module": "./patterns.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "PatternConfig",
-          "declaration": {
-            "name": "PatternConfig",
-            "module": "./patterns.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ResolvedPattern",
-          "declaration": {
-            "name": "ResolvedPattern",
-            "module": "./patterns.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ResolvedFillAndPattern",
-          "declaration": {
-            "name": "ResolvedFillAndPattern",
-            "module": "./patterns.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "LogConsole",
-          "declaration": {
-            "name": "LogConsole",
-            "module": "./log-console.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "average",
-          "declaration": {
-            "name": "average",
-            "module": "./accessibility/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "standardDeviation",
-          "declaration": {
-            "name": "standardDeviation",
-            "module": "./accessibility/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "findPeaks",
-          "declaration": {
-            "name": "findPeaks",
-            "module": "./accessibility/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "findValleys",
-          "declaration": {
-            "name": "findValleys",
-            "module": "./accessibility/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "analyzeLineTrend",
-          "declaration": {
-            "name": "analyzeLineTrend",
-            "module": "./accessibility/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "analyzeLines",
-          "declaration": {
-            "name": "analyzeLines",
-            "module": "./accessibility/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "analyzeBars",
-          "declaration": {
-            "name": "analyzeBars",
-            "module": "./accessibility/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "analyzePie",
-          "declaration": {
-            "name": "analyzePie",
-            "module": "./accessibility/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "analyzeFunnel",
-          "declaration": {
-            "name": "analyzeFunnel",
-            "module": "./accessibility/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "analyzeBubbles",
-          "declaration": {
-            "name": "analyzeBubbles",
-            "module": "./accessibility/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "LinePoint",
-          "declaration": {
-            "name": "LinePoint",
-            "module": "./accessibility/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "LineData",
-          "declaration": {
-            "name": "LineData",
-            "module": "./accessibility/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "BarData",
-          "declaration": {
-            "name": "BarData",
-            "module": "./accessibility/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "SliceData",
-          "declaration": {
-            "name": "SliceData",
-            "module": "./accessibility/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "StageData",
-          "declaration": {
-            "name": "StageData",
-            "module": "./accessibility/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "BubbleData",
-          "declaration": {
-            "name": "BubbleData",
-            "module": "./accessibility/index.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "NumberFormatter",
-          "declaration": {
-            "name": "NumberFormatter",
-            "module": "./format.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "formatNumber",
-          "declaration": {
-            "name": "formatNumber",
-            "module": "./format.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "parseFormat",
-          "declaration": {
-            "name": "parseFormat",
-            "module": "./format.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "FormatPreset",
-          "declaration": {
-            "name": "FormatPreset",
-            "module": "./format.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "FormatType",
-          "declaration": {
-            "name": "FormatType",
-            "module": "./format.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ParsedFormat",
-          "declaration": {
-            "name": "ParsedFormat",
-            "module": "./format.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "FormatterConfig",
-          "declaration": {
-            "name": "FormatterConfig",
-            "module": "./format.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "niceNumber",
-          "declaration": {
-            "name": "niceNumber",
-            "module": "./chart-utils.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "calculateNiceTicks",
-          "declaration": {
-            "name": "calculateNiceTicks",
-            "module": "./chart-utils.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "calculateTicksByInterval",
-          "declaration": {
-            "name": "calculateTicksByInterval",
-            "module": "./chart-utils.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "calculateTicks",
-          "declaration": {
-            "name": "calculateTicks",
-            "module": "./chart-utils.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "calculateLabelLines",
-          "declaration": {
-            "name": "calculateLabelLines",
-            "module": "./chart-utils.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "calculateLabelInterval",
-          "declaration": {
-            "name": "calculateLabelInterval",
-            "module": "./chart-utils.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "calculatePopupPosition",
-          "declaration": {
-            "name": "calculatePopupPosition",
-            "module": "./chart-utils.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "showPopupAtBounds",
-          "declaration": {
-            "name": "showPopupAtBounds",
-            "module": "./chart-utils.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ShapeBounds",
-          "declaration": {
-            "name": "ShapeBounds",
-            "module": "./chart-utils.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ClientRect",
-          "declaration": {
-            "name": "ClientRect",
-            "module": "./chart-utils.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "parseDate",
-          "declaration": {
-            "name": "parseDate",
-            "module": "./date-utils.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "formatDate",
-          "declaration": {
-            "name": "formatDate",
-            "module": "./date-utils.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "getTimeRange",
-          "declaration": {
-            "name": "getTimeRange",
-            "module": "./date-utils.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "dateToPosition",
-          "declaration": {
-            "name": "dateToPosition",
-            "module": "./date-utils.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "selectTickInterval",
-          "declaration": {
-            "name": "selectTickInterval",
-            "module": "./date-utils.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "calculateTimeTicks",
-          "declaration": {
-            "name": "calculateTimeTicks",
-            "module": "./date-utils.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "parseDateLabels",
-          "declaration": {
-            "name": "parseDateLabels",
-            "module": "./date-utils.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "ParsedDates",
-          "declaration": {
-            "name": "ParsedDates",
-            "module": "./date-utils.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "animateChartEntry",
-          "declaration": {
-            "name": "animateChartEntry",
-            "module": "./animation.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "animateBars",
-          "declaration": {
-            "name": "animateBars",
-            "module": "./animation.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "animateLines",
-          "declaration": {
-            "name": "animateLines",
-            "module": "./animation.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "animateAreas",
-          "declaration": {
-            "name": "animateAreas",
-            "module": "./animation.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "animatePieSlices",
-          "declaration": {
-            "name": "animatePieSlices",
-            "module": "./animation.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "animatePoints",
-          "declaration": {
-            "name": "animatePoints",
-            "module": "./animation.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "animateCascade",
-          "declaration": {
-            "name": "animateCascade",
-            "module": "./animation.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "cancelAnimations",
-          "declaration": {
-            "name": "cancelAnimations",
-            "module": "./animation.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "parseAnimateAttribute",
-          "declaration": {
-            "name": "parseAnimateAttribute",
-            "module": "./animation.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "prefersReducedMotion",
-          "declaration": {
-            "name": "prefersReducedMotion",
-            "module": "./animation.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "DEFAULT_ANIMATION_OPTIONS",
-          "declaration": {
-            "name": "DEFAULT_ANIMATION_OPTIONS",
-            "module": "./animation.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "AnimationOptions",
-          "declaration": {
-            "name": "AnimationOptions",
-            "module": "./animation.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "AnimatableChartType",
-          "declaration": {
-            "name": "AnimatableChartType",
-            "module": "./animation.js"
           }
         }
       ]

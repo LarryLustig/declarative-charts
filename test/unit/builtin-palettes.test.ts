@@ -6,7 +6,6 @@ import {
   getBuiltinPaletteNames,
   getBuiltinPalettesByType,
   generatePaletteColors,
-  getDefaultPaletteForChart,
   type CategoricalPalette,
   type SequentialPalette,
   type DivergingPalette
@@ -252,19 +251,6 @@ describe('builtin-palettes', () => {
   // Chart Type Defaults
   // ============================================================================
 
-  describe('getDefaultPaletteForChart', () => {
-    it('returns cool-to-warm for funnel charts', () => {
-      expect(getDefaultPaletteForChart('dc-funnel-chart')).toBe('cool-to-warm');
-    });
-
-    it('returns default for pie charts', () => {
-      expect(getDefaultPaletteForChart('dc-pie-chart')).toBe('default');
-    });
-
-    it('returns default for bar/line charts', () => {
-      expect(getDefaultPaletteForChart('dc-chart')).toBe('default');
-    });
-  });
 
   // ============================================================================
   // Specific Palette Validations

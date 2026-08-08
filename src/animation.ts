@@ -320,7 +320,8 @@ export function animatePoints(
 /**
  * Animate elements in a cascading sequence (for funnel and stage charts).
  */
-export function animateCascade(
+/** Internal: used by animateChartEntry only. */
+function animateCascade(
   container: Element,
   selector: string,
   options: AnimationOptions
@@ -432,15 +433,3 @@ export function animateChartEntry(
   return allAnimations;
 }
 
-/**
- * Cancel all running animations on a chart.
- * Useful when data changes before animations complete.
- */
-export function cancelAnimations(animations: Animation[]): void {
-  for (const anim of animations) {
-    // Cancel animations that haven't finished
-    if (anim.playState !== 'finished' && anim.playState !== 'idle') {
-      anim.cancel();
-    }
-  }
-}
