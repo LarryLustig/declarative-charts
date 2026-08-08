@@ -179,6 +179,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Popups extracted from `BaseChart` into `PopupController`**
+  - Fourth of the god-class extractions. `src/popup-controller.ts`, 180 lines
+  - The controller owns the four pieces of popup state and both coordinate paths into them:
+    `showPopup()` from viewport coordinates, `showPopupAtBounds()` from viewBox coordinates
+  - `showPopupForFocusedElement()` and `togglePopupForFocusedElement()` deliberately stayed on
+    the chart — subclass extension points that all four chart types override, exactly like
+    `getFocusableElements()` in the keyboard extraction. The popup-content generators live in the
+    subclasses and were not touched
+  - No API change. `popupContent`, `popupX`, `popupY` and `popupVisible` remain writable
+    protected accessors, since they were writable `@state()` fields, and `showPopup()`,
+    `hidePopup()` and `showPopupAtBounds()` still delegate — so the ~60 call sites across the
+    four chart types and `KeyboardNavController` are untouched
+  - `showPopupAtBounds()` dispatches back through the host to reach `showPopup()`, so a subclass
+    overriding it still wins — the same seam `getLuminance`, `focusElement` and `log` needed in
+    the three earlier extractions
+  - This one is net +47 lines in `base-chart.ts`, not fewer: preserving four `@state()` fields as
+    get/set pairs costs more source than the fields did. The gain is the responsibility boundary,
+    not the line count
+  - `PopupController` and `PopupHost` are exported
+  - 67 characterization tests were written and committed **before** the refactor
+    (`test/component/popups.test.ts`)
+
 - **Logging extracted from `BaseChart` into `ChartLogger`**
   - Third of the god-class extractions. `src/chart-logger.ts`, 283 lines; `base-chart.ts` down
     to 3,273 (from 3,724 before this work began)

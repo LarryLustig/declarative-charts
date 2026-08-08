@@ -1,5 +1,5 @@
 import { LitElement, css, html, svg, SVGTemplateResult } from 'lit';
-import { property, state } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
 import type { ChartTitle } from './chart-title.js';
 import type { ChartEmpty } from './chart-empty.js';
@@ -8,6 +8,7 @@ import type { ChartPalette, PaletteColorResult } from './chart-palette.js';
 import type { ChartFill } from './chart-fill.js';
 import { ColorResolver } from './color-resolver.js';
 import { KeyboardNavController } from './keyboard-nav-controller.js';
+import { PopupController } from './popup-controller.js';
 import { ChartLogger } from './chart-logger.js';
 import {
   PatternConfig,
@@ -19,7 +20,7 @@ import {
   getHighContrastPattern
 } from './patterns.js';
 import { NumberFormatter } from './format.js';
-import { calculatePopupPosition, type ShapeBounds } from './chart-utils.js';
+import { type ShapeBounds } from './chart-utils.js';
 import {
   animateChartEntry,
   parseAnimateAttribute,
@@ -205,17 +206,50 @@ export abstract class BaseChart extends LitElement {
   /** Track whether entry animation has been played */
   private _hasAnimated = false;
 
-  @state()
-  protected popupContent = '';
+  // ============================================================================
+  // Popup State
+  //
+  // The work lives in PopupController (see src/popup-controller.ts); these keep
+  // the API render() and every chart subclass already use. They were `@state()`
+  // fields, so assignment re-rendered - the controller's setters preserve that.
+  // Do not turn them back into plain fields.
+  // ============================================================================
 
-  @state()
-  protected popupX = 0;
+  /** HTML content of the popup. */
+  protected get popupContent(): string {
+    return this.popups.content;
+  }
 
-  @state()
-  protected popupY = 0;
+  protected set popupContent(value: string) {
+    this.popups.content = value;
+  }
 
-  @state()
-  protected popupVisible = false;
+  /** Popup left edge, in pixels relative to this element. */
+  protected get popupX(): number {
+    return this.popups.x;
+  }
+
+  protected set popupX(value: number) {
+    this.popups.x = value;
+  }
+
+  /** Popup top edge, in pixels relative to this element. */
+  protected get popupY(): number {
+    return this.popups.y;
+  }
+
+  protected set popupY(value: number) {
+    this.popups.y = value;
+  }
+
+  /** Whether the popup is currently showing. Read by all four chart types. */
+  protected get popupVisible(): boolean {
+    return this.popups.visible;
+  }
+
+  protected set popupVisible(value: boolean) {
+    this.popups.visible = value;
+  }
 
   /**
    * Default padding percentage used when no padding is specified.
@@ -1882,17 +1916,45 @@ export abstract class BaseChart extends LitElement {
     return this.querySelector(':scope > [hidden], :scope > * > [hidden]') !== null;
   }
 
+  // ============================================================================
+  // Popup Methods
+  //
+  // The work lives in PopupController; these thin wrappers keep the API that
+  // ~60 call sites across the chart types already use. See
+  // src/popup-controller.ts.
+  // ============================================================================
+
+  private _popups?: PopupController;
+
+  /**
+   * The hover/click popup for this chart.
+   *
+   * Built with an explicit adapter rather than passing `this`, for the same
+   * reason as {@link colors} and {@link keyboardNav}: several members it needs
+   * are not public. The getters keep the values live, so changing `width` or
+   * `height` still takes effect.
+   */
+  protected get popups(): PopupController {
+    if (!this._popups) {
+      const chart = this;
+      this._popups = new PopupController({
+        get shadowRoot() { return chart.shadowRoot; },
+        get width() { return chart.width; },
+        get height() { return chart.height; },
+        getBoundingClientRect: () => chart.getBoundingClientRect(),
+        showPopup: (content: string, x: number, y: number) => chart.showPopup(content, x, y),
+        requestUpdate: () => chart.requestUpdate()
+      });
+    }
+    return this._popups;
+  }
+
   protected showPopup(content: string, x: number, y: number) {
-    this.popupContent = content;
-    // Position popup offset from cursor (relative to host element)
-    const rect = this.getBoundingClientRect();
-    this.popupX = x - rect.left + 15;
-    this.popupY = y - rect.top - 10;
-    this.popupVisible = true;
+    this.popups.showPopup(content, x, y);
   }
 
   protected hidePopup() {
-    this.popupVisible = false;
+    this.popups.hidePopup();
   }
 
   /**
@@ -1904,22 +1966,7 @@ export abstract class BaseChart extends LitElement {
    * @returns true if popup was shown, false if SVG element not found
    */
   protected showPopupAtBounds(content: string, bounds: ShapeBounds): boolean {
-    const svgEl = this.shadowRoot?.querySelector('svg');
-    if (!svgEl) return false;
-
-    const chartRect = this.getBoundingClientRect();
-    const svgRect = svgEl.getBoundingClientRect();
-
-    const pos = calculatePopupPosition(
-      bounds,
-      chartRect,
-      svgRect,
-      this.width,
-      this.height
-    );
-
-    this.showPopup(content, pos.x, pos.y);
-    return true;
+    return this.popups.showPopupAtBounds(content, bounds);
   }
 
   /**

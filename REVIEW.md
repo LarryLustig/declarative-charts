@@ -924,7 +924,7 @@ computed layout accessor). For a large fraction of potential users the front doo
 
 Not broken, but expensive to change after publishing.
 
-### 5.1 `BaseChart` is a god class — 🔶 IN PROGRESS (3 of ~5 extracted)
+### 5.1 `BaseChart` is a god class — 🔶 IN PROGRESS (4 of ~5 extracted)
 
 > **`ColorResolver` extracted** — `src/color-resolver.ts`, 551 lines. `base-chart.ts` is down
 > from 3,724 to 3,386, and colour resolution is now readable and testable on its own.
@@ -1005,9 +1005,47 @@ Not broken, but expensive to change after publishing.
 > time in these three extractions that has happened. The mutation checks above are why that is
 > reported as a result rather than as luck.
 >
-> Still to extract, in rough order of payoff: `PopupController` (~100 lines), `TextMeasurer`
-> (~60), `SvgExporter`. Both abstraction leaks named below — the `orientation` cast and the
-> `tagName` sniffing in `getAnimatableChartType()` — are **still open**.
+> **`PopupController` extracted too** — `src/popup-controller.ts`, 180 lines. It owns the four
+> pieces of popup state and both coordinate paths into them: `showPopup()` converts viewport
+> coordinates from a mouse event, `showPopupAtBounds()` converts viewBox coordinates from a
+> shape's bounds via `calculatePopupPosition()`.
+>
+> What stayed behind, deliberately: `showPopupForFocusedElement()` and
+> `togglePopupForFocusedElement()`, the subclass extension points all four chart types override —
+> the same boundary as `getFocusableElements()` in the keyboard extraction. Moving them would have
+> left every subclass override overriding nothing, which is why the characterization suite asserts
+> both are own members of `BaseChart.prototype`. The popup-content generators
+> (`generateBarPopupContent()` and friends) were never `BaseChart`'s and were not touched.
+>
+> **This extraction made `base-chart.ts` bigger, not smaller** — 3,273 to 3,320, net +47. Worth
+> recording honestly, because it is the first one that did. The moved code is only ~50 lines; the
+> cost is that four `@state()` fields have to come back as get/set pairs to stay assignable, and
+> a `PopupHost` adapter has to be built. If line count were the objective this change would not
+> pay for itself. The objective is the responsibility boundary: popup positioning is now a thing
+> with a name, testable without a chart, and `BaseChart` no longer owns two coordinate systems.
+>
+> No test broke on the first full run — 2,111 passed unchanged. That is the second extraction in
+> a row with a clean first run, and as before it is reported as a result rather than luck only
+> because two mutation checks confirmed the guards are load-bearing:
+>
+> - Replacing `this.host.showPopup(...)` with `this.showPopup(...)` in `showPopupAtBounds()`
+>   failed 1 test — the override seam, the fourth appearance of this hazard after `getLuminance`,
+>   `focusElement` and `log`.
+> - Deleting the `host.requestUpdate()` from the `visible` setter failed 3 tests. The `@state()`
+>   → plain-field reactivity hazard, second appearance after `focusedIndex`/`keyboardActive`.
+>
+> Both hazards are now 4-for-4 and 2-for-2 across these extractions. They should be treated as
+> the default assumption for the remaining ones, not as things to check for afterwards.
+>
+> Two oddities the characterization tests pinned as-is rather than fixed, both worth a human
+> decision: `hidePopup()` leaves the content and coordinates in place (needed for the CSS opacity
+> transition, but it means stale popup text stays readable via `::part(popup)` and to assistive
+> tech between hovers), and `BaseChart.showPopupAtBounds('')` reports success and shows an empty
+> box while the identically-named standalone helper in `chart-utils.ts` bails on empty content.
+>
+> Still to extract, in rough order of payoff: `TextMeasurer` (~60 lines), `SvgExporter`. Both
+> abstraction leaks named below — the `orientation` cast and the `tagName` sniffing in
+> `getAnimatableChartType()` — are **still open**.
 >
 > Original finding below.
 
