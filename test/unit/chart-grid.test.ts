@@ -2,14 +2,20 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ChartGrid } from '../../src/chart-grid';
 
 /**
- * Tests for ChartGrid configuration element.
+ * Tests for the ChartGrid configuration element.
  *
- * Focuses on:
- * - Default property values
- * - Property setters
- * - getGridConfig() method
- * - getStrokeDasharray() method
- * - getStyleWarnings() method
+ * `<dc-grid>` used to take `color` and `style`. `style` is the sharpest
+ * convention violation the review found (REVIEW.md 6.1): every HTML element
+ * already has a `style` attribute, so `<dc-grid style="dashed">` shadowed a
+ * global one and put an unparseable declaration in the DOM. The attributes are
+ * now `stroke` and `stroke-dasharray`, named for the SVG properties they set
+ * and matching what `<dc-fill>` already accepted.
+ *
+ * Three things in this element were dead before that change: `getStyleWarnings()`
+ * had no caller, `getStrokeDasharray()` had no caller (the renderer re-derived
+ * the value from its own copy of the dash table), and every shipped example
+ * spelled the attribute `line-style`, which matched nothing at all. Those paths
+ * are covered here.
  */
 
 describe('ChartGrid properties', () => {
@@ -20,12 +26,12 @@ describe('ChartGrid properties', () => {
   });
 
   describe('default values', () => {
-    it('color defaults to #ddd', () => {
-      expect(grid.color).toBe('#ddd');
+    it('stroke defaults to #ddd', () => {
+      expect(grid.stroke).toBe('#ddd');
     });
 
-    it('lineStyle defaults to solid', () => {
-      expect(grid.lineStyle).toBe('solid');
+    it('strokeDasharray defaults to solid', () => {
+      expect(grid.strokeDasharray).toBe('solid');
     });
 
     it('hidden defaults to false', () => {
@@ -34,19 +40,14 @@ describe('ChartGrid properties', () => {
   });
 
   describe('property assignment', () => {
-    it('can set color', () => {
-      grid.color = '#ff0000';
-      expect(grid.color).toBe('#ff0000');
+    it('can set stroke', () => {
+      grid.stroke = '#ff0000';
+      expect(grid.stroke).toBe('#ff0000');
     });
 
-    it('can set lineStyle to dashed', () => {
-      grid.lineStyle = 'dashed';
-      expect(grid.lineStyle).toBe('dashed');
-    });
-
-    it('can set lineStyle to dotted', () => {
-      grid.lineStyle = 'dotted';
-      expect(grid.lineStyle).toBe('dotted');
+    it('can set strokeDasharray to a named pattern', () => {
+      grid.strokeDasharray = 'dashed';
+      expect(grid.strokeDasharray).toBe('dashed');
     });
 
     it('can set hidden', () => {
@@ -64,46 +65,41 @@ describe('getGridConfig', () => {
   });
 
   it('returns show=true when not hidden', () => {
-    const config = grid.getGridConfig();
-    expect(config.show).toBe(true);
+    expect(grid.getGridConfig().show).toBe(true);
   });
 
   it('returns show=false when hidden', () => {
     grid.hidden = true;
-    const config = grid.getGridConfig();
-    expect(config.show).toBe(false);
+    expect(grid.getGridConfig().show).toBe(false);
   });
 
-  it('returns the color value', () => {
-    grid.color = '#eee';
-    const config = grid.getGridConfig();
-    expect(config.color).toBe('#eee');
+  it('returns the stroke value', () => {
+    grid.stroke = '#eee';
+    expect(grid.getGridConfig().stroke).toBe('#eee');
   });
 
-  it('returns the lineStyle value', () => {
-    grid.lineStyle = 'dashed';
-    const config = grid.getGridConfig();
-    expect(config.lineStyle).toBe('dashed');
+  // The config now carries a resolved dasharray rather than a style name, so
+  // the renderer has nothing left to translate.
+  it('returns a resolved dasharray, not the name it was given', () => {
+    grid.strokeDasharray = 'dashed';
+    expect(grid.getGridConfig().strokeDasharray).toBe('5 5');
   });
 
   it('returns complete config with defaults', () => {
-    const config = grid.getGridConfig();
-    expect(config).toEqual({
+    expect(grid.getGridConfig()).toEqual({
       show: true,
-      color: '#ddd',
-      lineStyle: 'solid'
+      stroke: '#ddd',
+      strokeDasharray: 'none'
     });
   });
 
   it('returns complete config with custom values', () => {
-    grid.color = '#000';
-    grid.lineStyle = 'dotted';
-    grid.hidden = false;
-    const config = grid.getGridConfig();
-    expect(config).toEqual({
+    grid.stroke = '#000';
+    grid.strokeDasharray = 'dotted';
+    expect(grid.getGridConfig()).toEqual({
       show: true,
-      color: '#000',
-      lineStyle: 'dotted'
+      stroke: '#000',
+      strokeDasharray: '1 3'
     });
   });
 });
@@ -115,23 +111,36 @@ describe('getStrokeDasharray', () => {
     grid = new ChartGrid();
   });
 
-  it('returns empty string for solid', () => {
-    grid.lineStyle = 'solid';
-    expect(grid.getStrokeDasharray()).toBe('');
+  // The named patterns are <dc-fill>'s, so the same word means the same dash
+  // pattern on both elements. They used to disagree: a grid's "dashed" was
+  // "5,5" and a fill's was "5 5".
+  it.each([
+    ['solid', 'none'],
+    ['dashed', '5 5'],
+    ['dotted', '1 3'],
+    ['dash-dot', '5 3 1 3'],
+    ['long-dash', '10 5']
+  ])('resolves %s to %s', (name, expected) => {
+    grid.strokeDasharray = name;
+    expect(grid.getStrokeDasharray()).toBe(expected);
   });
 
-  it('returns "5,5" for dashed', () => {
-    grid.lineStyle = 'dashed';
-    expect(grid.getStrokeDasharray()).toBe('5,5');
+  it('defaults to solid', () => {
+    expect(grid.getStrokeDasharray()).toBe('none');
   });
 
-  it('returns "2,4" for dotted', () => {
-    grid.lineStyle = 'dotted';
-    expect(grid.getStrokeDasharray()).toBe('2,4');
+  it('passes a raw SVG dash list through untouched', () => {
+    grid.strokeDasharray = '4 2 1 2';
+    expect(grid.getStrokeDasharray()).toBe('4 2 1 2');
   });
 
-  it('returns empty string for default', () => {
-    // Default is solid
+  it('is case-insensitive about named patterns', () => {
+    grid.strokeDasharray = 'DASHED';
+    expect(grid.getStrokeDasharray()).toBe('5 5');
+  });
+
+  it('treats an empty value as solid rather than emitting nothing', () => {
+    grid.strokeDasharray = '';
     expect(grid.getStrokeDasharray()).toBe('');
   });
 });
@@ -143,28 +152,37 @@ describe('getStyleWarnings', () => {
     grid = new ChartGrid();
   });
 
-  it('returns empty array for valid configuration', () => {
-    const warnings = grid.getStyleWarnings();
-    expect(warnings).toEqual([]);
-  });
-
-  it('returns empty array for valid lineStyle values', () => {
-    grid.lineStyle = 'solid';
-    expect(grid.getStyleWarnings()).toEqual([]);
-
-    grid.lineStyle = 'dashed';
-    expect(grid.getStyleWarnings()).toEqual([]);
-
-    grid.lineStyle = 'dotted';
+  it('returns empty array for the default configuration', () => {
     expect(grid.getStyleWarnings()).toEqual([]);
   });
 
-  it('returns warning for invalid lineStyle', () => {
-    // Force an invalid value by bypassing type checking
-    (grid as any).lineStyle = 'wavy';
+  it('accepts every named pattern without warning', () => {
+    for (const name of ['solid', 'dashed', 'dotted', 'dash-dot', 'long-dash']) {
+      grid.strokeDasharray = name;
+      expect(grid.getStyleWarnings(), name).toEqual([]);
+    }
+  });
+
+  it('accepts raw dash lists without warning', () => {
+    for (const list of ['5 3', '5,3', '4 2 1 2', '2.5 1.5']) {
+      grid.strokeDasharray = list;
+      expect(grid.getStyleWarnings(), list).toEqual([]);
+    }
+  });
+
+  // This is the case that used to render a solid grid and say nothing - which
+  // is exactly what every shipped example was doing via `line-style`.
+  it('warns about an unrecognised dash pattern', () => {
+    grid.strokeDasharray = 'wavy';
     const warnings = grid.getStyleWarnings();
     expect(warnings).toHaveLength(1);
-    expect(warnings[0].attribute).toBe('style');
-    expect(warnings[0].message).toContain('Invalid style');
+    expect(warnings[0].attribute).toBe('stroke-dasharray');
+    expect(warnings[0].value).toBe('wavy');
+    expect(warnings[0].message).toContain('wavy');
+  });
+
+  it('does not warn about an empty value', () => {
+    grid.strokeDasharray = '';
+    expect(grid.getStyleWarnings()).toEqual([]);
   });
 });

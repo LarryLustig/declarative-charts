@@ -5,6 +5,7 @@ import type { ChartTitle } from './chart-title.js';
 import { ChartSwatch } from './chart-swatch.js';
 import { NumberFormatter } from './format.js';
 import type { ChartLegendItem } from './chart-legend-item.js';
+import { showConditionConverter, evaluateShowCondition, type ShowCondition } from './converters.js';
 
 /**
  * Shape types for legend indicators.
@@ -72,22 +73,6 @@ export type LegendPosition =
   | 'bottom-right';
 
 /**
- * Custom converter for boolean attributes that handles "false" string
- * Returns undefined when attribute is absent to preserve the default value
- */
-const booleanConverter = {
-  fromAttribute: (value: string | null) => {
-    // When attribute is absent, return undefined to use the property's default value
-    if (value === null) return undefined;
-    if (value === 'false') return false;
-    return true;
-  },
-  toAttribute: (value: boolean) => {
-    return value ? '' : null;
-  }
-};
-
-/**
  * Legend element for charts
  *
  * This element doesn't render itself - instead it's detected by the parent
@@ -137,16 +122,34 @@ const booleanConverter = {
  *   <dc-legend position="bottom" columns="3" fill="#1a1a1a" font-size="14"></dc-legend>
  * </dc-chart>
  */
+/** A legend item with its display strings resolved for this render. */
+type PreparedLegendItem = LegendItem & {
+  /** The label to draw, or null if this item's show-label condition excludes it. */
+  displayLabel: string | null;
+  /** The value/percent text to draw, or null if neither is shown. */
+  displayValue: string | null;
+  resolvedShape: LegendShape;
+};
+
 @customElement('dc-legend')
 export class ChartLegend extends LitElement {
-  @property({ attribute: 'show-value', converter: booleanConverter })
-  showValue = true;
+  /**
+   * Whether to show values in the legend.
+   *
+   * Uses the same converter as every other `show-*` in the library, so a
+   * threshold such as `show-value="10%"` means here what it means elsewhere.
+   * This element used to declare its own boolean converter, under which
+   * `show-value="10%"` silently evaluated to `true` - one attribute name with
+   * two meanings depending on which element it was written on.
+   */
+  @property({ attribute: 'show-value', converter: showConditionConverter })
+  showValue: ShowCondition = true;
 
-  @property({ attribute: 'show-percent', converter: booleanConverter })
-  showPercent = false;
+  @property({ attribute: 'show-percent', converter: showConditionConverter })
+  showPercent: ShowCondition = false;
 
-  @property({ attribute: 'show-label', converter: booleanConverter })
-  showLabel = true;
+  @property({ attribute: 'show-label', converter: showConditionConverter })
+  showLabel: ShowCondition = true;
 
   @property({ type: String })
   columns: string = 'auto';
@@ -367,13 +370,13 @@ export class ChartLegend extends LitElement {
    */
   private prepareItems(
     items: LegendItem[],
-    _showLabel: boolean,
-    showValue: boolean,
-    showPercent: boolean,
+    showLabel: ShowCondition,
+    showValue: ShowCondition,
+    showPercent: ShowCondition,
     formatter: NumberFormatter,
     valueFormat: string,
     percentFormat: string
-  ): Array<LegendItem & { displayValue: string | null; resolvedShape: LegendShape }> {
+  ): Array<PreparedLegendItem> {
     // Only sum valued items for percentage calculation
     const valuedItems = items.filter((item): item is ValuedLegendItem => !isDimensionless(item));
     const total = valuedItems.reduce((sum, item) => sum + item.value, 0);
@@ -382,26 +385,44 @@ export class ChartLegend extends LitElement {
       let displayValue: string | null = null;
 
       // Dimensionless items never show value or percent
-      if (!isDimensionless(item) && (showValue || showPercent)) {
+      if (!isDimensionless(item)) {
         const percent = total > 0 ? (item.value / total) * 100 : 0;
 
-        // Format value and percent using the formatter
-        const formattedValue = formatter.format(item.value, valueFormat);
-        const formattedPercent = formatter.format(percent / 100, percentFormat);
+        // Thresholds are per item, so this is evaluated inside the loop: with
+        // show-value="10%", a 4% slice shows no value and a 40% one does.
+        const wantValue = evaluateShowCondition(showValue, item.value, percent);
+        const wantPercent = evaluateShowCondition(showPercent, item.value, percent);
 
-        if (showValue && showPercent) {
-          displayValue = `${formattedValue} (${formattedPercent})`;
-        } else if (showValue) {
-          displayValue = formattedValue;
-        } else {
-          displayValue = formattedPercent;
+        if (wantValue || wantPercent) {
+          // Format value and percent using the formatter
+          const formattedValue = formatter.format(item.value, valueFormat);
+          const formattedPercent = formatter.format(percent / 100, percentFormat);
+
+          if (wantValue && wantPercent) {
+            displayValue = `${formattedValue} (${formattedPercent})`;
+          } else if (wantValue) {
+            displayValue = formattedValue;
+          } else {
+            displayValue = formattedPercent;
+          }
         }
       }
+
+      // The label is resolved per item for the same reason as the value, so
+      // one attribute means one thing wherever it is written. A dimensionless
+      // item has no value to compare, so a threshold cannot hide it.
+      const labelPercent = isDimensionless(item) || total <= 0
+        ? 100
+        : (item.value / total) * 100;
+      const labelValue = isDimensionless(item) ? Infinity : item.value;
+      const displayLabel = evaluateShowCondition(showLabel, labelValue, labelPercent)
+        ? (item.label || '')
+        : null;
 
       // Resolve shape, defaulting to 'square'
       const resolvedShape: LegendShape = item.shape || 'square';
 
-      return { ...item, displayValue, resolvedShape };
+      return { ...item, displayLabel, displayValue, resolvedShape };
     });
   }
 
@@ -445,8 +466,8 @@ export class ChartLegend extends LitElement {
   getDimensions(
     items: LegendItem[],
     chartWidth: number,
-    chartShowValue: boolean = true,
-    chartShowPercent: boolean = false,
+    chartShowValue: ShowCondition = true,
+    chartShowPercent: ShowCondition = false,
     chartValueFormat: string = 'number',
     chartPercentFormat: string = 'percent 1',
     chartLocale?: string
@@ -482,14 +503,14 @@ export class ChartLegend extends LitElement {
     // Calculate text widths
     const { fontSize: baseFontSize, colorBoxWidth, colorBoxGap, labelValueGap, itemPadding, columnGap, itemHeight, padding } = ChartLegend.TABULAR;
     const fontSize = baseFontSize * this.fontScale;
-    const labelWidth = showLabel
-      ? Math.max(...itemsWithDisplay.map(item => this.measureText(item.label || '', fontSize)))
-      : 0;
+    const labelWidth = Math.max(
+      ...itemsWithDisplay.map(item => this.measureText(item.displayLabel || '', fontSize))
+    );
     const displayValueWidth = Math.max(
       ...itemsWithDisplay.map(item => this.measureText(item.displayValue || '', fontSize - 1))
     );
     const columnWidth = colorBoxWidth + colorBoxGap + labelWidth +
-      (showLabel && displayValueWidth > 0 ? labelValueGap : 0) +
+      (labelWidth > 0 && displayValueWidth > 0 ? labelValueGap : 0) +
       displayValueWidth + itemPadding;
 
     // Calculate title contributions
@@ -532,9 +553,9 @@ export class ChartLegend extends LitElement {
 
       for (const item of itemsWithDisplay) {
         let text = '';
-        if (showLabel) text += item.label;
+        if (item.displayLabel) text += item.displayLabel;
         if (item.displayValue) {
-          text += showLabel ? ` (${item.displayValue})` : item.displayValue;
+          text += item.displayLabel ? ` (${item.displayValue})` : item.displayValue;
         }
 
         const textWidth = this.measureText(text, wrappedFontSize);
@@ -619,8 +640,8 @@ export class ChartLegend extends LitElement {
   generateSvg(
     items: LegendItem[],
     chartWidth: number,
-    chartShowValue: boolean = true,
-    chartShowPercent: boolean = false,
+    chartShowValue: ShowCondition = true,
+    chartShowPercent: ShowCondition = false,
     chartValueFormat: string = 'number',
     chartPercentFormat: string = 'percent 1',
     chartLocale?: string
@@ -657,9 +678,9 @@ export class ChartLegend extends LitElement {
     const isHorizontalPosition = this.position.startsWith('top') || this.position.startsWith('bottom');
 
     if (this.columns === '*') {
-      return this.generateWrappedSvg(itemsWithDisplay, chartWidth, showLabel, titleInfo, isHorizontalPosition);
+      return this.generateWrappedSvg(itemsWithDisplay, chartWidth, titleInfo, isHorizontalPosition);
     } else {
-      return this.generateTabularSvg(itemsWithDisplay, chartWidth, showLabel, titleInfo, isHorizontalPosition);
+      return this.generateTabularSvg(itemsWithDisplay, chartWidth, titleInfo, isHorizontalPosition);
     }
   }
 
@@ -667,9 +688,8 @@ export class ChartLegend extends LitElement {
    * Generate SVG for tabular (grid) layout at 0,0.
    */
   private generateTabularSvg(
-    items: Array<LegendItem & { displayValue: string | null; resolvedShape: LegendShape }>,
+    items: PreparedLegendItem[],
     chartWidth: number,
-    showLabel: boolean,
     titleInfo: { text: string; position: string; svgStyles: Record<string, string> } | null,
     isHorizontalPosition: boolean
   ): { width: number; height: number; svg: SVGTemplateResult } {
@@ -679,14 +699,14 @@ export class ChartLegend extends LitElement {
     const titleHeight = 25;
 
     // Calculate text widths
-    const labelWidth = showLabel
-      ? Math.max(...items.map(item => this.measureText(item.label || '', fontSize)))
-      : 0;
+    const labelWidth = Math.max(
+      ...items.map(item => this.measureText(item.displayLabel || '', fontSize))
+    );
     const displayValueWidth = Math.max(
       ...items.map(item => this.measureText(item.displayValue || '', fontSize - 1))
     );
     const columnWidth = colorBoxWidth + colorBoxGap + labelWidth +
-      (showLabel && displayValueWidth > 0 ? labelValueGap : 0) +
+      (labelWidth > 0 && displayValueWidth > 0 ? labelValueGap : 0) +
       displayValueWidth + itemPadding;
 
     // Calculate number of columns
@@ -831,7 +851,7 @@ export class ChartLegend extends LitElement {
           const itemX = contentX + col * (columnWidth + columnGap);
           const itemY = contentY + row * itemHeight;
           const labelX = itemX + colorBoxWidth + colorBoxGap;
-          const valueX = labelX + labelWidth + (showLabel ? labelValueGap : 0);
+          const valueX = labelX + labelWidth + (labelWidth > 0 ? labelValueGap : 0);
 
           return svg`
             <!-- Shape indicator -->
@@ -839,7 +859,7 @@ export class ChartLegend extends LitElement {
               ${ChartSwatch.renderShape(item.resolvedShape, 18, item.color, 'white')}
             </g>
 
-            ${showLabel ? svg`
+            ${item.displayLabel ? svg`
               <!-- Label -->
               <text
                 part="legend-label"
@@ -848,7 +868,7 @@ export class ChartLegend extends LitElement {
                 font-size="${fontSize}"
                 fill="#333"
               >
-                ${item.label}
+                ${item.displayLabel}
               </text>
             ` : ''}
 
@@ -874,9 +894,8 @@ export class ChartLegend extends LitElement {
    * Generate SVG for wrapped (inline flow) layout at 0,0.
    */
   private generateWrappedSvg(
-    items: Array<LegendItem & { displayValue: string | null; resolvedShape: LegendShape }>,
+    items: PreparedLegendItem[],
     chartWidth: number,
-    showLabel: boolean,
     titleInfo: { text: string; position: string; svgStyles: Record<string, string> } | null,
     isHorizontalPosition: boolean
   ): { width: number; height: number; svg: SVGTemplateResult } {
@@ -927,9 +946,9 @@ export class ChartLegend extends LitElement {
 
     const positionedItems = items.map(item => {
       let text = '';
-      if (showLabel) text += item.label;
+      if (item.displayLabel) text += item.displayLabel;
       if (item.displayValue) {
-        text += showLabel ? ` (${item.displayValue})` : item.displayValue;
+        text += item.displayLabel ? ` (${item.displayValue})` : item.displayValue;
       }
 
       const textWidth = this.measureText(text, fontSize);

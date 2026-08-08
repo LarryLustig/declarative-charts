@@ -771,27 +771,6 @@
               "description": "Render horizontal grid lines for vertical charts or vertical grid lines for horizontal charts.\r\nSupports negative value ranges and renders zero line with distinct styling when applicable."
             },
             {
-              "kind": "method",
-              "name": "getGridDasharray",
-              "privacy": "protected",
-              "return": {
-                "type": {
-                  "text": ""
-                }
-              },
-              "parameters": [
-                {
-                  "name": "lineStyle",
-                  "optional": true,
-                  "type": {
-                    "text": "string"
-                  },
-                  "description": "The grid line style ('solid', 'dashed', 'dotted')"
-                }
-              ],
-              "description": "Get the stroke-dasharray value for grid line rendering."
-            },
-            {
               "kind": "field",
               "name": "axisStrokeWidth",
               "type": {
@@ -9423,7 +9402,7 @@
       "declarations": [
         {
           "kind": "class",
-          "description": "Axis configuration element for charts.\r\n\r\nThis element configures an axis on a chart (bar chart, line chart, etc.).\r\nIt does not render itself - the parent chart reads its configuration and\r\nrenders the axis accordingly.\r\n\r\n## Axis Types\r\n\r\n- `value`: Numeric continuous scale with configurable range and ticks\r\n- `label`: Discrete category labels from data elements\r\n- `time`: Temporal data with proportional time-based positioning\r\n\r\nType is inferred if not specified:\r\n- Vertical charts: left/right = value, top/bottom = label\r\n- Horizontal charts: left/right = label, top/bottom = value\r\n\r\n## Position Naming\r\n\r\nYou can specify axis position using either:\r\n\r\n**Positional names** (recommended):\r\n- `left`, `right`, `top`, `bottom` - explicit side of the chart\r\n\r\n**Traditional names**:\r\n- `x`, `y` - mapped based on chart orientation:\r\n  - Vertical charts: x = bottom (category), y = left (value)\r\n  - Horizontal charts: x = left (value), y = bottom (category)\r\n\r\n## Range & Tick Configuration (value/time axes)\r\n\r\n```html\r\n<!-- Fixed range -->\r\n<dc-axis position=\"left\" min-value=\"0\" max-value=\"100\"></dc-axis>\r\n\r\n<!-- Custom tick interval -->\r\n<dc-axis position=\"left\" tick-interval=\"25\"></dc-axis>\r\n\r\n<!-- Explicit tick values -->\r\n<dc-axis position=\"left\" tick-values=\"0, 50, 75, 100\"></dc-axis>\r\n```\r\n\r\n## Grid Lines\r\n\r\nAdd a `<dc-grid>` child to configure grid lines:\r\n\r\n```html\r\n<dc-axis position=\"left\">\r\n  <dc-grid color=\"#eee\" style=\"dashed\"></dc-grid>\r\n</dc-axis>\r\n```\r\n\r\n## Axis Titles\r\n\r\nAdd a title by nesting a `<dc-title>` element:\r\n\r\n```html\r\n<dc-axis position=\"left\">\r\n  <dc-title>Revenue ($)</dc-title>\r\n</dc-axis>\r\n```",
+          "description": "Axis configuration element for charts.\r\n\r\nThis element configures an axis on a chart (bar chart, line chart, etc.).\r\nIt does not render itself - the parent chart reads its configuration and\r\nrenders the axis accordingly.\r\n\r\n## Axis Types\r\n\r\n- `value`: Numeric continuous scale with configurable range and ticks\r\n- `label`: Discrete category labels from data elements\r\n- `time`: Temporal data with proportional time-based positioning\r\n\r\nType is inferred if not specified:\r\n- Vertical charts: left/right = value, top/bottom = label\r\n- Horizontal charts: left/right = label, top/bottom = value\r\n\r\n## Position Naming\r\n\r\nYou can specify axis position using either:\r\n\r\n**Positional names** (recommended):\r\n- `left`, `right`, `top`, `bottom` - explicit side of the chart\r\n\r\n**Traditional names**:\r\n- `x`, `y` - mapped based on chart orientation:\r\n  - Vertical charts: x = bottom (category), y = left (value)\r\n  - Horizontal charts: x = left (value), y = bottom (category)\r\n\r\n## Range & Tick Configuration (value/time axes)\r\n\r\n```html\r\n<!-- Fixed range -->\r\n<dc-axis position=\"left\" min-value=\"0\" max-value=\"100\"></dc-axis>\r\n\r\n<!-- Custom tick interval -->\r\n<dc-axis position=\"left\" tick-interval=\"25\"></dc-axis>\r\n\r\n<!-- Explicit tick values -->\r\n<dc-axis position=\"left\" tick-values=\"0, 50, 75, 100\"></dc-axis>\r\n```\r\n\r\n## Grid Lines\r\n\r\nAdd a `<dc-grid>` child to configure grid lines:\r\n\r\n```html\r\n<dc-axis position=\"left\">\r\n  <dc-grid stroke=\"#eee\" stroke-dasharray=\"dashed\"></dc-grid>\r\n</dc-axis>\r\n```\r\n\r\n## Axis Titles\r\n\r\nAdd a title by nesting a `<dc-title>` element:\r\n\r\n```html\r\n<dc-axis position=\"left\">\r\n  <dc-title>Revenue ($)</dc-title>\r\n</dc-axis>\r\n```",
           "name": "ChartAxis",
           "members": [
             {
@@ -14250,28 +14229,28 @@
       "declarations": [
         {
           "kind": "class",
-          "description": "The `<dc-grid>` element configures grid line appearance for an axis.\nIt should be placed as a child of `<dc-axis>`.",
+          "description": "The `<dc-grid>` element configures grid line appearance for an axis.\r\nIt should be placed as a child of `<dc-axis>`.\r\n\r\nAttributes are named for the SVG properties they set - `stroke` and\r\n`stroke-dasharray` - matching `<dc-fill>` and the rest of the library.\r\n\r\n`stroke-dasharray` accepts the same named patterns as `<dc-fill>`\r\n(`solid`, `dashed`, `dotted`, `dash-dot`, `long-dash`) or a raw SVG dash\r\nlist such as `\"5 3\"`.",
           "name": "ChartGrid",
           "members": [
             {
               "kind": "field",
-              "name": "color",
+              "name": "stroke",
               "type": {
                 "text": "string"
               },
               "default": "'#ddd'",
-              "description": "Grid line color.\nAccepts any CSS color value.",
-              "attribute": "color"
+              "description": "Grid line colour. Accepts any CSS colour value.\r\n\r\nNamed `stroke`, not `color`: this draws a line, and SVG spells that\r\n`stroke`. `color` would also have implied it could be set from CSS.",
+              "attribute": "stroke"
             },
             {
               "kind": "field",
-              "name": "lineStyle",
+              "name": "strokeDasharray",
               "type": {
-                "text": "GridLineStyle"
+                "text": "string"
               },
               "default": "'solid'",
-              "description": "Grid line style.\nOptions: 'solid', 'dashed', 'dotted'.",
-              "attribute": "style"
+              "description": "Grid line dash pattern.\r\n\r\nNamed `stroke-dasharray` rather than `style`. Every HTML element already\r\nhas a `style` attribute, so the old name shadowed a global one and put\r\ninvalid CSS in the DOM - `<dc-grid style=\"dashed\">` is a declaration the\r\nbrowser tries, and fails, to parse.",
+              "attribute": "stroke-dasharray"
             },
             {
               "kind": "field",
@@ -14280,7 +14259,7 @@
                 "text": "boolean"
               },
               "default": "false",
-              "description": "Standard HTML hidden attribute.\nWhen true, grid lines are not rendered.",
+              "description": "Standard HTML hidden attribute.\r\nWhen true, grid lines are not rendered.",
               "attribute": "hidden",
               "reflects": true
             },
@@ -14292,7 +14271,7 @@
                   "text": ""
                 }
               },
-              "description": "Get the grid configuration from this element's properties."
+              "description": "Get the grid configuration from this element's properties.\r\n\r\nThe dasharray is resolved here rather than by the caller. It used to be\r\nresolved twice - once in this file and once in `axis-chart.ts` - from two\r\nseparate copies of the named-pattern table, and only the axis-chart copy\r\nwas ever reached."
             },
             {
               "kind": "method",
@@ -14317,22 +14296,22 @@
           ],
           "attributes": [
             {
-              "name": "color",
+              "name": "stroke",
               "type": {
                 "text": "string"
               },
               "default": "'#ddd'",
-              "description": "Grid line color.\nAccepts any CSS color value.",
-              "fieldName": "color"
+              "description": "Grid line colour. Accepts any CSS colour value.\r\n\r\nNamed `stroke`, not `color`: this draws a line, and SVG spells that\r\n`stroke`. `color` would also have implied it could be set from CSS.",
+              "fieldName": "stroke"
             },
             {
-              "name": "style",
+              "name": "stroke-dasharray",
               "type": {
-                "text": "GridLineStyle"
+                "text": "string"
               },
               "default": "'solid'",
-              "description": "Grid line style.\nOptions: 'solid', 'dashed', 'dotted'.",
-              "fieldName": "lineStyle"
+              "description": "Grid line dash pattern.\r\n\r\nNamed `stroke-dasharray` rather than `style`. Every HTML element already\r\nhas a `style` attribute, so the old name shadowed a global one and put\r\ninvalid CSS in the DOM - `<dc-grid style=\"dashed\">` is a declaration the\r\nbrowser tries, and fails, to parse.",
+              "fieldName": "strokeDasharray"
             },
             {
               "name": "hidden",
@@ -14340,7 +14319,7 @@
                 "text": "boolean"
               },
               "default": "false",
-              "description": "Standard HTML hidden attribute.\nWhen true, grid lines are not rendered.",
+              "description": "Standard HTML hidden attribute.\r\nWhen true, grid lines are not rendered.",
               "fieldName": "hidden"
             }
           ],
@@ -14573,29 +14552,24 @@
         },
         {
           "kind": "class",
-          "description": "Legend element for charts\r\n\r\nThis element doesn't render itself - instead it's detected by the parent\r\nchart which uses its configuration to render a legend. The legend renders\r\nas SVG text elements, so styling should use SVG presentation attributes.\r\n\r\nStyle the legend text using SVG attributes (not CSS/HTML):\r\n- Use `fill` for text color (not `color`)\r\n- Use unitless `font-size` values in viewBox units (not `px`, `em`, `rem`)\r\n- Use `font-family`, `font-weight`, `font-style` as normal",
+          "description": "",
           "name": "ChartLegend",
-          "slots": [
-            {
-              "description": "Can contain a dc-title element to customize the legend title",
-              "name": ""
-            }
-          ],
           "members": [
             {
               "kind": "field",
               "name": "showValue",
               "type": {
-                "text": "boolean"
+                "text": "ShowCondition"
               },
               "default": "true",
+              "description": "Whether to show values in the legend.\r\n\r\nUses the same converter as every other `show-*` in the library, so a\r\nthreshold such as `show-value=\"10%\"` means here what it means elsewhere.\r\nThis element used to declare its own boolean converter, under which\r\n`show-value=\"10%\"` silently evaluated to `true` - one attribute name with\r\ntwo meanings depending on which element it was written on.",
               "attribute": "show-value"
             },
             {
               "kind": "field",
               "name": "showPercent",
               "type": {
-                "text": "boolean"
+                "text": "ShowCondition"
               },
               "default": "false",
               "attribute": "show-percent"
@@ -14604,7 +14578,7 @@
               "kind": "field",
               "name": "showLabel",
               "type": {
-                "text": "boolean"
+                "text": "ShowCondition"
               },
               "default": "true",
               "attribute": "show-label"
@@ -14798,7 +14772,7 @@
               "privacy": "private",
               "return": {
                 "type": {
-                  "text": "Array<LegendItem & { displayValue: string | null; resolvedShape: LegendShape }>"
+                  "text": "Array<PreparedLegendItem>"
                 }
               },
               "parameters": [
@@ -14809,21 +14783,21 @@
                   }
                 },
                 {
-                  "name": "_showLabel",
+                  "name": "showLabel",
                   "type": {
-                    "text": "boolean"
+                    "text": "ShowCondition"
                   }
                 },
                 {
                   "name": "showValue",
                   "type": {
-                    "text": "boolean"
+                    "text": "ShowCondition"
                   }
                 },
                 {
                   "name": "showPercent",
                   "type": {
-                    "text": "boolean"
+                    "text": "ShowCondition"
                   }
                 },
                 {
@@ -14908,7 +14882,7 @@
                   "name": "chartShowValue",
                   "default": "true",
                   "type": {
-                    "text": "boolean"
+                    "text": "ShowCondition"
                   },
                   "description": "Chart-level show-value setting"
                 },
@@ -14916,7 +14890,7 @@
                   "name": "chartShowPercent",
                   "default": "false",
                   "type": {
-                    "text": "boolean"
+                    "text": "ShowCondition"
                   },
                   "description": "Chart-level show-percent setting"
                 },
@@ -14999,7 +14973,7 @@
                   "name": "chartShowValue",
                   "default": "true",
                   "type": {
-                    "text": "boolean"
+                    "text": "ShowCondition"
                   },
                   "description": "Chart-level show-value setting"
                 },
@@ -15007,7 +14981,7 @@
                   "name": "chartShowPercent",
                   "default": "false",
                   "type": {
-                    "text": "boolean"
+                    "text": "ShowCondition"
                   },
                   "description": "Chart-level show-percent setting"
                 },
@@ -15051,19 +15025,13 @@
                 {
                   "name": "items",
                   "type": {
-                    "text": "Array<LegendItem & { displayValue: string | null; resolvedShape: LegendShape }>"
+                    "text": "PreparedLegendItem[]"
                   }
                 },
                 {
                   "name": "chartWidth",
                   "type": {
                     "text": "number"
-                  }
-                },
-                {
-                  "name": "showLabel",
-                  "type": {
-                    "text": "boolean"
                   }
                 },
                 {
@@ -15094,19 +15062,13 @@
                 {
                   "name": "items",
                   "type": {
-                    "text": "Array<LegendItem & { displayValue: string | null; resolvedShape: LegendShape }>"
+                    "text": "PreparedLegendItem[]"
                   }
                 },
                 {
                   "name": "chartWidth",
                   "type": {
                     "text": "number"
-                  }
-                },
-                {
-                  "name": "showLabel",
-                  "type": {
-                    "text": "boolean"
                   }
                 },
                 {
@@ -15127,86 +15089,53 @@
           ],
           "attributes": [
             {
-              "type": {
-                "text": "boolean"
-              },
-              "description": "Whether to show values in legend (default: true)",
               "name": "show-value",
+              "type": {
+                "text": "ShowCondition"
+              },
               "default": "true",
+              "description": "Whether to show values in the legend.\r\n\r\nUses the same converter as every other `show-*` in the library, so a\r\nthreshold such as `show-value=\"10%\"` means here what it means elsewhere.\r\nThis element used to declare its own boolean converter, under which\r\n`show-value=\"10%\"` silently evaluated to `true` - one attribute name with\r\ntwo meanings depending on which element it was written on.",
               "fieldName": "showValue"
             },
             {
-              "type": {
-                "text": "boolean"
-              },
-              "description": "Whether to show percentages in legend (default: false)",
               "name": "show-percent",
+              "type": {
+                "text": "ShowCondition"
+              },
               "default": "false",
               "fieldName": "showPercent"
             },
             {
-              "type": {
-                "text": "boolean"
-              },
-              "description": "Whether to show labels in legend (default: true)",
               "name": "show-label",
+              "type": {
+                "text": "ShowCondition"
+              },
               "default": "true",
               "fieldName": "showLabel"
             },
             {
+              "name": "columns",
               "type": {
                 "text": "string"
               },
-              "description": "Number of columns: \"auto\" (default, calculates based on available space), integer for explicit tabular layout, or \"*\" for wrapped/inline layout",
-              "name": "columns",
               "default": "'auto'",
               "fieldName": "columns"
             },
             {
+              "name": "position",
               "type": {
                 "text": "LegendPosition"
               },
-              "description": "Position of the legend: \"right\" (default), \"top\", \"top-left\", \"top-right\", \"left\", \"left-top\", \"left-bottom\", \"right-top\", \"right-bottom\", \"bottom\", \"bottom-left\", \"bottom-right\"",
-              "name": "position",
               "default": "'right'",
               "fieldName": "position"
             },
             {
+              "name": "max-width",
               "type": {
                 "text": "string | undefined"
               },
-              "description": "Maximum width for the legend. Accepts px, rem, em, or % (percentage of chart width). If not specified, defaults to 80% for top/bottom positions, calculated content width for left/right with tabular columns, or 25% for left/right with columns=\"*\"",
-              "name": "max-width",
               "default": "undefined",
               "fieldName": "maxWidth"
-            },
-            {
-              "type": {
-                "text": "string"
-              },
-              "description": "Text color for legend items (SVG attribute, e.g., \"#333\", \"red\")",
-              "name": "fill"
-            },
-            {
-              "type": {
-                "text": "number"
-              },
-              "description": "Font size for legend items in viewBox units (e.g., \"13\", not \"13px\")",
-              "name": "font-size"
-            },
-            {
-              "type": {
-                "text": "string"
-              },
-              "description": "Font family for legend items",
-              "name": "font-family"
-            },
-            {
-              "type": {
-                "text": "string"
-              },
-              "description": "Font weight for legend items",
-              "name": "font-weight"
             },
             {
               "name": "value-format",
@@ -23443,31 +23372,6 @@
               }
             },
             {
-              "kind": "method",
-              "name": "getGridDasharray",
-              "privacy": "protected",
-              "return": {
-                "type": {
-                  "text": ""
-                }
-              },
-              "parameters": [
-                {
-                  "name": "lineStyle",
-                  "optional": true,
-                  "type": {
-                    "text": "string"
-                  },
-                  "description": "The grid line style ('solid', 'dashed', 'dotted')"
-                }
-              ],
-              "description": "Get the stroke-dasharray value for grid line rendering.",
-              "inheritedFrom": {
-                "name": "AxisChart",
-                "module": "src/axis-chart.ts"
-              }
-            },
-            {
               "kind": "field",
               "name": "axisStrokeWidth",
               "type": {
@@ -27777,8 +27681,8 @@
           "type": {
             "text": "object"
           },
-          "default": "{ fromAttribute: (value: string | null): ShowCondition => { if (value === null) return false; // Attribute values are compared case-insensitively and whitespace-tolerantly, // matching how HTML treats enumerated attributes. const normalized = value.trim(); const lower = normalized.toLowerCase(); if (lower === 'false') return false; if (normalized === '' || lower === 'true') return true; // Check for percentage threshold if (normalized.endsWith('%')) { const threshold = parseFloat(normalized); if (!isNaN(threshold)) { return { type: 'percent', threshold }; } } // Check for value threshold (number, optionally with px) const numValue = parseFloat(normalized.replace('px', '')); if (!isNaN(numValue)) { return { type: 'value', threshold: numValue }; } // Default to true for any other truthy string return true; }, toAttribute: (value: ShowCondition): string | null => { if (value === false) return null; if (value === true) return ''; if (typeof value === 'object') { if (value.type === 'percent') { return `${value.threshold}%`; } return String(value.threshold); } return null; } }",
-          "description": "Converter for show-value, show-label, show-percent attributes.\r\nSupports:\r\n- \"false\" or absent → false\r\n- \"true\" or \"\" (present without value) → true\r\n- \"5%\" → { type: 'percent', threshold: 5 }\r\n- \"100\" or \"100px\" (number without %) → { type: 'value', threshold: 100 }"
+          "default": "{ fromAttribute: (value: string | null): ShowCondition => { if (value === null) return false; // Attribute values are compared case-insensitively and whitespace-tolerantly, // matching how HTML treats enumerated attributes. const normalized = value.trim(); const lower = normalized.toLowerCase(); if (FALSY_SPELLINGS.includes(lower)) return false; if (normalized === '' || TRUTHY_SPELLINGS.includes(lower)) return true; // Check for percentage threshold if (normalized.endsWith('%')) { const threshold = parseFloat(normalized); if (!isNaN(threshold)) { return { type: 'percent', threshold }; } } // Check for value threshold (number, optionally with px) const numValue = parseFloat(normalized.replace('px', '')); if (!isNaN(numValue)) { return { type: 'value', threshold: numValue }; } // Unrecognised. Say so rather than picking a meaning: a value this // converter cannot read is a typo, and guessing \"true\" is how // show-value=\"off\" came to mean show. console.warn( `[${ErrorCode.PARSE_ERROR.code}] ${ErrorCode.PARSE_ERROR.path}: ` + `Could not parse show condition \"${value}\", defaulting to false. ` + `Use true/false, a percentage such as \"10%\", or a value such as \"100\".` ); return false; }, toAttribute: (value: ShowCondition): string | null => { if (value === false) return null; if (value === true) return ''; if (typeof value === 'object') { if (value.type === 'percent') { return `${value.threshold}%`; } return String(value.threshold); } return null; } }",
+          "description": "Converter for show-value, show-label, show-percent attributes.\r\nSupports:\r\n- absent, \"false\", \"off\", \"no\", \"none\", \"hidden\" → false\r\n- \"\" (present without value), \"true\", \"on\", \"yes\", \"show\" → true\r\n- \"5%\" → { type: 'percent', threshold: 5 }\r\n- \"100\" or \"100px\" (number without %) → { type: 'value', threshold: 100 }\r\n\r\nAnything else warns with DC104 and returns false, rather than guessing."
         },
         {
           "kind": "variable",
@@ -27810,6 +27714,39 @@
           },
           "default": "{ fromAttribute: (value: string | null): boolean | undefined => { if (value === null) return undefined; if (value.trim().toLowerCase() === 'false') return false; return true; }, toAttribute: (value: boolean | undefined): string | null => { if (value === undefined) return null; return value ? '' : 'false'; } }",
           "description": "Converter for optional boolean attributes that distinguish\r\nbetween unset (undefined), false, and true.\r\n\r\n- null/absent → undefined (use default)\r\n- \"false\" → false (explicitly disabled)\r\n- \"\" or \"true\" → true (explicitly enabled)"
+        },
+        {
+          "kind": "function",
+          "name": "evaluateShowCondition",
+          "return": {
+            "type": {
+              "text": "boolean"
+            }
+          },
+          "parameters": [
+            {
+              "name": "condition",
+              "type": {
+                "text": "ShowCondition"
+              },
+              "description": "The show condition (boolean or threshold)"
+            },
+            {
+              "name": "value",
+              "type": {
+                "text": "number"
+              },
+              "description": "The numeric value of the element"
+            },
+            {
+              "name": "percent",
+              "type": {
+                "text": "number"
+              },
+              "description": "The percentage of the element (0-100)"
+            }
+          ],
+          "description": "Evaluate a ShowCondition against a value and its share of the total.\r\n\r\nPure, and here rather than on `BaseChart`, because `<dc-legend>` needs it\r\ntoo and is not a chart. The legend used to coerce every condition to a\r\nboolean, so `show-value=\"10%\"` on a legend silently meant \"always\"."
         }
       ],
       "exports": [
@@ -27842,6 +27779,14 @@
           "name": "optionalBooleanConverter",
           "declaration": {
             "name": "optionalBooleanConverter",
+            "module": "src/converters.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "evaluateShowCondition",
+          "declaration": {
+            "name": "evaluateShowCondition",
             "module": "src/converters.ts"
           }
         }
@@ -32744,14 +32689,6 @@
           "name": "GridConfig",
           "declaration": {
             "name": "GridConfig",
-            "module": "./chart-grid.js"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "GridLineStyle",
-          "declaration": {
-            "name": "GridLineStyle",
             "module": "./chart-grid.js"
           }
         },

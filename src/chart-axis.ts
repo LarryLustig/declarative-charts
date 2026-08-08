@@ -82,7 +82,7 @@ const CSS_UNIT_PATTERN = /^[\d.]+\s*(px|em|rem|pt|%)$/i;
  *
  * ```html
  * <dc-axis position="left">
- *   <dc-grid color="#eee" style="dashed"></dc-grid>
+ *   <dc-grid stroke="#eee" stroke-dasharray="dashed"></dc-grid>
  * </dc-axis>
  * ```
  *
@@ -120,7 +120,7 @@ const CSS_UNIT_PATTERN = /^[\d.]+\s*(px|em|rem|pt|%)$/i;
  *   <dc-axis position="bottom" label-interval="2"></dc-axis>
  *   <dc-axis position="left" min-value="0" max-value="100">
  *     <dc-title>Sales</dc-title>
- *     <dc-grid color="#eee" style="dashed"></dc-grid>
+ *     <dc-grid stroke="#eee" stroke-dasharray="dashed"></dc-grid>
  *   </dc-axis>
  *   <dc-bar value="30" label="A"></dc-bar>
  * </dc-chart>

@@ -53,13 +53,31 @@ describe('showConditionConverter', () => {
       expect(result).toEqual({ type: 'value', threshold: -10 });
     });
 
-    it('returns true for invalid percentage', () => {
-      // Invalid percentage like "abc%" defaults to true
-      expect(showConditionConverter.fromAttribute('abc%')).toBe(true);
+    // An unreadable value used to mean "show". That is how show-value="off"
+    // came to turn labels on. Unrecognised values now warn (DC104) and default
+    // to false rather than guessing. See REVIEW.md 6.2.
+    it('returns false for an unparseable percentage', () => {
+      expect(showConditionConverter.fromAttribute('abc%')).toBe(false);
     });
 
-    it('returns true for non-numeric string', () => {
-      expect(showConditionConverter.fromAttribute('yes')).toBe(true);
+    it('returns true for recognised spellings of yes', () => {
+      for (const yes of ['yes', 'true', 'on', 'show', 'YES', ' true ']) {
+        expect(showConditionConverter.fromAttribute(yes), yes).toBe(true);
+      }
+    });
+
+    it('returns false for recognised spellings of no', () => {
+      for (const no of ['false', 'off', 'no', 'none', 'hidden', 'OFF', ' no ']) {
+        expect(showConditionConverter.fromAttribute(no), no).toBe(false);
+      }
+    });
+
+    it('returns false and warns for anything it cannot read', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      expect(showConditionConverter.fromAttribute('maybe')).toBe(false);
+      expect(warn).toHaveBeenCalledOnce();
+      expect(warn.mock.calls[0][0]).toContain('DC104');
+      warn.mockRestore();
     });
   });
 

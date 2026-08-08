@@ -42,6 +42,7 @@ import {
   showConditionConverter,
   booleanConverter,
   optionalBooleanConverter,
+  evaluateShowCondition,
   type ShowCondition
 } from './converters.js';
 export {
@@ -660,14 +661,9 @@ export abstract class BaseChart extends LitElement {
     value: number,
     percent: number
   ): boolean {
-    if (typeof condition === 'boolean') {
-      return condition;
-    }
-    if (condition.type === 'percent') {
-      return percent >= condition.threshold;
-    }
-    // condition.type === 'value'
-    return value >= condition.threshold;
+    // Delegates to the pure version in converters.ts; <dc-legend> needs the
+    // same logic and is not a chart, so it cannot inherit this method.
+    return evaluateShowCondition(condition, value, percent);
   }
 
   // ============================================================================
@@ -2761,8 +2757,10 @@ export abstract class BaseChart extends LitElement {
 
     // Delegate to ChartLegend.getDimensions()
     // Convert ShowCondition to boolean (threshold conditions count as "show")
-    const showValue = this.showValue !== false;
-    const showPercent = this.showPercent !== false;
+    // Passed through as conditions, not booleans: `!== false` turned a chart
+    // level show-value="10%" into a plain true before the legend could see it.
+    const showValue = this.showValue;
+    const showPercent = this.showPercent;
     legend.fontScale = this.fontScale;
     const dims = legend.getDimensions(
       items, this.width, showValue, showPercent,
@@ -2791,8 +2789,10 @@ export abstract class BaseChart extends LitElement {
 
     // Generate the legend SVG at 0,0
     // Convert ShowCondition to boolean (threshold conditions count as "show")
-    const showValue = this.showValue !== false;
-    const showPercent = this.showPercent !== false;
+    // Passed through as conditions, not booleans: `!== false` turned a chart
+    // level show-value="10%" into a plain true before the legend could see it.
+    const showValue = this.showValue;
+    const showPercent = this.showPercent;
     legend.fontScale = this.fontScale;
     const result = legend.generateSvg(
       items, this.width, showValue, showPercent,

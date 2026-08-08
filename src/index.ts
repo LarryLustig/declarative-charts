@@ -70,7 +70,7 @@ import './chart-defaults.js';
 export { ChartAxis } from './chart-axis.js';
 export type { AxisPosition, AxisName, AxisPositionOrName, AxisType } from './chart-axis.js';
 export { ChartGrid } from './chart-grid.js';
-export type { GridConfig, GridLineStyle } from './chart-grid.js';
+export type { GridConfig } from './chart-grid.js';
 export { ChartTitle } from './chart-title.js';
 export { ChartLegend } from './chart-legend.js';
 export { ChartLegendItem } from './chart-legend-item.js';

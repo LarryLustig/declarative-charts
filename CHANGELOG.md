@@ -7,7 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **BREAKING: `<dc-grid>` attributes renamed** (REVIEW.md §6.1). `style` → `stroke-dasharray`,
+  `color` → `stroke`. `style` is a global HTML attribute on every element, so the old name
+  shadowed it and put an unparseable CSS declaration in the DOM. The new names match the SVG
+  properties they set and accept the same named patterns as `<dc-fill>` (`solid`, `dashed`,
+  `dotted`, `dash-dot`, `long-dash`) or a raw dash list such as `"5 3"`
+- **BREAKING: `show-*` attributes reject values they cannot read** (REVIEW.md §6.2). An
+  unrecognised value used to mean *show*, so `show-value="off"`, `"no"` and `"none"` all turned
+  labels **on**. `off`/`no`/`none`/`hidden` now mean off and `on`/`yes`/`show` mean on; anything
+  else warns with `DC104` and defaults to not showing. These are enumerated attributes, not HTML
+  boolean attributes
+- **BREAKING: `<dc-legend show-*>` accepts thresholds**, like every other `show-*` in the
+  library. The legend declared its own private boolean converter, so `show-value="10%"` silently
+  meant `true` there while meaning "at least 10% of the total" everywhere else. Thresholds are
+  now evaluated per legend item. Chart-level conditions also reach the legend intact — they were
+  being flattened with `!== false` before it saw them
+
 ### Fixed
+
+- **`<dc-grid>` was undocumented and its examples used an attribute that did not exist.** Every
+  shipped example wrote `line-style="dashed"`, which matched no property, so those grids silently
+  rendered solid. `<dc-grid>` now has an API.md section — it had zero mentions
+- **`<dc-grid>`'s own validation never ran.** `getStyleWarnings()` had no caller, so an invalid
+  dash pattern was ignored in silence; it is now collected with the axis warnings. Its
+  `getStrokeDasharray()` had no caller either — the renderer carried a second copy of the dash
+  table, and the two disagreed (`5,5` vs `5 5`). One copy now, in `<dc-fill>`
 
 - **Popups, keyboard-navigation labels and screen-reader summaries ignored `value-format`**
   (REVIEW.md §3.3). A chart set to `value-format="currency USD"` drew `$1,000.00` on the label

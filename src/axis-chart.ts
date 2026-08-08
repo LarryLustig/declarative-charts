@@ -304,6 +304,10 @@ export abstract class AxisChart extends BaseChart {
     const axes = this.getAxisElements();
     for (const axis of axes) {
       const warnings = axis.getStyleWarnings();
+      // A <dc-grid> child validates itself, but nothing used to ask it, so an
+      // invalid dash pattern was silently ignored.
+      const gridEl = axis.getGridElement();
+      if (gridEl) warnings.push(...gridEl.getStyleWarnings());
       for (const warning of warnings) {
         this.logError(ErrorCode.AXIS_STYLE_WARNING, { message: warning.message });
       }
@@ -874,8 +878,8 @@ export abstract class AxisChart extends BaseChart {
     }
 
     // Get grid styling from config, with defaults
-    const gridColor = axisConfig?.grid?.color ?? '#ddd';
-    const gridDasharray = this.getGridDasharray(axisConfig?.grid?.lineStyle);
+    const gridColor = axisConfig?.grid?.stroke ?? '#ddd';
+    const gridDasharray = axisConfig?.grid?.strokeDasharray ?? '';
 
     if (orientation === 'vertical') {
       // Horizontal grid lines (for vertical bar/line charts)
@@ -919,23 +923,6 @@ export abstract class AxisChart extends BaseChart {
           `;
         })}
       `;
-    }
-  }
-
-  /**
-   * Get the stroke-dasharray value for grid line rendering.
-   * @param lineStyle The grid line style ('solid', 'dashed', 'dotted')
-   * @returns Dasharray string for SVG stroke-dasharray attribute
-   */
-  protected getGridDasharray(lineStyle?: string): string {
-    switch (lineStyle) {
-      case 'dashed':
-        return '5,5';
-      case 'dotted':
-        return '2,4';
-      case 'solid':
-      default:
-        return '';
     }
   }
 

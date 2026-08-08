@@ -959,4 +959,77 @@ describe('ChartLegend component', () => {
       expect(result.svg).toBeDefined();
     });
   });
+  // ==========================================================================
+  // show-* conditions (REVIEW.md 6.2)
+  //
+  // <dc-legend> used to declare its own private boolean converter, so
+  // show-value="10%" here meant `true` while the identical attribute on a data
+  // element meant "show when the item is at least 10% of the total". One
+  // attribute name, two meanings, no warning. It now uses the shared converter
+  // and evaluates the condition per item.
+  // ==========================================================================
+
+  describe('show-* conditions', () => {
+    /** Text of every <text> node the legend renders, joined. */
+    const renderedText = (l: ChartLegend, items = sampleValuedItems): string =>
+      JSON.stringify(l.generateSvg(items, 600).svg);
+
+    it('parses a percentage threshold instead of collapsing it to true', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', { 'show-value': '10%' });
+      expect(legend.showValue).toEqual({ type: 'percent', threshold: 10 });
+    });
+
+    it('parses a value threshold', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', { 'show-value': '500' });
+      expect(legend.showValue).toEqual({ type: 'value', threshold: 500 });
+    });
+
+    // Revenue 1000 (50%), Expenses 750 (37.5%), Profit 250 (12.5%).
+    it('applies a value threshold per item', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', { 'show-value': '500' });
+      const text = renderedText(legend);
+      expect(text).toContain('1,000');   // 1000 >= 500, shown
+      expect(text).toContain('750');     // 750 >= 500, shown
+      expect(text).not.toContain('250'); // 250 < 500, hidden
+    });
+
+    it('applies a percentage threshold per item', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', { 'show-value': '20%' });
+      const text = renderedText(legend);
+      expect(text).toContain('1,000');   // 50%, shown
+      expect(text).toContain('750');     // 37.5%, shown
+      expect(text).not.toContain('250'); // 12.5%, hidden
+    });
+
+    it('still honours plain true and false', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', { 'show-value': 'true' });
+      expect(renderedText(legend)).toContain('1,000');
+
+      legend = await fixture<ChartLegend>('dc-legend', { 'show-value': 'false' });
+      expect(renderedText(legend)).not.toContain('1,000');
+    });
+
+    // The case the review named: markup that reads as "off" used to mean on.
+    it('treats off/no/none as off rather than as on', async () => {
+      for (const off of ['off', 'no', 'none', 'hidden']) {
+        legend = await fixture<ChartLegend>('dc-legend', { 'show-value': off });
+        expect(renderedText(legend), off).not.toContain('1,000');
+      }
+    });
+
+    it('resolves show-label per item too', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', { 'show-label': '500' });
+      const text = renderedText(legend);
+      expect(text).toContain('Revenue');
+      expect(text).toContain('Expenses');
+      expect(text).not.toContain('Profit');
+    });
+
+    // A line has no value, so there is nothing for a threshold to compare and
+    // it must not be silently dropped from the legend.
+    it('never hides a dimensionless item behind a threshold', async () => {
+      legend = await fixture<ChartLegend>('dc-legend', { 'show-label': '10000' });
+      expect(renderedText(legend, mixedItems)).toContain('Trend Line');
+    });
+  });
 });

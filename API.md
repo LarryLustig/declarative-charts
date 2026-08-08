@@ -638,10 +638,18 @@ The `show-*` attributes accept several types of values:
 
 | Value | Description | Example |
 |-------|-------------|---------|
-| `true` or present | Always show | `show-value` or `show-value="true"` |
-| `false` | Never show | `show-value="false"` |
+| present, `true`, `on`, `yes`, `show` | Always show | `show-value` or `show-value="true"` |
+| absent, `false`, `off`, `no`, `none`, `hidden` | Never show | `show-value="false"` |
 | Percentage threshold | Show only when element's percentage >= threshold | `show-label="5%"` |
 | Value threshold | Show only when element's value >= threshold | `show-value="100"` |
+
+Values are matched case-insensitively. Anything else is a typo rather than a
+setting: the attribute warns with `DC104` and defaults to *not* showing, instead
+of guessing. These attributes are not HTML boolean attributes — `show-value="off"`
+means off, not "present, therefore on".
+
+The same values work on `<dc-legend>`, where a threshold is applied to each
+legend item individually.
 
 ### Chart-Level Defaults
 
@@ -1783,6 +1791,7 @@ Configures an axis on bar charts and line charts.
 
 **Child Elements:**
 - `<dc-title>` - Optional axis title
+- `<dc-grid>` - Optional grid line configuration
 
 **Examples:**
 
@@ -1812,14 +1821,48 @@ Axis with title:
 </dc-chart>
 ```
 
+### `<dc-grid>`
+
+Configures grid lines for an axis. Place it inside a `<dc-axis>`.
+
+Grid lines are drawn by default. Include `<dc-grid>` only to style them, or with
+`hidden` to turn them off.
+
+**Attributes:**
+- `stroke` (string) - Grid line colour, any CSS colour value (default: `#ddd`)
+- `stroke-dasharray` (string) - Dash pattern: a named pattern (`solid`, `dashed`, `dotted`, `dash-dot`, `long-dash`) or a raw SVG dash list such as `"5 3"` (default: `solid`)
+- `hidden` (boolean) - Hides the grid lines
+
+Both attributes are named for the SVG properties they set, and accept the same
+values as the matching attributes on `<dc-fill>`.
+
+**Examples:**
+
+```html
+<dc-chart width="600" height="400">
+  <dc-axis position="left">
+    <dc-grid stroke="#eee" stroke-dasharray="dashed"></dc-grid>
+  </dc-axis>
+  <dc-bar value="10" label="Jan"></dc-bar>
+  <dc-bar value="20" label="Feb"></dc-bar>
+</dc-chart>
+```
+
+Hide grid lines on one axis:
+```html
+<dc-axis position="bottom">
+  <dc-grid hidden></dc-grid>
+</dc-axis>
+```
+
 ### `<dc-legend>`
 
 Adds a legend to any chart type.
 
 **Attributes:**
-- `show-value` (boolean) - Whether to show values in legend (default: true)
-- `show-percent` (boolean) - Whether to show percentages in legend (default: false)
-- `show-label` (boolean) - Whether to show labels in legend (default: true)
+- `show-value` (boolean|string) - Whether to show values in legend (default: true). Accepts the same thresholds as elsewhere, applied per legend item
+- `show-percent` (boolean|string) - Whether to show percentages in legend (default: false)
+- `show-label` (boolean|string) - Whether to show labels in legend (default: true)
 - `columns` (string) - Number of columns: integer for tabular layout (default: "1"), or "*" for wrapped/inline layout
 - `position` (string) - Position: "right" (default), "top", "top-left", "top-right", "left", "bottom", "bottom-left", "bottom-right"
 - `value-format` (string) - Number format for legend values
