@@ -179,6 +179,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Keyboard navigation extracted from `BaseChart` into `KeyboardNavController`**
+  - Second of the god-class extractions. `src/keyboard-nav-controller.ts`, 221 lines;
+    `base-chart.ts` down to 3,330 (from 3,724 before this work began)
+  - The controller owns the focus cursor and key handling. `getFocusableElements()`,
+    `getShapeBounds()`, `renderFocusIndicator()` and the popup hooks deliberately stayed on the
+    chart — they are subclass extension points that every chart type overrides
+  - No API change. `focusedIndex` and `keyboardActive` remain writable protected accessors,
+    since they were writable `@state()` fields, and all navigation methods still delegate
+  - `KeyboardNavController` and `KeyboardNavHost` are exported
+  - 31 characterization tests were written and committed **before** the refactor
+    (`test/component/keyboard-nav.test.ts`)
+
 - **Colour resolution extracted from `BaseChart` into `ColorResolver`**
   - `BaseChart` had accumulated colour resolution alongside logging, popups, keyboard navigation,
     accessibility, layout and SVG export. Colour is the first of those responsibilities to move

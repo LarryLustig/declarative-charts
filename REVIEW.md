@@ -924,7 +924,7 @@ computed layout accessor). For a large fraction of potential users the front doo
 
 Not broken, but expensive to change after publishing.
 
-### 5.1 `BaseChart` is a god class — 🔶 IN PROGRESS (1 of ~5 extracted)
+### 5.1 `BaseChart` is a god class — 🔶 IN PROGRESS (2 of ~5 extracted)
 
 > **`ColorResolver` extracted** — `src/color-resolver.ts`, 551 lines. `base-chart.ts` is down
 > from 3,724 to 3,386, and colour resolution is now readable and testable on its own.
@@ -949,9 +949,29 @@ Not broken, but expensive to change after publishing.
 > Deliberately left behind: pattern registration and `<defs>` rendering — a separate
 > responsibility that merely lived in the same region of the file.
 >
-> Still to extract, in rough order of payoff: `KeyboardNavController` (~265 lines),
-> `ChartLogger` (~165), `PopupController` (~100), `SvgExporter`. Both abstraction leaks named
-> below — the `orientation` cast and the `tagName` sniffing in `getAnimatableChartType()` — are
+> **`KeyboardNavController` extracted too** — `src/keyboard-nav-controller.ts`, 221 lines.
+> `base-chart.ts` is now 3,330, below where this session started.
+>
+> The boundary here is different from the colour one and worth recording: roughly half the
+> keyboard region is *subclass extension points* — `getFocusableElements()`, `getShapeBounds()`,
+> `renderFocusIndicator()`, the popup hooks — which every chart type overrides. Those stayed.
+> The controller owns interaction logic; the chart owns what a chart knows.
+>
+> Both breaks were caught by the tests rather than by reasoning, and both were invisible to the
+> type system:
+>
+> - `focusedIndex`/`keyboardActive` were `@state()`, so Lit re-rendered automatically. As plain
+>   controller fields they had to call `host.requestUpdate()` — and I missed the blur path on the
+>   first attempt, which showed up as a focus indicator that would not disappear.
+> - The key handler's calls to `focusElement`, `focusNextElement`, `focusPreviousElement`,
+>   `activateCurrentElement` and `navigateToHref` were virtual calls on the chart. Calling the
+>   controller's own copies silently removed the ability to override them. They now route back
+>   through the host. This is the *same* class of break as `getLuminance` during the colour
+>   extraction — a general hazard when moving methods out of a class, not a one-off.
+>
+> Still to extract, in rough order of payoff: `ChartLogger` (~165 lines),
+> `PopupController` (~100), `SvgExporter`. Both abstraction leaks named below — the
+> `orientation` cast and the `tagName` sniffing in `getAnimatableChartType()` — are
 > **still open**.
 >
 > Original finding below.

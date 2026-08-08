@@ -190,6 +190,15 @@ Use `getPaletteColors(count, colorType)` in chart code to resolve palette colors
 
 **Hidden Attribute**: Standard HTML `hidden` on data elements (`<dc-line>`, `<dc-bar>`, etc.) hides them. Toggling it re-renders the chart automatically — see **Child Reactivity** below.
 
+**Keyboard Navigation**: Lives in `src/keyboard-nav-controller.ts`. `KeyboardNavController` owns the focus cursor (`focusedIndex`, `keyboardActive`) and key handling; `BaseChart` holds it behind a lazy `keyboardNav` getter and delegates.
+
+What stayed on the chart is deliberate: `getFocusableElements()`, `getShapeBounds()`, `renderFocusIndicator()`, `showPopupForFocusedElement()` and `togglePopupForFocusedElement()` are **subclass extension points** that every chart type overrides. The controller owns interaction logic; the chart owns what a chart knows.
+
+Two things the extraction had to preserve, both caught by tests rather than reasoning:
+
+- `focusedIndex`/`keyboardActive` were `@state()`, so Lit re-rendered on every change. As plain controller fields they must call `host.requestUpdate()` — miss one and the focus indicator silently stops moving. `BaseChart` keeps writable protected accessors because they were writable fields before.
+- The key handler's calls to `focusElement`, `focusNextElement`, `focusPreviousElement`, `activateCurrentElement` and `navigateToHref` **route back through the host**. Before extraction these were virtual calls on the chart, so a subclass could override any of them; calling the controller's own copies would have removed that silently.
+
 **Colour System**: Lives in `src/color-resolver.ts`, not `BaseChart`. `ColorResolver` owns palette lookup, contrast, and the priority between an element's own colour, a matched palette entry, a positional palette colour, and a generated fallback.
 
 `BaseChart` holds it behind a lazy `colors` getter and its existing `protected` methods delegate, so subclasses call exactly what they always did. It is constructed with an explicit `ColorHost` adapter rather than `this`, because `log` and `getMeasureContext` are not public and widening them would enlarge the API the extraction exists to shrink. The adapter uses getters so values stay live.

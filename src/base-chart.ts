@@ -7,6 +7,7 @@ import type { ChartLegend, LegendItem } from './chart-legend.js';
 import type { ChartPalette, PaletteColorResult } from './chart-palette.js';
 import type { ChartFill } from './chart-fill.js';
 import { ColorResolver } from './color-resolver.js';
+import { KeyboardNavController } from './keyboard-nav-controller.js';
 import {
   PatternConfig,
   ResolvedPattern,
@@ -564,19 +565,9 @@ export abstract class BaseChart extends LitElement {
   // Keyboard Navigation State
   // ============================================================================
 
-  /**
-   * Index of the currently focused element within the chart.
-   * -1 means no element is focused (chart level focus).
-   * Used for roving tabindex pattern.
-   */
-  @state()
-  protected focusedIndex = -1;
-
-  /**
-   * Whether keyboard navigation is currently active (chart has focus).
-   */
-  @state()
-  protected keyboardActive = false;
+  // Focus state moved to KeyboardNavController; BaseChart exposes it through
+  // protected getters further down, since all four chart types read it when
+  // drawing their focus indicator.
 
   /**
    * Custom accessible description for the chart.
@@ -1058,8 +1049,6 @@ export abstract class BaseChart extends LitElement {
   // Color System Utilities
   // ============================================================================
 
-
-
   // ============================================================================
   // Color System Utilities
   //
@@ -1195,9 +1184,6 @@ export abstract class BaseChart extends LitElement {
   // ============================================================================
   // High Contrast and Pattern Methods
   // ============================================================================
-
-
-
 
   /**
    * Clear used patterns at the start of each render cycle.
@@ -1408,19 +1394,6 @@ export abstract class BaseChart extends LitElement {
   // ============================================================================
   // End High Contrast and Pattern Methods
   // ============================================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   // ============================================================================
   // End Color System Utilities
@@ -3055,6 +3028,93 @@ export abstract class BaseChart extends LitElement {
   // Keyboard Navigation Methods
   // ============================================================================
 
+  private _keyboardNav?: KeyboardNavController;
+
+  /**
+   * Keyboard navigation state and handling for this chart.
+   *
+   * Built with an explicit adapter rather than passing `this`, for the same
+   * reason as {@link colors}: several members it needs are not public.
+   */
+  protected get keyboardNav(): KeyboardNavController {
+    if (!this._keyboardNav) {
+      const chart = this;
+      this._keyboardNav = new KeyboardNavController({
+        get shadowRoot() { return chart.shadowRoot; },
+        getFocusableElements: () => chart.getFocusableElements(),
+        showPopupForFocusedElement: (i: number) => chart.showPopupForFocusedElement(i),
+        togglePopupForFocusedElement: (i: number) => chart.togglePopupForFocusedElement(i),
+        hidePopup: () => chart.hidePopup(),
+        navigateToHref: (href: string) => chart.navigateToHref(href),
+        focusElement: (i: number) => chart.focusElement(i),
+        focusNextElement: () => chart.focusNextElement(),
+        focusPreviousElement: () => chart.focusPreviousElement(),
+        activateCurrentElement: () => chart.activateCurrentElement(),
+        requestUpdate: () => chart.requestUpdate()
+      });
+    }
+    return this._keyboardNav;
+  }
+
+  /**
+   * Index of the currently focused element, or -1 for none.
+   * Read by every chart type when drawing its focus indicator.
+   *
+   * Writable because it was a plain `@state()` field before the controller
+   * existed. Assigning it still re-renders, so anything that set it directly
+   * keeps working.
+   */
+  protected get focusedIndex(): number {
+    return this.keyboardNav.focusedIndex;
+  }
+
+  protected set focusedIndex(value: number) {
+    this.keyboardNav.focusedIndex = value;
+    this.requestUpdate();
+  }
+
+  /** Whether the chart currently has keyboard focus. */
+  protected get keyboardActive(): boolean {
+    return this.keyboardNav.keyboardActive;
+  }
+
+  protected set keyboardActive(value: boolean) {
+    this.keyboardNav.keyboardActive = value;
+    this.requestUpdate();
+  }
+
+  protected handleChartKeyDown(e: KeyboardEvent): void {
+    this.keyboardNav.handleChartKeyDown(e);
+  }
+
+  protected handleChartFocus(): void {
+    this.keyboardNav.handleChartFocus();
+  }
+
+  protected handleChartBlur(e: FocusEvent): void {
+    this.keyboardNav.handleChartBlur(e);
+  }
+
+  protected focusElement(index: number): void {
+    this.keyboardNav.focusElement(index);
+  }
+
+  protected focusNextElement(): void {
+    this.keyboardNav.focusNextElement();
+  }
+
+  protected focusPreviousElement(): void {
+    this.keyboardNav.focusPreviousElement();
+  }
+
+  protected activateCurrentElement(): void {
+    this.keyboardNav.activateCurrentElement();
+  }
+
+  protected navigateToHref(href: string): void {
+    this.keyboardNav.navigateToHref(href);
+  }
+
   /**
    * Get the list of focusable elements in this chart.
    * Override in subclasses to return chart-specific focusable elements.
@@ -3064,161 +3124,6 @@ export abstract class BaseChart extends LitElement {
    */
   protected getFocusableElements(): FocusableElement[] {
     return [];
-  }
-
-  /**
-   * Handle keyboard events on the chart SVG.
-   * Implements roving tabindex navigation pattern.
-   */
-  protected handleChartKeyDown(e: KeyboardEvent): void {
-    const focusable = this.getFocusableElements();
-    if (focusable.length === 0) return;
-
-    switch (e.key) {
-      case 'ArrowRight':
-      case 'ArrowDown':
-        e.preventDefault();
-        this.focusNextElement();
-        break;
-
-      case 'ArrowLeft':
-      case 'ArrowUp':
-        e.preventDefault();
-        this.focusPreviousElement();
-        break;
-
-      case 'Home':
-        e.preventDefault();
-        this.focusElement(0);
-        break;
-
-      case 'End':
-        e.preventDefault();
-        this.focusElement(focusable.length - 1);
-        break;
-
-      case 'Enter':
-      case ' ':
-        e.preventDefault();
-        this.activateCurrentElement();
-        break;
-
-      case 'Escape':
-        e.preventDefault();
-        this.hidePopup();
-        // Return focus to the chart container
-        this.focusedIndex = -1;
-        this.keyboardActive = false;
-        const svg = this.shadowRoot?.querySelector('svg');
-        svg?.blur();
-        break;
-    }
-  }
-
-  /**
-   * Handle focus entering the chart SVG.
-   */
-  protected handleChartFocus(): void {
-    this.keyboardActive = true;
-    const focusable = this.getFocusableElements();
-    // If no element is focused yet, focus the first one
-    if (this.focusedIndex === -1 && focusable.length > 0) {
-      this.focusedIndex = 0;
-    }
-  }
-
-  /**
-   * Handle focus leaving the chart SVG.
-   */
-  protected handleChartBlur(e: FocusEvent): void {
-    // Only deactivate if focus is leaving the chart entirely
-    const relatedTarget = e.relatedTarget as Element | null;
-    if (!relatedTarget || !this.shadowRoot?.contains(relatedTarget)) {
-      this.keyboardActive = false;
-      // Keep focusedIndex so we return to the same element
-    }
-  }
-
-  /**
-   * Focus a specific element by index.
-   */
-  protected focusElement(index: number): void {
-    const focusable = this.getFocusableElements();
-    if (index < 0 || index >= focusable.length) return;
-
-    this.focusedIndex = index;
-    this.keyboardActive = true;
-
-    // Find the SVG element and focus it (the visual indicator shows on the shape)
-    const svg = this.shadowRoot?.querySelector('svg');
-    if (svg && document.activeElement !== svg) {
-      svg.focus();
-    }
-
-    // Show popup for the focused element if it has a hover popup
-    const element = focusable[index];
-    if (element.popupTrigger === 'hover') {
-      this.showPopupForFocusedElement(index);
-    }
-  }
-
-  /**
-   * Focus the next element in the list.
-   */
-  protected focusNextElement(): void {
-    const focusable = this.getFocusableElements();
-    if (focusable.length === 0) return;
-
-    const nextIndex = this.focusedIndex < focusable.length - 1
-      ? this.focusedIndex + 1
-      : 0; // Wrap to beginning
-
-    this.focusElement(nextIndex);
-  }
-
-  /**
-   * Focus the previous element in the list.
-   */
-  protected focusPreviousElement(): void {
-    const focusable = this.getFocusableElements();
-    if (focusable.length === 0) return;
-
-    const prevIndex = this.focusedIndex > 0
-      ? this.focusedIndex - 1
-      : focusable.length - 1; // Wrap to end
-
-    this.focusElement(prevIndex);
-  }
-
-  /**
-   * Activate the currently focused element.
-   * - If it has an href, navigate to it
-   * - If it has a click popup, toggle the popup
-   */
-  protected activateCurrentElement(): void {
-    const focusable = this.getFocusableElements();
-    if (this.focusedIndex < 0 || this.focusedIndex >= focusable.length) return;
-
-    const element = focusable[this.focusedIndex];
-
-    // If it has an href, navigate to it
-    if (element.href) {
-      this.navigateToHref(element.href);
-      return;
-    }
-
-    // If it has a click popup, toggle it
-    if (element.popupTrigger === 'click') {
-      this.togglePopupForFocusedElement(this.focusedIndex);
-    }
-  }
-
-  /**
-   * Navigate to the specified URL.
-   * Extracted for testability - can be mocked in tests.
-   */
-  protected navigateToHref(href: string): void {
-    window.location.href = href;
   }
 
   /**
