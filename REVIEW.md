@@ -380,7 +380,20 @@ single traversal with orientation as a parameter. `renderBars` collapses to a `.
 `` svg`<rect …>` ``. Four drifted copies become one, the misalignment disappears by
 construction, and bar geometry becomes unit-testable without a DOM.
 
-### 3.3 Popups and screen-reader announcements bypass the formatter
+### 3.3 Popups and screen-reader announcements bypass the formatter — ⚠️ STILL OPEN
+
+> **Not fixed, contrary to an earlier claim.** This was recorded as "fixed for free by the hoist
+> in §5.2". It was not: §5.2 hoisted `renderFocusIndicator`, `togglePopupForFocusedElement` and
+> `shouldShowAutoPopup`, none of which touch popup *content*. The generators still interpolate the
+> raw number — `pie-chart.ts:535` is
+> `` `Value: ${slice.value}` ``, unformatted.
+>
+> So `value-format="currency USD"` still renders `$1,234.56` on the label and `1234.56` in the
+> tooltip and to a screen reader. Verified, not assumed.
+>
+> Original finding below.
+
+### 3.3 (original) Popups and screen-reader announcements bypass the formatter
 
 `value-format="currency USD"` renders `$1,234.56` on the label and `1234.56` in the tooltip and
 to a screen reader.
@@ -1292,6 +1305,16 @@ no subpath map, so consumers can't import a single chart type.
 ## 6. API design: fix while breaking changes are still free
 
 At v0.1.0, unpublished, every one of these is free. After publish, none of them are.
+
+> **§6 has not been worked on.** The findings below were listed in this document's
+> recommended sequence as "breaking changes worth making now", but none were executed —
+> verified against the source, not assumed. `<dc-grid>` still declares
+> `attribute: 'style'`; `converters.ts` still returns `true` for any unrecognised
+> `show-*` value, so `show-value="off"` still means show; `<dc-bar width>` is still a
+> homonym of `<dc-chart width>`; and the day-one deprecations (`bar-color`, `line-color`,
+> `slice-color`, element `color`) are still present.
+>
+> Now cheaper than when written: there are no users, so these are free to change.
 
 ### 6.1 `<dc-grid style="dashed">` shadows the global HTML `style` attribute
 
