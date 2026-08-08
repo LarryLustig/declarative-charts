@@ -179,6 +179,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **SVG export extracted from `BaseChart` into `SvgExporter`**
+  - Fifth of the god-class extractions. `src/svg-exporter.ts`, 146 lines; `base-chart.ts` down
+    to 3,292 (from 3,724 before this work began)
+  - The exporter owns the whole download path: clone the rendered `<svg>`, inline what a
+    standalone file cannot inherit, serialize, and hand it to the browser via an object URL
+  - **No API change**, and this one is load-bearing: `downloadSvg(filename?)` is documented,
+    consumer-facing API. The default filename now lives in one place, `DEFAULT_SVG_FILENAME`,
+    so the delegating signature and the implementation cannot drift
+  - `prepareSvgForExport()` stayed on the chart and is dispatched back through the host, so
+    replacing it in a subclass still governs the exported output — the same seam `getLuminance`,
+    `focusElement`, `log` and `showPopup` needed in the four earlier extractions
+  - `SvgExporter`, `SvgExportHost` and `DEFAULT_SVG_FILENAME` are exported
+  - 61 characterization tests were written and committed **before** the refactor
+    (`test/component/svg-export.test.ts`)
+
 - **Popups extracted from `BaseChart` into `PopupController`**
   - Fourth of the god-class extractions. `src/popup-controller.ts`, 180 lines
   - The controller owns the four pieces of popup state and both coordinate paths into them:

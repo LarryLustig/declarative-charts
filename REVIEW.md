@@ -924,7 +924,7 @@ computed layout accessor). For a large fraction of potential users the front doo
 
 Not broken, but expensive to change after publishing.
 
-### 5.1 `BaseChart` is a god class — 🔶 IN PROGRESS (4 of ~5 extracted)
+### 5.1 `BaseChart` is a god class — 🔶 IN PROGRESS (5 of ~6 extracted)
 
 > **`ColorResolver` extracted** — `src/color-resolver.ts`, 551 lines. `base-chart.ts` is down
 > from 3,724 to 3,386, and colour resolution is now readable and testable on its own.
@@ -1043,9 +1043,53 @@ Not broken, but expensive to change after publishing.
 > tech between hovers), and `BaseChart.showPopupAtBounds('')` reports success and shows an empty
 > box while the identically-named standalone helper in `chart-utils.ts` bails on empty content.
 >
-> Still to extract, in rough order of payoff: `TextMeasurer` (~60 lines), `SvgExporter`. Both
-> abstraction leaks named below — the `orientation` cast and the `tagName` sniffing in
-> `getAnimatableChartType()` — are **still open**.
+> **`SvgExporter` extracted too** — `src/svg-exporter.ts`, 146 lines. `base-chart.ts` is now
+> 3,292, down from 3,724 when this work began. The exporter owns the whole download path: clone
+> the rendered `<svg>`, inline what a standalone file cannot inherit, serialize, hand it to the
+> browser via an object URL.
+>
+> This is the first extraction to move **public API**. `downloadSvg(filename?)` is demonstrated
+> on `index.html` and referenced in this document's own §; its signature and observable behaviour
+> had to survive verbatim. That constraint shaped two details: the delegating method keeps a
+> default parameter value so `downloadSvg.length` stays 0 (a test pins it), and that default now
+> lives once as `DEFAULT_SVG_FILENAME` rather than being written in both the delegate and the
+> implementation, where it could drift.
+>
+> What stayed behind, deliberately: `prepareSvgForExport()`. It is `private` on `BaseChart`, not a
+> documented extension point, so moving it wholesale was tempting — but `downloadSvg()` called it
+> virtually, which means a subclass or a test double could replace it and fully govern the
+> exported file. It remains a `BaseChart` member and the exporter reaches it through the host.
+>
+> No test broke on the first full run — 2,172 passed unchanged. Third clean first run in a row,
+> and as before it is reported as a result only because three mutation checks confirmed the guards
+> are load-bearing:
+>
+> - Replacing `this.host.prepareSvgForExport(...)` with `this.prepareSvgForExport(...)` failed 3
+>   tests. The override seam, **fifth** appearance after `getLuminance`, `focusElement`, `log` and
+>   `showPopup`.
+> - Measuring anything other than the chart element with `getComputedStyle` failed 5 tests. This
+>   is a variant of the same hazard worth naming separately: the receiver, not just the dispatch.
+>   `getComputedStyle(this)` inside `BaseChart` meant the chart; inside an extracted class `this`
+>   silently means the exporter. Both type check, both yield a font-family, only one is right.
+> - Snapshotting `width`/`height` in the adapter instead of using getters failed 1 test.
+>
+> The `@state()` reactivity hazard does not apply here — the exporter holds no state at all, which
+> is why this extraction cost `base-chart.ts` 28 net lines instead of adding them like the popup
+> one did.
+>
+> The characterization suite pinned seven behaviours that are arguably wrong and were left exactly
+> as they are, because changing them is a human's call and not a refactor's: only the `<svg>`
+> subtree is cloned, so the shadow root's `<style>` is dropped and `font-family` is the *only*
+> style that reaches the exported file; lit-html binding markers ship inside it; `downloadSvg('')`
+> writes `.svg`; a non-string filename throws a raw `TypeError` rather than a DC-coded warning,
+> after the SVG has already been located; filenames are unsanitized; the width/height guard is
+> `!hasWidth || !hasHeight` while the body sets both, so a pre-existing `width` is clobbered; and
+> the DC204 warning goes straight to `console.warn` rather than through `logError()`, so the
+> `logging` attribute has no effect on it.
+>
+> Still to extract, in rough order of payoff: `TextMeasurer` (~60 lines). Both abstraction leaks
+> named below — the `orientation` cast and the `tagName` sniffing in `getAnimatableChartType()` —
+> are **still open**.
 >
 > Original finding below.
 

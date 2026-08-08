@@ -32,6 +32,8 @@ export { PopupController } from './popup-controller.js';
 export type { PopupHost } from './popup-controller.js';
 export { ChartLogger } from './chart-logger.js';
 export type { ChartLoggerHost } from './chart-logger.js';
+export { SvgExporter, DEFAULT_SVG_FILENAME } from './svg-exporter.js';
+export type { SvgExportHost } from './svg-exporter.js';
 
 // Export error handling
 export { ErrorCode, formatErrorMessage, getErrorByCode, createErrorLog } from './errors.js';

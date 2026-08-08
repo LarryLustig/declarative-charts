@@ -8,6 +8,7 @@ import type { ChartPalette, PaletteColorResult } from './chart-palette.js';
 import type { ChartFill } from './chart-fill.js';
 import { ColorResolver } from './color-resolver.js';
 import { KeyboardNavController } from './keyboard-nav-controller.js';
+import { SvgExporter, DEFAULT_SVG_FILENAME } from './svg-exporter.js';
 import { PopupController } from './popup-controller.js';
 import { ChartLogger } from './chart-logger.js';
 import {
@@ -3221,6 +3222,31 @@ export abstract class BaseChart extends LitElement {
   // SVG Export / Download
   // ============================================================================
 
+  private _svgExport?: SvgExporter;
+
+  /**
+   * SVG export for this chart.
+   *
+   * Built with an explicit adapter rather than passing `this`, for the same
+   * reason as {@link colors}: `prepareSvgForExport` is private, and widening it
+   * just to satisfy a structural interface would enlarge the API this
+   * extraction exists to shrink. The getters keep the values live, so a width
+   * change between two exports takes effect.
+   */
+  protected get svgExport(): SvgExporter {
+    if (!this._svgExport) {
+      const chart = this;
+      this._svgExport = new SvgExporter({
+        get shadowRoot() { return chart.shadowRoot; },
+        get width() { return chart.width; },
+        get height() { return chart.height; },
+        get hostElement() { return chart; },
+        prepareSvgForExport: (el: SVGElement) => chart.prepareSvgForExport(el)
+      });
+    }
+    return this._svgExport;
+  }
+
   /**
    * Download the chart as an SVG file.
    *
@@ -3246,75 +3272,21 @@ export abstract class BaseChart extends LitElement {
    * });
    * ```
    */
-  public downloadSvg(filename: string = 'chart.svg'): void {
-    const svg = this.shadowRoot?.querySelector('svg');
-    if (!svg) {
-      console.warn(`[${ErrorCode.SVG_NOT_FOUND.code}] ${ErrorCode.SVG_NOT_FOUND.message}`);
-      return;
-    }
-
-    // Ensure filename has .svg extension
-    if (!filename.toLowerCase().endsWith('.svg')) {
-      filename += '.svg';
-    }
-
-    // Clone the SVG so we don't modify the live DOM
-    const svgClone = svg.cloneNode(true) as SVGElement;
-
-    // Prepare the SVG for standalone use
-    this.prepareSvgForExport(svgClone);
-
-    // Serialize to string
-    const serializer = new XMLSerializer();
-    let svgString = serializer.serializeToString(svgClone);
-
-    // Add XML declaration for proper standalone SVG
-    svgString = '<?xml version="1.0" encoding="UTF-8"?>\n' + svgString;
-
-    // Create Blob and trigger download
-    const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    // Clean up the object URL
-    URL.revokeObjectURL(url);
+  public downloadSvg(filename: string = DEFAULT_SVG_FILENAME): void {
+    this.svgExport.downloadSvg(filename);
   }
 
   /**
    * Prepare an SVG element for standalone export.
    * Inlines computed styles that wouldn't otherwise be available in a standalone SVG file.
    *
+   * Stays on `BaseChart` and is called back through the host adapter, so
+   * replacing it on an instance or in a subclass still governs the exported
+   * output - which it did before the exporter existed.
+   *
    * @param svgElement The cloned SVG element to prepare
    */
   private prepareSvgForExport(svgElement: SVGElement): void {
-    // Add xmlns attribute if not present (required for standalone SVG)
-    if (!svgElement.hasAttribute('xmlns')) {
-      svgElement.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    }
-
-    // Get the computed font-family from the host element
-    const computedStyle = window.getComputedStyle(this);
-    const fontFamily = computedStyle.fontFamily;
-
-    // Apply font-family to all text elements that don't have an explicit font-family
-    const textElements = svgElement.querySelectorAll('text');
-    textElements.forEach(textEl => {
-      if (!textEl.hasAttribute('font-family') || textEl.getAttribute('font-family') === '') {
-        textEl.setAttribute('font-family', fontFamily);
-      }
-    });
-
-    // Set explicit width/height attributes based on viewBox for better compatibility
-    // with image editors and viewers that don't handle viewBox-only sizing well
-    if (!svgElement.hasAttribute('width') || !svgElement.hasAttribute('height')) {
-      svgElement.setAttribute('width', String(this.width));
-      svgElement.setAttribute('height', String(this.height));
-    }
+    this.svgExport.prepareSvgForExport(svgElement);
   }
 }

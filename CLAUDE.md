@@ -210,6 +210,17 @@ Two things a future contributor must not undo:
 
 `test/component/popups.test.ts` holds 67 characterization tests pinning popup behaviour, including that `hidePopup()` deliberately keeps the content and coordinates (the CSS opacity transition needs them) and that `showPopupAtBounds('')` reports success — unlike the standalone helper of the same name in `chart-utils.ts`, which bails on empty content.
 
+**SVG Export**: Lives in `src/svg-exporter.ts`, not `BaseChart`. `SvgExporter` owns the whole download path — clone the rendered `<svg>`, inline what a standalone file cannot inherit, serialize, and hand it to the browser via an object URL. `BaseChart` holds it behind a lazy `svgExport` getter, built with an explicit `SvgExportHost` adapter, and the **public** `downloadSvg(filename?)` delegates unchanged.
+
+`downloadSvg()` is documented, consumer-facing API (demonstrated on `index.html`, referenced in ROADMAP). Its signature and observable behaviour — the `.svg` extension appended case-insensitively, the `chart.svg` default (shared as `DEFAULT_SVG_FILENAME` so the delegate and the exporter cannot drift), the DC204 `console.warn` early return — must survive any future change.
+
+Two things a future contributor must not undo:
+
+- `SvgExporter.downloadSvg()` calls **`this.host.prepareSvgForExport()`**, not its own copy. `prepareSvgForExport` stays a member of `BaseChart` — replacing it on an instance or in a subclass governs the exported output, as it did before extraction. Same hazard class as `getLuminance`, the keyboard nav actions and `PopupController.showPopupAtBounds`. Bypassing it fails 3 tests.
+- The font-family comes from `getComputedStyle(host.hostElement)` — **the chart element**, which is the only reason the exporter is handed it. Measuring the exporter or the cloned SVG still type checks and still yields a font-family, just the wrong one. Fails 5 tests.
+
+`test/component/svg-export.test.ts` holds 61 characterization tests. Several pin behaviour that is arguably wrong and was deliberately left alone: only the `<svg>` subtree is cloned, so the shadow root's `<style>` is dropped and `font-family` is the *only* style that reaches the file; lit-html binding marker comments ship inside it; `downloadSvg('')` produces `.svg`; a non-string filename throws a raw `TypeError`; and the width/height guard is `!hasWidth || !hasHeight` while the body sets both.
+
 **Colour System**: Lives in `src/color-resolver.ts`, not `BaseChart`. `ColorResolver` owns palette lookup, contrast, and the priority between an element's own colour, a matched palette entry, a positional palette colour, and a generated fallback.
 
 `BaseChart` holds it behind a lazy `colors` getter and its existing `protected` methods delegate, so subclasses call exactly what they always did. It is constructed with an explicit `ColorHost` adapter rather than `this`, because `log` and `getMeasureContext` are not public and widening them would enlarge the API the extraction exists to shrink. The adapter uses getters so values stay live.
