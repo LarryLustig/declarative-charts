@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Visual tests settled on fixed sleeps rather than on conditions**, making them flaky on a
+  loaded machine. The "wait for Lit updates" step asserted `chart.updateComplete !== undefined` —
+  true the instant an element upgrades, awaiting nothing — so a 100ms sleep was doing all the
+  work. Waits are now condition-based: `updateComplete` is awaited in a loop (Lit resolves it to
+  `false` when another update was scheduled, and these charts re-render from a `MutationObserver`),
+  followed by `document.fonts.ready` and a two-frame paint settle. The swatch test additionally
+  waits for `dc-palette` and `dc-fill`, which `<dc-swatch>` itself waits for before resolving its
+  colour. The suite also got faster and much less variable: ~10s across cold, loaded and five
+  consecutive runs
+
 ### Removed
 
 - **BREAKING: the day-one deprecations are gone** (REVIEW.md §6.5). A pre-1.0 library should not

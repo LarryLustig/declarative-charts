@@ -746,13 +746,33 @@ test('my new chart', async ({ page }) => {
 ```
 3. Run `npm run test:visual:update` to generate the baseline
 
-**Current coverage (15 tests):**
+**Current coverage (23 tests):**
 - Bar charts: basic, horizontal, negative, grouped, stacked
-- Line charts: basic, multiple lines
+- Line charts: basic, multiple lines, time axis
+- Area charts: basic, stacked, overlapping
 - Bubble chart: basic
 - Pie charts: basic, donut
 - Funnel charts: basic, chevron
-- Features: patterns, custom axis, legend positions
+- Stage charts: basic, value-based sizing, zero handling
+- Features: patterns, custom axis, legend at top, swatches
+
+**⚠️ Never settle a visual test with `waitForTimeout()`.** Use `waitForChartRender(page)`, or
+`waitForCustomElements()` + `waitForRendered()` for a fixture whose elements are not charts.
+
+A sleep passes or fails on how loaded the machine is, which is exactly the difference between an
+idle laptop and CI — and it hid a real defect for a long time. The suite's "wait for Lit updates"
+step asserted `chart.updateComplete !== undefined`, which is true the instant an element upgrades
+and never awaits anything, so all settling was really being done by a 100ms sleep that nobody had
+reason to doubt.
+
+`waitForRendered()` **loops** on `updateComplete` rather than awaiting it once. Lit resolves it to
+`false` when a further update was scheduled while the last one ran, and these charts re-render
+from a `MutationObserver` over their own light-DOM children — so one await is genuinely not
+enough. It also awaits `document.fonts.ready`, because text metrics decide label layout.
+
+Wait for the elements a *component* waits for, not just the one under test: `<dc-swatch>` defers a
+`requestUpdate()` behind `customElements.whenDefined('dc-palette')` and a `requestAnimationFrame`,
+so its test waits for `dc-palette` and `dc-fill` too.
 
 ### Test Syntax Quick Reference
 

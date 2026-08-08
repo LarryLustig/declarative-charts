@@ -16,37 +16,101 @@ import { test, expect } from '@playwright/test';
 // Base URL for test fixtures
 const FIXTURES_URL = '/test/visual/fixtures/charts.html';
 
+type Page = ReturnType<typeof test['page']>;
+
+/** Every chart element a fixture might contain. */
+const CHART_TAGS = [
+  'dc-chart',
+  'dc-pie-chart',
+  'dc-funnel-chart',
+  'dc-stage-chart',
+] as const;
+
+const CHART_SELECTOR = CHART_TAGS.join(', ');
+
+/**
+ * How long to wait for the module graph to evaluate and register elements.
+ *
+ * Deliberately generous and deliberately *explicit*. This wait used to inherit
+ * the per-test timeout, so a page whose script never finished failed with a bare
+ * stack frame and no statement of what was being awaited.
+ */
+const DEFINITION_TIMEOUT = 30_000;
+
+/**
+ * Wait until every named custom element has been registered.
+ *
+ * Waiting for the elements a component itself waits for matters here: a
+ * `<dc-swatch>` defers a `requestUpdate()` behind
+ * `customElements.whenDefined('dc-palette')` and a `requestAnimationFrame`, so
+ * waiting only for `dc-swatch` leaves that tail outstanding.
+ */
+async function waitForCustomElements(page: Page, tags: readonly string[]) {
+  try {
+    await page.waitForFunction(
+      (names: string[]) => names.every((n) => customElements.get(n) !== undefined),
+      tags as unknown as string[],
+      { timeout: DEFINITION_TIMEOUT }
+    );
+  } catch (cause) {
+    const missing = await page
+      .evaluate(
+        (names: string[]) => names.filter((n) => !customElements.get(n)),
+        tags as unknown as string[]
+      )
+      .catch(() => tags as unknown as string[]);
+    throw new Error(
+      `Custom elements were never registered after ${DEFINITION_TIMEOUT}ms: ` +
+        `${missing.join(', ')}. The fixture loads /src/index.ts, so this usually ` +
+        `means the module graph failed to evaluate rather than that rendering was slow.`,
+      { cause }
+    );
+  }
+}
+
+/**
+ * Wait until the matched elements have finished rendering and painting.
+ *
+ * The step this replaces asserted `chart.updateComplete !== undefined`, which is
+ * true the instant an element upgrades and never awaits anything - so the whole
+ * suite's settling was really being done by a fixed 100ms sleep. A sleep is
+ * flaky by construction: it passes or fails on how loaded the machine is, which
+ * is precisely the difference between a developer's idle laptop and CI.
+ *
+ * The loop is not defensive padding. Lit resolves `updateComplete` to `false`
+ * when a further update was scheduled while the last one ran, and these charts
+ * re-render from a `MutationObserver` over their own light-DOM children, so one
+ * await genuinely is not enough.
+ */
+async function waitForRendered(page: Page, selector: string) {
+  await page.evaluate(async (sel: string) => {
+    const els = Array.from(document.querySelectorAll(sel)) as Array<{
+      updateComplete?: Promise<boolean>;
+    }>;
+
+    for (let i = 0; i < 20; i++) {
+      const settled = await Promise.all(els.map((e) => e.updateComplete ?? true));
+      if (settled.every(Boolean)) break;
+    }
+
+    // Text metrics decide label layout, so an unloaded font changes the picture.
+    await document.fonts.ready;
+
+    // Two frames: one to run the pending paint, one to be sure it happened.
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+    );
+  }, selector);
+}
+
 // Wait for charts to fully render (Lit update cycle + SVG rendering)
-async function waitForChartRender(page: ReturnType<typeof test['page']>) {
-  // Wait for custom elements to be defined
-  await page.waitForFunction(() => {
-    return (
-      customElements.get('dc-chart') !== undefined &&
-      customElements.get('dc-pie-chart') !== undefined &&
-      customElements.get('dc-funnel-chart') !== undefined &&
-      customElements.get('dc-stage-chart') !== undefined
-    );
-  });
-
-  // Wait for Lit updates to complete
-  await page.waitForFunction(() => {
-    const charts = document.querySelectorAll(
-      'dc-chart, dc-pie-chart, dc-funnel-chart, dc-stage-chart'
-    );
-    return Array.from(charts).every(
-      (chart) => (chart as any).updateComplete !== undefined
-    );
-  });
-
-  // Small delay for SVG rendering
-  await page.waitForTimeout(100);
+async function waitForChartRender(page: Page) {
+  await waitForCustomElements(page, CHART_TAGS);
+  await waitForRendered(page, CHART_SELECTOR);
 }
 
 // Get the chart container element for a specific chart
-async function getChartContainer(
-  page: ReturnType<typeof test['page']>,
-  chartId: string
-) {
+async function getChartContainer(page: Page, chartId: string) {
   return page.locator(`#${chartId}`);
 }
 
@@ -211,12 +275,10 @@ test.describe('Stage Charts', () => {
 test.describe('Swatches', () => {
   test('swatches with palettes and shapes', async ({ page }) => {
     await page.goto(`${FIXTURES_URL}?chart=swatches`);
-    // Wait for dc-swatch to be defined
-    await page.waitForFunction(() => {
-      return customElements.get('dc-swatch') !== undefined;
-    });
-    // Wait for swatches to render
-    await page.waitForTimeout(200);
+    // dc-swatch resolves its colour only once dc-palette and dc-fill exist, so
+    // wait for all three - waiting for dc-swatch alone leaves that tail open.
+    await waitForCustomElements(page, ['dc-swatch', 'dc-palette', 'dc-fill']);
+    await waitForRendered(page, 'dc-swatch');
 
     const container = await getChartContainer(page, 'swatches');
     await expect(container).toHaveScreenshot('swatches.png');

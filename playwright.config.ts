@@ -23,6 +23,13 @@ export default defineConfig({
   // Retry failed tests on CI only
   retries: process.env.CI ? 2 : 0,
 
+  // Per-test budget. The default is 30s, which is also what the element
+  // registration wait allows - so that wait could never fire its own error and
+  // a slow page surfaced as a bare "test timeout" pointing at a stack frame.
+  // 60s leaves room for the specific message to win, and gives a loaded machine
+  // headroom without making a genuine hang slow to report.
+  timeout: 60_000,
+
   // Limit parallel workers on CI to avoid resource issues
   workers: process.env.CI ? 1 : undefined,
 
