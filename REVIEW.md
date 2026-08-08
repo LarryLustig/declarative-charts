@@ -1323,17 +1323,36 @@ no subpath map, so consumers can't import a single chart type.
 
 At v0.1.0, unpublished, every one of these is free. After publish, none of them are.
 
-> **§6 has not been worked on.** The findings below were listed in this document's
-> recommended sequence as "breaking changes worth making now", but none were executed —
-> verified against the source, not assumed. `<dc-grid>` still declares
-> `attribute: 'style'`; `converters.ts` still returns `true` for any unrecognised
-> `show-*` value, so `show-value="off"` still means show; `<dc-bar width>` is still a
-> homonym of `<dc-chart width>`; and the day-one deprecations (`bar-color`, `line-color`,
-> `slice-color`, element `color`) are still present.
+> **§6 is now complete.** 6.1, 6.2, 6.4 and 6.5 were executed; 6.3 was already fixed; 6.6 is a
+> record of what to leave alone, and its one actionable note is resolved below.
 >
-> Now cheaper than when written: there are no users, so these are free to change.
+> Two of §6.5's four "deprecations" were not deprecations. That is recorded in place rather than
+> quietly dropped — see 6.5.
 
-### 6.1 `<dc-grid style="dashed">` shadows the global HTML `style` attribute
+### 6.1 `<dc-grid style="dashed">` shadows the global HTML `style` attribute — ✅ FIXED
+
+> **Fixed.** `style` → `stroke-dasharray`, `color` → `stroke`, resolving through the same named
+> patterns `<dc-fill>` already accepted.
+>
+> The element turned out to be dead three ways over, which is why nothing had ever complained:
+>
+> - `getStyleWarnings()` had no caller, so an invalid pattern was ignored in silence. Now
+>   collected with the axis warnings.
+> - `getStrokeDasharray()` had no caller either — `axis-chart.ts` carried a second copy of the
+>   dash table, and the copies disagreed (`5,5` against `5 5`). One copy now.
+> - **Every shipped example wrote `line-style="dashed"`**, which matched no property at all. Those
+>   grids have been rendering solid the entire time.
+>
+> Verified in Chromium, not by reading: `axes.html` now emits `stroke-dasharray` values of
+> `"5 5"` and `"1 3"` where it previously emitted only `""`.
+>
+> `<dc-grid>` also had **zero mentions in API.md** despite being fully implemented, so users could
+> not discover grid styling at all. Documented as part of the rename — renaming an undocumented
+> element and leaving it undocumented would have been half a job.
+>
+> Original finding below.
+
+### 6.1 (original) `<dc-grid style="dashed">` shadows the global HTML `style` attribute
 
 `chart-grid.ts:59-60`. Every HTML element has `style`; overloading it to mean "line dash style"
 is the sharpest convention violation in the codebase, and it puts invalid CSS in the DOM. Rename
@@ -1341,7 +1360,32 @@ to `stroke-dasharray` — which `<dc-fill>` already accepts with named `"dashed"
 values (`chart-fill.ts:168`), so this is both standard *and* internally consistent. Same for
 `<dc-grid color>` → `stroke`.
 
-### 6.2 `show-value="off"` means **show**
+### 6.2 `show-value="off"` means **show** — ✅ FIXED
+
+> **Fixed, both halves.**
+>
+> The converter returned `true` for anything it did not recognise, so `off`, `no` and `none` all
+> turned labels **on**. The defence would be that HTML boolean attributes work that way — but this
+> is not one: it already treated `"false"` as false and it accepts thresholds, which makes it an
+> *enumerated* attribute, and HTML's rule for those is to fall back to a default rather than read
+> presence. `off`/`no`/`none`/`hidden` now mean off, `on`/`yes`/`show` mean on, and anything else
+> warns `DC104` and defaults to not showing rather than guessing.
+>
+> The second half was the more interesting one. `<dc-legend>` declared its **own private**
+> `booleanConverter`, shadowing the shared one, so `show-value="10%"` meant `true` there and "at
+> least 10% of the total" everywhere else. It now uses the shared converter and evaluates per
+> item. Labels resolve per item too, so column widths derive from what is actually drawn.
+>
+> A third coercion was sitting upstream of both: `this.showValue !== false` in `base-chart.ts`
+> flattened chart-level conditions to booleans *before* the legend could see them, so a
+> chart-level `show-value="10%"` was equally lost. Removed.
+>
+> `evaluateShowCondition` moved to `converters.ts` as a pure function, since the legend needs it
+> and is not a chart. `BaseChart` delegates.
+>
+> Original finding below.
+
+### 6.2 (original) `show-value="off"` means **show**
 
 `converters.ts:44-45` returns `true` for any unrecognised string. `show-value="yes"`,
 `"none"`, and `"off"` all enable. Reject unknown values, log `DC104`, default to false.
@@ -1392,7 +1436,27 @@ The codes are good; the default is backwards. Default `console-log` to `'warning
 people silence it. Silent misconfiguration is the worst possible failure mode for a declarative
 API, because the markup *looks* right.
 
-### 6.4 Naming collisions
+### 6.4 Naming collisions — ✅ FIXED
+
+> **Fixed, all three.** `<dc-bar width>` → `bar-width`, funnel `segment-*height` → `stage-*height`,
+> `<dc-fill scale>` → `pattern-scale`.
+>
+> The first rename exposed a hazard worth recording. Unknown attributes on a data element are
+> **passed through onto the SVG shape**, so simply dropping `width` from the known-attribute set
+> let a leftover `width="80"` land on the `<rect>` and override the computed geometry. Measured,
+> not assumed: two equal bars rendered 80 and 251 instead of 251 and 251. The old name therefore
+> stays *listed* as known while doing nothing, and logs `DC104` saying it was renamed. Silently
+> ignored beats silently misrendered; saying so beats both.
+>
+> On the funnel, "height" was kept rather than adopting `stage-size`: a funnel stage varies only
+> in height, while a stage chart's shapes vary in both dimensions, so `stage-size` remains correct
+> there. The noun now matches the child element in both charts. The prose in `funnel-chart.ts`
+> called stages "segments" throughout and was corrected with it — leaving it would have kept
+> teaching the word the rename exists to remove.
+>
+> Original finding below.
+
+### 6.4 (original) Naming collisions
 
 - **`width` is a homonym.** Chart width on `<dc-chart>` (`base-chart.ts:128`), bar *thickness*
   on `<dc-bar>` (`chart-bar.ts:51`) — while the chart-level version of that same idea is
@@ -1405,7 +1469,34 @@ API, because the markup *looks* right.
 - `<dc-fill scale>` (`chart-fill.ts:213`) vs shape `pattern-scale`
   (`base-filled-shape.ts:74`) — same concept.
 
-### 6.5 Delete the day-one deprecations
+### 6.5 Delete the day-one deprecations — ✅ FIXED, and this section was half wrong
+
+> **Two of the four items listed below were not deprecations.** Checked against the source rather
+> than taken from the list.
+>
+> **Removed**, as genuine deprecations with real replacements:
+> - `color` on data elements → `fill` / `stroke`. 128 uses across the example pages migrated.
+> - `BaseShape`, the alias for `BaseFilledShape`.
+> - `ChartLegend.customTitle` → `getTitleInfo()`.
+>
+> **Kept — `bar-color` and `line-color` are not deprecated.** Neither carries an `@deprecated`
+> marker anywhere in the source, and both are the live source of default bar, line and area
+> colours. There is no replacement to move to. Deleting them would have removed working
+> capability on the strength of a list entry.
+>
+> **Kept — `slice-color`'s replacement does not exist.** Its notice said "use `fill-colors`
+> instead". `fill-colors` appears in exactly one JSDoc line, on `<dc-chart>`, and is implemented
+> nowhere. So the notice deprecated the only way to set a chart-wide slice colour in favour of
+> something never written. Undeprecated, and the phantom `@attr` line deleted rather than left to
+> mislead the next reader.
+>
+> The migration was verified in Chromium rather than by grep, since a 128-site mechanical edit to
+> files no test covers is exactly where a silent break hides: all ten affected example pages
+> render with every shape coloured and no console warnings.
+>
+> Original finding below.
+
+### 6.5 (original) Delete the day-one deprecations
 
 `color` (`base-chart-element.ts:21`), `bar-color`/`line-color` (`chart.ts:268,278`),
 `slice-color` (`pie-chart.ts:39`). A pre-1.0 library should not ship with deprecations already
@@ -1419,8 +1510,12 @@ Worth recording so it doesn't get "fixed" later:
 - **Bare-ID references** (`palette="status"`, `pattern="danger"`, `zero-fill="x"`) match the
   actual HTML convention — `for=`, `list=`, `form=`, `aria-labelledby` all take bare IDs. The
   `<dc-log-console chart="#my-chart">` selector exception is justified by its multi-chart role.
-  *(But `API.md` contradicts itself: line 1341 shows `zero-fill="zero-style"` and line 1347
-  shows `zero="auto circle #zero-style"` — same page, same feature, two syntaxes.)*
+  *(The `API.md` "contradiction" noted here — `zero-fill="zero-style"` beside
+  `zero="auto circle #zero-style"` — is not one. They are different attributes, and the `#` is
+  load-bearing: the compound shorthand's parts are space-separated and unordered, so a bare
+  `zero-style` could not be told apart from the keywords `auto`/`hidden`/`circle` or from a
+  number. The `#` marks it as an ID exactly as a CSS selector does. API.md now says so, which is
+  what was actually missing.)*
 - **The decimal-percent convention** (0.38 → "38%") matches `Intl.NumberFormat`'s
   `style: 'percent'` and d3-format's `%`. Keep it; the loud flagging in `API.md:854` is the
   right mitigation.

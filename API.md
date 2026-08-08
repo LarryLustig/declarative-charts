@@ -1762,6 +1762,13 @@ Use the `zero-*` attributes to control how stages with value=0 are displayed:
 </dc-stage-chart>
 ```
 
+Note the `#`. Element references elsewhere in the library take a bare ID
+(`zero-fill="zero-style"`, `palette="status"`, `pattern="danger"`), matching how
+`for=`, `list=` and `form=` work in HTML. The compound `zero` shorthand is the
+exception: its parts are space-separated and unordered, so a bare `zero-style`
+could not be told apart from the keywords (`auto`, `hidden`, `circle`) or from a
+number. The `#` marks the token as an ID, the same way it does in a CSS selector.
+
 ### `<dc-stage>`
 
 Defines a single stage in a stage chart.
