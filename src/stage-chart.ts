@@ -4,6 +4,7 @@ import { BaseChart, type ShowCondition, type FocusableElement, type AnimatableCh
 import { ErrorCode } from './errors.js';
 import type { LegendItem } from './chart-legend.js';
 import type { ChartStage, StageShape } from './chart-stage.js';
+import { computeStageLayout, resolveStageShape } from './stage-layout.js';
 import type { ChartPopup } from './chart-popup.js';
 import type { ChartFill } from './chart-fill.js';
 import { analyzeFunnel, type StageData as InsightStageData } from './accessibility/index.js';
@@ -174,9 +175,11 @@ export class StageChart extends BaseChart {
     labelOffsetR?: number;
     labelFill?: string;
   }> {
+    // `hidden` is honoured on every other data element and API.md lists
+    // <dc-stage> as supporting it; the filter was simply missing.
     const stageElements = Array.from(
       this.querySelectorAll('dc-stage')
-    ) as ChartStage[];
+    ).filter(el => !el.hasAttribute('hidden')) as ChartStage[];
 
     const knownAttrs = new Set(['value', 'show-value', 'show-label', 'show-percent', 'shape', 'corner-radius']);
 
@@ -721,37 +724,12 @@ export class StageChart extends BaseChart {
     const strokeColors = this.resolveStrokeColors(stagesData.length, elementStrokes, undefined, effectiveStroke.color);
     const defaultStrokeWidth = effectiveStroke.width;
 
-    // Calculate positions
-    const visibleStages = stagesData.filter(s => !(s.value === 0 && zeroSettings.hidden));
-    const totalGaps = Math.max(0, visibleStages.length - 1) * gapSize;
-
-    // Calculate total space needed for shapes
-    let totalShapeSpace = 0;
-    for (let i = 0; i < stagesData.length; i++) {
-      if (stagesData[i].value === 0 && zeroSettings.hidden) continue;
-      const size = stageSizes[i];
-      const effectiveShape = stagesData[i].shape || this.shape;
-      if (isVertical) {
-        totalShapeSpace += this.getShapeHeight(size, effectiveShape);
-      } else {
-        totalShapeSpace += this.getShapeWidth(size, effectiveShape);
-      }
-    }
-
-    // Calculate starting position to center everything
-    const availableSpace = isVertical ? chartHeight : chartWidth;
-    const totalRequired = totalShapeSpace + totalGaps;
-    let currentPos = isVertical
-      ? padding.top + Math.max(0, (availableSpace - totalRequired) / 2)
-      : padding.left + Math.max(0, (availableSpace - totalRequired) / 2);
-
-    const centerX = padding.left + chartWidth / 2;
-    const centerY = padding.top + chartHeight / 2;
-
-    // Calculate auto size for zero values if needed
+    // Calculate auto size for zero values if needed. This has to happen BEFORE
+    // layout: a zero stage can be resized by the `zero` settings, and geometry
+    // computed from the unadjusted size would place it wrongly.
     let autoZeroSize: number | undefined;
     if (zeroSettings.sizeValue === 'auto') {
-      const nonZeroValues = stagesData.filter(s => s.value > 0).map(s => s.value);
+      const nonZeroValues = stagesData.filter(st => st.value > 0).map(st => st.value);
       if (nonZeroValues.length > 0) {
         autoZeroSize = Math.min(...nonZeroValues);
         this.log('info', 'zero.autoSize', `Auto-calculated zero-value size from smallest non-zero value`, autoZeroSize);
@@ -761,6 +739,36 @@ export class StageChart extends BaseChart {
         this.log('info', 'zero.autoSize', `All values are zero, using default size`, autoZeroSize);
       }
     }
+
+    /** Sizes after zero handling - what the geometry must actually use. */
+    const resolvedSizes = stagesData.map((st, i) => {
+      const isZero = st.value === 0;
+      const isHiddenZero = isZero && zeroSettings.hidden;
+      if (!isZero || isHiddenZero) return stageSizes[i];
+      if (zeroSettings.sizeValue === 'auto' && autoZeroSize !== undefined) return autoZeroSize;
+      if (typeof zeroSettings.sizeValue === 'number') return zeroSettings.sizeValue;
+      return stageSizes[i];
+    });
+
+    /** Shape after zero handling - `zero` may substitute a different one. */
+    const resolvedShapes = stagesData.map(st =>
+      (st.value === 0 && zeroSettings.shape) ? zeroSettings.shape : (st.shape || this.shape));
+
+    // Geometry comes from the pure layout module - see src/stage-layout.ts.
+    // Everything above this point is data extraction, colour resolution and zero
+    // handling, all of which need the DOM. Placement does not.
+    const boxes = computeStageLayout({
+      sizes: resolvedSizes,
+      shapes: resolvedShapes,
+      hidden: stagesData.map(st => st.value === 0 && zeroSettings.hidden),
+      orientation: this.orientation,
+      aspectRatio: this.aspectRatio,
+      gap: gapSize,
+      padding,
+      chartWidth,
+      chartHeight
+    });
+
 
     const stages = stagesData.map((stage, index) => {
       const isZero = stage.value === 0;
@@ -772,36 +780,12 @@ export class StageChart extends BaseChart {
         effectiveShape = zeroSettings.shape;
       }
 
-      let size = stageSizes[index];
 
-      // Handle zero value sizing
-      if (isZero && !isHidden) {
-        if (zeroSettings.sizeValue === 'auto' && autoZeroSize !== undefined) {
-          size = autoZeroSize;
-        } else if (typeof zeroSettings.sizeValue === 'number') {
-          size = zeroSettings.sizeValue;
-        }
-        // If no zeroSettings.sizeValue, keep the calculated size (which will be small or constrained by min-size)
-      }
-
-      const shapeWidth = this.getShapeWidth(size, effectiveShape);
-      const shapeHeight = this.getShapeHeight(size, effectiveShape);
-
-      // Calculate position
-      let x: number, y: number;
-      if (isVertical) {
-        x = centerX - shapeWidth / 2;
-        y = currentPos;
-        if (!isHidden) {
-          currentPos += shapeHeight + gapSize;
-        }
-      } else {
-        x = currentPos;
-        y = centerY - shapeHeight / 2;
-        if (!isHidden) {
-          currentPos += shapeWidth + gapSize;
-        }
-      }
+      const box = boxes[index];
+      const shapeWidth = box.width;
+      const shapeHeight = box.height;
+      const x = box.x;
+      const y = box.y;
 
       const cornerRadiusStr = stage.cornerRadius || this.cornerRadius;
       const cornerRadius = this.parseCornerRadius(cornerRadiusStr, shapeWidth);
@@ -918,33 +902,24 @@ export class StageChart extends BaseChart {
     };
   }
 
-  /**
-   * Get shape width based on size and shape type
-   */
-  private getShapeWidth(size: number, shape: StageShape): number {
-    switch (shape) {
-      case 'square':
-      case 'circle':
-        return size;
-      case 'rectangle':
-      case 'oval':
-        return size * Math.sqrt(this.aspectRatio);
-    }
-  }
 
   /**
-   * Get shape height based on size and shape type
+   * Coerce a shape name to one the geometry understands.
+   *
+   * `StageShape` is a four-member union, so TypeScript thought the switches over
+   * it were exhaustive - but an attribute is an arbitrary string at runtime.
+   * `shape="chevron"` fell off the end of a default-less switch, returned
+   * undefined, and turned every downstream coordinate into NaN: an unrenderable
+   * chart with no error anywhere.
    */
-  private getShapeHeight(size: number, shape: StageShape): number {
-    switch (shape) {
-      case 'square':
-      case 'circle':
-        return size;
-      case 'rectangle':
-      case 'oval':
-        return size / Math.sqrt(this.aspectRatio);
+  private resolveShape(shape: StageShape): StageShape {
+    const { shape: resolved, wasInvalid } = resolveStageShape(shape);
+    if (wasInvalid) {
+      this.logError(ErrorCode.STAGE_SHAPE_INVALID, { value: String(shape) });
     }
+    return resolved;
   }
+
 
   /**
    * Calculate if label and value text can fit in a shape.
@@ -1309,7 +1284,9 @@ export class StageChart extends BaseChart {
       click: (e: MouseEvent) => this.handleStageClick(e, index)
     };
 
-    switch (shape) {
+    // Normalised, not raw: an unrecognised value fell off the end of this switch
+    // and returned undefined, so the stage was simply never drawn.
+    switch (this.resolveShape(shape)) {
       case 'rectangle':
       case 'square':
         return svg`

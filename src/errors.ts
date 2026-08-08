@@ -183,6 +183,16 @@ export const ErrorCode = {
   // ===========================================================================
 
   /**
+   * An unrecognised shape name was given to a stage chart
+   */
+  STAGE_SHAPE_INVALID: {
+    code: 'DC110',
+    level: 'warning',
+    path: 'stage.shape',
+    message: 'Unrecognised shape "{value}"; using rectangle instead'
+  },
+
+  /**
    * An unrecognised value was given for the logging or console-log attribute
    */
   LOG_LEVEL_INVALID: {

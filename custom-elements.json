@@ -28112,9 +28112,9 @@
           "kind": "variable",
           "name": "ErrorCode",
           "type": {
-            "text": "{\r\n  // ===========================================================================\r\n  // DC001-DC099: Data Errors\r\n  // ===========================================================================\r\n\r\n  /**\r\n   * Chart has no data elements\r\n   */\r\n  DATA_EMPTY: {\r\n    code: 'DC001',\r\n    level: 'warning',\r\n    path: 'data.empty',\r\n    message: '{chartType} has no {expectedElements}. Add {expectedElements} to display data.'\r\n  },\r\n\r\n  /**\r\n   * All data elements are hidden\r\n   */\r\n  DATA_ALL_HIDDEN: {\r\n    code: 'DC002',\r\n    level: 'warning',\r\n    path: 'data.allHidden',\r\n    message: '{chartType} has {count} data element(s) but all are hidden. Check for hidden attributes on {elementTypes}.'\r\n  },\r\n\r\n  /**\r\n   * Total of all values is zero (pie chart)\r\n   */\r\n  DATA_ZERO_TOTAL: {\r\n    code: 'DC003',\r\n    level: 'warning',\r\n    path: 'data.zeroTotal',\r\n    message: 'All {elementType} values sum to 0. {chartType} cannot be rendered. Check that {elementType}s have positive values.'\r\n  },\r\n\r\n  /**\r\n   * Elements have zero or negative values where positive is required\r\n   */\r\n  DATA_INVALID_VALUES: {\r\n    code: 'DC004',\r\n    level: 'warning',\r\n    path: 'data.invalidValues',\r\n    message: '{count} {elementType}(s) have zero or negative values and will not be visible: {labels}. {chartType}s require positive values.'\r\n  },\r\n\r\n  /**\r\n   * Bars have value 0 and will not render\r\n   */\r\n  DATA_ZERO_BARS: {\r\n    code: 'DC005',\r\n    level: 'warning',\r\n    path: 'bars.zeroValue',\r\n    message: '{count} bar(s) have value 0 and will not be visible: {labels}'\r\n  },\r\n\r\n  /**\r\n   * Elements have negative values (stage chart warning)\r\n   */\r\n  DATA_NEGATIVE_VALUES: {\r\n    code: 'DC006',\r\n    level: 'warning',\r\n    path: 'data.negativeValues',\r\n    message: '{count} {elementType}(s) have negative values which may not display correctly: {labels}'\r\n  },\r\n\r\n  // ===========================================================================\r\n  // DC100-DC199: Configuration Errors\r\n  // ===========================================================================\r\n\r\n  /**\r\n   * Line element has no points\r\n   */\r\n  LINE_NO_POINTS: {\r\n    code: 'DC101',\r\n    level: 'warning',\r\n    path: 'lines.noPoints',\r\n    message: \"Line '{label}' has no dc-point children and will not be visible.\"\r\n  },\r\n\r\n  /**\r\n   * Area element has no points\r\n   */\r\n  AREA_NO_POINTS: {\r\n    code: 'DC102',\r\n    level: 'warning',\r\n    path: 'areas.noPoints',\r\n    message: \"Area '{label}' has no dc-point children and will not be visible.\"\r\n  },\r\n\r\n  /**\r\n   * Invalid inner radius for donut chart\r\n   */\r\n  DONUT_INVALID_RADIUS: {\r\n    code: 'DC103',\r\n    level: 'warning',\r\n    path: 'donut.invalidInnerRadius',\r\n    message: 'inner-radius=\"{value}\" is {reason}. {suggestion}'\r\n  },\r\n\r\n  /**\r\n   * Could not parse attribute value\r\n   */\r\n  PARSE_ERROR: {\r\n    code: 'DC104',\r\n    level: 'warning',\r\n    path: 'parse',\r\n    message: 'Could not parse {attribute} value \"{value}\", defaulting to {default}'\r\n  },\r\n\r\n  /**\r\n   * Invalid format string\r\n   */\r\n  FORMAT_INVALID: {\r\n    code: 'DC105',\r\n    level: 'warning',\r\n    path: 'format.invalid',\r\n    message: 'Invalid format string: \"{format}\", using default'\r\n  },\r\n\r\n  /**\r\n   * Time axis has insufficient valid dates\r\n   */\r\n  TIME_AXIS_FEW_DATES: {\r\n    code: 'DC106',\r\n    level: 'warning',\r\n    path: 'timeAxis',\r\n    message: \"Type is 'time' but only {count} valid date(s) found\"\r\n  },\r\n\r\n  /**\r\n   * Too many bars for the available plot width. Gutters have been compressed\r\n   * (and bars clamped to a minimum) so the chart still renders.\r\n   */\r\n  BAR_SPACE_EXHAUSTED: {\r\n    code: 'DC107',\r\n    level: 'warning',\r\n    path: 'bars.layout',\r\n    message: '{count} bars exceed the available {available} units; gutters compressed to {gutterScale}x to keep bars at least {minSize} unit(s) wide'\r\n  },\r\n\r\n  // ===========================================================================\r\n  // DC200-DC299: Reference Errors\r\n  // ===========================================================================\r\n\r\n  /**\r\n   * An unrecognised value was given for the logging or console-log attribute\r\n   */\r\n  LOG_LEVEL_INVALID: {\r\n    code: 'DC109',\r\n    level: 'warning',\r\n    path: 'logging.level',\r\n    message: 'Unrecognised {attribute} value \"{value}\"; using the default instead'\r\n  },\r\n\r\n  /**\r\n   * A filename passed to downloadSvg() was unusable and had to be adjusted\r\n   */\r\n  EXPORT_FILENAME_INVALID: {\r\n    code: 'DC108',\r\n    level: 'warning',\r\n    path: 'export.filename',\r\n    message: 'Filename \"{value}\" is not usable as-is and was adjusted'\r\n  },\r\n\r\n  /**\r\n   * Palette not found\r\n   */\r\n  PALETTE_NOT_FOUND: {\r\n    code: 'DC201',\r\n    level: 'warning',\r\n    path: 'colors.palette',\r\n    message: 'Palette \"{id}\" not found (no DOM element or built-in with that name)'\r\n  },\r\n\r\n  /**\r\n   * Pattern not found or invalid\r\n   */\r\n  PATTERN_NOT_FOUND: {\r\n    code: 'DC202',\r\n    level: 'warning',\r\n    path: 'pattern.resolve',\r\n    message: 'Pattern \"{id}\" is not a valid type or ID reference'\r\n  },\r\n\r\n  /**\r\n   * Zero-fill element not found\r\n   */\r\n  ZERO_FILL_NOT_FOUND: {\r\n    code: 'DC203',\r\n    level: 'warning',\r\n    path: 'zero.fillNotFound',\r\n    message: 'Zero-fill element with id \"{id}\" not found'\r\n  },\r\n\r\n  /**\r\n   * SVG element not found in shadow DOM (internal error)\r\n   */\r\n  SVG_NOT_FOUND: {\r\n    code: 'DC204',\r\n    level: 'warning',\r\n    path: 'render.svgNotFound',\r\n    message: 'No SVG element found in chart shadow DOM'\r\n  },\r\n\r\n  // ===========================================================================\r\n  // DC300-DC399: Style Warnings\r\n  // ===========================================================================\r\n\r\n  /**\r\n   * CSS attribute used instead of SVG attribute on title\r\n   */\r\n  TITLE_STYLE_WARNING: {\r\n    code: 'DC301',\r\n    level: 'warning',\r\n    path: 'title.style',\r\n    message: '{message}'\r\n  },\r\n\r\n  /**\r\n   * CSS attribute used instead of SVG attribute on legend\r\n   */\r\n  LEGEND_STYLE_WARNING: {\r\n    code: 'DC302',\r\n    level: 'warning',\r\n    path: 'legend.style',\r\n    message: '{message}'\r\n  },\r\n\r\n  /**\r\n   * CSS attribute used instead of SVG attribute on axis\r\n   */\r\n  AXIS_STYLE_WARNING: {\r\n    code: 'DC303',\r\n    level: 'warning',\r\n    path: 'axis.style',\r\n    message: '{message}'\r\n  },\r\n\r\n  // ===========================================================================\r\n  // DC400-DC499: Informational Warnings\r\n  // ===========================================================================\r\n\r\n  /**\r\n   * All elements have the same color (consider using palette)\r\n   */\r\n  COLORS_UNIFORM: {\r\n    code: 'DC401',\r\n    level: 'warning',\r\n    path: 'colors.uniform',\r\n    message: 'All {count} {elementType}s have the same fill color - consider using a palette for visual distinction'\r\n  }\r\n\r\n}"
+            "text": "{\r\n  // ===========================================================================\r\n  // DC001-DC099: Data Errors\r\n  // ===========================================================================\r\n\r\n  /**\r\n   * Chart has no data elements\r\n   */\r\n  DATA_EMPTY: {\r\n    code: 'DC001',\r\n    level: 'warning',\r\n    path: 'data.empty',\r\n    message: '{chartType} has no {expectedElements}. Add {expectedElements} to display data.'\r\n  },\r\n\r\n  /**\r\n   * All data elements are hidden\r\n   */\r\n  DATA_ALL_HIDDEN: {\r\n    code: 'DC002',\r\n    level: 'warning',\r\n    path: 'data.allHidden',\r\n    message: '{chartType} has {count} data element(s) but all are hidden. Check for hidden attributes on {elementTypes}.'\r\n  },\r\n\r\n  /**\r\n   * Total of all values is zero (pie chart)\r\n   */\r\n  DATA_ZERO_TOTAL: {\r\n    code: 'DC003',\r\n    level: 'warning',\r\n    path: 'data.zeroTotal',\r\n    message: 'All {elementType} values sum to 0. {chartType} cannot be rendered. Check that {elementType}s have positive values.'\r\n  },\r\n\r\n  /**\r\n   * Elements have zero or negative values where positive is required\r\n   */\r\n  DATA_INVALID_VALUES: {\r\n    code: 'DC004',\r\n    level: 'warning',\r\n    path: 'data.invalidValues',\r\n    message: '{count} {elementType}(s) have zero or negative values and will not be visible: {labels}. {chartType}s require positive values.'\r\n  },\r\n\r\n  /**\r\n   * Bars have value 0 and will not render\r\n   */\r\n  DATA_ZERO_BARS: {\r\n    code: 'DC005',\r\n    level: 'warning',\r\n    path: 'bars.zeroValue',\r\n    message: '{count} bar(s) have value 0 and will not be visible: {labels}'\r\n  },\r\n\r\n  /**\r\n   * Elements have negative values (stage chart warning)\r\n   */\r\n  DATA_NEGATIVE_VALUES: {\r\n    code: 'DC006',\r\n    level: 'warning',\r\n    path: 'data.negativeValues',\r\n    message: '{count} {elementType}(s) have negative values which may not display correctly: {labels}'\r\n  },\r\n\r\n  // ===========================================================================\r\n  // DC100-DC199: Configuration Errors\r\n  // ===========================================================================\r\n\r\n  /**\r\n   * Line element has no points\r\n   */\r\n  LINE_NO_POINTS: {\r\n    code: 'DC101',\r\n    level: 'warning',\r\n    path: 'lines.noPoints',\r\n    message: \"Line '{label}' has no dc-point children and will not be visible.\"\r\n  },\r\n\r\n  /**\r\n   * Area element has no points\r\n   */\r\n  AREA_NO_POINTS: {\r\n    code: 'DC102',\r\n    level: 'warning',\r\n    path: 'areas.noPoints',\r\n    message: \"Area '{label}' has no dc-point children and will not be visible.\"\r\n  },\r\n\r\n  /**\r\n   * Invalid inner radius for donut chart\r\n   */\r\n  DONUT_INVALID_RADIUS: {\r\n    code: 'DC103',\r\n    level: 'warning',\r\n    path: 'donut.invalidInnerRadius',\r\n    message: 'inner-radius=\"{value}\" is {reason}. {suggestion}'\r\n  },\r\n\r\n  /**\r\n   * Could not parse attribute value\r\n   */\r\n  PARSE_ERROR: {\r\n    code: 'DC104',\r\n    level: 'warning',\r\n    path: 'parse',\r\n    message: 'Could not parse {attribute} value \"{value}\", defaulting to {default}'\r\n  },\r\n\r\n  /**\r\n   * Invalid format string\r\n   */\r\n  FORMAT_INVALID: {\r\n    code: 'DC105',\r\n    level: 'warning',\r\n    path: 'format.invalid',\r\n    message: 'Invalid format string: \"{format}\", using default'\r\n  },\r\n\r\n  /**\r\n   * Time axis has insufficient valid dates\r\n   */\r\n  TIME_AXIS_FEW_DATES: {\r\n    code: 'DC106',\r\n    level: 'warning',\r\n    path: 'timeAxis',\r\n    message: \"Type is 'time' but only {count} valid date(s) found\"\r\n  },\r\n\r\n  /**\r\n   * Too many bars for the available plot width. Gutters have been compressed\r\n   * (and bars clamped to a minimum) so the chart still renders.\r\n   */\r\n  BAR_SPACE_EXHAUSTED: {\r\n    code: 'DC107',\r\n    level: 'warning',\r\n    path: 'bars.layout',\r\n    message: '{count} bars exceed the available {available} units; gutters compressed to {gutterScale}x to keep bars at least {minSize} unit(s) wide'\r\n  },\r\n\r\n  // ===========================================================================\r\n  // DC200-DC299: Reference Errors\r\n  // ===========================================================================\r\n\r\n  /**\r\n   * An unrecognised shape name was given to a stage chart\r\n   */\r\n  STAGE_SHAPE_INVALID: {\r\n    code: 'DC110',\r\n    level: 'warning',\r\n    path: 'stage.shape',\r\n    message: 'Unrecognised shape \"{value}\"; using rectangle instead'\r\n  },\r\n\r\n  /**\r\n   * An unrecognised value was given for the logging or console-log attribute\r\n   */\r\n  LOG_LEVEL_INVALID: {\r\n    code: 'DC109',\r\n    level: 'warning',\r\n    path: 'logging.level',\r\n    message: 'Unrecognised {attribute} value \"{value}\"; using the default instead'\r\n  },\r\n\r\n  /**\r\n   * A filename passed to downloadSvg() was unusable and had to be adjusted\r\n   */\r\n  EXPORT_FILENAME_INVALID: {\r\n    code: 'DC108',\r\n    level: 'warning',\r\n    path: 'export.filename',\r\n    message: 'Filename \"{value}\" is not usable as-is and was adjusted'\r\n  },\r\n\r\n  /**\r\n   * Palette not found\r\n   */\r\n  PALETTE_NOT_FOUND: {\r\n    code: 'DC201',\r\n    level: 'warning',\r\n    path: 'colors.palette',\r\n    message: 'Palette \"{id}\" not found (no DOM element or built-in with that name)'\r\n  },\r\n\r\n  /**\r\n   * Pattern not found or invalid\r\n   */\r\n  PATTERN_NOT_FOUND: {\r\n    code: 'DC202',\r\n    level: 'warning',\r\n    path: 'pattern.resolve',\r\n    message: 'Pattern \"{id}\" is not a valid type or ID reference'\r\n  },\r\n\r\n  /**\r\n   * Zero-fill element not found\r\n   */\r\n  ZERO_FILL_NOT_FOUND: {\r\n    code: 'DC203',\r\n    level: 'warning',\r\n    path: 'zero.fillNotFound',\r\n    message: 'Zero-fill element with id \"{id}\" not found'\r\n  },\r\n\r\n  /**\r\n   * SVG element not found in shadow DOM (internal error)\r\n   */\r\n  SVG_NOT_FOUND: {\r\n    code: 'DC204',\r\n    level: 'warning',\r\n    path: 'render.svgNotFound',\r\n    message: 'No SVG element found in chart shadow DOM'\r\n  },\r\n\r\n  // ===========================================================================\r\n  // DC300-DC399: Style Warnings\r\n  // ===========================================================================\r\n\r\n  /**\r\n   * CSS attribute used instead of SVG attribute on title\r\n   */\r\n  TITLE_STYLE_WARNING: {\r\n    code: 'DC301',\r\n    level: 'warning',\r\n    path: 'title.style',\r\n    message: '{message}'\r\n  },\r\n\r\n  /**\r\n   * CSS attribute used instead of SVG attribute on legend\r\n   */\r\n  LEGEND_STYLE_WARNING: {\r\n    code: 'DC302',\r\n    level: 'warning',\r\n    path: 'legend.style',\r\n    message: '{message}'\r\n  },\r\n\r\n  /**\r\n   * CSS attribute used instead of SVG attribute on axis\r\n   */\r\n  AXIS_STYLE_WARNING: {\r\n    code: 'DC303',\r\n    level: 'warning',\r\n    path: 'axis.style',\r\n    message: '{message}'\r\n  },\r\n\r\n  // ===========================================================================\r\n  // DC400-DC499: Informational Warnings\r\n  // ===========================================================================\r\n\r\n  /**\r\n   * All elements have the same color (consider using palette)\r\n   */\r\n  COLORS_UNIFORM: {\r\n    code: 'DC401',\r\n    level: 'warning',\r\n    path: 'colors.uniform',\r\n    message: 'All {count} {elementType}s have the same fill color - consider using a palette for visual distinction'\r\n  }\r\n\r\n}"
           },
-          "default": "{ // =========================================================================== // DC001-DC099: Data Errors // =========================================================================== /** * Chart has no data elements */ DATA_EMPTY: { code: 'DC001', level: 'warning', path: 'data.empty', message: '{chartType} has no {expectedElements}. Add {expectedElements} to display data.' }, /** * All data elements are hidden */ DATA_ALL_HIDDEN: { code: 'DC002', level: 'warning', path: 'data.allHidden', message: '{chartType} has {count} data element(s) but all are hidden. Check for hidden attributes on {elementTypes}.' }, /** * Total of all values is zero (pie chart) */ DATA_ZERO_TOTAL: { code: 'DC003', level: 'warning', path: 'data.zeroTotal', message: 'All {elementType} values sum to 0. {chartType} cannot be rendered. Check that {elementType}s have positive values.' }, /** * Elements have zero or negative values where positive is required */ DATA_INVALID_VALUES: { code: 'DC004', level: 'warning', path: 'data.invalidValues', message: '{count} {elementType}(s) have zero or negative values and will not be visible: {labels}. {chartType}s require positive values.' }, /** * Bars have value 0 and will not render */ DATA_ZERO_BARS: { code: 'DC005', level: 'warning', path: 'bars.zeroValue', message: '{count} bar(s) have value 0 and will not be visible: {labels}' }, /** * Elements have negative values (stage chart warning) */ DATA_NEGATIVE_VALUES: { code: 'DC006', level: 'warning', path: 'data.negativeValues', message: '{count} {elementType}(s) have negative values which may not display correctly: {labels}' }, // =========================================================================== // DC100-DC199: Configuration Errors // =========================================================================== /** * Line element has no points */ LINE_NO_POINTS: { code: 'DC101', level: 'warning', path: 'lines.noPoints', message: \"Line '{label}' has no dc-point children and will not be visible.\" }, /** * Area element has no points */ AREA_NO_POINTS: { code: 'DC102', level: 'warning', path: 'areas.noPoints', message: \"Area '{label}' has no dc-point children and will not be visible.\" }, /** * Invalid inner radius for donut chart */ DONUT_INVALID_RADIUS: { code: 'DC103', level: 'warning', path: 'donut.invalidInnerRadius', message: 'inner-radius=\"{value}\" is {reason}. {suggestion}' }, /** * Could not parse attribute value */ PARSE_ERROR: { code: 'DC104', level: 'warning', path: 'parse', message: 'Could not parse {attribute} value \"{value}\", defaulting to {default}' }, /** * Invalid format string */ FORMAT_INVALID: { code: 'DC105', level: 'warning', path: 'format.invalid', message: 'Invalid format string: \"{format}\", using default' }, /** * Time axis has insufficient valid dates */ TIME_AXIS_FEW_DATES: { code: 'DC106', level: 'warning', path: 'timeAxis', message: \"Type is 'time' but only {count} valid date(s) found\" }, /** * Too many bars for the available plot width. Gutters have been compressed * (and bars clamped to a minimum) so the chart still renders. */ BAR_SPACE_EXHAUSTED: { code: 'DC107', level: 'warning', path: 'bars.layout', message: '{count} bars exceed the available {available} units; gutters compressed to {gutterScale}x to keep bars at least {minSize} unit(s) wide' }, // =========================================================================== // DC200-DC299: Reference Errors // =========================================================================== /** * An unrecognised value was given for the logging or console-log attribute */ LOG_LEVEL_INVALID: { code: 'DC109', level: 'warning', path: 'logging.level', message: 'Unrecognised {attribute} value \"{value}\"; using the default instead' }, /** * A filename passed to downloadSvg() was unusable and had to be adjusted */ EXPORT_FILENAME_INVALID: { code: 'DC108', level: 'warning', path: 'export.filename', message: 'Filename \"{value}\" is not usable as-is and was adjusted' }, /** * Palette not found */ PALETTE_NOT_FOUND: { code: 'DC201', level: 'warning', path: 'colors.palette', message: 'Palette \"{id}\" not found (no DOM element or built-in with that name)' }, /** * Pattern not found or invalid */ PATTERN_NOT_FOUND: { code: 'DC202', level: 'warning', path: 'pattern.resolve', message: 'Pattern \"{id}\" is not a valid type or ID reference' }, /** * Zero-fill element not found */ ZERO_FILL_NOT_FOUND: { code: 'DC203', level: 'warning', path: 'zero.fillNotFound', message: 'Zero-fill element with id \"{id}\" not found' }, /** * SVG element not found in shadow DOM (internal error) */ SVG_NOT_FOUND: { code: 'DC204', level: 'warning', path: 'render.svgNotFound', message: 'No SVG element found in chart shadow DOM' }, // =========================================================================== // DC300-DC399: Style Warnings // =========================================================================== /** * CSS attribute used instead of SVG attribute on title */ TITLE_STYLE_WARNING: { code: 'DC301', level: 'warning', path: 'title.style', message: '{message}' }, /** * CSS attribute used instead of SVG attribute on legend */ LEGEND_STYLE_WARNING: { code: 'DC302', level: 'warning', path: 'legend.style', message: '{message}' }, /** * CSS attribute used instead of SVG attribute on axis */ AXIS_STYLE_WARNING: { code: 'DC303', level: 'warning', path: 'axis.style', message: '{message}' }, // =========================================================================== // DC400-DC499: Informational Warnings // =========================================================================== /** * All elements have the same color (consider using palette) */ COLORS_UNIFORM: { code: 'DC401', level: 'warning', path: 'colors.uniform', message: 'All {count} {elementType}s have the same fill color - consider using a palette for visual distinction' } }",
+          "default": "{ // =========================================================================== // DC001-DC099: Data Errors // =========================================================================== /** * Chart has no data elements */ DATA_EMPTY: { code: 'DC001', level: 'warning', path: 'data.empty', message: '{chartType} has no {expectedElements}. Add {expectedElements} to display data.' }, /** * All data elements are hidden */ DATA_ALL_HIDDEN: { code: 'DC002', level: 'warning', path: 'data.allHidden', message: '{chartType} has {count} data element(s) but all are hidden. Check for hidden attributes on {elementTypes}.' }, /** * Total of all values is zero (pie chart) */ DATA_ZERO_TOTAL: { code: 'DC003', level: 'warning', path: 'data.zeroTotal', message: 'All {elementType} values sum to 0. {chartType} cannot be rendered. Check that {elementType}s have positive values.' }, /** * Elements have zero or negative values where positive is required */ DATA_INVALID_VALUES: { code: 'DC004', level: 'warning', path: 'data.invalidValues', message: '{count} {elementType}(s) have zero or negative values and will not be visible: {labels}. {chartType}s require positive values.' }, /** * Bars have value 0 and will not render */ DATA_ZERO_BARS: { code: 'DC005', level: 'warning', path: 'bars.zeroValue', message: '{count} bar(s) have value 0 and will not be visible: {labels}' }, /** * Elements have negative values (stage chart warning) */ DATA_NEGATIVE_VALUES: { code: 'DC006', level: 'warning', path: 'data.negativeValues', message: '{count} {elementType}(s) have negative values which may not display correctly: {labels}' }, // =========================================================================== // DC100-DC199: Configuration Errors // =========================================================================== /** * Line element has no points */ LINE_NO_POINTS: { code: 'DC101', level: 'warning', path: 'lines.noPoints', message: \"Line '{label}' has no dc-point children and will not be visible.\" }, /** * Area element has no points */ AREA_NO_POINTS: { code: 'DC102', level: 'warning', path: 'areas.noPoints', message: \"Area '{label}' has no dc-point children and will not be visible.\" }, /** * Invalid inner radius for donut chart */ DONUT_INVALID_RADIUS: { code: 'DC103', level: 'warning', path: 'donut.invalidInnerRadius', message: 'inner-radius=\"{value}\" is {reason}. {suggestion}' }, /** * Could not parse attribute value */ PARSE_ERROR: { code: 'DC104', level: 'warning', path: 'parse', message: 'Could not parse {attribute} value \"{value}\", defaulting to {default}' }, /** * Invalid format string */ FORMAT_INVALID: { code: 'DC105', level: 'warning', path: 'format.invalid', message: 'Invalid format string: \"{format}\", using default' }, /** * Time axis has insufficient valid dates */ TIME_AXIS_FEW_DATES: { code: 'DC106', level: 'warning', path: 'timeAxis', message: \"Type is 'time' but only {count} valid date(s) found\" }, /** * Too many bars for the available plot width. Gutters have been compressed * (and bars clamped to a minimum) so the chart still renders. */ BAR_SPACE_EXHAUSTED: { code: 'DC107', level: 'warning', path: 'bars.layout', message: '{count} bars exceed the available {available} units; gutters compressed to {gutterScale}x to keep bars at least {minSize} unit(s) wide' }, // =========================================================================== // DC200-DC299: Reference Errors // =========================================================================== /** * An unrecognised shape name was given to a stage chart */ STAGE_SHAPE_INVALID: { code: 'DC110', level: 'warning', path: 'stage.shape', message: 'Unrecognised shape \"{value}\"; using rectangle instead' }, /** * An unrecognised value was given for the logging or console-log attribute */ LOG_LEVEL_INVALID: { code: 'DC109', level: 'warning', path: 'logging.level', message: 'Unrecognised {attribute} value \"{value}\"; using the default instead' }, /** * A filename passed to downloadSvg() was unusable and had to be adjusted */ EXPORT_FILENAME_INVALID: { code: 'DC108', level: 'warning', path: 'export.filename', message: 'Filename \"{value}\" is not usable as-is and was adjusted' }, /** * Palette not found */ PALETTE_NOT_FOUND: { code: 'DC201', level: 'warning', path: 'colors.palette', message: 'Palette \"{id}\" not found (no DOM element or built-in with that name)' }, /** * Pattern not found or invalid */ PATTERN_NOT_FOUND: { code: 'DC202', level: 'warning', path: 'pattern.resolve', message: 'Pattern \"{id}\" is not a valid type or ID reference' }, /** * Zero-fill element not found */ ZERO_FILL_NOT_FOUND: { code: 'DC203', level: 'warning', path: 'zero.fillNotFound', message: 'Zero-fill element with id \"{id}\" not found' }, /** * SVG element not found in shadow DOM (internal error) */ SVG_NOT_FOUND: { code: 'DC204', level: 'warning', path: 'render.svgNotFound', message: 'No SVG element found in chart shadow DOM' }, // =========================================================================== // DC300-DC399: Style Warnings // =========================================================================== /** * CSS attribute used instead of SVG attribute on title */ TITLE_STYLE_WARNING: { code: 'DC301', level: 'warning', path: 'title.style', message: '{message}' }, /** * CSS attribute used instead of SVG attribute on legend */ LEGEND_STYLE_WARNING: { code: 'DC302', level: 'warning', path: 'legend.style', message: '{message}' }, /** * CSS attribute used instead of SVG attribute on axis */ AXIS_STYLE_WARNING: { code: 'DC303', level: 'warning', path: 'axis.style', message: '{message}' }, // =========================================================================== // DC400-DC499: Informational Warnings // =========================================================================== /** * All elements have the same color (consider using palette) */ COLORS_UNIFORM: { code: 'DC401', level: 'warning', path: 'colors.uniform', message: 'All {count} {elementType}s have the same fill color - consider using a palette for visual distinction' } }",
           "description": "Error code registry.\r\nUse ErrorCode.XXX to reference errors throughout the codebase."
         },
         {
@@ -38192,20 +38192,14 @@
             },
             {
               "kind": "method",
-              "name": "getShapeWidth",
+              "name": "resolveShape",
               "privacy": "private",
               "return": {
                 "type": {
-                  "text": "number"
+                  "text": "StageShape"
                 }
               },
               "parameters": [
-                {
-                  "name": "size",
-                  "type": {
-                    "text": "number"
-                  }
-                },
                 {
                   "name": "shape",
                   "type": {
@@ -38213,32 +38207,7 @@
                   }
                 }
               ],
-              "description": "Get shape width based on size and shape type"
-            },
-            {
-              "kind": "method",
-              "name": "getShapeHeight",
-              "privacy": "private",
-              "return": {
-                "type": {
-                  "text": "number"
-                }
-              },
-              "parameters": [
-                {
-                  "name": "size",
-                  "type": {
-                    "text": "number"
-                  }
-                },
-                {
-                  "name": "shape",
-                  "type": {
-                    "text": "StageShape"
-                  }
-                }
-              ],
-              "description": "Get shape height based on size and shape type"
+              "description": "Coerce a shape name to one the geometry understands.\r\n\r\n`StageShape` is a four-member union, so TypeScript thought the switches over\r\nit were exhaustive - but an attribute is an arbitrary string at runtime.\r\n`shape=\"chevron\"` fell off the end of a default-less switch, returned\r\nundefined, and turned every downstream coordinate into NaN: an unrenderable\r\nchart with no error anywhere."
             },
             {
               "kind": "method",
@@ -42337,6 +42306,142 @@
           "declaration": {
             "name": "StageChart",
             "module": "src/stage-chart.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/stage-layout.ts",
+      "declarations": [
+        {
+          "kind": "function",
+          "name": "resolveStageShape",
+          "return": {
+            "type": {
+              "text": ""
+            }
+          },
+          "parameters": [
+            {
+              "name": "shape",
+              "type": {
+                "text": "StageShape | string | undefined"
+              }
+            }
+          ],
+          "description": "Coerce a shape name to one the geometry understands.\n\n`StageShape` is a four-member union, so TypeScript treated switches over it as\nexhaustive - but an HTML attribute is an arbitrary string at runtime.\n`shape=\"chevron\"` fell off the end of three default-less switches: two\nreturned `undefined` and turned every downstream coordinate into NaN, and the\nthird drew nothing at all. An unrenderable chart, with no error anywhere."
+        },
+        {
+          "kind": "function",
+          "name": "stageShapeWidth",
+          "return": {
+            "type": {
+              "text": "number"
+            }
+          },
+          "parameters": [
+            {
+              "name": "size",
+              "type": {
+                "text": "number"
+              }
+            },
+            {
+              "name": "shape",
+              "type": {
+                "text": "StageShape"
+              }
+            },
+            {
+              "name": "aspectRatio",
+              "type": {
+                "text": "number"
+              }
+            }
+          ],
+          "description": "Width of a stage shape.\n\nStage charts size by **area**, so a \"size\" is the side of an equivalent\nsquare. Rectangles and ovals spread that area across the aspect ratio, which\nis why a min-size of 30 renders about 21 units tall rather than 30."
+        },
+        {
+          "kind": "function",
+          "name": "stageShapeHeight",
+          "return": {
+            "type": {
+              "text": "number"
+            }
+          },
+          "parameters": [
+            {
+              "name": "size",
+              "type": {
+                "text": "number"
+              }
+            },
+            {
+              "name": "shape",
+              "type": {
+                "text": "StageShape"
+              }
+            },
+            {
+              "name": "aspectRatio",
+              "type": {
+                "text": "number"
+              }
+            }
+          ],
+          "description": "Height of a stage shape. See stageShapeWidth."
+        },
+        {
+          "kind": "function",
+          "name": "computeStageLayout",
+          "return": {
+            "type": {
+              "text": "StageBox[]"
+            }
+          },
+          "parameters": [
+            {
+              "name": "input",
+              "type": {
+                "text": "StageLayoutInput"
+              }
+            }
+          ],
+          "description": "Place every stage along the flow axis, centred on the cross axis.\n\nThe run is centred as a whole: the total of every visible shape plus the gaps\nbetween them is measured first, then the block is offset so any leftover space\nis split evenly. Hidden stages still receive a box - callers index by position\nand the renderer skips them - but contribute no extent and do not advance the\ncursor."
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "resolveStageShape",
+          "declaration": {
+            "name": "resolveStageShape",
+            "module": "src/stage-layout.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "stageShapeWidth",
+          "declaration": {
+            "name": "stageShapeWidth",
+            "module": "src/stage-layout.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "stageShapeHeight",
+          "declaration": {
+            "name": "stageShapeHeight",
+            "module": "src/stage-layout.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "computeStageLayout",
+          "declaration": {
+            "name": "computeStageLayout",
+            "module": "src/stage-layout.ts"
           }
         }
       ]

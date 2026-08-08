@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **An unrecognised stage `shape` produced an unrenderable chart.** `shape="chevron"` fell off the
+  end of three default-less switches: two returned `undefined` and turned every coordinate into
+  NaN, the third drew no element at all — with no error anywhere. TypeScript thought the switches
+  were exhaustive because `StageShape` is a four-member union, but an HTML attribute is an
+  arbitrary string at runtime. Now falls back to `rectangle` and warns with the new `DC110`
+- **`hidden` was ignored on `<dc-stage>`**, though API.md lists it as supported and every other
+  data element honours it
+- **A resized zero-value stage pushed the whole stack off-centre.** The centring offset was
+  computed from unadjusted sizes while positions advanced by adjusted ones. One visual baseline
+  changed; the space above and below the stack is now equal
+
+### Changed
+
+- **Stage chart geometry extracted into `src/stage-layout.ts`** (REVIEW.md §5.3)
+  - 144 lines of pure functions over numbers — no DOM, no Lit, no chart state — replacing
+    geometry that was interleaved with data extraction, colour resolution and zero handling
+    across a 352-line method
+  - 26 characterization tests written first, on what was the worst-covered file in the repo
+
+
 ### Changed
 
 - **`BaseChart` god-class work completed** (REVIEW.md §5)

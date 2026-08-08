@@ -1156,17 +1156,33 @@ of the clicked-index field. `getSlices`/`getStages` (`pie-chart.ts:57-129`,
 Hoist the quartet into `BaseChart` and route all popup/ARIA text through `this.formatValue()` —
 which resolves §3.3 in one place, permanently. ~600 lines removed.
 
-### 5.3 No layout phase — 🔶 PARTIALLY FIXED
+### 5.3 No layout phase — ✅ FIXED
 
-> **Bars are fixed** — `computeBarLayout()` walks once and returns geometry, which is what let
-> §3.2's misalignment bug be fixed by construction rather than patched. See that section.
+> **Bars** were fixed by `computeBarLayout()`, which is what let §3.2's misalignment be fixed by
+> construction. **Stage charts** now have `src/stage-layout.ts` — 144 lines of pure geometry over
+> numbers, with no DOM, no Lit and no chart state. `calculateStageLayout()` was 352 lines doing
+> four jobs at once; only placement is geometry, and only placement can be reasoned about without
+> a browser.
 >
-> **`stage-chart.ts` is not.** `calculateStageLayout()` still interleaves geometry with
-> emission across ~360 lines, and it remains the worst-covered file in the repo. Extracting it
-> into a pure `layout/stage-layout.ts` taking `(stages, width, height, padding)` is still the
-> right move and is still outstanding. Left rather than half-done: it is the one piece of this
-> section that needs its own characterization suite first, on the least-tested code in the
-> project.
+> 26 characterization tests were written first, on what was the worst-covered file in the repo
+> (70% statements / 61% branch). They immediately found two shipped bugs that had nothing to do
+> with the refactor:
+>
+> - **An unrecognised `shape` produced an unrenderable chart.** `StageShape` is a four-member
+>   union, so TypeScript treated three switches over it as exhaustive — but an HTML attribute is
+>   an arbitrary string. `shape="chevron"` fell off the end of all three: two returned `undefined`
+>   and turned every coordinate into NaN, the third drew nothing at all. No error anywhere. Now
+>   falls back to `rectangle` and warns with the new `DC110`.
+> - **`hidden` was ignored on `<dc-stage>`**, though API.md lists it as supported and every other
+>   data element honours it.
+>
+> The extraction then caught a regression *of its own*, which is the better argument for the
+> tests: zero-value stages are resized by the `zero` settings **after** `stageSizes` is computed,
+> so the first version of the pure call laid out from unadjusted sizes. Fixing the ordering
+> exposed a third pre-existing bug — the old code took its centring offset from unadjusted totals
+> while advancing by adjusted sizes, so a resized zero stage pushed the whole stack off-centre.
+> One visual baseline changed as a result; measured afterwards, the space above and below the
+> stack is now identical (42.3 / 42.3), so the baseline had been recording the bug.
 >
 > Original finding below.
 
