@@ -3466,41 +3466,57 @@ export class Chart extends AxisChart {
   // Popup Content Generators
   // ============================================================================
 
-  private generateBarPopupContent(bar: { label: string; value: number; groupLabel?: string }, totalValue: number): string {
-    const percentage = totalValue > 0 ? ((bar.value / totalValue) * 100).toFixed(1) : '0.0';
+  private generateBarPopupContent(
+    bar: { label: string; value: number; groupLabel?: string; valueFormat?: string },
+    totalValue: number
+  ): string {
     let content = `<strong>${bar.label}</strong>`;
     if (bar.groupLabel) content += `<br>${bar.groupLabel}`;
-    content += `<br>Value: ${bar.value}<br>${percentage}%`;
+    content += `<br>Value: ${this.formatValue(bar.value, bar.valueFormat)}`;
+    content += `<br>${this.formatPercent(this.shareOf(bar.value, totalValue) ?? 0)}`;
     return content;
   }
 
   private generateSegmentPopupContent(
-    segment: { label: string; value: number },
+    segment: { label: string; value: number; valueFormat?: string },
     bar: { label: string; groupLabel?: string },
     barTotal: number
   ): string {
-    const percentOfBar = barTotal > 0 ? ((segment.value / barTotal) * 100).toFixed(1) : '0.0';
     let content = `<strong>${segment.label}</strong>`;
     content += `<br>${bar.label}`;
     if (bar.groupLabel) content += ` (${bar.groupLabel})`;
-    content += `<br>Value: ${segment.value}<br>${percentOfBar}% of bar`;
+    content += `<br>Value: ${this.formatValue(segment.value, segment.valueFormat)}`;
+    content += `<br>${this.formatPercent(this.shareOf(segment.value, barTotal) ?? 0)} of bar`;
     return content;
   }
 
   private generateLinePopupContent(line: { label: string; points: Array<{ value: number }> }): string {
-    const total = line.points.reduce((sum, p) => sum + p.value, 0);
-    const avg = line.points.length > 0 ? (total / line.points.length).toFixed(1) : '0';
-    return `<strong>${line.label}</strong><br>Points: ${line.points.length}<br>Avg: ${avg}`;
+    // Missing points are excluded from the average rather than counted as zero.
+    const present = line.points.filter(p => Number.isFinite(p.value));
+    const total = present.reduce((sum, p) => sum + p.value, 0);
+    const avg = present.length > 0 ? total / present.length : 0;
+    return `<strong>${line.label}</strong><br>Points: ${present.length}`
+      + `<br>Avg: ${this.formatValue(avg)}`;
   }
 
-  private generatePointPopupContent(point: { label: string; value: number }, lineName: string, totalValue: number): string {
-    const percentage = totalValue > 0 ? ((point.value / totalValue) * 100).toFixed(1) : '0.0';
-    return `<strong>${point.label}</strong><br>${lineName}<br>Value: ${point.value}<br>${percentage}%`;
+  private generatePointPopupContent(
+    point: { label: string; value: number; valueFormat?: string },
+    lineName: string,
+    totalValue: number
+  ): string {
+    return `<strong>${point.label}</strong><br>${lineName}`
+      + `<br>Value: ${this.formatValue(point.value, point.valueFormat)}`
+      + `<br>${this.formatPercent(this.shareOf(point.value, totalValue) ?? 0)}`;
   }
 
-  private generateBubblePopupContent(bubble: { label: string; value: number; sizeValue: number }, totalValue: number): string {
-    const percentage = totalValue > 0 ? ((bubble.value / totalValue) * 100).toFixed(1) : '0.0';
-    return `<strong>${bubble.label}</strong><br>Value: ${bubble.value}<br>Size: ${bubble.sizeValue}<br>${percentage}%`;
+  private generateBubblePopupContent(
+    bubble: { label: string; value: number; sizeValue: number; valueFormat?: string },
+    totalValue: number
+  ): string {
+    return `<strong>${bubble.label}</strong>`
+      + `<br>Value: ${this.formatValue(bubble.value, bubble.valueFormat)}`
+      + `<br>Size: ${this.formatValue(bubble.sizeValue, bubble.valueFormat)}`
+      + `<br>${this.formatPercent(this.shareOf(bubble.value, totalValue) ?? 0)}`;
   }
 
   // ============================================================================
@@ -3964,7 +3980,7 @@ export class Chart extends AxisChart {
       const values = bars.map(b => b.value);
       const min = Math.min(...values);
       const max = Math.max(...values);
-      parts.push(`${bars.length} bar${bars.length !== 1 ? 's' : ''}, values from ${min} to ${max}`);
+      parts.push(`${bars.length} bar${bars.length !== 1 ? 's' : ''}, values from ${this.formatValue(min)} to ${this.formatValue(max)}`);
     }
 
     if (areas.length > 0) {
@@ -3982,7 +3998,7 @@ export class Chart extends AxisChart {
       const values = bubbles.map(b => b.value);
       const min = Math.min(...values);
       const max = Math.max(...values);
-      parts.push(`${bubbles.length} bubble${bubbles.length !== 1 ? 's' : ''}, values from ${min} to ${max}`);
+      parts.push(`${bubbles.length} bubble${bubbles.length !== 1 ? 's' : ''}, values from ${this.formatValue(min)} to ${this.formatValue(max)}`);
     }
 
     return parts.join('; ');
@@ -4109,7 +4125,8 @@ export class Chart extends AxisChart {
       const percent = total > 0 ? (bar.value / total) * 100 : 0;
       elements.push({
         index,
-        label: `${bar.label}: ${bar.value}${percent > 0 ? ` (${percent.toFixed(1)}%)` : ''}`,
+        label: `${bar.label}: ${this.formatValue(bar.value, bar.valueFormat)}`
+          + `${percent > 0 ? ` (${this.formatPercent(percent / 100)})` : ''}`,
         hasAction,
         href: bar.href,
         popupTrigger: bar.popup?.trigger as 'hover' | 'click' | undefined ||
@@ -4128,7 +4145,7 @@ export class Chart extends AxisChart {
         const hasAction = !!(point.href || point.popup || this.shouldShowAutoPopup(point.autoPopup));
         elements.push({
           index,
-          label: `${line.label}, ${point.label}: ${point.value}`,
+          label: `${line.label}, ${point.label}: ${this.formatValue(point.value, point.valueFormat)}`,
           hasAction,
           href: point.href,
           popupTrigger: point.popup?.trigger as 'hover' | 'click' | undefined ||
@@ -4143,7 +4160,8 @@ export class Chart extends AxisChart {
       const hasAction = !!(bubble.href || bubble.popup || this.shouldShowAutoPopup(bubble.autoPopup));
       elements.push({
         index,
-        label: `${bubble.label}: value ${bubble.value}, size ${bubble.sizeValue}`,
+        label: `${bubble.label}: value ${this.formatValue(bubble.value, bubble.valueFormat)}`
+          + `, size ${this.formatValue(bubble.sizeValue, bubble.valueFormat)}`,
         hasAction,
         href: bubble.href,
         popupTrigger: bubble.popup?.trigger as 'hover' | 'click' | undefined ||

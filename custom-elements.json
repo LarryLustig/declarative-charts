@@ -22154,7 +22154,7 @@
                 {
                   "name": "bar",
                   "type": {
-                    "text": "{ label: string; value: number; groupLabel?: string }"
+                    "text": "{ label: string; value: number; groupLabel?: string; valueFormat?: string }"
                   }
                 },
                 {
@@ -22178,7 +22178,7 @@
                 {
                   "name": "segment",
                   "type": {
-                    "text": "{ label: string; value: number }"
+                    "text": "{ label: string; value: number; valueFormat?: string }"
                   }
                 },
                 {
@@ -22226,7 +22226,7 @@
                 {
                   "name": "point",
                   "type": {
-                    "text": "{ label: string; value: number }"
+                    "text": "{ label: string; value: number; valueFormat?: string }"
                   }
                 },
                 {
@@ -22256,7 +22256,7 @@
                 {
                   "name": "bubble",
                   "type": {
-                    "text": "{ label: string; value: number; sizeValue: number }"
+                    "text": "{ label: string; value: number; sizeValue: number; valueFormat?: string }"
                   }
                 },
                 {
@@ -28785,7 +28785,7 @@
                 {
                   "name": "stage",
                   "type": {
-                    "text": "{ label: string; value: number }"
+                    "text": "{ label: string; value: number; valueFormat?: string }"
                   },
                   "description": "The stage data"
                 },
@@ -33975,7 +33975,7 @@
                 {
                   "name": "slice",
                   "type": {
-                    "text": "{ label: string; value: number }"
+                    "text": "{ label: string; value: number; valueFormat?: string }"
                   },
                   "description": "The slice data"
                 },

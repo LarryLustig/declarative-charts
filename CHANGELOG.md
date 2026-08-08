@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Popups, keyboard-navigation labels and screen-reader summaries ignored `value-format`**
+  (REVIEW.md §3.3). A chart set to `value-format="currency USD"` drew `$1,000.00` on the label
+  and announced `1000` in the tooltip and to a screen reader. 18 sites across the four chart
+  types now route through the formatter, honouring each element's own `value-format` override
+  rather than only the chart-level one. Counts are deliberately left unformatted — "3 stages" is
+  a cardinal, not a measurement
+- **A line popup's average counted missing points as zero**, dragging the mean below every value
+  actually plotted. Missing points are now excluded from both the sum and the divisor
+
 - **An unrecognised stage `shape` produced an unrenderable chart.** `shape="chevron"` fell off the
   end of three default-less switches: two returned `undefined` and turned every coordinate into
   NaN, the third drew no element at all — with no error anywhere. TypeScript thought the switches
@@ -27,10 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     geometry that was interleaved with data extraction, colour resolution and zero handling
     across a 352-line method
   - 26 characterization tests written first, on what was the worst-covered file in the repo
-
-
-### Changed
-
 - **`BaseChart` god-class work completed** (REVIEW.md §5)
   - `TextMeasurer` extracted, the sixth and last responsibility to move out. Six modules now hold
     1,592 lines that used to be inside the base class

@@ -1529,7 +1529,7 @@ export class StageChart extends BaseChart {
     const values = stages.map(s => s.value);
     const max = Math.max(...values);
     const min = Math.min(...values);
-    return `${stages.length} stages, values range from ${min} to ${max}`;
+    return `${stages.length} stages, values range from ${this.formatValue(min)} to ${this.formatValue(max)}`;
   }
 
   protected override getInsights(): string {
@@ -1564,7 +1564,8 @@ export class StageChart extends BaseChart {
         const percentage = total > 0 ? (stage.value / total) * 100 : 0;
         return {
           index,
-          label: `${stage.label}: ${stage.value} (${percentage.toFixed(1)}%)`,
+          label: `${stage.label}: ${this.formatValue(stage.value, stage.valueFormat)}`
+            + ` (${this.formatPercent(percentage / 100)})`,
           hasAction,
           popupTrigger: stage.popup?.trigger as 'hover' | 'click' | undefined ||
                         (this.shouldShowAutoPopup(stage.autoPopup) ? 'hover' : undefined)

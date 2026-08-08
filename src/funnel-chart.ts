@@ -835,9 +835,13 @@ export class FunnelChart extends BaseChart {
    * @param totalValue The total of all stage values (first stage value for funnels)
    * @returns HTML string for the popup
    */
-  private generateStagePopupContent(stage: { label: string; value: number }, totalValue: number): string {
-    const percentage = totalValue > 0 ? ((stage.value / totalValue) * 100).toFixed(1) : '0.0';
-    return `<strong>${stage.label}</strong><br>Value: ${stage.value}<br>${percentage}%`;
+  private generateStagePopupContent(
+    stage: { label: string; value: number; valueFormat?: string },
+    totalValue: number
+  ): string {
+    return `<strong>${stage.label}</strong>`
+      + `<br>Value: ${this.formatValue(stage.value, stage.valueFormat)}`
+      + `<br>${this.formatPercent(this.shareOf(stage.value, totalValue) ?? 0)}`;
   }
 
   private stageDetail(
@@ -976,7 +980,7 @@ export class FunnelChart extends BaseChart {
 
     const first = stages[0].value;
     const last = stages[stages.length - 1].value;
-    return `${stages.length} stages from ${first} to ${last}`;
+    return `${stages.length} stages from ${this.formatValue(first)} to ${this.formatValue(last)}`;
   }
 
   /**
@@ -1016,7 +1020,8 @@ export class FunnelChart extends BaseChart {
       const conversionRate = firstValue > 0 ? (stage.value / firstValue) * 100 : 0;
       return {
         index,
-        label: `${stage.label}: ${stage.value} (${conversionRate.toFixed(1)}% of total)`,
+        label: `${stage.label}: ${this.formatValue(stage.value, stage.valueFormat)}`
+          + ` (${this.formatPercent(conversionRate / 100)} of total)`,
         hasAction,
         popupTrigger: stage.popup?.trigger as 'hover' | 'click' | undefined ||
                       (this.shouldShowAutoPopup(stage.autoPopup) ? 'hover' : undefined)

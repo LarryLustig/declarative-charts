@@ -380,16 +380,33 @@ single traversal with orientation as a parameter. `renderBars` collapses to a `.
 `` svg`<rect …>` ``. Four drifted copies become one, the misalignment disappears by
 construction, and bar geometry becomes unit-testable without a DOM.
 
-### 3.3 Popups and screen-reader announcements bypass the formatter — ⚠️ STILL OPEN
+### 3.3 Popups and screen-reader announcements bypass the formatter — ✅ FIXED
 
-> **Not fixed, contrary to an earlier claim.** This was recorded as "fixed for free by the hoist
-> in §5.2". It was not: §5.2 hoisted `renderFocusIndicator`, `togglePopupForFocusedElement` and
-> `shouldShowAutoPopup`, none of which touch popup *content*. The generators still interpolate the
-> raw number — `pie-chart.ts:535` is
-> `` `Value: ${slice.value}` ``, unformatted.
+> **Fixed.** Note the two corrections this section has already needed: it was first recorded as
+> "fixed for free by the hoist in §5.2" when it was not — §5.2 hoisted `renderFocusIndicator`,
+> `togglePopupForFocusedElement` and `shouldShowAutoPopup`, none of which touch popup *content*.
+> Claiming a fix from an adjacent change is how a review drifts away from the code.
 >
-> So `value-format="currency USD"` still renders `$1,234.56` on the label and `1234.56` in the
-> tooltip and to a screen reader. Verified, not assumed.
+> **What changed.** 18 sites across the four chart types now route through
+> `this.formatValue(value, valueFormat)` and `this.formatPercent(share)`, carrying each element's
+> own `value-format` override rather than only the chart-level one:
+>
+> - popup content in `chart.ts` (bar, line, area, bubble), `pie-chart.ts`, `funnel-chart.ts`
+> - keyboard-navigation ARIA labels in all four
+> - `getDataSummary()` in all four — the screen-reader description
+>
+> Verified by measurement rather than inspection: for the same stage, label and popup now agree
+> across formats — default `1,000.00` / `1,000.00`, `number 0` `1,000` / `1,000`,
+> `currency USD` `$1,000.00` / `$1,000.00`. Before, the right-hand side of each pair was `1000`.
+>
+> **A distinction worth recording.** Only *data values* are formatted. Counts stay bare: a summary
+> reads "3 stages, values range from 1,000 to 5,000" — "3" is a cardinal, not a measurement, and
+> running it through a currency formatter would produce "$3.00 stages". The formatter applies to
+> numbers the user supplied, not to numbers the library counted.
+>
+> Three tests asserted the old raw output. They were updated, not deleted — each now asserts the
+> formatted string with a comment saying what changed, since a test that pins a bug is still
+> evidence of what the code used to do.
 >
 > Original finding below.
 

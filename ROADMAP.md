@@ -719,10 +719,43 @@ New `<dc-legend-item>` element for defining custom legend entries:
   <dc-radar-axis label="Speed"></dc-radar-axis>
   <dc-radar-axis label="Power"></dc-radar-axis>
   <dc-radar-axis label="Range"></dc-radar-axis>
-  <dc-radar-series label="Model A" values="80, 60, 90"></dc-radar-series>
-  <dc-radar-series label="Model B" values="70, 80, 60"></dc-radar-series>
+
+  <dc-radar-series label="Model A">
+    <dc-point value="80" label="Speed"></dc-point>
+    <dc-point value="60" label="Power"></dc-point>
+    <dc-point value="90" label="Range"></dc-point>
+  </dc-radar-series>
+
+  <dc-radar-series label="Model B">
+    <dc-point value="70" label="Speed"></dc-point>
+    <dc-point value="80" label="Power"></dc-point>
+    <dc-point label="Range"></dc-point>   <!-- no data for this axis -->
+  </dc-radar-series>
 </dc-radar-chart>
 ```
+
+**Why one element per value, and why `<dc-point>` specifically.**
+
+An earlier draft of this proposal used `values="80, 60, 90"`. That is a serialized
+array in an attribute, which is exactly the shape this library exists not to have —
+see REVIEW.md §4.6, where a general bulk-data path was considered and declined. A
+value expressed as markup can carry a `fill`, an `href`, an `hx-get`, a `<dc-popup>`,
+`hidden`, or a `value-format`; a value buried in a comma-separated string can carry
+none of those, and the radar chart would silently support half the library.
+
+The datum needs no new element. A radar point *is* a point: a value at a position,
+which is what `<dc-point>` already models for lines and areas. It brings `value`,
+`label`, `fill`, `href`, `target`, `shape`, `show-value`, popups, and the missing-value
+handling from §4.5 — note the third point of Model B above, which has no value and
+should render as a gap in the polygon rather than collapsing to the centre.
+
+("Radial" describes the *direction* a value is plotted along, not the value itself.
+The radiating lines are the axes, already modelled by `<dc-radar-axis>`.)
+
+**Points bind to axes by label**, the same way `<dc-line>` points align with bar
+categories in a combo chart today. That makes order irrelevant, makes a missing axis
+visible rather than silently shifting everything, and reads correctly in source order.
+If a series omits an axis entirely, treat it as missing data, not zero.
 
 **Gauge Chart:**
 ```html

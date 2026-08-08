@@ -530,9 +530,13 @@ export class PieChart extends BaseChart {
    * @param totalValue The total of all slice values
    * @returns HTML string for the popup
    */
-  private generateSlicePopupContent(slice: { label: string; value: number }, totalValue: number): string {
-    const percentage = totalValue > 0 ? ((slice.value / totalValue) * 100).toFixed(1) : '0.0';
-    return `<strong>${slice.label}</strong><br>Value: ${slice.value}<br>${percentage}%`;
+  private generateSlicePopupContent(
+    slice: { label: string; value: number; valueFormat?: string },
+    totalValue: number
+  ): string {
+    return `<strong>${slice.label}</strong>`
+      + `<br>Value: ${this.formatValue(slice.value, slice.valueFormat)}`
+      + `<br>${this.formatPercent(this.shareOf(slice.value, totalValue) ?? 0)}`;
   }
 
   private sliceDetail(
@@ -655,7 +659,7 @@ export class PieChart extends BaseChart {
     if (slices.length === 0) return '';
 
     const total = slices.reduce((sum, s) => sum + s.value, 0);
-    return `${slices.length} slices totaling ${total}`;
+    return `${slices.length} slices totaling ${this.formatValue(total)}`;
   }
 
   /**
@@ -695,7 +699,8 @@ export class PieChart extends BaseChart {
       const percent = total > 0 ? (slice.value / total) * 100 : 0;
       return {
         index,
-        label: `${slice.label}: ${slice.value} (${percent.toFixed(1)}%)`,
+        label: `${slice.label}: ${this.formatValue(slice.value, slice.valueFormat)}`
+          + ` (${this.formatPercent(percent / 100)})`,
         hasAction,
         popupTrigger: slice.popup?.trigger as 'hover' | 'click' | undefined ||
                       (this.shouldShowAutoPopup(slice.autoPopup) ? 'hover' : undefined)

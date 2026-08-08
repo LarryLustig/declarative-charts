@@ -420,7 +420,8 @@ describe('FunnelChart component', () => {
       `);
       const summary = (chart as any).getDataSummary();
       expect(summary).toContain('2 stages');
-      expect(summary).toContain('1000');
+      // Values are formatted; the count of stages is a cardinal, not data.
+      expect(summary).toContain('1,000');
       expect(summary).toContain('100');
     });
 
@@ -469,7 +470,9 @@ describe('FunnelChart component', () => {
       `);
       const elements = (chart as any).getFocusableElements();
       expect(elements[0].label).toContain('Test Stage');
-      expect(elements[0].label).toContain('1000');
+      // Formatted, matching the on-chart label. It used to announce the raw
+      // number while the label showed a formatted one.
+      expect(elements[0].label).toContain('1,000');
     });
 
     it('focusable elements include conversion rate', async () => {
@@ -927,7 +930,8 @@ describe('FunnelChart component', () => {
         1000
       );
       expect(content).toContain('Visitors');
-      expect(content).toContain('1000');
+      // Same formatting as the rendered label - the two used to disagree.
+      expect(content).toContain('1,000');
     });
 
     it('includes percentage in popup content', async () => {
