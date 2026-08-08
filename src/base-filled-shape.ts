@@ -23,7 +23,7 @@ export abstract class BaseFilledShape extends BaseChartElement {
 
   /**
    * Fill color for this element (SVG standard attribute).
-   * Takes precedence over chart-level fill-color, fill-colors, and gradient settings.
+   * Takes precedence over chart-level defaults and palette matches.
    */
   @property({ type: String })
   fill = '';
@@ -102,7 +102,7 @@ export abstract class BaseFilledShape extends BaseChartElement {
    * Returns `fill` if set, otherwise falls back to `color` for backwards compatibility.
    */
   getEffectiveFill(): string {
-    return this.fill || this.color;
+    return this.fill;
   }
 
   /**
@@ -124,7 +124,3 @@ export abstract class BaseFilledShape extends BaseChartElement {
   }
 }
 
-/**
- * @deprecated Use `BaseFilledShape` instead. This alias is provided for backward compatibility.
- */
-export { BaseFilledShape as BaseShape };

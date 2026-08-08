@@ -11,7 +11,6 @@ import { optionalNumberConverter } from './converters.js';
  * @attr {number} value - The numeric value for this point. Omit it, or use "null", to mark the point as having no data
  * @attr {string} label - The label to display below this point (inherited from BaseChartElement)
  * @attr {string} fill - Fill color for this point, overrides line color (SVG standard, inherited from BaseChartElement)
- * @attr {string} color - @deprecated Use fill instead. Optional color for this specific point (inherited from BaseChartElement)
  * @attr {string} href - Optional URL to navigate to when point is clicked (inherited from BaseChartElement)
  * @attr {string} target - Optional target for the link (e.g., "_blank", inherited from BaseChartElement)
  * @attr {boolean} show-value - Whether to display the numeric value for this point (default: true, can be overridden by line-level or chart-level settings)

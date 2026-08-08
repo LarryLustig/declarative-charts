@@ -90,7 +90,7 @@ export { LogConsole } from './log-console.js';
 export { BaseChart } from './base-chart.js';
 export { AxisChart } from './axis-chart.js';
 export { BaseChartElement } from './base-chart-element.js';
-export { BaseFilledShape, BaseShape } from './base-filled-shape.js';
+export { BaseFilledShape } from './base-filled-shape.js';
 export type { AxisConfig, TickConfig, TimeScale } from './axis-chart.js';
 
 // ---------------------------------------------------------------------------

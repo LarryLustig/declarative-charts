@@ -13,7 +13,6 @@ import { showConditionConverter, type ShowCondition } from './base-chart.js';  /
  *
  * @attr {number} value - The numeric value for this bar
  * @attr {string} fill - Fill color for this bar (SVG standard, inherited from BaseChartElement)
- * @attr {string} color - @deprecated Use fill instead. The color of this bar (CSS color, inherited from BaseChartElement)
  * @attr {string} label - The label to display below this bar (inherited from BaseChartElement)
  * @attr {string} href - Optional URL to navigate to when bar is clicked (inherited from BaseChartElement)
  * @attr {string} target - Optional target for the link (e.g., "_blank", inherited from BaseChartElement)

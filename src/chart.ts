@@ -228,7 +228,6 @@ interface BubbleData {
  * @attr {number} height - Height of the chart in pixels (default: 400)
  * @attr {string} orientation - Bar orientation: "vertical" or "horizontal" (default: vertical)
  * @attr {boolean} show-value - Whether to display numeric values by default (default: true)
- * @attr {string} fill-colors - Fill colors for bars/bubbles
  * @attr {string} stroke-colors - Stroke colors for lines
  * @attr {string} bar-width - Default bar width
  * @attr {number} gutter - Spacing between bars (default: 10)

@@ -28,7 +28,6 @@ describe('BaseShape.BASE_KNOWN_ATTRS', () => {
   it('contains expected base attributes', () => {
     const expected = [
       'label',
-      'color',
       'fill',
       'stroke',
       'stroke-width',
@@ -46,8 +45,10 @@ describe('BaseShape.BASE_KNOWN_ATTRS', () => {
     });
   });
 
-  it('contains deprecated color attribute', () => {
-    expect(BaseShape.BASE_KNOWN_ATTRS.has('color')).toBe(true);
+  // `color` was a day-one deprecation of fill/stroke and has been removed
+  // (REVIEW.md 6.5), so it is no longer a known attribute.
+  it('no longer carries the deprecated color attribute', () => {
+    expect(BaseShape.BASE_KNOWN_ATTRS.has('color')).toBe(false);
   });
 
   it('contains all pattern-related attributes', () => {

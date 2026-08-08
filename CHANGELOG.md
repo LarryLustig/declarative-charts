@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- **BREAKING: the day-one deprecations are gone** (REVIEW.md §6.5). A pre-1.0 library should not
+  ship carrying deprecations
+  - `color` on data elements — use `fill` (shapes) or `stroke` (lines). 128 uses across the
+    example pages were migrated
+  - `BaseShape`, the alias for `BaseFilledShape`
+  - `ChartLegend.customTitle` — use `getTitleInfo()`
+
 ### Changed
 
 - **BREAKING: naming collisions resolved** (REVIEW.md §6.4)
@@ -39,6 +48,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`slice-color` was deprecated in favour of an attribute that does not exist.** Its notice said
+  "use `fill-colors` instead"; `fill-colors` appears in one JSDoc line and is implemented nowhere.
+  It is the only way to set a chart-wide slice colour — the pie equivalent of `bar-color` — so it
+  has been undeprecated rather than removed, and the phantom `@attr fill-colors` line on
+  `<dc-chart>` deleted
 - **`<dc-grid>` was undocumented and its examples used an attribute that did not exist.** Every
   shipped example wrote `line-style="dashed"`, which matched no property, so those grids silently
   rendered solid. `<dc-grid>` now has an API.md section — it had zero mentions

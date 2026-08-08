@@ -11,7 +11,6 @@ import { ChartLegend, type LegendItem, type ValuedLegendItem, type Dimensionless
  *
  * Tests DOM-dependent methods that require querySelector:
  * - getTitleInfo() - queries child dc-title element
- * - customTitle getter - queries child dc-title element
  * - getDimensions() - calculates legend size based on items and configuration
  * - generateSvg() - generates SVG template for legend rendering
  */
@@ -62,44 +61,6 @@ describe('ChartLegend component', () => {
       const title = legend.querySelector('dc-title');
       expect(title).not.toBeNull();
       expect(title?.textContent).toBe('Legend Title');
-    });
-  });
-
-  // ============================================================================
-  // customTitle getter (deprecated)
-  // ============================================================================
-
-  describe('customTitle getter', () => {
-    it('returns undefined when no title element', async () => {
-      legend = await fixture<ChartLegend>('dc-legend');
-      expect(legend.customTitle).toBeUndefined();
-    });
-
-    it('returns title text when title element exists', async () => {
-      legend = await fixture<ChartLegend>(
-        'dc-legend',
-        {},
-        '<dc-title>My Legend</dc-title>'
-      );
-      expect(legend.customTitle).toBe('My Legend');
-    });
-
-    it('trims whitespace from title', async () => {
-      legend = await fixture<ChartLegend>(
-        'dc-legend',
-        {},
-        '<dc-title>  Trimmed Title  </dc-title>'
-      );
-      expect(legend.customTitle).toBe('Trimmed Title');
-    });
-
-    it('returns undefined for empty title', async () => {
-      legend = await fixture<ChartLegend>(
-        'dc-legend',
-        {},
-        '<dc-title>   </dc-title>'
-      );
-      expect(legend.customTitle).toBeUndefined();
     });
   });
 

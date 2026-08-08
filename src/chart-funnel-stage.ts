@@ -13,7 +13,6 @@ import { BaseFilledShape } from './base-filled-shape.js';
  * @attr {number} value - The numeric value for this stage
  * @attr {string} label - The label for this stage (inherited from BaseChartElement)
  * @attr {string} fill - Fill color for this stage (inherited from BaseChartElement)
- * @attr {string} color - @deprecated Use fill instead. Optional color for this stage (inherited from BaseChartElement)
  * @attr {string} stroke - Stroke color for this stage (inherited from BaseChartElement). Note: funnel-chart also supports shorthand syntax.
  * @attr {number} stroke-width - Stroke width for this stage (inherited from BaseChartElement)
  * @attr {boolean} show-value - Whether to show the value on this stage (inherits from chart)

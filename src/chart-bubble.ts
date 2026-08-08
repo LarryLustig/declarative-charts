@@ -12,7 +12,6 @@ import { showConditionConverter, type ShowCondition } from './base-chart.js';  /
  * @attr {string} label - The label for this bubble (used as X-axis category, inherited from BaseChartElement)
  * @attr {string} fill - Fill color for this bubble (SVG standard, inherited from BaseChartElement)
  * @attr {string} stroke - Stroke color for this bubble (SVG standard, inherited from BaseChartElement)
- * @attr {string} color - @deprecated Use fill instead. Optional color for this specific bubble (inherited from BaseChartElement)
  * @attr {string} href - Optional URL to navigate to when bubble is clicked (inherited from BaseChartElement)
  * @attr {string} target - Optional target for the link (e.g., "_blank", inherited from BaseChartElement)
  * @attr {boolean} show-value - Whether to display the numeric value for this bubble (default: true)

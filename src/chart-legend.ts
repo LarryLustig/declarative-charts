@@ -184,15 +184,6 @@ export class ChartLegend extends LitElement {
   percentFormat?: string;
 
   /**
-   * Get the custom title for this legend, if any
-   * @deprecated Use getTitleInfo() instead for full title information including position
-   */
-  get customTitle(): string | undefined {
-    const titleElement = this.querySelector('dc-title');
-    return titleElement?.textContent?.trim() || undefined;
-  }
-
-  /**
    * Get the title element info including text, position, and SVG styles
    * @returns Object with text, position, and svgStyles, or null if no title
    */

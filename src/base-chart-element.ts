@@ -14,14 +14,6 @@ export abstract class BaseChartElement extends LitElement {
   label = '';
 
   /**
-   * @deprecated Use `fill` or `stroke` instead. Will be removed in a future version.
-   * For stroke-based elements (lines), this falls back to stroke.
-   * For fill-based elements, this falls back to fill.
-   */
-  @property({ type: String })
-  color = '';
-
-  /**
    * Stroke color for this element (SVG standard attribute).
    * Takes precedence over chart-level stroke-color, stroke-colors, and gradient settings.
    */
@@ -164,7 +156,6 @@ export abstract class BaseChartElement extends LitElement {
    */
   static readonly BASE_KNOWN_ATTRS = new Set([
     'label',
-    'color',      // deprecated
     'stroke',
     'stroke-width',
     'href',
@@ -182,10 +173,9 @@ export abstract class BaseChartElement extends LitElement {
 
   /**
    * Get the effective stroke color for this element.
-   * Returns `stroke` if set, otherwise falls back to `color` for backwards compatibility.
    */
   getEffectiveStroke(): string {
-    return this.stroke || this.color;
+    return this.stroke;
   }
 
   /**

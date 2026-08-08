@@ -18,7 +18,6 @@ export type StageShape = 'rectangle' | 'square' | 'oval' | 'circle';
  * @attr {number} value - The numeric value for this stage
  * @attr {string} label - The label for this stage (inherited from BaseChartElement)
  * @attr {string} fill - Fill color for this stage (inherited from BaseChartElement)
- * @attr {string} color - @deprecated Use fill instead. Optional color for this stage (inherited from BaseChartElement)
  * @attr {string} stroke - Stroke shorthand (e.g., "2 #333")
  * @attr {number} stroke-width - Stroke width for this stage (inherited from BaseChartElement)
  * @attr {StageShape} shape - Override chart's shape for this stage

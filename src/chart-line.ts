@@ -16,7 +16,6 @@ export type CurveFit = 'linear' | 'smooth' | 'monotone' | 'step';
  * @element dc-line
  *
  * @attr {string} stroke - Stroke color for this line (SVG standard, inherited from BaseChartElement)
- * @attr {string} color - @deprecated Use stroke instead. The color of this line (inherited from BaseChartElement)
  * @attr {string} label - The label for this line (for legend, inherited from BaseChartElement)
  * @attr {string} href - Optional URL to navigate to when line is clicked (inherited from BaseChartElement)
  * @attr {string} target - Optional target for the link (e.g., "_blank", inherited from BaseChartElement)

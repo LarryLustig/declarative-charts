@@ -13,7 +13,6 @@ import { BaseFilledShape } from './base-filled-shape.js';
  * @attr {number} value - The numeric value for this slice
  * @attr {string} label - The label for this slice (inherited from BaseChartElement)
  * @attr {string} fill - Fill color for this slice (SVG standard, inherited from BaseChartElement)
- * @attr {string} color - @deprecated Use fill instead. Optional color for this slice (inherited from BaseChartElement)
  * @attr {boolean|string} show-value - Whether to show the value on this slice (inherits from chart). Can be true/false or a threshold like "5%" or "100"
  * @attr {boolean|string} show-label - Whether to show the label on this slice (inherits from chart). Can be true/false or a threshold like "5%" or "100"
  * @attr {boolean|string} show-percent - Whether to show the percentage on this slice (inherits from chart). Can be true/false or a threshold like "5%" or "100"

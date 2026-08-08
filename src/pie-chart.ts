@@ -15,7 +15,7 @@ import { analyzePie, type SliceData as InsightSliceData } from './accessibility/
  * @attr {number} width - Width of the chart in pixels (default: 600)
  * @attr {number} height - Height of the chart in pixels (default: 400)
  * @attr {string} fill-color - Default fill color for slices without individual fills
- * @attr {string} slice-color - @deprecated Use fill-color instead. Default color for slices.
+ * @attr {string} slice-color - Default color for slices not otherwise coloured
  * @attr {boolean} show-value - Whether to show values on slices (default: false)
  * @attr {boolean} show-label - Whether to show labels on slices (default: true)
  * @attr {boolean} show-percent - Whether to show percentages on slices (default: true)
@@ -34,7 +34,14 @@ import { analyzePie, type SliceData as InsightSliceData } from './accessibility/
 @customElement('dc-pie-chart')
 export class PieChart extends BaseChart {
   /**
-   * @deprecated Use `fill-colors` instead. Kept for backwards compatibility.
+   * Default fill for slices that do not set their own and are not matched by a
+   * palette. The pie equivalent of `bar-color` on `<dc-chart>`.
+   *
+   * This carried an `@deprecated Use fill-colors instead` notice. No such
+   * attribute exists - `fill-colors` appears in one JSDoc line and is
+   * implemented nowhere - so the notice pointed at a replacement that was never
+   * written, for the only way to set a chart-wide slice colour. Undeprecated
+   * rather than removed.
    */
   @property({ type: String, attribute: 'slice-color' })
   sliceColor?: string;
