@@ -242,7 +242,13 @@ export class ChartSwatch extends LitElement {
    * @param stroke Stroke color (default: 'none')
    * @returns SVG template for the shape, rendered at origin (0,0) within a size x size box
    */
-  static renderShape(shape: string, size: number, fill: string, stroke: string = 'none'): SVGTemplateResult {
+  static renderShape(
+    shape: string,
+    size: number,
+    fill: string,
+    stroke: string = 'none',
+    strokeDasharray?: string
+  ): SVGTemplateResult {
     const s = size;
     const half = s / 2;
     const strokeWidth = stroke !== 'none' ? 1 : 0;
@@ -275,6 +281,10 @@ export class ChartSwatch extends LitElement {
         `;
 
       case 'line':
+        // A dashed series must read as dashed in the legend, or the legend
+        // cannot tell two lines apart. `stroke-linecap="round"` is dropped when
+        // dashed, because round caps smear a short dash pattern into a solid
+        // line at this size.
         return svg`
           <line
             x1="0"
@@ -283,7 +293,8 @@ export class ChartSwatch extends LitElement {
             y2="${half}"
             stroke="${fill}"
             stroke-width="3"
-            stroke-linecap="round"
+            stroke-linecap="${strokeDasharray ? 'butt' : 'round'}"
+            stroke-dasharray="${strokeDasharray ?? ''}"
           />
         `;
 

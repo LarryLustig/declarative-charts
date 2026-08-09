@@ -3580,6 +3580,27 @@
             },
             {
               "kind": "method",
+              "name": "registerLegendItemPatterns",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "description": "Register the patterns named by any `<dc-legend-item pattern=\"...\">`.\r\n\r\nUses the same index basis as renderLegend's resolver, so both\r\nproduce the same pattern id and the second registration is a no-op.",
+              "parameters": [
+                {
+                  "description": "Array of legend items with label, color, value, and optional shape",
+                  "name": "items"
+                }
+              ],
+              "inheritedFrom": {
+                "name": "BaseChart",
+                "module": "src/base-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
               "name": "renderLegend",
               "privacy": "protected",
               "return": {
@@ -3592,11 +3613,9 @@
                   "name": "items",
                   "type": {
                     "text": "LegendItem[]"
-                  },
-                  "description": "Array of legend items with label, color, value, and optional shape"
+                  }
                 }
               ],
-              "description": "Render a legend for the chart using ChartLegend.generateSvg()",
               "inheritedFrom": {
                 "name": "BaseChart",
                 "module": "src/base-chart.ts"
@@ -7010,6 +7029,23 @@
             },
             {
               "kind": "method",
+              "name": "registerLegendItemPatterns",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "description": "Register the patterns named by any `<dc-legend-item pattern=\"...\">`.\r\n\r\nUses the same index basis as renderLegend's resolver, so both\r\nproduce the same pattern id and the second registration is a no-op.",
+              "parameters": [
+                {
+                  "description": "Array of legend items with label, color, value, and optional shape",
+                  "name": "items"
+                }
+              ]
+            },
+            {
+              "kind": "method",
               "name": "renderLegend",
               "privacy": "protected",
               "return": {
@@ -7022,11 +7058,9 @@
                   "name": "items",
                   "type": {
                     "text": "LegendItem[]"
-                  },
-                  "description": "Array of legend items with label, color, value, and optional shape"
+                  }
                 }
-              ],
-              "description": "Render a legend for the chart using ChartLegend.generateSvg()"
+              ]
             },
             {
               "kind": "method",
@@ -14368,6 +14402,14 @@
             },
             {
               "kind": "field",
+              "name": "resolvePattern",
+              "type": {
+                "text": "(type: string, fill: string, index: number) => string | null | undefined"
+              },
+              "description": "Supplied by the chart so a custom legend item's `pattern` can be resolved.\r\n\r\nPatterns live in the chart's `<defs>` and are registered during fill\r\nresolution, which never sees `<dc-legend-item>` elements - so the chart\r\nregisters them here instead, and hands back the `url(#id)` to paint with.\r\nReturns null when the pattern name is not recognised."
+            },
+            {
+              "kind": "field",
               "name": "columns",
               "type": {
                 "text": "string"
@@ -17999,11 +18041,11 @@
             "text": "['circle', 'square', 'rect', 'line', 'triangle', 'diamond', 'star', 'cross', 'plus']"
           },
           "default": "['circle', 'square', 'rect', 'line', 'triangle', 'diamond', 'star', 'cross', 'plus']",
-          "description": "Standard shape names supported by dc-swatch.\nThese match the shapes used in line chart points for consistency."
+          "description": "Standard shape names supported by dc-swatch.\r\nThese match the shapes used in line chart points for consistency."
         },
         {
           "kind": "class",
-          "description": "Swatch element for displaying a color from a palette outside of charts.\n\nUse this element to display colored shapes that match your chart data,\nallowing you to visually associate prose, tables, or other content with\nchart elements.\n\nThe swatch looks up its color from a referenced palette using label and/or\nvalue matching, just like chart elements do.",
+          "description": "Swatch element for displaying a color from a palette outside of charts.\r\n\r\nUse this element to display colored shapes that match your chart data,\r\nallowing you to visually associate prose, tables, or other content with\r\nchart elements.\r\n\r\nThe swatch looks up its color from a referenced palette using label and/or\r\nvalue matching, just like chart elements do.",
           "name": "ChartSwatch",
           "members": [
             {
@@ -18049,7 +18091,7 @@
                 "text": "string"
               },
               "default": "'circle'",
-              "description": "Shape to render. Can be a standard shape name or a unicode character.\nStandard shapes: circle, square, rect, line, triangle, diamond, star, cross, plus",
+              "description": "Shape to render. Can be a standard shape name or a unicode character.\r\nStandard shapes: circle, square, rect, line, triangle, diamond, star, cross, plus",
               "attribute": "shape"
             },
             {
@@ -18089,7 +18131,7 @@
                   "text": "ChartPalette | null"
                 }
               },
-              "description": "Get the palette element referenced by the palette attribute.\nForces upgrade of the element if it hasn't been upgraded yet."
+              "description": "Get the palette element referenced by the palette attribute.\r\nForces upgrade of the element if it hasn't been upgraded yet."
             },
             {
               "kind": "method",
@@ -18100,7 +18142,7 @@
                   "text": "{ fill: string; stroke: string }"
                 }
               },
-              "description": "Resolve the fill and stroke colors to use.\nPriority: explicit attributes > DOM palette lookup > built-in palette > fallback"
+              "description": "Resolve the fill and stroke colors to use.\r\nPriority: explicit attributes > DOM palette lookup > built-in palette > fallback"
             },
             {
               "kind": "method",
@@ -18190,9 +18232,16 @@
                     "text": "string"
                   },
                   "description": "Stroke color (default: 'none')"
+                },
+                {
+                  "name": "strokeDasharray",
+                  "optional": true,
+                  "type": {
+                    "text": "string"
+                  }
                 }
               ],
-              "description": "Static method to render an SVG shape.\nCan be used by other components (like ChartLegend) without instantiating a swatch."
+              "description": "Static method to render an SVG shape.\r\nCan be used by other components (like ChartLegend) without instantiating a swatch."
             }
           ],
           "attributes": [
@@ -18224,7 +18273,7 @@
               "type": {
                 "text": "string"
               },
-              "description": "Shape to render. Can be a standard shape name or a unicode character.\nStandard shapes: circle, square, rect, line, triangle, diamond, star, cross, plus",
+              "description": "Shape to render. Can be a standard shape name or a unicode character.\r\nStandard shapes: circle, square, rect, line, triangle, diamond, star, cross, plus",
               "name": "shape",
               "default": "'circle'",
               "fieldName": "shape"
@@ -25753,6 +25802,27 @@
             },
             {
               "kind": "method",
+              "name": "registerLegendItemPatterns",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "description": "Register the patterns named by any `<dc-legend-item pattern=\"...\">`.\r\n\r\nUses the same index basis as renderLegend's resolver, so both\r\nproduce the same pattern id and the second registration is a no-op.",
+              "parameters": [
+                {
+                  "description": "Array of legend items with label, color, value, and optional shape",
+                  "name": "items"
+                }
+              ],
+              "inheritedFrom": {
+                "name": "BaseChart",
+                "module": "src/base-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
               "name": "renderLegend",
               "privacy": "protected",
               "return": {
@@ -25765,11 +25835,9 @@
                   "name": "items",
                   "type": {
                     "text": "LegendItem[]"
-                  },
-                  "description": "Array of legend items with label, color, value, and optional shape"
+                  }
                 }
               ],
-              "description": "Render a legend for the chart using ChartLegend.generateSvg()",
               "inheritedFrom": {
                 "name": "BaseChart",
                 "module": "src/base-chart.ts"
@@ -31077,6 +31145,27 @@
             },
             {
               "kind": "method",
+              "name": "registerLegendItemPatterns",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "description": "Register the patterns named by any `<dc-legend-item pattern=\"...\">`.\r\n\r\nUses the same index basis as renderLegend's resolver, so both\r\nproduce the same pattern id and the second registration is a no-op.",
+              "parameters": [
+                {
+                  "description": "Array of legend items with label, color, value, and optional shape",
+                  "name": "items"
+                }
+              ],
+              "inheritedFrom": {
+                "name": "BaseChart",
+                "module": "src/base-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
               "name": "renderLegend",
               "privacy": "protected",
               "return": {
@@ -31089,11 +31178,9 @@
                   "name": "items",
                   "type": {
                     "text": "LegendItem[]"
-                  },
-                  "description": "Array of legend items with label, color, value, and optional shape"
+                  }
                 }
               ],
-              "description": "Render a legend for the chart using ChartLegend.generateSvg()",
               "inheritedFrom": {
                 "name": "BaseChart",
                 "module": "src/base-chart.ts"
@@ -32883,7 +32970,7 @@
       "declarations": [
         {
           "kind": "class",
-          "description": "Log console component for displaying chart log entries\n\nThis component connects to one or more charts via a CSS selector and displays\ntheir log entries in a tabular format. When multiple charts match the selector,\na tab bar is shown to select which chart's logs to display.\n\nNOTE: Unlike other reference attributes in this library (e.g., zero-fill, pattern)\nwhich accept element IDs, the `chart` attribute takes a full CSS selector.\nThis is intentional because dc-log-console is designed to monitor multiple charts\nsimultaneously and display them in a tabbed interface.",
+          "description": "Log console component for displaying chart log entries\r\n\r\nThis component connects to one or more charts via a CSS selector and displays\r\ntheir log entries in a tabular format. When multiple charts match the selector,\r\na tab bar is shown to select which chart's logs to display.\r\n\r\nNOTE: Unlike other reference attributes in this library (e.g., zero-fill, pattern)\r\nwhich accept element IDs, the `chart` attribute takes a full CSS selector.\r\nThis is intentional because dc-log-console is designed to monitor multiple charts\r\nsimultaneously and display them in a tabbed interface.",
           "name": "LogConsole",
           "members": [
             {
@@ -32893,7 +32980,7 @@
                 "text": "string"
               },
               "default": "''",
-              "description": "CSS selector identifying the chart(s) to monitor.\n\nUnlike other reference attributes in this library (e.g., zero-fill, pattern)\nwhich accept element IDs, this attribute takes a full CSS selector because\ndc-log-console is designed to monitor multiple charts simultaneously.\n\nExamples: \"#my-chart\", \"dc-chart\", \".chart-class\"",
+              "description": "CSS selector identifying the chart(s) to monitor.\r\n\r\nUnlike other reference attributes in this library (e.g., zero-fill, pattern)\r\nwhich accept element IDs, this attribute takes a full CSS selector because\r\ndc-log-console is designed to monitor multiple charts simultaneously.\r\n\r\nExamples: \"#my-chart\", \"dc-chart\", \".chart-class\"",
               "attribute": "chart"
             },
             {
@@ -33037,7 +33124,7 @@
               "type": {
                 "text": "string"
               },
-              "description": "CSS selector identifying the chart(s) to monitor.\n\nUnlike other reference attributes in this library (e.g., zero-fill, pattern)\nwhich accept element IDs, this attribute takes a full CSS selector because\ndc-log-console is designed to monitor multiple charts simultaneously.\n\nExamples: \"#my-chart\", \"dc-chart\", \".chart-class\"",
+              "description": "CSS selector identifying the chart(s) to monitor.\r\n\r\nUnlike other reference attributes in this library (e.g., zero-fill, pattern)\r\nwhich accept element IDs, this attribute takes a full CSS selector because\r\ndc-log-console is designed to monitor multiple charts simultaneously.\r\n\r\nExamples: \"#my-chart\", \"dc-chart\", \".chart-class\"",
               "name": "chart",
               "default": "''",
               "fieldName": "chart"
@@ -36218,6 +36305,27 @@
             },
             {
               "kind": "method",
+              "name": "registerLegendItemPatterns",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "description": "Register the patterns named by any `<dc-legend-item pattern=\"...\">`.\r\n\r\nUses the same index basis as renderLegend's resolver, so both\r\nproduce the same pattern id and the second registration is a no-op.",
+              "parameters": [
+                {
+                  "description": "Array of legend items with label, color, value, and optional shape",
+                  "name": "items"
+                }
+              ],
+              "inheritedFrom": {
+                "name": "BaseChart",
+                "module": "src/base-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
               "name": "renderLegend",
               "privacy": "protected",
               "return": {
@@ -36230,11 +36338,9 @@
                   "name": "items",
                   "type": {
                     "text": "LegendItem[]"
-                  },
-                  "description": "Array of legend items with label, color, value, and optional shape"
+                  }
                 }
               ],
-              "description": "Render a legend for the chart using ChartLegend.generateSvg()",
               "inheritedFrom": {
                 "name": "BaseChart",
                 "module": "src/base-chart.ts"
@@ -40746,6 +40852,27 @@
             },
             {
               "kind": "method",
+              "name": "registerLegendItemPatterns",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "description": "Register the patterns named by any `<dc-legend-item pattern=\"...\">`.\r\n\r\nUses the same index basis as renderLegend's resolver, so both\r\nproduce the same pattern id and the second registration is a no-op.",
+              "parameters": [
+                {
+                  "description": "Array of legend items with label, color, value, and optional shape",
+                  "name": "items"
+                }
+              ],
+              "inheritedFrom": {
+                "name": "BaseChart",
+                "module": "src/base-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
               "name": "renderLegend",
               "privacy": "protected",
               "return": {
@@ -40758,11 +40885,9 @@
                   "name": "items",
                   "type": {
                     "text": "LegendItem[]"
-                  },
-                  "description": "Array of legend items with label, color, value, and optional shape"
+                  }
                 }
               ],
-              "description": "Render a legend for the chart using ChartLegend.generateSvg()",
               "inheritedFrom": {
                 "name": "BaseChart",
                 "module": "src/base-chart.ts"

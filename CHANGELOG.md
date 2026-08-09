@@ -9,6 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A `<dc-legend-item>` with no label blanked the entire legend.** `getCustomItems()` filtered
+  label-less items out and returned an empty array; the caller does `customItems ?? items`, and
+  `[]` is not nullish, so it counted as "custom items were supplied" and discarded the chart's own.
+  One typo — `lable="Revenue"` — emptied the legend with nothing logged. It now falls back to the
+  chart's items and says why
+- **`<dc-legend-item stroke-dasharray>` and `pattern` did nothing.** Both were declared on the
+  element and documented in API.md, and neither was read — the same dead-attribute class as
+  `bar-color`. A dashed series now reads as dashed in the legend, and a patterned one paints with
+  its pattern. Registering the pattern also had to move ahead of `renderDefs()`, which runs earlier
+  in the template than the legend: doing it during the legend render produced `url(#id)` pointing
+  at a definition that was never emitted
+- **`<dc-log-console>` leaked a `MutationObserver` watching `document.body`** when it was removed
+  before its deferred first frame ran — which is exactly what an htmx swap does. The observer
+  survived for the page's lifetime, firing on every mutation anywhere to refresh a console no
+  longer in the document
+
+### Added
+
+- **Tests for the two elements that had none.** `log-console.ts` (422 lines) went 0% → 96%, and
+  `chart-legend-item.ts` (131 lines) 0% → 100%; overall coverage 86.5% → 88.1%. A unit test for
+  `animation.ts`'s pure helpers went in alongside
+
+
 - **43 example code blocks did not match the chart beside them.** `label-positioning.html`
   accounted for 20 of them, every snippet omitting the `palette` and the `<dc-title>` its chart
   actually had — so copying any of them produced different colours and no title. Snippets are now

@@ -3,7 +3,9 @@ import { LitElement, svg, SVGTemplateResult } from 'lit';
 import { SVG_TEXT_STYLE_ATTRS, HTML_TO_SVG_WARNINGS, type TitleStyleWarning } from './chart-title.js';
 import type { ChartTitle } from './chart-title.js';
 import { ChartSwatch } from './chart-swatch.js';
+import { resolveDasharray } from './chart-fill.js';
 import { NumberFormatter } from './format.js';
+import { ErrorCode } from './errors.js';
 import type { ChartLegendItem } from './chart-legend-item.js';
 import { showConditionConverter, evaluateShowCondition, type ShowCondition } from './converters.js';
 
@@ -21,6 +23,15 @@ export interface BaseLegendItem {
   color: string;
   /** Shape for the legend indicator. Defaults to 'square'. */
   shape?: LegendShape;
+  /**
+   * Dash pattern for a `line` indicator, already resolved to an SVG value.
+   *
+   * Carried so a dashed series reads as dashed in the legend. `<dc-legend-item
+   * stroke-dasharray>` used to be declared, documented, and read by nothing.
+   */
+  strokeDasharray?: string;
+  /** Pattern type for a patterned fill, resolved by the chart into a `url(#id)`. */
+  pattern?: string;
 }
 
 /**
@@ -151,6 +162,16 @@ export class ChartLegend extends LitElement {
   @property({ attribute: 'show-label', converter: showConditionConverter })
   showLabel: ShowCondition = true;
 
+  /**
+   * Supplied by the chart so a custom legend item's `pattern` can be resolved.
+   *
+   * Patterns live in the chart's `<defs>` and are registered during fill
+   * resolution, which never sees `<dc-legend-item>` elements - so the chart
+   * registers them here instead, and hands back the `url(#id)` to paint with.
+   * Returns null when the pattern name is not recognised.
+   */
+  resolvePattern?: (type: string, fill: string, index: number) => string | null;
+
   @property({ type: String })
   columns: string = 'auto';
 
@@ -223,11 +244,27 @@ export class ChartLegend extends LitElement {
 
     if (itemElements.length === 0) return null;
 
-    return itemElements
-      .filter(item => item.label) // Skip items without labels
+    const usable = itemElements.filter(item => item.label); // Skip items without labels
+
+    // Returning an empty array here would be worse than returning null: the
+    // caller does `customItems ?? items`, so `[]` counts as "custom items were
+    // supplied" and silently discards the auto-generated ones. A single typo -
+    // `lable="Revenue"` - emptied the whole legend with nothing logged.
+    if (usable.length === 0) {
+      console.warn(
+        `[${ErrorCode.PARSE_ERROR.code}] legend.customItems: ` +
+        `${itemElements.length} <dc-legend-item> element(s) have no label and were ignored; ` +
+        `falling back to the chart's own legend items.`
+      );
+      return null;
+    }
+
+    return usable
       .map(item => {
         const color = item.getEffectiveColor();
         const shape = item.getEffectiveShape();
+        const strokeDasharray = resolveDasharray(item.strokeDasharray);
+        const pattern = item.pattern;
 
         // If value is provided, return ValuedLegendItem; otherwise DimensionlessLegendItem
         if (item.value !== undefined) {
@@ -235,6 +272,8 @@ export class ChartLegend extends LitElement {
             label: item.label || '',
             color,
             shape,
+            strokeDasharray,
+            pattern,
             value: item.value,
           } as ValuedLegendItem;
         } else {
@@ -242,6 +281,8 @@ export class ChartLegend extends LitElement {
             label: item.label || '',
             color,
             shape,
+            strokeDasharray,
+            pattern,
             dimensionless: true,
           } as DimensionlessLegendItem;
         }
@@ -413,7 +454,14 @@ export class ChartLegend extends LitElement {
       // Resolve shape, defaulting to 'square'
       const resolvedShape: LegendShape = item.shape || 'square';
 
-      return { ...item, displayLabel, displayValue, resolvedShape };
+      // A patterned item paints with url(#id); the chart owns the <defs>.
+      let color = item.color;
+      if (item.pattern && this.resolvePattern) {
+        const url = this.resolvePattern(item.pattern, item.color, items.indexOf(item));
+        if (url) color = url;
+      }
+
+      return { ...item, color, displayLabel, displayValue, resolvedShape };
     });
   }
 
@@ -847,7 +895,7 @@ export class ChartLegend extends LitElement {
           return svg`
             <!-- Shape indicator -->
             <g part="legend-swatch" transform="translate(${itemX}, ${itemY})">
-              ${ChartSwatch.renderShape(item.resolvedShape, 18, item.color, 'white')}
+              ${ChartSwatch.renderShape(item.resolvedShape, 18, item.color, 'white', item.strokeDasharray)}
             </g>
 
             ${item.displayLabel ? svg`
@@ -1062,7 +1110,7 @@ export class ChartLegend extends LitElement {
         ${positionedItems.map(item => svg`
           <!-- Shape indicator -->
           <g part="legend-swatch" transform="translate(${contentX + item.x}, ${contentY + item.y})">
-            ${ChartSwatch.renderShape(item.resolvedShape, 12, item.color, 'white')}
+            ${ChartSwatch.renderShape(item.resolvedShape, 12, item.color, 'white', item.strokeDasharray)}
           </g>
 
           <!-- Item text -->

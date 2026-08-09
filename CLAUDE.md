@@ -635,10 +635,12 @@ maintainability arguments, not coverage ones.
 
 | File | Stmts | Why |
 |---|---|---|
-| `log-console.ts` | **0%** | 422 lines, no test at all |
-| `chart-legend-item.ts` | **0%** | 131 lines, no test at all |
-| `animation.ts` | **35%** | Partly an artifact — happy-dom has no Web Animations API, so `element.animate` throws. Stub it in `test/component/setup.ts` to recover most of this |
+| `animation.ts` | **36%** | The `animate*` functions have no test. **Not** the happy-dom artifact an earlier note claimed — `test/component/` runs in happy-dom, which *does* provide `Element.prototype.animate`; only `test/unit/` (node) lacks a DOM, and `supportsWebAnimations()` correctly returns false there. No stub is needed |
 | `stage-chart.ts` | **72.8%** | The worst-covered real code. The geometry was extracted to `stage-layout.ts` (100%), but `calculateStageSizes` and `calculateTextFit` remain untested |
+
+`log-console.ts` (0% → 96%) and `chart-legend-item.ts` (0% → 100%) were the two untested elements
+and are now covered. Writing those tests turned up four defects, which is the usual return on
+characterizing untested code — see CHANGELOG.
 
 `index.ts` reports 0% because it is re-exports only; nothing executes.
 

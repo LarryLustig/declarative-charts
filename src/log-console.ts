@@ -237,6 +237,12 @@ export class LogConsole extends LitElement {
     super.connectedCallback();
     // Delay initial query to ensure charts are registered
     requestAnimationFrame(() => {
+      // The element may have been removed before this frame ran - an htmx swap
+      // does exactly that. Without this guard, disconnectedCallback has already
+      // been and gone, and the observer set up below watches document.body with
+      // subtree: true for the lifetime of the page, firing on every mutation
+      // anywhere and refreshing a console that is no longer in the document.
+      if (!this.isConnected) return;
       this.findCharts();
       this.setupObserver();
     });
@@ -281,6 +287,10 @@ export class LogConsole extends LitElement {
    * Set up mutation observer to detect chart changes
    */
   private setupObserver(): void {
+    // Replace rather than accumulate: connectedCallback runs again whenever the
+    // element is moved in the DOM.
+    this.observer?.disconnect();
+
     // Observe the document for attribute changes on matched charts
     this.observer = new MutationObserver(() => {
       // Debounce rapid changes

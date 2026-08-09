@@ -2526,6 +2526,13 @@ export abstract class BaseChart extends LitElement {
     this.clearLog();
     this.clearUsedPatterns();
 
+    // Patterns named by <dc-legend-item> must be registered before renderDefs()
+    // runs, and the legend renders inside renderChart() - which comes after it
+    // in the template. Registering there alone produced a legend painted with
+    // url(#id) and no matching <pattern> in <defs>: a broken reference that
+    // draws nothing.
+    this.registerLegendItemPatterns();
+
     // Generate accessibility content
     const ariaLabelValue = this.getAriaLabel();
     const descriptionContent = this.generateAccessibilityDescription();
@@ -2777,6 +2784,25 @@ export abstract class BaseChart extends LitElement {
    * Render a legend for the chart using ChartLegend.generateSvg()
    * @param items Array of legend items with label, color, value, and optional shape
    */
+  /**
+   * Register the patterns named by any `<dc-legend-item pattern="...">`.
+   *
+   * Uses the same index basis as {@link renderLegend}'s resolver, so both
+   * produce the same pattern id and the second registration is a no-op.
+   */
+  protected registerLegendItemPatterns(): void {
+    const legend = this.getLegend();
+    if (!legend) return;
+    const items = legend.getCustomItems();
+    if (!items) return;
+
+    items.forEach((item, index) => {
+      if (!item.pattern) return;
+      const config = this.resolvePatternAttribute(item.pattern, undefined, undefined, undefined);
+      if (config) this.registerPattern(config, item.color, 1000 + index);
+    });
+  }
+
   protected renderLegend(items: LegendItem[]): SVGTemplateResult {
     const legend = this.getLegend();
     if (!legend) return svg``;
@@ -2794,6 +2820,20 @@ export abstract class BaseChart extends LitElement {
     const showValue = this.showValue;
     const showPercent = this.showPercent;
     legend.fontScale = this.fontScale;
+
+    // A custom legend item may name a pattern. Patterns live in the chart's
+    // <defs> and are registered during fill resolution, which never sees these
+    // items - so register them here, before the legend renders. Without this
+    // the `pattern` attribute parsed fine and drew nothing.
+    legend.resolvePattern = (type: string, fill: string, index: number) => {
+      const config = this.resolvePatternAttribute(type, undefined, undefined, undefined);
+      if (!config) {
+        this.logError(ErrorCode.PATTERN_NOT_FOUND, { id: type });
+        return null;
+      }
+      return this.registerPattern(config, fill, 1000 + index).fillUrl;
+    };
+
     const result = legend.generateSvg(
       items, this.width, showValue, showPercent,
       this.valueFormat, this.percentFormat, this.locale
