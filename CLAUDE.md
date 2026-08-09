@@ -593,11 +593,17 @@ npm run bench -- --url=http://localhost:4173/test/visual/fixtures/bench.html  # 
 Harness: `test/visual/bench.mjs` (driver) + `test/visual/fixtures/bench.html` (page, exposes
 `window.runBench(type, n)`).
 
-**Two known failures this harness currently reports** — see `REVIEW.md` §3.4 and §3.5:
-- Render cost is **O(n²)** in datapoint count for both bars and lines. Parse/upgrade time is
-  negligible, so the cost is in the render pipeline, not in the one-element-per-datapoint design.
-- Bar width crosses zero past **84 bars** on a 900-unit chart; every `<rect>` is then discarded
-  and the chart draws nothing, with no DC-code raised.
+**Both failures this harness was written to expose are fixed** (`REVIEW.md` §3.4, §3.5).
+Re-measured, not assumed:
+
+- Render cost is now roughly linear — **1.5–1.6x for 2x the data**, where it was quadratic.
+  1,000 bars render in ~550ms against 44,562ms before the per-render caching went in.
+- Bar width no longer crosses zero. Past the point where bars would go negative it clamps at 1
+  unit and every `<rect>` still paints; the probe confirms 0 negative widths up to n=200, and
+  `DC107` reports the compressed gutters.
+
+Run it after any change to the render pipeline or to bar layout — those are the two places a
+regression here would come from.
 
 Use a fresh browser context per size when adding cases — sharing a page lets a slow run bleed
 into the next measurement.
