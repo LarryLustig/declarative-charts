@@ -1528,7 +1528,50 @@ Worth recording so it doesn't get "fixed" later:
 
 ---
 
-## 7. Documentation drift
+## 7. Documentation drift — ✅ FIXED
+
+> **Fixed, and the audit found more than this section listed.** Rather than spot-checking the
+> claims below, the attribute surface was extracted from source and diffed against `API.md`. That
+> is now a test — `test/unit/api-docs.test.ts` — because a one-time cleanup drifts again.
+>
+> **Worse than reported: four attributes were documented with no property behind them.**
+> `fill-colors`, `stroke-colors`, `stroke-color` and `fill-color` appeared in JSDoc `@attr` tags
+> and, for two of them, in `API.md`. `fill-colors` is the one that matters: `slice-color` had been
+> *deprecated in favour of it*, so a working feature was discouraged in favour of one that was
+> never written. All four removed; `slice-color` undeprecated (§6.5).
+>
+> **Also wrong, and not in the list below:** `<dc-legend columns>` documented `"1"` as its default
+> when it is `'auto'`; `<dc-fill max-value>` documented as exclusive when `matchesValue()` is
+> inclusive; `<dc-empty>`, `<dc-defaults>` and `<dc-log-console>` had no Components entry at all.
+> The `<dc-axis>` gap was as reported — 4 of 13 attributes — and is now complete, including the
+> range, tick-priority and time-axis groups, with worked examples.
+>
+> **The examples folder was the bigger problem, and it hid a real bug.** Nothing had ever
+> exercised those 33 pages. Loading them all found `<dc-pie-chart inner-radius="50%">` rendering
+> `M 250 44 A 144.25 … L NaN NaN A NaN NaN` — `Number("50%")` is NaN, and NaN is false for both
+> `< 0` and `>= 100`, so it walked past the `DC103` validation that exists for exactly this. The
+> negative branch was separately dishonest: it logged "Using 0 (solid pie)" while the pixel radius
+> had already been computed from the negative value and was never corrected.
+>
+> **The donut's visual baseline had been certifying that broken chart**, which is the sharpest
+> lesson here: a screenshot test pins whatever was on screen when the baseline was taken,
+> including a chart made of NaN. `test/visual/examples.spec.ts` now loads every example page and
+> fails on NaN, empty charts and unexpected console output.
+>
+> **Coverage table:** replaced with measured numbers. It was wrong by 4–12× exactly as reported —
+> `chart-palette.ts` listed at 8% while at 100%. Overall is 86.5%.
+> `converters.ts` is now 98.2% rather than the 28.9% below, as a side effect of §6.2.
+>
+> **README** did list Area and Stage in its feature list, but showed an example of neither. Both
+> added, and every fenced example in `README.md` and `API.md` was rendered in Chromium to confirm
+> it is valid markup — 7/7 and 64/64. The "use `chart.requestUpdate()` after modifying children"
+> advice was stale and contradicted the `MutationObserver`; corrected.
+>
+> `tasks/stage-chart-api.md` deleted as reported.
+>
+> Original finding below.
+
+## 7. (original) Documentation drift
 
 **`CLAUDE.md`'s coverage table is wrong by 4–12×.** It counts only `test/unit/` and is unaware
 of the ~8,900-line `test/component/` suite:

@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A donut written as `inner-radius="50%"` rendered nothing but NaN coordinates.**
+  `Number("50%")` is NaN, and NaN is false for both `< 0` and `>= 100`, so it passed the `DC103`
+  validation that exists for exactly this. `inner-radius` now accepts `50` and `"50%"` alike, and
+  an unusable value raises `DC103` and falls back to a solid pie. The negative branch separately
+  logged "Using 0 (solid pie)" while continuing to draw with the negative value — the promised
+  fallback now happens. **The donut's visual baseline had been certifying the broken output**
+- **Four attributes were documented but never implemented** — `fill-colors`, `stroke-colors`,
+  `stroke-color`, `fill-color`. `slice-color` had been deprecated in favour of `fill-colors`,
+  which was never written
+- **`API.md` was wrong in both directions.** `<dc-axis>` documented 4 of its 13 attributes, so
+  setting a Y-axis minimum was invisible; `<dc-grid>`, `<dc-empty>`, `<dc-defaults>` and
+  `<dc-log-console>` had no entry; `<dc-legend columns>` gave the wrong default; `<dc-fill
+  max-value>` was described as exclusive when it is inclusive. Every attribute is now documented,
+  and `test/unit/api-docs.test.ts` keeps it that way
+- **README** showed no Area or Stage chart despite listing both as features, and advised calling
+  `chart.requestUpdate()` after changing children — which the `MutationObserver` made unnecessary
+- **Two example pages showed a chart with no markup beside it**, which is the point of an example
+
+### Added
+
+- **`test/visual/examples.spec.ts`** loads all 33 example pages and fails on NaN geometry, charts
+  that render nothing, and unexpected console output. Nothing had exercised these pages before
+- **`test/unit/api-docs.test.ts`** diffs `API.md` against the attributes declared in `src/`, in
+  both directions, and rejects a JSDoc `@attr` with no property behind it
+
+
 - **Visual tests settled on fixed sleeps rather than on conditions**, making them flaky on a
   loaded machine. The "wait for Lit updates" step asserted `chart.updateComplete !== undefined` —
   true the instant an element upgrades, awaiting nothing — so a 100ms sleep was doing all the

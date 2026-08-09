@@ -21,7 +21,6 @@ import { analyzeFunnel, type StageData as InsightStageData } from './accessibili
  * @attr {number} funnel-factor - Percentage controlling funnel narrowing (default: 70). Positive values narrow from top to bottom (e.g., 70 = bottom is 70% of top width). Negative values narrow from bottom to top (e.g., -70 = top is 70% of bottom width).
  * @attr {string} palette - Palette for stage colors. Can be an ID of a user-defined <dc-palette> or a built-in palette name (default: cool-to-warm gradient).
  * @attr {string} stroke - Shorthand for stroke color and width (e.g., "2 #333" or "#333 2"). Overridden by explicit stroke-color/stroke-width.
- * @attr {string} stroke-color - Stroke color for stage borders (default: #e0e0e0). Can be overridden per stage.
  * @attr {number} stroke-width - Stroke width for stage borders in pixels (default: 0). Can be overridden per stage.
  * @attr {boolean} flat-top - When true and chevron is set, makes the top edge of the first stage horizontal (default: false)
  * @attr {boolean} flat-bottom - When true and chevron is set, makes the bottom edge of the last stage horizontal (default: false)

@@ -47,7 +47,6 @@ interface ConnectorConfig {
  * @attr {boolean} zero-hidden - Hide zero-value elements entirely
  * @attr {string} palette - Palette for stage colors
  * @attr {string} stroke - Shorthand for stroke color and width
- * @attr {string} stroke-color - Stroke color for stage borders (default: #e0e0e0)
  * @attr {number} stroke-width - Stroke width for stage borders (default: 1)
  *
  * @slot - Child elements: dc-title, dc-stage, dc-legend, dc-palette

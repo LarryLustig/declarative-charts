@@ -26323,13 +26323,6 @@
             },
             {
               "type": {
-                "text": "string"
-              },
-              "description": "Stroke colors for lines",
-              "name": "stroke-colors"
-            },
-            {
-              "type": {
                 "text": "string | undefined"
               },
               "description": "Default bar width",
@@ -27374,6 +27367,15 @@
             }
           ],
           "description": "Evaluate a ShowCondition against a value and its share of the total.\r\n\r\nPure, and here rather than on `BaseChart`, because `<dc-legend>` needs it\r\ntoo and is not a chart. The legend used to coerce every condition to a\r\nboolean, so `show-value=\"10%\"` on a legend silently meant \"always\"."
+        },
+        {
+          "kind": "variable",
+          "name": "percentNumberConverter",
+          "type": {
+            "text": "object"
+          },
+          "default": "{ fromAttribute: (value: string | null): number => { if (value === null) return 0; const trimmed = value.trim(); if (trimmed === '') return 0; const parsed = Number(trimmed.endsWith('%') ? trimmed.slice(0, -1).trim() : trimmed); return Number.isFinite(parsed) ? parsed : NaN; }, toAttribute: (value: number): string | null => Number.isFinite(value) ? String(value) : null }",
+          "description": "Converter for a percentage-valued number attribute.\r\n\r\nAccepts a bare number (`50`) or an explicit percentage (`\"50%\"`). The two\r\nspell the same thing, and the second is what a reader writes when the\r\ndocumentation calls the value a percentage - `<dc-pie-chart inner-radius=\"50%\">`\r\nappeared in the library's own examples and rendered a chart made entirely of\r\nNaN coordinates, because `Number(\"50%\")` is NaN and NaN passes every range\r\ncheck silently.\r\n\r\nReturns NaN for anything unparseable so the caller can diagnose it; callers\r\nmust treat a non-finite result as \"not supplied\"."
         }
       ],
       "exports": [
@@ -27414,6 +27416,14 @@
           "name": "evaluateShowCondition",
           "declaration": {
             "name": "evaluateShowCondition",
+            "module": "src/converters.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "percentNumberConverter",
+          "declaration": {
+            "name": "percentNumberConverter",
             "module": "src/converters.ts"
           }
         }
@@ -31703,13 +31713,6 @@
               }
             },
             {
-              "type": {
-                "text": "string"
-              },
-              "description": "Stroke color for stage borders (default: #e0e0e0). Can be overridden per stage.",
-              "name": "stroke-color"
-            },
-            {
               "name": "stroke-width",
               "type": {
                 "text": "number | undefined"
@@ -33323,6 +33326,7 @@
                 "text": "number"
               },
               "default": "0",
+              "description": "Inner radius as a percentage of the outer radius, turning the pie into a\r\ndonut. Accepts `50` or `\"50%\"` - the docs call it a percentage, so both\r\nspellings reach for the same thing.",
               "attribute": "inner-radius"
             },
             {
@@ -36786,13 +36790,6 @@
             },
             {
               "type": {
-                "text": "string"
-              },
-              "description": "Default fill color for slices without individual fills",
-              "name": "fill-color"
-            },
-            {
-              "type": {
                 "text": "string | undefined"
               },
               "description": "Default fill for slices that do not set their own and are not matched by a\r\npalette. The pie equivalent of `bar-color` on `<dc-chart>`.\r\n\r\nThis carried an `@deprecated Use fill-colors instead` notice. No such\r\nattribute exists - `fill-colors` appears in one JSDoc line and is\r\nimplemented nowhere - so the notice pointed at a replacement that was never\r\nwritten, for the only way to set a chart-wide slice colour. Undeprecated\r\nrather than removed.",
@@ -36842,7 +36839,7 @@
               "type": {
                 "text": "number"
               },
-              "description": "Inner radius as percentage (0-100) for donut charts (default: 0)",
+              "description": "Inner radius as a percentage of the outer radius, turning the pie into a\r\ndonut. Accepts `50` or `\"50%\"` - the docs call it a percentage, so both\r\nspellings reach for the same thing.",
               "name": "inner-radius",
               "default": "0",
               "fieldName": "innerRadius"
@@ -41462,13 +41459,6 @@
                 "name": "BaseChart",
                 "module": "src/base-chart.ts"
               }
-            },
-            {
-              "type": {
-                "text": "string"
-              },
-              "description": "Stroke color for stage borders (default: #e0e0e0)",
-              "name": "stroke-color"
             },
             {
               "name": "stroke-width",

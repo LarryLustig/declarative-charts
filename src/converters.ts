@@ -173,3 +173,28 @@ export function evaluateShowCondition(
   if (condition.type === 'percent') return percent >= condition.threshold;
   return value >= condition.threshold;
 }
+
+/**
+ * Converter for a percentage-valued number attribute.
+ *
+ * Accepts a bare number (`50`) or an explicit percentage (`"50%"`). The two
+ * spell the same thing, and the second is what a reader writes when the
+ * documentation calls the value a percentage - `<dc-pie-chart inner-radius="50%">`
+ * appeared in the library's own examples and rendered a chart made entirely of
+ * NaN coordinates, because `Number("50%")` is NaN and NaN passes every range
+ * check silently.
+ *
+ * Returns NaN for anything unparseable so the caller can diagnose it; callers
+ * must treat a non-finite result as "not supplied".
+ */
+export const percentNumberConverter = {
+  fromAttribute: (value: string | null): number => {
+    if (value === null) return 0;
+    const trimmed = value.trim();
+    if (trimmed === '') return 0;
+    const parsed = Number(trimmed.endsWith('%') ? trimmed.slice(0, -1).trim() : trimmed);
+    return Number.isFinite(parsed) ? parsed : NaN;
+  },
+  toAttribute: (value: number): string | null =>
+    Number.isFinite(value) ? String(value) : null
+};

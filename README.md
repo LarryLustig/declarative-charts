@@ -80,6 +80,26 @@ Open your browser to `http://localhost:5173`
 </dc-chart>
 ```
 
+### Area Chart
+
+```html
+<dc-chart width="600" height="400">
+  <dc-title>Traffic by Source</dc-title>
+  <dc-area fill="#2196F3" label="Direct">
+    <dc-point value="30" label="Mon"></dc-point>
+    <dc-point value="45" label="Tue"></dc-point>
+    <dc-point value="38" label="Wed"></dc-point>
+  </dc-area>
+  <dc-area fill="#4CAF50" label="Referral">
+    <dc-point value="20" label="Mon"></dc-point>
+    <dc-point value="25" label="Tue"></dc-point>
+    <dc-point value="32" label="Wed"></dc-point>
+  </dc-area>
+</dc-chart>
+```
+
+Areas stack by default; add `overlapping` to the chart to draw them on top of one another.
+
 ### Pie Chart
 
 ```html
@@ -101,6 +121,20 @@ Open your browser to `http://localhost:5173`
   <dc-funnel-stage value="100" label="Customers"></dc-funnel-stage>
 </dc-funnel-chart>
 ```
+
+### Stage Chart
+
+```html
+<dc-stage-chart width="400" height="500" stage-size="value">
+  <dc-title>Pipeline</dc-title>
+  <dc-stage value="100" label="Leads"></dc-stage>
+  <dc-stage value="60" label="Qualified"></dc-stage>
+  <dc-stage value="20" label="Won"></dc-stage>
+</dc-stage-chart>
+```
+
+Like a funnel, a stage chart shows a flow — but it draws each step as a shape whose *area* is
+proportional to its value, rather than as a chevron band.
 
 ### Bubble Chart
 
@@ -136,7 +170,7 @@ Includes Lit (~45 KB gzipped). No additional dependencies required.
 ## Performance Guidelines
 
 - **Large datasets**: For very large datasets, consider aggregating data before rendering.
-- **Dynamic updates**: Use `chart.requestUpdate()` after modifying child elements. Batch multiple changes before calling update.
+- **Dynamic updates**: Just change the markup. Charts watch their own children with a `MutationObserver`, so adding, removing, hiding or re-attributing an element re-renders automatically — `requestUpdate()` is not needed, and htmx-style `innerHTML` swaps work as-is.
 - **Hidden elements**: Use the `hidden` attribute on data elements to temporarily hide them without removing from DOM.
 - **Popups**: Use `auto-popup` for automatic tooltips instead of manually managing popup state.
 - **SVG rendering**: Charts render to SVG, which scales cleanly but can slow down with thousands of elements.

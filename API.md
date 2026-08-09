@@ -1308,7 +1308,12 @@ Renders bar, line, or bubble charts depending on child elements.
 - `bar-width` (string) - Default width for bars (e.g., "50px", "2rem")
 - `gutter` (number) - Space between bars in pixels (default: 10)
 - `point-shape` (string) - Default shape for points: "circle", "square", "triangle", "diamond", "star", "cross", "plus", or unicode character (default: "circle")
+- `curve-fit` (string) - Default curve fitting for lines and areas: "linear" (default), "smooth", "monotone", "step"
 - `overlapping` (boolean) - When true, multiple areas overlap instead of stacking (default: false)
+- `bar-color` (string) - Default fill for bars that set no `fill` of their own and match no palette entry (default: `#4CAF50`)
+- `line-color` (string) - Default stroke for lines and areas, on the same terms (default: `#2196F3`)
+- `max-bubble-radius` (number) - Largest bubble radius, in viewBox units (default: 30)
+- `min-bubble-radius` (number) - Smallest bubble radius (default: 5)
 - Plus all [common chart attributes](#common-chart-attributes)
 
 **Child Elements:**
@@ -1430,6 +1435,8 @@ Defines a single line in a line chart. Contains multiple `<dc-point>` elements.
 - `show-value` (boolean|string) - Whether to display values on points in this line
 - `show-percent` (boolean|string) - Whether to display percentages on points in this line
 - `point-shape` (string) - Default shape for points on this line
+- `curve-fit` (string) - Curve fitting method: "linear" (default), "smooth", "monotone", "step"
+- `missing` (string) - How to treat points with no value: "gap" (default), "skip", or "zero". See [Missing Values](#missing-values)
 
 **Child Elements:**
 - `<dc-point>` - Individual points (one or more)
@@ -1447,6 +1454,7 @@ Areas are filled regions bounded by data points above and the zero line (or char
 - `stroke-width` (number) - Width of the top edge stroke (default: 2)
 - `label` (string) - Label for the area (for legend)
 - `curve-fit` (string) - Curve fitting method: "linear", "smooth", "monotone", "step" (default: "linear")
+- `missing` (string) - How to treat points with no value: "gap" (default), "skip", or "zero". See [Missing Values](#missing-values)
 - `show-value` (boolean|string) - Whether to display values on points (default: true)
 - `show-percent` (boolean|string) - Whether to display percentages on points
 - `pattern` (string) - Pattern type ("diagonal-lines", "dots", etc.) or ID reference
@@ -1517,6 +1525,7 @@ Defines a bubble in a bubble chart.
 **Attributes:**
 - `value` (number) - The bubble's Y-axis value (required)
 - `size-value` (number) - The value that determines bubble size (required)
+- `show-value` (boolean|string) - Whether to display the value on the bubble (default: true)
 - `label` (string) - Label for the bubble
 - `fill` (string) - CSS color for the bubble
 
@@ -1531,6 +1540,7 @@ Renders a pie chart with support for donut charts.
 - `show-label` (boolean|string) - Whether to show labels on slices (default: true)
 - `show-percent` (boolean|string) - Whether to show percentages on slices (default: true)
 - `inner-radius` (number) - Inner radius as percentage (0-100) for donut charts (default: 0)
+- `slice-color` (string) - Default fill for slices that set no `fill` of their own and match no palette entry. The pie equivalent of `bar-color` on `<dc-chart>`
 - Plus all [common chart attributes](#common-chart-attributes)
 
 **Child Elements:**
@@ -1625,7 +1635,7 @@ Defines a single stage in a funnel chart.
 - `label` (string) - Label for this stage
 - `fill` (string) - CSS color for this stage
 - `stroke` (string) - Shorthand for stroke color and width
-- `stroke-color` (string) - Optional stroke color for this stage
+- `stroke` (string) - Optional stroke color for this stage
 - `stroke-width` (number) - Optional stroke width for this stage
 - `show-value` (boolean|string) - Whether to show the value on this stage
 - `show-label` (boolean|string) - Whether to show the label on this stage
@@ -1780,7 +1790,7 @@ Defines a single stage in a stage chart.
 - `corner-radius` (string) - Override corner radius for rectangles
 - `fill` (string) - CSS color for this stage
 - `stroke` (string) - Shorthand for stroke color and width
-- `stroke-color` (string) - Optional stroke color for this stage
+- `stroke` (string) - Optional stroke color for this stage
 - `stroke-width` (number) - Optional stroke width for this stage
 - `show-value` (boolean|string) - Whether to show the value on this stage
 - `show-label` (boolean|string) - Whether to show the label on this stage
@@ -1792,9 +1802,26 @@ Configures an axis on bar charts and line charts.
 
 **Attributes:**
 - `position` (string) - Axis position: "left", "right", "top", "bottom", "x", or "y" (default: "bottom")
+- `type` (string) - Axis behaviour: "value", "label", or "time". Inferred from `position` and the chart's orientation when omitted — on a vertical chart, left/right are value axes and top/bottom are label axes; on a horizontal chart, the reverse
 - `label-interval` (number|string) - Controls which category labels are shown: "auto" (default), or a number (1=all, 2=every other, etc.)
 - `label-lines` (number|string) - Staggers labels across multiple lines: 1 (default), 2, 3, etc., or "auto"
 - `value-format` (string) - Number format for axis labels
+
+**Range** (value and time axes only):
+- `min-value` (number|string) - Axis minimum: a number, or "auto" to calculate from the data (default)
+- `max-value` (number|string) - Axis maximum: a number, or "auto" (default)
+- `range-padding` (string) - Extra space beyond the data range, e.g. `"10%"` on each end. Applies only where `min-value`/`max-value` are "auto"
+
+**Ticks**, in ascending priority — `tick-values` wins over `tick-interval`, which wins over `tick-count`:
+- `tick-count` (number) - Approximate number of ticks (default: 5). The actual count varies to land on "nice" values
+- `tick-interval` (number) - Exact spacing between ticks, e.g. `tick-interval="25"` gives 0, 25, 50, 75
+- `tick-values` (string) - Explicit comma-separated ticks, e.g. `tick-values="0, 50, 75, 100"`
+
+**Time axes** (`type="time"`):
+- `date-format` (string) - How to parse the input: omit for ISO 8601 auto-detection, or "timestamp" for Unix seconds
+- `date-label-format` (string) - How to render the labels, using `yyyy`, `MMM`, `MM`, `d`, `dd`, `HH`, `hh`, `mm`, `ss` — e.g. `"MMM d"` gives "Jan 15", `"HH:mm"` gives "14:30"
+
+**Child Elements** are documented below; note that setting a Y-axis minimum is `min-value`, and grid lines come from a nested `<dc-grid>`.
 
 **Child Elements:**
 - `<dc-title>` - Optional axis title
@@ -1810,6 +1837,26 @@ Axis with custom label interval:
   <dc-bar value="10" label="Jan"></dc-bar>
   <dc-bar value="20" label="Feb"></dc-bar>
   <dc-bar value="30" label="Mar"></dc-bar>
+</dc-chart>
+```
+
+Fixed range with explicit ticks:
+```html
+<dc-chart width="600" height="400">
+  <dc-axis position="left" min-value="0" max-value="100" tick-interval="25"></dc-axis>
+  <dc-bar value="42" label="Q1"></dc-bar>
+  <dc-bar value="67" label="Q2"></dc-bar>
+</dc-chart>
+```
+
+Time axis:
+```html
+<dc-chart width="600" height="400">
+  <dc-axis position="bottom" type="time" date-label-format="MMM d"></dc-axis>
+  <dc-line>
+    <dc-point value="10" label="2024-01-15"></dc-point>
+    <dc-point value="25" label="2024-02-15"></dc-point>
+  </dc-line>
 </dc-chart>
 ```
 
@@ -1870,7 +1917,8 @@ Adds a legend to any chart type.
 - `show-value` (boolean|string) - Whether to show values in legend (default: true). Accepts the same thresholds as elsewhere, applied per legend item
 - `show-percent` (boolean|string) - Whether to show percentages in legend (default: false)
 - `show-label` (boolean|string) - Whether to show labels in legend (default: true)
-- `columns` (string) - Number of columns: integer for tabular layout (default: "1"), or "*" for wrapped/inline layout
+- `columns` (string) - Number of columns: "auto" (default) fits the available width, an integer for a fixed tabular layout, or "*" for wrapped/inline layout
+- `max-width` (string) - Caps the legend's width, e.g. `max-width="200"`
 - `position` (string) - Position: "right" (default), "top", "top-left", "top-right", "left", "bottom", "bottom-left", "bottom-right"
 - `value-format` (string) - Number format for legend values
 - `percent-format` (string) - Number format for legend percentages
@@ -1963,6 +2011,9 @@ Line legend with different stroke styles:
 Defines the chart title. Renders as an SVG `<text>` element.
 
 **Content:** Text content of the element
+
+**Attributes:**
+- `position` (string) - Where the title sits: "top" (default), "top-left", "top-right", "left", "right", "bottom", "bottom-left", "bottom-right"
 
 **Styling Attributes:**
 
@@ -2097,8 +2148,9 @@ Defines a fill style (solid color and/or pattern) within a palette, or standalon
 - `stroke-miterlimit` (number) - Miter limit for stroke-linejoin="miter"
 - `pattern` (string) - Pattern type
 - `pattern-scale` (number) - Pattern scale multiplier (default: 1). Same name and meaning as `pattern-scale` on shapes
+- `value` (number) - Exact value to match. Shorthand for setting `min-value` and `max-value` to the same number
 - `min-value` (number) - Minimum value for range matching (inclusive)
-- `max-value` (number) - Maximum value for range matching (exclusive)
+- `max-value` (number) - Maximum value for range matching (inclusive)
 
 **Named dash patterns:**
 - `solid` - No dashes (equivalent to "none")
@@ -2153,6 +2205,42 @@ Displays a colored shape from a palette outside of charts, useful for annotating
 <!-- Direct color override -->
 <dc-swatch fill="#FF5722" shape="circle"></dc-swatch>
 ```
+
+### `<dc-empty>`
+
+Supplies the message a chart shows when it has no data. Place it inside any chart.
+
+**Content:** Text content of the element
+
+**Attributes:**
+- `fill` (string) - Text colour
+- `font-size` (number) - Font size in viewBox units
+
+Keeping the message in markup means the page's own translation applies to it. See
+[Empty and Loading States](#empty-and-loading-states).
+
+### `<dc-defaults>`
+
+Sets default attribute values for the charts beneath it, so shared configuration is written once
+rather than repeated on every chart. Accepts most `<dc-chart>` attributes.
+
+```html
+<dc-defaults palette="viridis" value-format="compact 1"></dc-defaults>
+```
+
+See [Default Configuration](#default-configuration) for the full attribute list and the
+precedence rules.
+
+### `<dc-log-console>`
+
+Displays the diagnostics a chart produced, for debugging.
+
+**Attributes:**
+- `chart` (string) - CSS selector for the chart(s) to monitor, e.g. `"#my-chart"` or `"dc-chart"`
+
+This is the one attribute in the library that takes a selector rather than a bare ID, because it
+is designed to monitor several charts at once through a tabbed display. See
+[Logging & Debugging](#logging--debugging).
 
 ---
 

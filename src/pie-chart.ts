@@ -2,6 +2,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { svg, SVGTemplateResult } from 'lit';
 import { BaseChart, showConditionConverter, type ShowCondition, type FocusableElement, type AnimatableChartType } from './base-chart.js';
 import { ErrorCode } from './errors.js';
+import { percentNumberConverter } from './converters.js';
 import type { LegendItem } from './chart-legend.js';
 import type { ChartPieSlice } from './chart-pie-slice.js';
 import type { ChartPopup } from './chart-popup.js';
@@ -14,7 +15,6 @@ import { analyzePie, type SliceData as InsightSliceData } from './accessibility/
  *
  * @attr {number} width - Width of the chart in pixels (default: 600)
  * @attr {number} height - Height of the chart in pixels (default: 400)
- * @attr {string} fill-color - Default fill color for slices without individual fills
  * @attr {string} slice-color - Default color for slices not otherwise coloured
  * @attr {boolean} show-value - Whether to show values on slices (default: false)
  * @attr {boolean} show-label - Whether to show labels on slices (default: true)
@@ -56,7 +56,12 @@ export class PieChart extends BaseChart {
   @property({ attribute: 'show-percent', converter: showConditionConverter })
   override showPercent: ShowCondition = true;
 
-  @property({ type: Number, attribute: 'inner-radius' })
+  /**
+   * Inner radius as a percentage of the outer radius, turning the pie into a
+   * donut. Accepts `50` or `"50%"` - the docs call it a percentage, so both
+   * spellings reach for the same thing.
+   */
+  @property({ converter: percentNumberConverter, attribute: 'inner-radius' })
   innerRadius = 0;
 
   private clickedSliceIndex = -1;
@@ -218,18 +223,36 @@ export class PieChart extends BaseChart {
     this.log('info', 'layout.center', `padding.left(${padding.left.toFixed(1)}) + chartWidth(${chartWidth.toFixed(1)})/2, padding.top(${padding.top.toFixed(1)}) + chartHeight(${chartHeight.toFixed(1)})/2`, { x: centerX, y: centerY });
 
     const radius = Math.min(chartWidth, chartHeight) / 2;
-    const innerRadiusPixels = (this.innerRadius / 100) * radius;
-    this.log('info', 'layout.radius', `min(chartWidth(${chartWidth.toFixed(1)}), chartHeight(${chartHeight.toFixed(1)})) / 2 = ${radius.toFixed(1)}`, radius);
-    this.log('info', 'layout.innerRadius', `${this.innerRadius}% of radius(${radius.toFixed(1)}) = ${innerRadiusPixels.toFixed(1)}`, innerRadiusPixels);
 
-    // Warn about invalid inner radius
-    if (this.innerRadius < 0) {
+    // Sanitize before use, not after. These checks used to run on the raw value
+    // *after* innerRadiusPixels had been computed from it, so a negative radius
+    // logged "Using 0 (solid pie)" and then went on drawing with the negative
+    // one - the message described a fallback that did not exist. NaN was worse:
+    // it fails `< 0` and `>= 100` alike, so an unparseable value passed every
+    // check and turned every coordinate downstream into NaN, silently.
+    let effectiveInnerRadius = this.innerRadius;
+
+    if (!Number.isFinite(effectiveInnerRadius)) {
+      this.logError(ErrorCode.DONUT_INVALID_RADIUS, {
+        value: this.getAttribute('inner-radius') ?? String(this.innerRadius),
+        reason: 'not a number',
+        suggestion: 'Using 0 (solid pie). Use a number 0-99, e.g. inner-radius="50".'
+      });
+      effectiveInnerRadius = 0;
+    } else if (effectiveInnerRadius < 0) {
       this.logError(ErrorCode.DONUT_INVALID_RADIUS, {
         value: this.innerRadius,
         reason: 'negative',
         suggestion: 'Using 0 (solid pie).'
       });
-    } else if (this.innerRadius >= 100) {
+      effectiveInnerRadius = 0;
+    }
+
+    const innerRadiusPixels = (effectiveInnerRadius / 100) * radius;
+    this.log('info', 'layout.radius', `min(chartWidth(${chartWidth.toFixed(1)}), chartHeight(${chartHeight.toFixed(1)})) / 2 = ${radius.toFixed(1)}`, radius);
+    this.log('info', 'layout.innerRadius', `${effectiveInnerRadius}% of radius(${radius.toFixed(1)}) = ${innerRadiusPixels.toFixed(1)}`, innerRadiusPixels);
+
+    if (effectiveInnerRadius >= 100) {
       this.logError(ErrorCode.DONUT_INVALID_RADIUS, {
         value: this.innerRadius,
         reason: '>= 100%',

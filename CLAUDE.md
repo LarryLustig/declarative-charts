@@ -602,23 +602,39 @@ Harness: `test/visual/bench.mjs` (driver) + `test/visual/fixtures/bench.html` (p
 Use a fresh browser context per size when adding cases — sharing a page lets a slow run bleed
 into the next measurement.
 
-### Files with Test Coverage
+### Coverage
 
-| Source File | Test File | Coverage |
-|-------------|-----------|----------|
-| `src/format.ts` | `test/unit/format.test.ts` | 92% |
-| `src/accessibility/insights.ts` | `test/unit/insights.test.ts` | 97% |
-| `src/patterns.ts` | `test/unit/patterns.test.ts` | 100% |
-| `src/builtin-palettes.ts` | `test/unit/builtin-palettes.test.ts` | 100% |
-| `src/axis-chart.ts` (scale functions) | `test/unit/axis-scales.test.ts` | 22% (scale calcs only) |
-| `src/chart-fill.ts` | `test/unit/chart-fill.test.ts` | 96% |
-| `src/chart-legend.ts` (utilities) | `test/unit/chart-legend.test.ts` | 11% (type guard, warnings) |
-| `src/chart-axis.ts` | `test/unit/chart-axis.test.ts` | 52% (parsing, position) |
-| `src/chart-palette.ts` | `test/unit/chart-palette.test.ts` | 8% (properties only) |
-| `src/chart-title.ts` | `test/unit/chart-title.test.ts` | 44% (constants, warnings) |
-| `src/chart-swatch.ts` | `test/unit/chart-swatch.test.ts` | 25% (constants, properties) |
-| `src/base-filled-shape.ts` | `test/unit/base-shape.test.ts` | 100% |
-| `src/chart-defaults.ts` | `test/unit/chart-defaults.test.ts`, `test/component/chart-defaults.test.ts` | properties, DOM traversal |
+**86.5% statements overall.** Run `npm run test:coverage` for current numbers; the figures below
+were measured, not estimated.
+
+This table used to count only `test/unit/` and was unaware of the much larger `test/component/`
+suite, so it understated most files by 4-12x — `chart-palette.ts` was listed at 8% while actually
+at 100%. As written it would have sent a contributor to duplicate thousands of lines of tests that
+already existed. **If you update it, measure.**
+
+**Well covered** (>90% statements): every data element (`chart-bar`, `chart-line`, `chart-area`,
+`chart-point`, `chart-bubble`, `chart-stage`, `chart-pie-slice`, `chart-bar-segment`,
+`chart-funnel-stage`) at 100%, plus `errors.ts`, `patterns.ts`, `chart-fill.ts`, `chart-title.ts`,
+`chart-popup.ts`, `chart-palette.ts`, `stage-layout.ts`, and all four extracted controllers
+(`chart-logger`, `popup-controller`, `keyboard-nav-controller`, `svg-exporter`). Then
+`format.ts` 98.7%, `converters.ts` 98.2%, `chart-utils.ts` 96.3%, `chart-legend.ts` 95.5%,
+`chart-grid.ts` 94.7%, `color-resolver.ts` 93.8%, `funnel-chart.ts` / `pie-chart.ts` 93%,
+`chart-axis.ts` 92.4%, `builtin-palettes.ts` 91.4%, `chart-swatch.ts` 91.0%.
+
+**The large files sit in the mid-80s**, which is respectable for their size: `chart.ts` 86.4%,
+`axis-chart.ts` 85.7%, `base-chart.ts` 85.0%. The structural criticisms in REVIEW.md §5 are
+maintainability arguments, not coverage ones.
+
+**Genuinely thin, in priority order:**
+
+| File | Stmts | Why |
+|---|---|---|
+| `log-console.ts` | **0%** | 422 lines, no test at all |
+| `chart-legend-item.ts` | **0%** | 131 lines, no test at all |
+| `animation.ts` | **35%** | Partly an artifact — happy-dom has no Web Animations API, so `element.animate` throws. Stub it in `test/component/setup.ts` to recover most of this |
+| `stage-chart.ts` | **72.8%** | The worst-covered real code. The geometry was extracted to `stage-layout.ts` (100%), but `calculateStageSizes` and `calculateTextFit` remain untested |
+
+`index.ts` reports 0% because it is re-exports only; nothing executes.
 
 ### ⚠️ REQUIRED: Update Tests When Modifying Covered Files
 
@@ -896,6 +912,20 @@ Example pages **must** follow this HTML structure for proper grid layout:
 - `examples.js` wraps `<pre>` in `.code-wrapper` divs - structure must account for this
 - Related examples go in ONE grid (e.g., Currency + Compact + d3-format together)
 - Standard chart size: `width="500" height="350"`
+
+**A chart shown without its markup is the one real violation.** The `<pre><code>` block is the
+point of an example page — a reader who cannot see the markup that produced the picture has
+learned nothing. Several pages had drifted into showing a chart alone.
+
+Prose sections ("How It Works", "Color Priority", a screen-reader testing guide) legitimately sit
+inside `.example` **without** a `.grid`, and should not be forced into one. The rule above is
+about chart examples.
+
+**`test/visual/examples.spec.ts` loads every page** and fails on NaN geometry, charts that render
+nothing, and unexpected console output. It exists because nothing else exercised these pages, and
+they had accumulated a removed attribute used 128 times, a grid attribute that never existed, and
+a donut that rendered entirely NaN coordinates. Add a page to `STARTS_EMPTY` or
+`DEMONSTRATES_DIAGNOSTICS` there if it is *meant* to render nothing or to emit DC warnings.
 
 **Required includes:**
 - `<link rel="stylesheet" href="examples.css">`
