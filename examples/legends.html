@@ -508,6 +508,41 @@
         </div>
     </div>
 
+    <div class="example">
+        <h2>Constraining Legend Width</h2>
+        <p><code>max-width</code> caps how wide the legend may grow, in viewBox units. Useful when labels are long and would otherwise take space from the plot.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Unconstrained</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-legend&gt;&lt;/dc-legend&gt;
+  &lt;dc-bar value="30" label="Western Region"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-legend></dc-legend>
+                    <dc-bar value="30" label="Western Region"></dc-bar>
+                    <dc-bar value="45" label="Eastern Region"></dc-bar>
+                    <dc-bar value="38" label="Northern Territories"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>max-width="120"</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-legend max-width="120"&gt;&lt;/dc-legend&gt;
+  &lt;dc-bar value="30" label="Western Region"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-legend max-width="120"></dc-legend>
+                    <dc-bar value="30" label="Western Region"></dc-bar>
+                    <dc-bar value="45" label="Eastern Region"></dc-bar>
+                    <dc-bar value="38" label="Northern Territories"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="../src/index.ts"></script>
     <script src="examples.js"></script>
 </body>

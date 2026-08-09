@@ -673,10 +673,21 @@ export class Chart extends AxisChart {
         pattern: b.pattern,
         patternStroke: b.patternStroke,
         patternFill: b.patternFill,
-        patternScale: b.patternScale,
-        defaultColor: this.getDefaultBarFill()
+        patternScale: b.patternScale
       }));
-      const resolvedFills = this.resolveFillsWithPatterns(elements);
+      // `defaultColor` is the *second argument* of resolveFillsWithPatterns.
+      // It used to be set as a field on each element instead, where nothing
+      // read it - the parameter type does not declare it, and an excess
+      // property check does not apply to a variable, so tsc never objected.
+      // `bar-color` was therefore silently dead: bars always auto-generated.
+      //
+      // Guarded on the attribute being present rather than on `this.barColor`,
+      // which has a truthy default. Passing that unconditionally would make
+      // every default bar chart a single flat green.
+      const resolvedFills = this.resolveFillsWithPatterns(
+        elements,
+        this.hasAttribute('bar-color') ? this.getDefaultBarFill() : undefined
+      );
 
       // Get effective stroke from chart-level shorthand (default: no stroke for bars)
       const effectiveStroke = this.getEffectiveStroke('none', 0);

@@ -174,6 +174,33 @@ describe('API.md matches the implemented attributes', () => {
   });
 
   /**
+   * Every diagnostic a user can see must be looked-up-able.
+   *
+   * Warnings echo to the console by default, so a `[DC005]` in DevTools is the
+   * library's main channel for telling someone their markup is wrong. API.md
+   * documented 3 of 24 codes, and one of those only incidentally, inside a
+   * sample log line.
+   *
+   * Note the message pattern accepts either quote style. Three messages are
+   * double-quoted because their text contains an apostrophe, and a
+   * single-quote-only pattern drops them without a word — which is this
+   * table's own failure mode, applied to the check meant to prevent it.
+   */
+  it('documents every diagnostic code', () => {
+    const errors = norm(readFileSync(resolve(root, 'src/errors.ts'), 'utf8'));
+    const codes = [...errors.matchAll(/code:\s*'(DC\d+)'/g)].map(m => m[1]);
+
+    expect(codes.length, 'no error codes were found to check').toBeGreaterThan(20);
+    expect(new Set(codes).size, 'duplicate DC codes in errors.ts').toBe(codes.length);
+
+    const undocumented = codes.filter(c => !api.includes(`\`${c}\``));
+    expect(
+      undocumented,
+      `error codes missing from API.md: ${undocumented.join(', ')}`
+    ).toEqual([]);
+  });
+
+  /**
    * A JSDoc `@attr` with no property behind it is how `fill-colors` came to be
    * the recommended replacement for a working attribute while never existing.
    * Text styling attributes are exempt: `font-family` and friends are read from

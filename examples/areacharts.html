@@ -466,6 +466,62 @@
         </div>
     </div>
 
+    <div class="example">
+        <h2>Missing Values</h2>
+        <p>A <code>&lt;dc-point&gt;</code> with no <code>value</code> means "no data", which is not the same as zero. Use <code>missing</code> on the area to say how those points should be treated.</p>
+
+        <div class="grid">
+            <div>
+                <h3>gap (default)</h3>
+                <pre><code>&lt;dc-area label="Traffic" missing="gap"&gt;
+  &lt;dc-point value="30" label="Mon"&gt;&lt;/dc-point&gt;
+  &lt;dc-point label="Tue"&gt;&lt;/dc-point&gt;
+  &lt;dc-point value="38" label="Wed"&gt;&lt;/dc-point&gt;
+  &lt;dc-point value="42" label="Thu"&gt;&lt;/dc-point&gt;
+&lt;/dc-area&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-area label="Traffic" missing="gap" fill="#2196F3">
+                        <dc-point value="30" label="Mon"></dc-point>
+                        <dc-point label="Tue"></dc-point>
+                        <dc-point value="38" label="Wed"></dc-point>
+                        <dc-point value="42" label="Thu"></dc-point>
+                    </dc-area>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>skip</h3>
+                <pre><code>&lt;dc-area label="Traffic" missing="skip"&gt;
+  &lt;!-- same points --&gt;
+&lt;/dc-area&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-area label="Traffic" missing="skip" fill="#4CAF50">
+                        <dc-point value="30" label="Mon"></dc-point>
+                        <dc-point label="Tue"></dc-point>
+                        <dc-point value="38" label="Wed"></dc-point>
+                        <dc-point value="42" label="Thu"></dc-point>
+                    </dc-area>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>zero</h3>
+                <pre><code>&lt;dc-area label="Traffic" missing="zero"&gt;
+  &lt;!-- same points --&gt;
+&lt;/dc-area&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-area label="Traffic" missing="zero" fill="#FF9800">
+                        <dc-point value="30" label="Mon"></dc-point>
+                        <dc-point label="Tue"></dc-point>
+                        <dc-point value="38" label="Wed"></dc-point>
+                        <dc-point value="42" label="Thu"></dc-point>
+                    </dc-area>
+                </dc-chart>
+            </div>
+        </div>
+        <p><strong>Only use <code>zero</code> when absent really does mean zero.</strong> A chart that dives to the axis is claiming the value <em>was</em> zero, which for anything financial or clinical is not a cosmetic difference.</p>
+    </div>
+
     <script type="module" src="../src/index.ts"></script>
     <script src="examples.js"></script>
 </body>

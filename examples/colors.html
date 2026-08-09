@@ -298,7 +298,94 @@
         </div>
     </div>
 
-    <script type="module" src="../dist/declarative-charts.standalone.js"></script>
+    <div class="example">
+        <h2>Chart-Level Default Colours</h2>
+        <p>When an element sets no <code>fill</code> of its own and matches no palette entry, the chart-level default is used. <code>bar-color</code>, <code>line-color</code> and <code>slice-color</code> set that default for bars, lines and pie slices respectively &mdash; useful when one colour for the whole series says more than a palette would.</p>
+        <p>Note the difference when they are <em>omitted</em>: bars are given distinct auto-generated colours, while lines all share one default stroke. Give each line its own <code>stroke</code>, or a <code>palette</code>, when they need telling apart.</p>
+
+        <div class="grid">
+            <div>
+                <h3>bar-color</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" bar-color="#7c3aed"&gt;
+  &lt;dc-bar value="30" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="45" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="38" label="Q3"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" bar-color="#7c3aed">
+                    <dc-bar value="30" label="Q1"></dc-bar>
+                    <dc-bar value="45" label="Q2"></dc-bar>
+                    <dc-bar value="38" label="Q3"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>line-color</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" line-color="#ea580c"&gt;
+  &lt;dc-line label="Temperature"&gt;
+    &lt;dc-point value="15" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="22" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="18" label="Wed"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" line-color="#ea580c">
+                    <dc-line label="Temperature">
+                        <dc-point value="15" label="Mon"></dc-point>
+                        <dc-point value="22" label="Tue"></dc-point>
+                        <dc-point value="18" label="Wed"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>slice-color</h3>
+                <pre><code>&lt;dc-pie-chart width="500" height="350" slice-color="#0d9488"&gt;
+  &lt;dc-pie-slice value="45" label="A"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="30" label="B" fill="#f59e0b"&gt;&lt;/dc-pie-slice&gt;
+  &lt;dc-pie-slice value="25" label="C"&gt;&lt;/dc-pie-slice&gt;
+&lt;/dc-pie-chart&gt;</code></pre>
+                <dc-pie-chart width="500" height="350" slice-color="#0d9488">
+                    <dc-pie-slice value="45" label="A"></dc-pie-slice>
+                    <dc-pie-slice value="30" label="B" fill="#f59e0b"></dc-pie-slice>
+                    <dc-pie-slice value="25" label="C"></dc-pie-slice>
+                </dc-pie-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Label Colour</h2>
+        <p><code>label-fill</code> sets the colour of an element's own label. By default labels drawn inside a shape pick a colour that contrasts with the fill; set <code>label-fill</code> to override that decision.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Automatic Contrast</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" show-value&gt;
+  &lt;dc-bar value="30" label="Dark" fill="#1e293b"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="45" label="Light" fill="#fde68a"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" show-value>
+                    <dc-bar value="30" label="Dark" fill="#1e293b"></dc-bar>
+                    <dc-bar value="45" label="Light" fill="#fde68a"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Explicit label-fill</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" show-value&gt;
+  &lt;dc-bar value="30" label="Dark" fill="#1e293b"
+          label-fill="#f87171"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="45" label="Light" fill="#fde68a"
+          label-fill="#7c3aed"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" show-value>
+                    <dc-bar value="30" label="Dark" fill="#1e293b" label-fill="#f87171"></dc-bar>
+                    <dc-bar value="45" label="Light" fill="#fde68a" label-fill="#7c3aed"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
     <script src="examples.js"></script>
 </body>
 </html>

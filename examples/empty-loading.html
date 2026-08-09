@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empty &amp; Loading States - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+</head>
+<body>
+    <h1>Empty &amp; Loading States</h1>
+    <p>What a chart shows when it has no data yet, or none to show at all</p>
+
+    <nav></nav>
+
+    <div class="example">
+        <h2>Empty Charts</h2>
+        <p>A chart with no data elements draws a placeholder instead of the plot. The axes, grid and legend are dropped with it &mdash; they all describe data, so drawing them around nothing is noise. The title is kept, because it still says what the chart is about.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Default Message</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Sales by Region&lt;/dc-title&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" console-log="none">
+                    <dc-title>Sales by Region</dc-title>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Custom Message with &lt;dc-empty&gt;</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Sales by Region&lt;/dc-title&gt;
+  &lt;dc-empty&gt;No sales recorded this quarter&lt;/dc-empty&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" console-log="none">
+                    <dc-title>Sales by Region</dc-title>
+                    <dc-empty>No sales recorded this quarter</dc-empty>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Styling the Message</h2>
+        <p><code>&lt;dc-empty&gt;</code> renders as SVG text, so it takes <code>fill</code> and a unitless <code>font-size</code> in viewBox units &mdash; the same conventions as <code>&lt;dc-title&gt;</code>. Keeping the wording in markup also means your page's own translation applies to it.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Colour and Size</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-empty fill="#dc2626" font-size="22"&gt;
+    Connection lost
+  &lt;/dc-empty&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" console-log="none">
+                    <dc-empty fill="#dc2626" font-size="22">Connection lost</dc-empty>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Themed with a CSS Variable</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"
+          style="--dc-empty-color: #2563eb"&gt;
+  &lt;dc-empty&gt;Nothing to report&lt;/dc-empty&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" console-log="none" style="--dc-empty-color: #2563eb">
+                    <dc-empty>Nothing to report</dc-empty>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>All Elements Hidden</h2>
+        <p>A chart whose data elements are all <code>hidden</code> is empty for a different reason, and says so. This is the state a filter UI produces when the filter matches nothing &mdash; distinguishing it from "no data was supplied" is the difference between a bug report and a shrug.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Every Bar Hidden</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Filtered Results&lt;/dc-title&gt;
+  &lt;dc-empty&gt;No results match your filter&lt;/dc-empty&gt;
+  &lt;dc-bar value="30" label="Q1" hidden&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="45" label="Q2" hidden&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" console-log="none">
+                    <dc-title>Filtered Results</dc-title>
+                    <dc-empty>No results match your filter</dc-empty>
+                    <dc-bar value="30" label="Q1" hidden></dc-bar>
+                    <dc-bar value="45" label="Q2" hidden></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Unhiding Restores the Chart</h3>
+                <pre><code>&lt;!-- Remove the hidden attribute and the
+     chart re-renders on its own --&gt;
+&lt;dc-bar value="30" label="Q1"&gt;&lt;/dc-bar&gt;</code></pre>
+                <dc-chart width="500" height="350" id="filter-demo" console-log="none">
+                    <dc-title>Filtered Results</dc-title>
+                    <dc-empty>No results match your filter</dc-empty>
+                    <dc-bar value="30" label="Q1" hidden></dc-bar>
+                    <dc-bar value="45" label="Q2" hidden></dc-bar>
+                    <dc-bar value="38" label="Q3" hidden></dc-bar>
+                </dc-chart>
+                <p><button id="filter-toggle">Toggle filter</button></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Loading State</h2>
+        <p>Add <code>loading</code> while data is on its way. The chart shows a skeleton rather than an empty plot, so the space does not jump when the data arrives. The skeleton uses a fixed shape, not a random one &mdash; a placeholder that reshuffles every frame is a distraction.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Loading Skeleton</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" loading&gt;
+  &lt;dc-title&gt;Revenue&lt;/dc-title&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" loading>
+                    <dc-title>Revenue</dc-title>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Loading, Then Loaded</h3>
+                <pre><code>&lt;dc-chart id="load-demo" width="500" height="350" loading&gt;
+  &lt;dc-title&gt;Revenue&lt;/dc-title&gt;
+&lt;/dc-chart&gt;
+
+&lt;script&gt;
+  // when the data arrives:
+  chart.removeAttribute('loading');
+&lt;/script&gt;</code></pre>
+                <dc-chart id="load-demo" width="500" height="350" loading>
+                    <dc-title>Revenue</dc-title>
+                    <dc-bar value="120" label="Jan"></dc-bar>
+                    <dc-bar value="150" label="Feb"></dc-bar>
+                    <dc-bar value="135" label="Mar"></dc-bar>
+                    <dc-bar value="180" label="Apr"></dc-bar>
+                </dc-chart>
+                <p><button id="load-toggle">Toggle loading</button></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Why This Matters</h2>
+        <p>An empty chart is the state a data-driven page spends most of its early life in, and the easiest one to get wrong. Three things the library does deliberately:</p>
+        <ul>
+            <li><strong>The plot is replaced, not merely blank.</strong> Axes and a legend around no data look like a rendering failure rather than an answer.</li>
+            <li><strong>The chart is not focusable while empty.</strong> <code>tabindex</code> drops to <code>-1</code>, so keyboard users are not sent into a chart with nothing to navigate.</li>
+            <li><strong>The reason is logged.</strong> <code>DC001</code> for no data, <code>DC002</code> for everything hidden &mdash; so "why is this blank" is answerable from the console. The examples above set <code>console-log="none"</code> only to keep this page quiet.</li>
+        </ul>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const filterBtn = document.getElementById('filter-toggle');
+            const filterChart = document.getElementById('filter-demo');
+            filterBtn?.addEventListener('click', () => {
+                // No requestUpdate() needed - the chart observes its own children.
+                filterChart.querySelectorAll('dc-bar').forEach(bar => bar.toggleAttribute('hidden'));
+            });
+
+            const loadBtn = document.getElementById('load-toggle');
+            const loadChart = document.getElementById('load-demo');
+            loadBtn?.addEventListener('click', () => {
+                loadChart.toggleAttribute('loading');
+            });
+        });
+    </script>
+</body>
+</html>

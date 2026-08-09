@@ -1310,8 +1310,8 @@ Renders bar, line, or bubble charts depending on child elements.
 - `point-shape` (string) - Default shape for points: "circle", "square", "triangle", "diamond", "star", "cross", "plus", or unicode character (default: "circle")
 - `curve-fit` (string) - Default curve fitting for lines and areas: "linear" (default), "smooth", "monotone", "step"
 - `overlapping` (boolean) - When true, multiple areas overlap instead of stacking (default: false)
-- `bar-color` (string) - Default fill for bars that set no `fill` of their own and match no palette entry (default: `#4CAF50`)
-- `line-color` (string) - Default stroke for lines and areas, on the same terms (default: `#2196F3`)
+- `bar-color` (string) - Fill for every bar that sets no `fill` of its own and matches no palette entry. When omitted, bars are given distinct auto-generated colours instead
+- `line-color` (string) - Stroke for lines and areas on the same terms (default: `#2196F3`, so lines share one colour unless given their own `stroke` or a palette)
 - `max-bubble-radius` (number) - Largest bubble radius, in viewBox units (default: 30)
 - `min-bubble-radius` (number) - Smallest bubble radius (default: 5)
 - Plus all [common chart attributes](#common-chart-attributes)
@@ -2563,10 +2563,59 @@ Add the `logging` attribute to any chart:
 
 | Value | Description |
 |-------|-------------|
-| `false` | No logging (default, best performance) |
+| `false` | No logging at all |
 | `error` | Only errors |
-| `warning` | Warnings and errors |
+| `warning` | Warnings and errors (**default**) |
 | `info` or `true` | All messages (info, warning, and error) |
+
+`console-log` takes `none`, `error`, `warning` (default) or `info` and controls
+what reaches the browser console. Capture and echo are separate: `logging`
+decides what is recorded for `<dc-log-console>`, `console-log` what is printed.
+
+### Diagnostic Codes
+
+Every warning carries a `DC` code. They are grouped by cause, so the number tells
+you where to look before you read the message.
+
+| Range | Category |
+|-------|----------|
+| DC001-DC099 | Data — nothing to draw, or values that cannot be drawn |
+| DC100-DC199 | Configuration — an attribute the library could not use |
+| DC200-DC299 | References — a palette, pattern or element that was not found |
+| DC300-DC399 | Style — a CSS convention used where SVG was expected |
+| DC400-DC499 | Informational — works, but probably not what you meant |
+
+| Code | Meaning |
+|------|---------|
+| `DC001` | Chart has no data elements |
+| `DC002` | Every data element is hidden |
+| `DC003` | All values sum to zero, so nothing can be drawn |
+| `DC004` | Elements have zero or negative values where positive is required |
+| `DC005` | Bars have value 0 and will not be visible |
+| `DC006` | Elements have negative values that may not display correctly |
+| `DC101` | A `<dc-line>` has no `<dc-point>` children |
+| `DC102` | A `<dc-area>` has no `<dc-point>` children |
+| `DC103` | `inner-radius` is unusable — see [`<dc-pie-chart>`](#dc-pie-chart) |
+| `DC104` | An attribute value could not be parsed; a default was used |
+| `DC105` | Invalid format string; the default format was used |
+| `DC106` | `type="time"` but too few valid dates were found |
+| `DC107` | Too many bars for the plot width; gutters were compressed |
+| `DC108` | A filename passed to `downloadSvg()` was adjusted |
+| `DC109` | Unrecognised `logging` or `console-log` value; default used |
+| `DC110` | Unrecognised stage `shape`; `rectangle` used |
+| `DC201` | Palette not found — check the name against [Palettes](#palettes-and-pattern-fills) |
+| `DC202` | Pattern is not a valid type or ID reference |
+| `DC203` | `zero-fill` referenced an element that does not exist |
+| `DC204` | No SVG found in the chart's shadow DOM (internal) |
+| `DC301` | A CSS attribute was used on `<dc-title>` where SVG was expected |
+| `DC302` | The same, on `<dc-legend>` |
+| `DC303` | The same, on `<dc-axis>` |
+| `DC401` | Every element has the same colour — consider a palette |
+
+A code that resolves to a fallback still draws a chart, which is why these are
+warnings rather than errors: the picture appears, but it is not the one the
+markup describes. That is the failure mode a declarative API is most prone to,
+so the warnings are on by default.
 
 ### Browser Console Output
 

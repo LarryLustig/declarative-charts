@@ -163,6 +163,40 @@
         </div>
     </div>
 
+    <div class="example">
+        <h2>Bubble Radius Limits</h2>
+        <p><code>min-bubble-radius</code> and <code>max-bubble-radius</code> set the range that size values are mapped onto, in viewBox units. Widen the range for more visual contrast; narrow it when large bubbles would overlap.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Default (5 to 30)</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-bubble label="Q1" value="30" size-value="10"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble label="Q2" value="45" size-value="120"&gt;&lt;/dc-bubble&gt;
+  &lt;dc-bubble label="Q3" value="60" size-value="300"&gt;&lt;/dc-bubble&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-bubble label="Q1" value="30" size-value="10"></dc-bubble>
+                    <dc-bubble label="Q2" value="45" size-value="120"></dc-bubble>
+                    <dc-bubble label="Q3" value="60" size-value="300"></dc-bubble>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Wider Range (10 to 60)</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"
+          min-bubble-radius="10" max-bubble-radius="60"&gt;
+  &lt;!-- same bubbles --&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" min-bubble-radius="10" max-bubble-radius="60">
+                    <dc-bubble label="Q1" value="30" size-value="10"></dc-bubble>
+                    <dc-bubble label="Q2" value="45" size-value="120"></dc-bubble>
+                    <dc-bubble label="Q3" value="60" size-value="300"></dc-bubble>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="../src/index.ts"></script>
     <script src="examples.js"></script>
 </body>

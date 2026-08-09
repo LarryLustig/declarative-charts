@@ -29,7 +29,12 @@ const pages = readdirSync(EXAMPLES_DIR).filter(f => f.endsWith('.html'));
  * point; `loaded-content.html` starts with nothing and fetches on demand.
  */
 const DEMONSTRATES_DIAGNOSTICS = new Set(['logging.html']);
-const STARTS_EMPTY = new Set(['loaded-content.html', 'htmx-integration.html']);
+const STARTS_EMPTY = new Set([
+  'loaded-content.html',
+  'htmx-integration.html',
+  // Its whole subject is what a chart shows when it has nothing to show.
+  'empty-loading.html'
+]);
 
 test.describe('example pages', () => {
   test('render without NaN, page errors, or unexpected warnings', async ({ page }) => {

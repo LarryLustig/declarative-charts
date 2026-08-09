@@ -697,6 +697,58 @@
         </div>
     </div>
 
+    <div class="example">
+        <h2>Shape Proportions and Size Limits</h2>
+        <p>Stage charts size by <em>area</em>, and <code>aspect-ratio</code> decides how that area is spread across width and height. A ratio of 1 gives squares; higher ratios give shorter, broader shapes for the same value. <code>stage-max-size</code> caps the largest stage, which stops one dominant value from crowding out the rest.</p>
+
+        <div class="grid">
+            <div>
+                <h3>aspect-ratio="1"</h3>
+                <pre><code>&lt;dc-stage-chart width="600" height="500"
+                stage-size="value" aspect-ratio="1"&gt;
+  &lt;dc-stage value="100" label="Leads"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="60" label="Qualified"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="20" label="Won"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="600" height="500" stage-size="value" aspect-ratio="1">
+                    <dc-stage value="100" label="Leads"></dc-stage>
+                    <dc-stage value="60" label="Qualified"></dc-stage>
+                    <dc-stage value="20" label="Won"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>aspect-ratio="3"</h3>
+                <pre><code>&lt;dc-stage-chart width="600" height="500"
+                stage-size="value" aspect-ratio="3"&gt;
+  &lt;!-- same stages --&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="600" height="500" stage-size="value" aspect-ratio="3">
+                    <dc-stage value="100" label="Leads"></dc-stage>
+                    <dc-stage value="60" label="Qualified"></dc-stage>
+                    <dc-stage value="20" label="Won"></dc-stage>
+                </dc-stage-chart>
+            </div>
+
+            <div>
+                <h3>stage-max-size="90"</h3>
+                <pre><code>&lt;dc-stage-chart width="600" height="500"
+                stage-size="value" stage-max-size="90"&gt;
+  &lt;dc-stage value="500" label="Leads"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="60" label="Qualified"&gt;&lt;/dc-stage&gt;
+  &lt;dc-stage value="20" label="Won"&gt;&lt;/dc-stage&gt;
+&lt;/dc-stage-chart&gt;</code></pre>
+                <dc-stage-chart width="600" height="500" stage-size="value" stage-max-size="90">
+                    <dc-stage value="500" label="Leads"></dc-stage>
+                    <dc-stage value="60" label="Qualified"></dc-stage>
+                    <dc-stage value="20" label="Won"></dc-stage>
+                </dc-stage-chart>
+            </div>
+        </div>
+        <p>A stage wider than the plot area is clamped to fit, so at a high <code>aspect-ratio</code> in a narrow chart the largest stages can end up the same width. Widen the chart or lower the ratio if two stages of different value look identical.</p>
+    </div>
+
+
     <script type="module" src="../src/index.ts"></script>
     <script src="examples.js"></script>
 </body>

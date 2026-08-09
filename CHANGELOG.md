@@ -9,6 +9,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`bar-color` did nothing.** `chart.ts` set `defaultColor` as a *field* on each element, but
+  `resolveFillsWithPatterns()` takes it as its **second argument** — nothing read the field, and
+  TypeScript's excess-property check does not apply to a variable, so the compiler never objected.
+  Bars auto-generated their colours whatever `bar-color` said. This is very likely why an earlier
+  review recorded the attribute as a deprecation: it was undocumented *and* inert. The fix is
+  guarded on the attribute being present, so charts without it still get distinct auto-generated
+  colours rather than one flat green
+- **Four example pages were broken on a fresh clone.** `colors.html`, `defaults.html`,
+  `palettes.html` and `swatches.html` loaded `../dist/declarative-charts.standalone.js`, which is
+  gitignored and uncommitted, so they showed nothing until someone ran `npm run build` — and stale
+  library behaviour whenever `dist/` was out of date. All four now load `../src/index.ts` like the
+  other 29
+- **Only 3 of 24 diagnostic codes were documented**, one of them incidentally inside a sample log
+  line. Warnings echo to the console by default, so a `[DC005]` in DevTools had nowhere to point.
+  API.md now carries the full reference, and the log-level table no longer claims `false` is the
+  default — it has been `warning` since diagnostics were turned on
+
+### Added
+
+- **`examples/empty-loading.html`** — the Empty and Loading States feature had no example at all.
+  Covers the default and custom messages, styling `<dc-empty>`, the all-hidden state and the
+  loading skeleton, with live toggles for the last two
+- Examples for features that had none: `missing` on areas, `text-scaling`, bubble radius limits,
+  legend `max-width`, stage `aspect-ratio` and `stage-max-size`, individual side padding, and the
+  chart-level `bar-color` / `line-color` / `slice-color` / `label-fill` defaults. Attribute
+  coverage in `examples/` went from 75/103 to 98/103
+
+
 - **A donut written as `inner-radius="50%"` rendered nothing but NaN coordinates.**
   `Number("50%")` is NaN, and NaN is false for both `< 0` and `>= 100`, so it passed the `DC103`
   validation that exists for exactly this. `inner-radius` now accepts `50` and `"50%"` alike, and
