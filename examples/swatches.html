@@ -18,22 +18,6 @@
         .swatch-demo dc-swatch {
             margin-right: 5px;
         }
-        .data-table {
-            border-collapse: collapse;
-            width: 100%;
-            margin: 20px 0;
-        }
-        .data-table th, .data-table td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-        }
-        .data-table th {
-            background: #f3f4f6;
-        }
-        .data-table tr:nth-child(even) {
-            background: #f9fafb;
-        }
     </style>
 </head>
 <body>
@@ -103,7 +87,7 @@
   &lt;/tr&gt;
   ...
 &lt;/table&gt;</code></pre>
-                <table class="data-table">
+                <table class="example-table">
                     <tr>
                         <th>Category</th>
                         <th>Q4 Value</th>
@@ -199,13 +183,18 @@ Expenses remain stable</code></pre>
                 <pre><code>&lt;dc-chart palette="brand-colors" width="500" height="300"&gt;
   &lt;dc-title&gt;Quarterly Trends&lt;/dc-title&gt;
   &lt;dc-line label="Revenue"&gt;
-    &lt;dc-point value="100" label="Q1"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="120" label="Q2"&gt;&lt;/dc-point&gt;
+  &lt;dc-point value="100" label="Q1"&gt;&lt;/dc-point&gt;
+  &lt;dc-point value="120" label="Q2"&gt;&lt;/dc-point&gt;
+  &lt;dc-point value="115" label="Q3"&gt;&lt;/dc-point&gt;
+  &lt;dc-point value="140" label="Q4"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
   &lt;dc-line label="Expenses"&gt;
-    &lt;dc-point value="80" label="Q1"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="85" label="Q2"&gt;&lt;/dc-point&gt;
+  &lt;dc-point value="80" label="Q1"&gt;&lt;/dc-point&gt;
+  &lt;dc-point value="85" label="Q2"&gt;&lt;/dc-point&gt;
+  &lt;dc-point value="90" label="Q3"&gt;&lt;/dc-point&gt;
+  &lt;dc-point value="88" label="Q4"&gt;&lt;/dc-point&gt;
   &lt;/dc-line&gt;
+  &lt;dc-legend position="top"&gt;&lt;/dc-legend&gt;
 &lt;/dc-chart&gt;</code></pre>
                 <dc-chart palette="brand-colors" width="500" height="300">
                     <dc-title>Quarterly Trends</dc-title>

@@ -79,6 +79,7 @@ const NAV_CONFIG = {
         {
             label: 'Developer',
             dropdown: [
+                { href: 'defaults.html', label: 'Default Configuration' },
                 { href: 'logging.html', label: 'Logging' },
                 { href: 'htmx-integration.html', label: 'htmx Integration' },
                 { href: 'accessibility.html', label: 'Accessibility' },

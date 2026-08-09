@@ -921,11 +921,37 @@ Prose sections ("How It Works", "Color Priority", a screen-reader testing guide)
 inside `.example` **without** a `.grid`, and should not be forced into one. The rule above is
 about chart examples.
 
-**`test/visual/examples.spec.ts` loads every page** and fails on NaN geometry, charts that render
-nothing, and unexpected console output. It exists because nothing else exercised these pages, and
-they had accumulated a removed attribute used 128 times, a grid attribute that never existed, and
-a donut that rendered entirely NaN coordinates. Add a page to `STARTS_EMPTY` or
-`DEMONSTRATES_DIAGNOSTICS` there if it is *meant* to render nothing or to emit DC warnings.
+**Three tests guard the examples**, because nothing used to:
+
+| Test | Catches |
+|---|---|
+| `test/visual/examples.spec.ts` | NaN geometry, charts rendering nothing, unexpected console output |
+| `test/visual/example-code.spec.ts` | a `<pre><code>` block that disagrees with the chart beside it |
+| `test/unit/examples-structure.test.ts` | boilerplate, nav reachability, `dist/` loads, duplicated CSS |
+
+Add a page to `STARTS_EMPTY` or `DEMONSTRATES_DIAGNOSTICS` in the first if it is *meant* to render
+nothing or emit DC warnings, and to `FRAGMENTS` in the third if it is an htmx fragment rather than
+a page.
+
+**The code block must match the chart.** This is the worst drift a page can carry because it is
+invisible — the picture is right and the markup under it is wrong, so a reader who copies it gets
+something else. `label-positioning.html` had 20 cells whose snippets omitted the `palette` and the
+`<dc-title>` the charts actually had. A snippet may still abbreviate, but it has to *say* so: an
+ellipsis, or a comment like `<!-- same bars -->`. Twenty-four bars do not need spelling out.
+
+**Load the library the same way on every page:** `<script type="module" src="../src/index.ts">`.
+Four pages once loaded `../dist/declarative-charts.standalone.js`, which is gitignored and never
+committed, so they were blank on a fresh clone. Never reference `dist/` from an example.
+
+**Charts inside one grid share a size.** Side-by-side cells exist to be compared, and different
+dimensions make the comparison unfair and the row ragged. Across pages the size varies with the
+chart type — stage and funnel charts are legitimately taller — so there is no single global
+standard beyond `500x350` being the common default.
+
+**Shared styling belongs in `examples.css`,** not in a page-local `<style>`. Page-local blocks are
+for what is genuinely unique to a page — the `::part()` demo on `colors.html`, the palette cards
+on `palettes.html`. `.note` was once declared byte-for-byte on three pages, and buttons were
+styled on one page only.
 
 **Required includes:**
 - `<link rel="stylesheet" href="examples.css">`

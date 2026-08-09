@@ -305,7 +305,7 @@
         <div class="grid">
             <div>
                 <h3>Bar Chart</h3>
-                <pre><code>&lt;dc-chart palette="category10" width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" palette="category10"&gt;
   &lt;dc-title&gt;Quarterly Sales&lt;/dc-title&gt;
   &lt;dc-bar value="10" label="Q1"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="25" label="Q2"&gt;&lt;/dc-bar&gt;
@@ -325,7 +325,7 @@
 
             <div>
                 <h3>Funnel with Gradient</h3>
-                <pre><code>&lt;dc-funnel-chart palette="cool-to-warm" width="500" height="350"&gt;
+                <pre><code>&lt;dc-funnel-chart width="500" height="350" palette="cool-to-warm"&gt;
   &lt;dc-title&gt;Sales Funnel&lt;/dc-title&gt;
   &lt;dc-funnel-stage value="1000" label="Visitors"&gt;&lt;/dc-funnel-stage&gt;
   &lt;dc-funnel-stage value="600" label="Leads"&gt;&lt;/dc-funnel-stage&gt;
@@ -370,9 +370,11 @@
 &lt;/dc-palette&gt;
 
 &lt;dc-chart palette="brand-colors" width="500" height="350"&gt;
+  &lt;dc-title&gt;Q4 Financial Summary&lt;/dc-title&gt;
   &lt;dc-bar value="120" label="Revenue"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="80" label="Expenses"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="40" label="Profit"&gt;&lt;/dc-bar&gt;
+  &lt;dc-legend&gt;&lt;/dc-legend&gt;
 &lt;/dc-chart&gt;</code></pre>
                 <dc-chart palette="brand-colors" width="500" height="350">
                     <dc-title>Q4 Financial Summary</dc-title>
@@ -392,6 +394,7 @@
 &lt;/dc-palette&gt;
 
 &lt;dc-chart palette="performance-thresholds" width="500" height="350"&gt;
+  &lt;dc-title&gt;Team Performance Scores&lt;/dc-title&gt;
   &lt;dc-bar value="25" label="Team A"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="55" label="Team B"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="85" label="Team C"&gt;&lt;/dc-bar&gt;
@@ -426,10 +429,13 @@
 &lt;/dc-palette&gt;
 
 &lt;dc-chart palette="pos-neg" width="500" height="350"&gt;
+  &lt;dc-title&gt;Monthly Profit/Loss&lt;/dc-title&gt;
   &lt;dc-bar value="35" label="Jan"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="-20" label="Feb"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="50" label="Mar"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="-10" label="Apr"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="25" label="May"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="-30" label="Jun"&gt;&lt;/dc-bar&gt;
 &lt;/dc-chart&gt;</code></pre>
                 <dc-chart palette="pos-neg" width="500" height="350">
                     <dc-title>Monthly Profit/Loss</dc-title>

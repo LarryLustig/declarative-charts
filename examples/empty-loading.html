@@ -49,9 +49,7 @@
             <div>
                 <h3>Colour and Size</h3>
                 <pre><code>&lt;dc-chart width="500" height="350"&gt;
-  &lt;dc-empty fill="#dc2626" font-size="22"&gt;
-    Connection lost
-  &lt;/dc-empty&gt;
+  &lt;dc-empty fill="#dc2626" font-size="22"&gt;Connection lost&lt;/dc-empty&gt;
 &lt;/dc-chart&gt;</code></pre>
                 <dc-chart width="500" height="350" console-log="none">
                     <dc-empty fill="#dc2626" font-size="22">Connection lost</dc-empty>
@@ -60,8 +58,7 @@
 
             <div>
                 <h3>Themed with a CSS Variable</h3>
-                <pre><code>&lt;dc-chart width="500" height="350"
-          style="--dc-empty-color: #2563eb"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" style="--dc-empty-color: #2563eb"&gt;
   &lt;dc-empty&gt;Nothing to report&lt;/dc-empty&gt;
 &lt;/dc-chart&gt;</code></pre>
                 <dc-chart width="500" height="350" console-log="none" style="--dc-empty-color: #2563eb">
@@ -128,6 +125,10 @@
                 <h3>Loading, Then Loaded</h3>
                 <pre><code>&lt;dc-chart id="load-demo" width="500" height="350" loading&gt;
   &lt;dc-title&gt;Revenue&lt;/dc-title&gt;
+  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="150" label="Feb"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="135" label="Mar"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="180" label="Apr"&gt;&lt;/dc-bar&gt;
 &lt;/dc-chart&gt;
 
 &lt;script&gt;

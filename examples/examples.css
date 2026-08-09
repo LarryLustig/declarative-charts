@@ -235,3 +235,83 @@ code {
 dc-chart {
     margin: 20px 0;
 }
+
+/* ---------------------------------------------------------------------------
+   Callout used by several pages for an aside that is not part of an example.
+   Was duplicated verbatim in three page-local <style> blocks.
+   --------------------------------------------------------------------------- */
+
+.note {
+    background: #e3f2fd;
+    border-left: 4px solid #2196F3;
+    padding: 10px 15px;
+    margin: 15px 0;
+    border-radius: 0 4px 4px 0;
+}
+
+.note strong {
+    color: #1565C0;
+}
+
+/* ---------------------------------------------------------------------------
+   Interactive controls. Shared so a button looks the same on every page - these
+   lived only on interactive.html, so buttons elsewhere fell back to the
+   browser default.
+   --------------------------------------------------------------------------- */
+
+.controls {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f0f0f0;
+    border-radius: 4px;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 5px;
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #1976D2;
+}
+
+/* ---------------------------------------------------------------------------
+   Reference tables inside example pages. One class, because the three that
+   existed (.format-table, .position-table, .data-table) were the same component
+   with accidental differences in padding and striping.
+   --------------------------------------------------------------------------- */
+
+.example-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 20px 0;
+}
+
+.example-table th,
+.example-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+.example-table th {
+    background: #f3f4f6;
+}
+
+.example-table tr:nth-child(even) {
+    background: #f9fafb;
+}
+
+.example-table code {
+    background: #e5e7eb;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}

@@ -5,30 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Number Formatting - Declarative Chart Library</title>
     <link rel="stylesheet" href="examples.css">
-    <style>
-        .format-table {
-            border-collapse: collapse;
-            width: 100%;
-            margin: 20px 0;
-        }
-        .format-table th, .format-table td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-        }
-        .format-table th {
-            background: #f3f4f6;
-        }
-        .format-table tr:nth-child(even) {
-            background: #f9fafb;
-        }
-        .format-table code {
-            background: #e5e7eb;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.9em;
-        }
-    </style>
 </head>
 <body>
     <h1>Number Formatting</h1>
@@ -39,7 +15,7 @@
     <h2>Format Syntax Reference</h2>
 
     <h3>Named Presets</h3>
-    <table class="format-table">
+    <table class="example-table">
         <thead>
             <tr>
                 <th>Preset</th>
@@ -124,7 +100,7 @@
     </table>
 
     <h3>d3-format Subset</h3>
-    <table class="format-table">
+    <table class="example-table">
         <thead>
             <tr>
                 <th>Format</th>
@@ -252,13 +228,13 @@
         <div class="grid">
             <div>
                 <h3>Compact Axis Labels</h3>
-                <pre><code>&lt;dc-chart width="500" height="300" value-format="$,.0f"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" value-format="$,.0f"&gt;
     &lt;dc-axis position="left" value-format="compact 1"&gt;&lt;/dc-axis&gt;
     &lt;dc-bar value="2500000" label="Product A"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="1800000" label="Product B"&gt;&lt;/dc-bar&gt;
     &lt;dc-bar value="3200000" label="Product C"&gt;&lt;/dc-bar&gt;
 &lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="300" value-format="$,.0f">
+                <dc-chart width="500" height="350" value-format="$,.0f">
                     <dc-axis position="left" value-format="compact 1"></dc-axis>
                     <dc-bar value="2500000" label="Product A"></dc-bar>
                     <dc-bar value="1800000" label="Product B"></dc-bar>
@@ -360,7 +336,7 @@
             </div>
             <div>
                 <h3>Line Chart with Currency</h3>
-                <pre><code>&lt;dc-chart width="500" height="300" value-format="$,.2f"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350" value-format="$,.2f"&gt;
     &lt;dc-line label="ACME Stock"&gt;
         &lt;dc-point value="142.50" label="Mon"&gt;&lt;/dc-point&gt;
         &lt;dc-point value="145.75" label="Tue"&gt;&lt;/dc-point&gt;
@@ -369,7 +345,7 @@
         &lt;dc-point value="151.50" label="Fri"&gt;&lt;/dc-point&gt;
     &lt;/dc-line&gt;
 &lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="500" height="300" value-format="$,.2f">
+                <dc-chart width="500" height="350" value-format="$,.2f">
                     <dc-line label="ACME Stock">
                         <dc-point value="142.50" label="Mon"></dc-point>
                         <dc-point value="145.75" label="Tue"></dc-point>

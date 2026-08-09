@@ -9,6 +9,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **43 example code blocks did not match the chart beside them.** `label-positioning.html`
+  accounted for 20 of them, every snippet omitting the `palette` and the `<dc-title>` its chart
+  actually had — so copying any of them produced different colours and no title. Snippets are now
+  regenerated from the charts themselves, and may abbreviate only when they say so (an ellipsis,
+  or a comment such as `<!-- same bars -->`)
+- **`defaults.html` was in no navigation menu**, reachable only by typing its URL
+- **`animations.html` loaded the library from an absolute `/src/index.ts`**, which breaks whenever
+  the site is not served from the domain root. Every page now uses the same relative path
+- **Seven grids mixed chart sizes across side-by-side cells**, making the comparisons they exist
+  for unfair and the rows ragged
+- **`.note` was declared byte-for-byte in three page-local `<style>` blocks**, and buttons were
+  styled on `interactive.html` alone — so the same control looked different depending on the page.
+  Both now live in `examples.css`, along with a single `.example-table` replacing the three
+  near-identical table styles (`.format-table`, `.position-table`, `.data-table`) that differed
+  only by accident in padding and striping
+- `loaded-content.html` is an htmx fragment, not a page; it is now marked as one, and its heading
+  typo ("Dyanmic") is fixed
+
+### Added
+
+- **`test/visual/example-code.spec.ts`** compares all 386 example code blocks against the charts
+  they sit beside, in both attributes and child-element counts
+- **`test/unit/examples-structure.test.ts`** pins the page-to-page invariants: boilerplate, title
+  convention, script order, nav reachability, no `dist/` references, and no CSS duplicated across
+  page-local `<style>` blocks
+
+
 - **`bar-color` did nothing.** `chart.ts` set `defaultColor` as a *field* on each element, but
   `resolveFillsWithPatterns()` takes it as its **second argument** — nothing read the field, and
   TypeScript's excess-property check does not apply to a variable, so the compiler never objected.
