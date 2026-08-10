@@ -310,6 +310,20 @@ test.describe('Chart Features', () => {
     await expect(container).toHaveScreenshot('legend-top.png');
   });
 
+  /**
+   * The evenly-spaced fixture above cannot show whether a time axis is working:
+   * weekly samples look identical whether they are placed by date or by index.
+   * These samples are deliberately irregular - three days apart, then seven
+   * weeks - so the gaps in the drawn line are the assertion.
+   */
+  test('line chart with unevenly sampled time axis', async ({ page }) => {
+    await page.goto(`${FIXTURES_URL}?chart=time-axis-uneven`);
+    await waitForChartRender(page);
+
+    const container = await getChartContainer(page, 'time-axis-uneven');
+    await expect(container).toHaveScreenshot('time-axis-uneven.png');
+  });
+
   test('line chart with time axis', async ({ page }) => {
     await page.goto(`${FIXTURES_URL}?chart=time-axis`);
     await waitForChartRender(page);

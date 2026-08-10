@@ -1651,13 +1651,16 @@ guarded by tests; the custom-elements manifest ships; the README now leads with 
 Django and a Rails template loop, and an htmx swap; the npm keywords include `hypermedia`,
 `no-build`, `server-rendered`, `htmx`, plus `html-first`, `django` and `rails`.
 
-> **One discovery from this phase changes what "complete" means.** The time-axis feature —
-> `type="time"`, `date-format`, `date-label-format` — is **entirely unwired**. `parseTimeScale`,
-> `getTimeX` and `renderTimeAxis` all exist in `axis-chart.ts` and nothing calls them, so a time
-> axis renders raw label strings spaced by index. It is documented in API.md, demonstrated in
-> `examples/`, and has a *passing visual baseline of the broken output*. Decide whether to build
-> it or withdraw it before posting anywhere: a reader who tries the documented example gets a
-> chart that quietly ignores half its configuration.
+> **The time axis, found unwired during this phase, is now built.** `parseTimeScale`, `getTimeX`
+> and `renderTimeAxisLabels` existed in `axis-chart.ts` and nothing called them, so `type="time"`
+> rendered raw label strings spaced by index — documented, exampled, and carrying a *passing
+> visual baseline of the broken output*. Points now sit where their dates fall, the axis labels
+> its own tick dates, and a second visual fixture uses deliberately irregular samples so the
+> baseline would catch a regression that the evenly-spaced one cannot see.
+>
+> Building it exposed a bug underneath: `formatDate` chained `.replace()` calls, so the final
+> `/a/g` → AM|PM rewrote the "a" inside the month name it had just written. `"MMM d"` produced
+> `"JPMn 3"`. Every existing test used June.
 
 **Still to do:** one good post to r/htmx, r/django, and Lobsters.
 

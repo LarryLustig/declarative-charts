@@ -258,24 +258,39 @@ export function formatDate(date: Date, format: string): string {
   const hour12 = hour % 12 || 12;
   const ampm = hour < 12 ? 'AM' : 'PM';
 
-  return format
-    .replace(/yyyy/g, String(year))
-    .replace(/yy/g, String(year).slice(-2))
-    .replace(/MMMM/g, MONTH_NAMES_LONG[month])
-    .replace(/MMM/g, MONTH_NAMES_SHORT[month])
-    .replace(/MM/g, String(month + 1).padStart(2, '0'))
-    .replace(/M/g, String(month + 1))
-    .replace(/dd/g, String(day).padStart(2, '0'))
-    .replace(/d/g, String(day))
-    .replace(/HH/g, String(hour).padStart(2, '0'))
-    .replace(/H/g, String(hour))
-    .replace(/hh/g, String(hour12).padStart(2, '0'))
-    .replace(/h/g, String(hour12))
-    .replace(/mm/g, String(minute).padStart(2, '0'))
-    .replace(/m/g, String(minute))
-    .replace(/ss/g, String(second).padStart(2, '0'))
-    .replace(/s/g, String(second))
-    .replace(/a/g, ampm);
+  const replacements: Record<string, string> = {
+    yyyy: String(year),
+    yy: String(year).slice(-2),
+    MMMM: MONTH_NAMES_LONG[month],
+    MMM: MONTH_NAMES_SHORT[month],
+    MM: String(month + 1).padStart(2, '0'),
+    M: String(month + 1),
+    dd: String(day).padStart(2, '0'),
+    d: String(day),
+    HH: String(hour).padStart(2, '0'),
+    H: String(hour),
+    hh: String(hour12).padStart(2, '0'),
+    h: String(hour12),
+    mm: String(minute).padStart(2, '0'),
+    m: String(minute),
+    ss: String(second).padStart(2, '0'),
+    s: String(second),
+    a: ampm
+  };
+
+  // One pass, not a chain of .replace() calls.
+  //
+  // Chained replacements substitute into their own output: `MMM` produced
+  // "Jan", and the final `/a/g` -> AM|PM then rewrote the "a" inside it, so
+  // "MMM d" rendered as "JPMn 3". Every month containing an 'a' - Jan, Mar,
+  // May - came out mangled. The existing tests all used June, which does not,
+  // so nothing caught it.
+  //
+  // Alternatives are ordered longest-first so `MMMM` wins over `MMM` over `MM`.
+  return format.replace(
+    /yyyy|yy|MMMM|MMM|MM|M|dd|d|HH|H|hh|h|mm|m|ss|s|a/g,
+    token => replacements[token]
+  );
 }
 
 // ============================================================================

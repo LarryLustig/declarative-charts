@@ -489,6 +489,11 @@ export class Chart extends AxisChart {
     return [...barValues, ...lineValues, ...bubbleValues, ...areaValues, ...stackedMaximums];
   }
 
+  /** Bars occupy fixed slots, so a time scale is not applied when any exist. */
+  protected override hasCategorySlots(): boolean {
+    return this.getFlattenedBars().length > 0;
+  }
+
   protected getCategoryLabels(): string[] {
     // Prefer bar labels, then line labels, then area labels, then bubble labels
     const bars = this.getFlattenedBars();
@@ -2744,8 +2749,12 @@ export class Chart extends AxisChart {
             }
           } else {
             // Vertical orientation (default): x is category-based, y is value-based
-            // Try label matching first, then fall back to index-based
-            if (labelPositions.has(point.label)) {
+            // A time axis places the point by its date; otherwise match the
+            // label against the categories, and fall back to the index.
+            const timeX = this.getTimeXForLabel(point.label, padding.left, chartWidth);
+            if (timeX !== null) {
+              x = timeX;
+            } else if (labelPositions.has(point.label)) {
               x = labelPositions.get(point.label)!;
             } else {
               x = bars.length > 0
@@ -2942,6 +2951,9 @@ export class Chart extends AxisChart {
         if (point.label && labelPositions.has(point.label)) {
           x = labelPositions.get(point.label)!;
         }
+        // A time axis positions by date, ahead of label matching.
+        const timeX = this.getTimeXForLabel(point.label, padding.left, chartWidth);
+        if (timeX !== null) x = timeX;
 
         const valueHeight = Number.isFinite(point.value)
           ? (point.value / totalRange) * chartHeight
@@ -3018,6 +3030,10 @@ export class Chart extends AxisChart {
           if (point.label && labelPositions.has(point.label)) {
             x = labelPositions.get(point.label)!;
           }
+
+          // A time axis positions by date, ahead of label matching.
+          const timeXPos = this.getTimeXForLabel(point.label, padding.left, chartWidth);
+          if (timeXPos !== null) x = timeXPos;
 
           const y = this.height - padding.bottom - ((point.value - min) / totalRange) * chartHeight;
 
@@ -3227,7 +3243,8 @@ export class Chart extends AxisChart {
 
     return svg`
       ${bubbles.map((bubble, index) => {
-        const x = padding.left + stepX / 2 + index * stepX;
+        const x = this.getTimeXForLabel(bubble.label, padding.left, chartWidth)
+          ?? padding.left + stepX / 2 + index * stepX;
         const y = this.height - padding.bottom - ((bubble.value - min) / totalRange) * chartHeight;
         const radius = this.calculateBubbleRadius(bubble.sizeValue, maxSizeValue);
 
@@ -3459,6 +3476,14 @@ export class Chart extends AxisChart {
     chartWidth: number,
     range: ValueRange
   ): SVGTemplateResult {
+    // A time axis labels its own tick dates rather than every datapoint: with
+    // daily data over a year, one label per point is unreadable, and the ticks
+    // land on round dates instead of wherever the samples happen to fall.
+    const timeScale = this.getTimeScale();
+    if (timeScale) {
+      return this.renderTimeAxisLabels(timeScale, padding, chartWidth);
+    }
+
     const stepX = chartWidth / (points.length - 1 || 1);
     // For all-negative charts, position labels at top (where zero is)
     const labelsAtTop = !range.hasPositives;

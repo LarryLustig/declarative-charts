@@ -7,7 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Time axes work.** `<dc-axis type="time">` now positions points by their date rather than by
+  their turn, and labels the axis with its own round tick dates instead of one label per
+  datapoint. `date-format="timestamp"` reads Unix seconds; `date-label-format` takes the `MMM d`
+  token set. Lines, areas and bubbles are all positioned; bar charts decline a time scale and say
+  why, since bars occupy fixed slots the ticks could not line up with
+  - Everything needed already existed — `parseTimeScale`, `getTimeX` and `renderTimeAxisLabels`
+    in `axis-chart.ts`, and the parsers in `date-utils.ts` — and **nothing called any of it**, so
+    the feature had been documented, exampled and visually baselined while doing nothing at all
+
 ### Fixed
+
+- **`formatDate` mangled every month name containing an "a".** It ran a chain of `.replace()`
+  calls, so the final `/a/g` → AM|PM rewrote the "a" inside the month it had just produced:
+  `"MMM d"` rendered `"JPMn 3"` for January. Jan, Mar and May were all affected. It is now a
+  single tokenising pass. Every existing test used June, whose names contain no "a", which is why
+  it had gone unnoticed
+
 
 - **`<dc-palette high-contrast>` did nothing.** CLAUDE.md documents it as the way to override
   high-contrast colours, and nothing read the palette's own flag — a page that chose accessible

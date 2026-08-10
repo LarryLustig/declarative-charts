@@ -283,7 +283,15 @@ const CONTEXT_FOR_ELEMENT: Record<string, (attrs: string) => string> = {
     `<dc-chart width="600" height="400">
        <dc-axis ${a}><dc-title>Axis title</dc-title></dc-axis>${BARS}
      </dc-chart>`,
-  'dc-axis:type': a => `<dc-chart width="600" height="400"><dc-axis position="bottom" ${a}></dc-axis>${BARS}</dc-chart>`,
+  'dc-axis:type': a =>
+    `<dc-chart width="600" height="400">
+       <dc-axis position="bottom" ${a}></dc-axis>
+       <dc-line label="L">
+         <dc-point value="10" label="2024-01-01"></dc-point>
+         <dc-point value="20" label="2024-01-08"></dc-point>
+         <dc-point value="30" label="2024-03-01"></dc-point>
+       </dc-line>
+     </dc-chart>`,
   'dc-axis:label-interval': a => MANY_BAR_AXIS(a),
   'dc-axis:label-lines': a => MANY_BAR_AXIS(a),
   'dc-axis:date-format': a => TIME_AXIS(a),
@@ -380,7 +388,10 @@ const VALUE_FOR_ELEMENT: Record<string, string> = {
   // 'bottom' is the default, so it restates rather than changes. 'top' moves
   // the axis title, which is what makes the change observable at all.
   'dc-axis:position': 'top',
-  'dc-axis:type': 'value',
+  // The auto-detected format for this span is already "MMM d", so asking for
+  // it again changes nothing. yyyy-MM never coincides with the auto choice.
+  'dc-axis:date-label-format': 'yyyy-MM',
+  'dc-axis:type': 'time',
   'dc-legend-item:stroke': '#ff00ff',
 
   // 'circle' is already the swatch default, so it would change nothing.
@@ -415,19 +426,8 @@ const NO_VISUAL_EFFECT: Record<string, string> = {
  * the code and forget.
  */
 const KNOWN_DEAD: Record<string, string> = {
-  /**
-   * The whole time-axis feature is unwired, not just these three attributes.
-   * `parseTimeScale`, `getTimeX` and `renderTimeAxis` all exist in
-   * `axis-chart.ts` and **nothing calls them** - so `type="time"` leaves the
-   * raw label strings in place, spaced by index rather than by date.
-   *
-   * It is documented in API.md, demonstrated in the examples, and has a passing
-   * visual baseline showing the un-implemented output. Fixing it means wiring
-   * the feature up, not writing a better test context.
-   */
-  'dc-axis:type': 'axisConfig.type is read only by parseTimeScale, which has no caller',
-  'dc-axis:date-format': 'the time axis never runs; see dc-axis:type',
-  'dc-axis:date-label-format': 'the time axis never runs; see dc-axis:type'
+  // Empty. The time-axis attributes that were here are implemented; the ten
+  // before them are too. A new entry means a new bug.
 };
 
 /**

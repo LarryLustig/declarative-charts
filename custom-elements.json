@@ -913,6 +913,88 @@
             },
             {
               "kind": "method",
+              "name": "getTimeScale",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "TimeScale | null"
+                }
+              },
+              "description": "The active time scale, or null when this is not a time axis.\r\n\r\nCached per render: `parseTimeScale` parses every category label, and this is\r\nreached from inside per-point render loops. Uncached it would be the same\r\nquadratic shape that `getChartPadding` once was.\r\n\r\nA time scale is only active when the chart has no bars. Bars occupy fixed\r\nslots along the category axis, so positioning their labels by date would\r\nput the ticks somewhere the bars are not."
+            },
+            {
+              "kind": "method",
+              "name": "computeTimeScale",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "TimeScale | null"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "hasCategorySlots",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "description": "Whether the category axis places elements in fixed slots rather than along\r\na continuous scale. Bar charts do; point-based series do not."
+            },
+            {
+              "kind": "method",
+              "name": "getTimeXForLabel",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "number | null"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "label",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "chartLeft",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "chartWidth",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "description": "X coordinate for a label under the active time scale, or null when there is\r\nno time scale or the label is not a date.\r\n\r\nParsed per distinct label and memoized, so a chart with several series\r\nsharing dates parses each one once."
+            },
+            {
+              "kind": "method",
+              "name": "getTimeDateForLabel",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "Date | null"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "label",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Parsed date for one category label, memoized for the render."
+            },
+            {
+              "kind": "method",
               "name": "getTimePosition",
               "privacy": "protected",
               "return": {
@@ -19837,6 +19919,21 @@
             },
             {
               "kind": "method",
+              "name": "hasCategorySlots",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "description": "Bars occupy fixed slots, so a time scale is not applied when any exist.",
+              "inheritedFrom": {
+                "name": "AxisChart",
+                "module": "src/axis-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
               "name": "getCategoryLabels",
               "privacy": "protected",
               "return": {
@@ -23302,6 +23399,93 @@
                 }
               ],
               "description": "Parse category labels as dates and calculate time scale.\r\nReturns null if labels can't be parsed as valid dates.",
+              "inheritedFrom": {
+                "name": "AxisChart",
+                "module": "src/axis-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getTimeScale",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "TimeScale | null"
+                }
+              },
+              "description": "The active time scale, or null when this is not a time axis.\r\n\r\nCached per render: `parseTimeScale` parses every category label, and this is\r\nreached from inside per-point render loops. Uncached it would be the same\r\nquadratic shape that `getChartPadding` once was.\r\n\r\nA time scale is only active when the chart has no bars. Bars occupy fixed\r\nslots along the category axis, so positioning their labels by date would\r\nput the ticks somewhere the bars are not.",
+              "inheritedFrom": {
+                "name": "AxisChart",
+                "module": "src/axis-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "computeTimeScale",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "TimeScale | null"
+                }
+              },
+              "inheritedFrom": {
+                "name": "AxisChart",
+                "module": "src/axis-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getTimeXForLabel",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "number | null"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "label",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "chartLeft",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "chartWidth",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "description": "X coordinate for a label under the active time scale, or null when there is\r\nno time scale or the label is not a date.\r\n\r\nParsed per distinct label and memoized, so a chart with several series\r\nsharing dates parses each one once.",
+              "inheritedFrom": {
+                "name": "AxisChart",
+                "module": "src/axis-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getTimeDateForLabel",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "Date | null"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "label",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "Parsed date for one category label, memoized for the render.",
               "inheritedFrom": {
                 "name": "AxisChart",
                 "module": "src/axis-chart.ts"

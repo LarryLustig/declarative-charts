@@ -332,6 +332,23 @@
     </dc-chart>
   </div>
 
+  <!-- Line Chart - Time Axis, unevenly spaced -->
+  <div id="time-axis-uneven" class="chart-container">
+    <h2>Line Chart - Time Axis (uneven samples)</h2>
+    <dc-chart width="500" height="350">
+      <dc-title>Irregular Sampling</dc-title>
+      <dc-axis position="bottom" type="time" date-label-format="MMM d"></dc-axis>
+      <dc-axis position="left"><dc-title>Value</dc-title></dc-axis>
+      <dc-line label="Readings" stroke="#2196F3">
+        <dc-point value="120" label="2024-01-01"></dc-point>
+        <dc-point value="180" label="2024-01-03"></dc-point>
+        <dc-point value="150" label="2024-01-06"></dc-point>
+        <dc-point value="220" label="2024-02-20"></dc-point>
+        <dc-point value="190" label="2024-03-30"></dc-point>
+      </dc-line>
+    </dc-chart>
+  </div>
+
   <!-- Stage Chart - Basic -->
   <div id="stage-basic" class="chart-container">
     <h2>Stage Chart - Basic</h2>

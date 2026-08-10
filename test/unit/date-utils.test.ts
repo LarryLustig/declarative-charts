@@ -196,6 +196,37 @@ describe('formatDate', () => {
       expect(formatDate(testDate, 'MMM')).toBe('Jun');
     });
 
+    /**
+     * Chained `.replace()` calls substituted into their own output: `MMM` gave
+     * "Jan", and the trailing `/a/g` -> AM|PM then rewrote the "a" inside it,
+     * so "MMM d" rendered "JPMn 3".
+     *
+     * Every test above uses June, whose names contain no 'a', which is the only
+     * reason this went unnoticed. These use the months that expose it.
+     */
+    it.each([
+      [0, 'Jan', 'January'],
+      [2, 'Mar', 'March'],
+      [4, 'May', 'May'],
+      [7, 'Aug', 'August']
+    ])('formats month %i without mangling its name', (monthIndex, short, long) => {
+      const d = new Date(2024, monthIndex, 3, 14, 30);
+      expect(formatDate(d, 'MMM')).toBe(short);
+      expect(formatDate(d, 'MMMM')).toBe(long);
+      expect(formatDate(d, 'MMM d')).toBe(`${short} 3`);
+    });
+
+    it('still formats the meridiem token itself', () => {
+      expect(formatDate(new Date(2024, 0, 3, 14, 30), 'h:mm a')).toBe('2:30 PM');
+      expect(formatDate(new Date(2024, 0, 3, 9, 5), 'h:mm a')).toBe('9:05 AM');
+    });
+
+    it('does not re-substitute a value it has just written', () => {
+      // 11 contains no tokens, but a chained implementation could still walk
+      // back over "Nov" and the digits it had already produced.
+      expect(formatDate(new Date(2024, 10, 11), 'MMM dd, yyyy')).toBe('Nov 11, 2024');
+    });
+
     it('formats MM as zero-padded month', () => {
       expect(formatDate(testDate, 'MM')).toBe('06');
     });

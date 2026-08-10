@@ -1248,6 +1248,72 @@ export abstract class AxisChart extends BaseChart {
   }
 
   /**
+   * The active time scale, or null when this is not a time axis.
+   *
+   * Cached per render: `parseTimeScale` parses every category label, and this is
+   * reached from inside per-point render loops. Uncached it would be the same
+   * quadratic shape that `getChartPadding` once was.
+   *
+   * A time scale is only active when the chart has no bars. Bars occupy fixed
+   * slots along the category axis, so positioning their labels by date would
+   * put the ticks somewhere the bars are not.
+   */
+  protected getTimeScale(): TimeScale | null {
+    return this.cachePerRender('timeScale', () => this.computeTimeScale());
+  }
+
+  private computeTimeScale(): TimeScale | null {
+    const config = this.getAxisConfig(this.getCategoryAxisPosition());
+    if (config.type !== 'time') return null;
+
+    if (this.hasCategorySlots()) {
+      this.log('info', 'timeAxis', 'Ignoring type="time": this chart positions categories in slots');
+      return null;
+    }
+
+    return this.parseTimeScale(this.getCategoryLabels(), config);
+  }
+
+  /**
+   * Whether the category axis places elements in fixed slots rather than along
+   * a continuous scale. Bar charts do; point-based series do not.
+   */
+  protected hasCategorySlots(): boolean {
+    return false;
+  }
+
+  /**
+   * X coordinate for a label under the active time scale, or null when there is
+   * no time scale or the label is not a date.
+   *
+   * Parsed per distinct label and memoized, so a chart with several series
+   * sharing dates parses each one once.
+   */
+  protected getTimeXForLabel(
+    label: string,
+    chartLeft: number,
+    chartWidth: number
+  ): number | null {
+    const scale = this.getTimeScale();
+    if (!scale) return null;
+
+    const date = this.getTimeDateForLabel(label);
+    return date ? this.getTimeX(date, scale, chartLeft, chartWidth) : null;
+  }
+
+  /** Parsed date for one category label, memoized for the render. */
+  protected getTimeDateForLabel(label: string): Date | null {
+    const scale = this.getTimeScale();
+    if (!scale) return null;
+
+    return this.cachePerRender(`timeDate:${label}`, () => {
+      const config = this.getAxisConfig(this.getCategoryAxisPosition());
+      const parsed = parseDateLabels([label], config.dateFormat);
+      return parsed.dates[0] ?? null;
+    });
+  }
+
+  /**
    * Calculate the position (0-1) for a date within the time scale.
    *
    * @param date The date to position
