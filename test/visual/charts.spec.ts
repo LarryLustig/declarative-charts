@@ -304,6 +304,24 @@ test.describe('Radar Charts', () => {
   });
 });
 
+test.describe('Reference Lines and Bands', () => {
+  test('reference lines and a band', async ({ page }) => {
+    await page.goto(`${FIXTURES_URL}?chart=reference-basic`);
+    await waitForChartRender(page);
+
+    const container = await getChartContainer(page, 'reference-basic');
+    await expect(container).toHaveScreenshot('reference-basic.png');
+  });
+
+  test('reference on a horizontal chart', async ({ page }) => {
+    await page.goto(`${FIXTURES_URL}?chart=reference-horizontal`);
+    await waitForChartRender(page);
+
+    const container = await getChartContainer(page, 'reference-horizontal');
+    await expect(container).toHaveScreenshot('reference-horizontal.png');
+  });
+});
+
 test.describe('Chart Features', () => {
   test('chart with patterns', async ({ page }) => {
     await page.goto(`${FIXTURES_URL}?chart=patterns`);

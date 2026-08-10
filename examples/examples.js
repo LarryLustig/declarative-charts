@@ -50,6 +50,7 @@ const NAV_CONFIG = {
                 { href: 'data-labels.html', label: 'Labels & Values' },
                 { href: 'label-positioning.html', label: 'Label Positioning' },
                 { href: 'formatting.html', label: 'Number Formatting' },
+                { href: 'references.html', label: 'Reference Lines' },
                 { href: 'empty-loading.html', label: 'Empty & Loading' },
             ]
         },

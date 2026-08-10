@@ -715,11 +715,118 @@
             },
             {
               "kind": "method",
-              "name": "renderGridLines",
+              "name": "getReferences",
               "privacy": "protected",
               "return": {
                 "type": {
                   "text": ""
+                }
+              },
+              "description": "Resolved `<dc-reference>` children.\r\n\r\nCached per render: it is read by the range calculation, by two render\r\npasses and by the insight generator, and it walks the DOM.",
+              "parameters": [
+                {
+                  "description": "Chart padding values",
+                  "name": "padding"
+                },
+                {
+                  "description": "Width of the chart content area",
+                  "name": "chartWidth"
+                },
+                {
+                  "description": "Height of the chart content area",
+                  "name": "chartHeight"
+                },
+                {
+                  "description": "Value range (min, max) for scaling, or just max for backward compatibility",
+                  "name": "range"
+                },
+                {
+                  "description": "'vertical' for horizontal grid lines, 'horizontal' for vertical grid lines",
+                  "name": "orientation"
+                },
+                {
+                  "description": "Optional axis configuration for tick customization",
+                  "name": "axisConfig"
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "extractReferences",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "ReferenceData[]"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getReferenceValues",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "number[]"
+                }
+              },
+              "description": "Every value a reference asks the axis to reach.\r\n\r\nFolded into the chart's own min/max so an automatic axis grows to show the\r\ntarget. A target the axis crops off is worse than no target: the chart\r\nlooks complete and quietly omits the thing it was annotated with."
+            },
+            {
+              "kind": "method",
+              "name": "referenceCoordinate",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "number"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "padding",
+                  "type": {
+                    "text": "{ top: number; right: number; bottom: number; left: number }"
+                  }
+                },
+                {
+                  "name": "chartWidth",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "chartHeight",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "range",
+                  "type": {
+                    "text": "ValueRange"
+                  }
+                },
+                {
+                  "name": "orientation",
+                  "type": {
+                    "text": "'vertical' | 'horizontal'"
+                  }
+                }
+              ],
+              "description": "Value axis coordinate for a value, in the given orientation."
+            },
+            {
+              "kind": "method",
+              "name": "renderReferenceBands",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "SVGTemplateResult"
                 }
               },
               "parameters": [
@@ -727,48 +834,129 @@
                   "name": "padding",
                   "type": {
                     "text": "{ top: number; right: number; bottom: number; left: number }"
-                  },
-                  "description": "Chart padding values"
+                  }
                 },
                 {
                   "name": "chartWidth",
                   "type": {
                     "text": "number"
-                  },
-                  "description": "Width of the chart content area"
+                  }
                 },
                 {
                   "name": "chartHeight",
                   "type": {
                     "text": "number"
-                  },
-                  "description": "Height of the chart content area"
+                  }
                 },
                 {
                   "name": "range",
                   "type": {
-                    "text": "ValueRange | number"
-                  },
-                  "description": "Value range (min, max) for scaling, or just max for backward compatibility"
+                    "text": "ValueRange"
+                  }
                 },
                 {
                   "name": "orientation",
                   "default": "'vertical'",
                   "type": {
                     "text": "'vertical' | 'horizontal'"
-                  },
-                  "description": "'vertical' for horizontal grid lines, 'horizontal' for vertical grid lines"
+                  }
+                }
+              ],
+              "description": "Bands, drawn behind the data.\r\n\r\nA band is a region of the plot rather than a mark on it, so anything it\r\noverlaps must stay readable — which means underneath. Lines go on top, in\r\n`renderReferenceLines()`."
+            },
+            {
+              "kind": "method",
+              "name": "renderReferenceLines",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "SVGTemplateResult"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "padding",
+                  "type": {
+                    "text": "{ top: number; right: number; bottom: number; left: number }"
+                  }
+                },
+                {
+                  "name": "chartWidth",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "chartHeight",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "range",
+                  "type": {
+                    "text": "ValueRange"
+                  }
+                },
+                {
+                  "name": "orientation",
+                  "default": "'vertical'",
+                  "type": {
+                    "text": "'vertical' | 'horizontal'"
+                  }
+                }
+              ],
+              "description": "Lines and their labels, drawn over the data.\r\n\r\nA line outside the axis range is skipped rather than clamped. Clamping a\r\nband shows part of a region that really is partly on screen; clamping a\r\nline would draw it somewhere it is not, which is a lie the reader cannot\r\ndetect."
+            },
+            {
+              "kind": "method",
+              "name": "renderGridLines",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "SVGTemplateResult"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "padding",
+                  "type": {
+                    "text": "{ top: number; right: number; bottom: number; left: number }"
+                  }
+                },
+                {
+                  "name": "chartWidth",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "chartHeight",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "range",
+                  "type": {
+                    "text": "ValueRange | number"
+                  }
+                },
+                {
+                  "name": "orientation",
+                  "default": "'vertical'",
+                  "type": {
+                    "text": "'vertical' | 'horizontal'"
+                  }
                 },
                 {
                   "name": "axisConfig",
                   "optional": true,
                   "type": {
                     "text": "AxisConfig"
-                  },
-                  "description": "Optional axis configuration for tick customization"
+                  }
                 }
-              ],
-              "description": "Render horizontal grid lines for vertical charts or vertical grid lines for horizontal charts.\r\nSupports negative value ranges and renders zero line with distinct styling when applicable."
+              ]
             },
             {
               "kind": "field",
@@ -18382,6 +18570,578 @@
     },
     {
       "kind": "javascript-module",
+      "path": "src/chart-reference.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "A target, threshold, budget or SLA drawn across the plot.\n\nOne element covers both shapes an annotation takes, because they are the same\nidea at different widths:\n\n- `value` draws a **line** at that point on the value axis.\n- `min` and `max` draw a **band** between them.\n- Either bound alone draws a half-open band — `min=\"80\"` shades everything\n  from 80 to the top of the plot, which is how a danger zone is usually\n  stated.\n\nSetting `value` alongside a band is not a conflict: it draws the centre line\nof the band, which is exactly what \"acceptable range, target 100\" means.\n\nA reference is an annotation rather than data. It is not focusable, it does\nnot appear in the legend — its `label` is drawn on the line itself, so a\nlegend entry would only repeat it — and it contributes no value to any total\nor percentage. It *does* widen an automatic axis range, because a target the\naxis crops off is worse than no target at all.",
+          "name": "ChartReference",
+          "members": [
+            {
+              "kind": "field",
+              "name": "value",
+              "default": "NaN",
+              "description": "Where to draw the line.\n\nNaN rather than 0 by default, so an omitted `value` means \"no line\" instead\nof a line along the zero axis — the same reason `<dc-point>` defaults this\nway.",
+              "attribute": "value"
+            },
+            {
+              "kind": "field",
+              "name": "min",
+              "default": "NaN",
+              "description": "Lower bound of a band. Alone, the band runs from here to the top.",
+              "attribute": "min"
+            },
+            {
+              "kind": "field",
+              "name": "max",
+              "default": "NaN",
+              "description": "Upper bound of a band. Alone, the band runs from the bottom to here.",
+              "attribute": "max"
+            },
+            {
+              "kind": "field",
+              "name": "stroke",
+              "type": {
+                "text": "string"
+              },
+              "default": "'#dc2626'",
+              "description": "Line colour.\n\nRed by default because the overwhelming majority of these are a limit\nsomeone is trying not to cross. Override it for a band that means \"good\".",
+              "attribute": "stroke",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "strokeWidth",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Stroke width for this element (SVG standard attribute).\r\nTakes precedence over chart-level stroke-width.",
+              "attribute": "stroke-width",
+              "default": "2",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "strokeDasharray",
+              "type": {
+                "text": "string"
+              },
+              "default": "'dashed'",
+              "description": "Dash pattern for the line. Accepts the named patterns `<dc-grid>` and\n`<dc-fill>` take, or a raw SVG dash list.\n\nDashed by default: a solid line the same weight as a data line reads as\ndata, and the whole point of an annotation is that it is not.",
+              "attribute": "stroke-dasharray"
+            },
+            {
+              "kind": "field",
+              "name": "fill",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Band fill. Falls back to `stroke`, so one colour attribute usually does.",
+              "attribute": "fill"
+            },
+            {
+              "kind": "field",
+              "name": "fillOpacity",
+              "type": {
+                "text": "number"
+              },
+              "default": "0.12",
+              "attribute": "fill-opacity"
+            },
+            {
+              "kind": "field",
+              "name": "hasLine",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "True when this element asks for a line.",
+              "readonly": true
+            },
+            {
+              "kind": "field",
+              "name": "hasBand",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "True when this element asks for a band, including a half-open one.",
+              "readonly": true
+            },
+            {
+              "kind": "field",
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "label",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "href",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "href",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "target",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "target",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "autoPopup",
+              "type": {
+                "text": "boolean | undefined"
+              },
+              "description": "Whether to show an automatic popup for this element.\r\n- undefined: inherit from chart's auto-popup setting\r\n- true: show auto popup (unless explicit <dc-popup> is present)\r\n- false: do not show auto popup\r\n\r\nIf an explicit <dc-popup> child element is present, it takes precedence.",
+              "attribute": "auto-popup",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "valueFormat",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Format for values displayed on this element's label.\r\nOverrides the chart's value-format for this element only.\r\nUses the same format syntax as chart's value-format attribute.",
+              "attribute": "value-format",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "showValue",
+              "type": {
+                "text": "ShowCondition | undefined"
+              },
+              "description": "Whether to display the numeric value on this element.\r\nCan be true, false, a percentage threshold (e.g., \"5%\"), or a value threshold (e.g., \"100\").\r\nIf not set, inherits from parent element or chart-level setting.",
+              "attribute": "show-value",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "showPercent",
+              "type": {
+                "text": "ShowCondition | undefined"
+              },
+              "description": "Whether to display the percentage on this element.\r\nCan be true, false, a percentage threshold (e.g., \"5%\"), or a value threshold (e.g., \"100\").\r\nIf not set, inherits from parent element or chart-level setting.",
+              "attribute": "show-percent",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "labelPosition",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Position for labels on this element.\r\nValid values depend on element type:\r\n- Bars: \"outside\", \"inside-top\", \"inside-center\", \"inside-bottom\", \"outside-top\", \"outside-bottom\"\r\n- Points: \"above\", \"above-left\", \"above-right\", \"below\", \"below-left\", \"below-right\", \"left\", \"right\", \"center\"\r\n- Bubbles: Same as points, plus \"inside\"\r\n- Pie slices: \"inside\", \"outside\"\r\n- Funnel/Stage: \"inside\", \"outside-left\", \"outside-right\"\r\n- Stage chart: Also supports \"above\", \"below\"\r\nIf not set, inherits from parent element or chart-level setting.",
+              "attribute": "label-position",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "labelOffsetX",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Horizontal offset for labels in viewBox units.\r\nPositive values move right, negative values move left.\r\nIf not set, inherits from parent element or chart-level setting.",
+              "attribute": "label-offset-x",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "labelOffsetY",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Vertical offset for labels in viewBox units.\r\nPositive values move down (SVG convention), negative values move up.\r\nIf not set, inherits from parent element or chart-level setting.",
+              "attribute": "label-offset-y",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "labelOffsetR",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Radial offset for labels in viewBox units.\r\nMeaning depends on element type:\r\n- Bars: away from zero line\r\n- Pie/Bubbles: away from center\r\n- Points: away from point center\r\n- Funnel/Stage: away from stage center\r\nPositive values move outward, negative values move inward.\r\nIf not set, inherits from parent element or chart-level setting.",
+              "attribute": "label-offset-r",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "labelFill",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Fill color for labels on this element (SVG text fill).\r\n- \"auto\" (default): Automatically calculate based on background\r\n  - Inside shapes: Contrast against shape fill color\r\n  - Outside shapes: Use dark text (#333) for light backgrounds\r\n- Any CSS color: Use the specified color\r\nIf not set, inherits from parent element or chart-level setting.",
+              "attribute": "label-fill",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "BASE_KNOWN_ATTRS",
+              "static": true,
+              "readonly": true,
+              "default": "new Set([ 'label', 'stroke', 'stroke-width', 'href', 'target', 'auto-popup', 'value-format', 'show-value', 'show-percent', 'label-position', 'label-offset-x', 'label-offset-y', 'label-offset-r', 'label-fill' ])",
+              "description": "Common attributes handled by BaseChartElement.\r\nSubclasses should merge their own known attributes with this set.",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getEffectiveStroke",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              },
+              "description": "Get the effective stroke color for this element.",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getPassthroughAttributes",
+              "return": {
+                "type": {
+                  "text": ""
+                }
+              },
+              "parameters": [
+                {
+                  "name": "knownAttrs",
+                  "type": {
+                    "text": "Set<string>"
+                  },
+                  "description": "Set of attribute names that are handled by the component"
+                }
+              ],
+              "description": "Get all attributes that should be passed through to rendered SVG elements.",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            }
+          ],
+          "attributes": [
+            {
+              "type": {
+                "text": "number"
+              },
+              "description": "Where to draw the line.\n\nNaN rather than 0 by default, so an omitted `value` means \"no line\" instead\nof a line along the zero axis — the same reason `<dc-point>` defaults this\nway.",
+              "name": "value",
+              "default": "NaN",
+              "fieldName": "value"
+            },
+            {
+              "type": {
+                "text": "number"
+              },
+              "description": "Lower bound of a band. Alone, the band runs from here to the top.",
+              "name": "min",
+              "default": "NaN",
+              "fieldName": "min"
+            },
+            {
+              "type": {
+                "text": "number"
+              },
+              "description": "Upper bound of a band. Alone, the band runs from the bottom to here.",
+              "name": "max",
+              "default": "NaN",
+              "fieldName": "max"
+            },
+            {
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "label",
+              "description": "Text drawn at the end of the line or band",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "stroke",
+              "type": {
+                "text": "string"
+              },
+              "default": "'#dc2626'",
+              "description": "Line colour.\n\nRed by default because the overwhelming majority of these are a limit\nsomeone is trying not to cross. Override it for a band that means \"good\".",
+              "fieldName": "stroke",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "stroke-width",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Line width (default: 2)",
+              "fieldName": "strokeWidth",
+              "default": "2",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "type": {
+                "text": "string"
+              },
+              "description": "Dash pattern for the line. Accepts the named patterns `<dc-grid>` and\n`<dc-fill>` take, or a raw SVG dash list.\n\nDashed by default: a solid line the same weight as a data line reads as\ndata, and the whole point of an annotation is that it is not.",
+              "name": "stroke-dasharray",
+              "default": "'dashed'",
+              "fieldName": "strokeDasharray"
+            },
+            {
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Band fill. Falls back to `stroke`, so one colour attribute usually does.",
+              "name": "fill",
+              "fieldName": "fill"
+            },
+            {
+              "type": {
+                "text": "number"
+              },
+              "description": "Band opacity (default: 0.12)",
+              "name": "fill-opacity",
+              "default": "0.12",
+              "fieldName": "fillOpacity"
+            },
+            {
+              "name": "label-position",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "\"end\" (default) or \"start\" of the line",
+              "fieldName": "labelPosition",
+              "attribute": "label-position",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "auto-popup",
+              "type": {
+                "text": "boolean | undefined"
+              },
+              "description": "Whether to show an automatic popup for this element.\r\n- undefined: inherit from chart's auto-popup setting\r\n- true: show auto popup (unless explicit <dc-popup> is present)\r\n- false: do not show auto popup\r\n\r\nIf an explicit <dc-popup> child element is present, it takes precedence.",
+              "fieldName": "autoPopup",
+              "attribute": "auto-popup",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "value-format",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Format for values displayed on this element's label.\r\nOverrides the chart's value-format for this element only.\r\nUses the same format syntax as chart's value-format attribute.",
+              "fieldName": "valueFormat",
+              "attribute": "value-format",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "show-value",
+              "type": {
+                "text": "ShowCondition | undefined"
+              },
+              "description": "Whether to display the numeric value on this element.\r\nCan be true, false, a percentage threshold (e.g., \"5%\"), or a value threshold (e.g., \"100\").\r\nIf not set, inherits from parent element or chart-level setting.",
+              "fieldName": "showValue",
+              "attribute": "show-value",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "show-percent",
+              "type": {
+                "text": "ShowCondition | undefined"
+              },
+              "description": "Whether to display the percentage on this element.\r\nCan be true, false, a percentage threshold (e.g., \"5%\"), or a value threshold (e.g., \"100\").\r\nIf not set, inherits from parent element or chart-level setting.",
+              "fieldName": "showPercent",
+              "attribute": "show-percent",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "label-offset-x",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Horizontal offset for labels in viewBox units.\r\nPositive values move right, negative values move left.\r\nIf not set, inherits from parent element or chart-level setting.",
+              "fieldName": "labelOffsetX",
+              "attribute": "label-offset-x",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "label-offset-y",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Vertical offset for labels in viewBox units.\r\nPositive values move down (SVG convention), negative values move up.\r\nIf not set, inherits from parent element or chart-level setting.",
+              "fieldName": "labelOffsetY",
+              "attribute": "label-offset-y",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "label-offset-r",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Radial offset for labels in viewBox units.\r\nMeaning depends on element type:\r\n- Bars: away from zero line\r\n- Pie/Bubbles: away from center\r\n- Points: away from point center\r\n- Funnel/Stage: away from stage center\r\nPositive values move outward, negative values move inward.\r\nIf not set, inherits from parent element or chart-level setting.",
+              "fieldName": "labelOffsetR",
+              "attribute": "label-offset-r",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "label-fill",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Fill color for labels on this element (SVG text fill).\r\n- \"auto\" (default): Automatically calculate based on background\r\n  - Inside shapes: Contrast against shape fill color\r\n  - Outside shapes: Use dark text (#333) for light backgrounds\r\n- Any CSS color: Use the specified color\r\nIf not set, inherits from parent element or chart-level setting.",
+              "fieldName": "labelFill",
+              "attribute": "label-fill",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "href",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "href",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "target",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "target",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            }
+          ],
+          "superclass": {
+            "name": "BaseChartElement",
+            "module": "/src/base-chart-element.js"
+          },
+          "tagName": "dc-reference",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "ChartReference",
+          "declaration": {
+            "name": "ChartReference",
+            "module": "src/chart-reference.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "dc-reference",
+          "declaration": {
+            "name": "ChartReference",
+            "module": "src/chart-reference.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
       "path": "src/chart-scatter.ts",
       "declarations": [
         {
@@ -24420,7 +25180,7 @@
                   "text": "number | undefined"
                 }
               },
-              "description": "Get the reference line value for target comparisons.\r\nStub - returns undefined until reference lines feature is implemented."
+              "description": "The value a screen-reader description compares the bars against.\r\n\r\nThe first `<dc-reference>` that draws a line. A chart can carry several -\r\na target and a limit, say - but the insight sentence reads \"all exceed\r\ntarget\", singular, and naming which one is meant would need the sentence\r\nrewritten. First-declared is at least predictable from the markup.\r\n\r\nA band alone is not a target: \"between 80 and 120\" has no single number to\r\nbe above or below."
             },
             {
               "kind": "method",
@@ -25083,11 +25843,134 @@
             },
             {
               "kind": "method",
-              "name": "renderGridLines",
+              "name": "getReferences",
               "privacy": "protected",
               "return": {
                 "type": {
                   "text": ""
+                }
+              },
+              "description": "Resolved `<dc-reference>` children.\r\n\r\nCached per render: it is read by the range calculation, by two render\r\npasses and by the insight generator, and it walks the DOM.",
+              "parameters": [
+                {
+                  "description": "Chart padding values",
+                  "name": "padding"
+                },
+                {
+                  "description": "Width of the chart content area",
+                  "name": "chartWidth"
+                },
+                {
+                  "description": "Height of the chart content area",
+                  "name": "chartHeight"
+                },
+                {
+                  "description": "Value range (min, max) for scaling, or just max for backward compatibility",
+                  "name": "range"
+                },
+                {
+                  "description": "'vertical' for horizontal grid lines, 'horizontal' for vertical grid lines",
+                  "name": "orientation"
+                },
+                {
+                  "description": "Optional axis configuration for tick customization",
+                  "name": "axisConfig"
+                }
+              ],
+              "inheritedFrom": {
+                "name": "AxisChart",
+                "module": "src/axis-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "extractReferences",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "ReferenceData[]"
+                }
+              },
+              "inheritedFrom": {
+                "name": "AxisChart",
+                "module": "src/axis-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getReferenceValues",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "number[]"
+                }
+              },
+              "description": "Every value a reference asks the axis to reach.\r\n\r\nFolded into the chart's own min/max so an automatic axis grows to show the\r\ntarget. A target the axis crops off is worse than no target: the chart\r\nlooks complete and quietly omits the thing it was annotated with.",
+              "inheritedFrom": {
+                "name": "AxisChart",
+                "module": "src/axis-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "referenceCoordinate",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "number"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "padding",
+                  "type": {
+                    "text": "{ top: number; right: number; bottom: number; left: number }"
+                  }
+                },
+                {
+                  "name": "chartWidth",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "chartHeight",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "range",
+                  "type": {
+                    "text": "ValueRange"
+                  }
+                },
+                {
+                  "name": "orientation",
+                  "type": {
+                    "text": "'vertical' | 'horizontal'"
+                  }
+                }
+              ],
+              "description": "Value axis coordinate for a value, in the given orientation.",
+              "inheritedFrom": {
+                "name": "AxisChart",
+                "module": "src/axis-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "renderReferenceBands",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "SVGTemplateResult"
                 }
               },
               "parameters": [
@@ -25095,48 +25978,137 @@
                   "name": "padding",
                   "type": {
                     "text": "{ top: number; right: number; bottom: number; left: number }"
-                  },
-                  "description": "Chart padding values"
+                  }
                 },
                 {
                   "name": "chartWidth",
                   "type": {
                     "text": "number"
-                  },
-                  "description": "Width of the chart content area"
+                  }
                 },
                 {
                   "name": "chartHeight",
                   "type": {
                     "text": "number"
-                  },
-                  "description": "Height of the chart content area"
+                  }
                 },
                 {
                   "name": "range",
                   "type": {
-                    "text": "ValueRange | number"
-                  },
-                  "description": "Value range (min, max) for scaling, or just max for backward compatibility"
+                    "text": "ValueRange"
+                  }
                 },
                 {
                   "name": "orientation",
                   "default": "'vertical'",
                   "type": {
                     "text": "'vertical' | 'horizontal'"
-                  },
-                  "description": "'vertical' for horizontal grid lines, 'horizontal' for vertical grid lines"
+                  }
+                }
+              ],
+              "description": "Bands, drawn behind the data.\r\n\r\nA band is a region of the plot rather than a mark on it, so anything it\r\noverlaps must stay readable — which means underneath. Lines go on top, in\r\n`renderReferenceLines()`.",
+              "inheritedFrom": {
+                "name": "AxisChart",
+                "module": "src/axis-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "renderReferenceLines",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "SVGTemplateResult"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "padding",
+                  "type": {
+                    "text": "{ top: number; right: number; bottom: number; left: number }"
+                  }
+                },
+                {
+                  "name": "chartWidth",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "chartHeight",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "range",
+                  "type": {
+                    "text": "ValueRange"
+                  }
+                },
+                {
+                  "name": "orientation",
+                  "default": "'vertical'",
+                  "type": {
+                    "text": "'vertical' | 'horizontal'"
+                  }
+                }
+              ],
+              "description": "Lines and their labels, drawn over the data.\r\n\r\nA line outside the axis range is skipped rather than clamped. Clamping a\r\nband shows part of a region that really is partly on screen; clamping a\r\nline would draw it somewhere it is not, which is a lie the reader cannot\r\ndetect.",
+              "inheritedFrom": {
+                "name": "AxisChart",
+                "module": "src/axis-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "renderGridLines",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "SVGTemplateResult"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "padding",
+                  "type": {
+                    "text": "{ top: number; right: number; bottom: number; left: number }"
+                  }
+                },
+                {
+                  "name": "chartWidth",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "chartHeight",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "range",
+                  "type": {
+                    "text": "ValueRange | number"
+                  }
+                },
+                {
+                  "name": "orientation",
+                  "default": "'vertical'",
+                  "type": {
+                    "text": "'vertical' | 'horizontal'"
+                  }
                 },
                 {
                   "name": "axisConfig",
                   "optional": true,
                   "type": {
                     "text": "AxisConfig"
-                  },
-                  "description": "Optional axis configuration for tick customization"
+                  }
                 }
               ],
-              "description": "Render horizontal grid lines for vertical charts or vertical grid lines for horizontal charts.\r\nSupports negative value ranges and renders zero line with distinct styling when applicable.",
               "inheritedFrom": {
                 "name": "AxisChart",
                 "module": "src/axis-chart.ts"
@@ -29984,9 +30956,9 @@
           "kind": "variable",
           "name": "ErrorCode",
           "type": {
-            "text": "{\r\n  // ===========================================================================\r\n  // DC001-DC099: Data Errors\r\n  // ===========================================================================\r\n\r\n  /**\r\n   * Chart has no data elements\r\n   */\r\n  DATA_EMPTY: {\r\n    code: 'DC001',\r\n    level: 'warning',\r\n    path: 'data.empty',\r\n    message: '{chartType} has no {expectedElements}. Add {expectedElements} to display data.'\r\n  },\r\n\r\n  /**\r\n   * All data elements are hidden\r\n   */\r\n  DATA_ALL_HIDDEN: {\r\n    code: 'DC002',\r\n    level: 'warning',\r\n    path: 'data.allHidden',\r\n    message: '{chartType} has {count} data element(s) but all are hidden. Check for hidden attributes on {elementTypes}.'\r\n  },\r\n\r\n  /**\r\n   * Total of all values is zero (pie chart)\r\n   */\r\n  DATA_ZERO_TOTAL: {\r\n    code: 'DC003',\r\n    level: 'warning',\r\n    path: 'data.zeroTotal',\r\n    message: 'All {elementType} values sum to 0. {chartType} cannot be rendered. Check that {elementType}s have positive values.'\r\n  },\r\n\r\n  /**\r\n   * Elements have zero or negative values where positive is required\r\n   */\r\n  DATA_INVALID_VALUES: {\r\n    code: 'DC004',\r\n    level: 'warning',\r\n    path: 'data.invalidValues',\r\n    message: '{count} {elementType}(s) have zero or negative values and will not be visible: {labels}. {chartType}s require positive values.'\r\n  },\r\n\r\n  /**\r\n   * Bars have value 0 and will not render\r\n   */\r\n  DATA_ZERO_BARS: {\r\n    code: 'DC005',\r\n    level: 'warning',\r\n    path: 'bars.zeroValue',\r\n    message: '{count} bar(s) have value 0 and will not be visible: {labels}'\r\n  },\r\n\r\n  /**\r\n   * Elements have negative values (stage chart warning)\r\n   */\r\n  DATA_NEGATIVE_VALUES: {\r\n    code: 'DC006',\r\n    level: 'warning',\r\n    path: 'data.negativeValues',\r\n    message: '{count} {elementType}(s) have negative values which may not display correctly: {labels}'\r\n  },\r\n\r\n  // ===========================================================================\r\n  // DC100-DC199: Configuration Errors\r\n  // ===========================================================================\r\n\r\n  /**\r\n   * Line element has no points\r\n   */\r\n  LINE_NO_POINTS: {\r\n    code: 'DC101',\r\n    level: 'warning',\r\n    path: 'lines.noPoints',\r\n    message: \"Line '{label}' has no dc-point children and will not be visible.\"\r\n  },\r\n\r\n  /**\r\n   * Area element has no points\r\n   */\r\n  AREA_NO_POINTS: {\r\n    code: 'DC102',\r\n    level: 'warning',\r\n    path: 'areas.noPoints',\r\n    message: \"Area '{label}' has no dc-point children and will not be visible.\"\r\n  },\r\n\r\n  /**\r\n   * Invalid inner radius for donut chart\r\n   */\r\n  DONUT_INVALID_RADIUS: {\r\n    code: 'DC103',\r\n    level: 'warning',\r\n    path: 'donut.invalidInnerRadius',\r\n    message: 'inner-radius=\"{value}\" is {reason}. {suggestion}'\r\n  },\r\n\r\n  /**\r\n   * Could not parse attribute value\r\n   */\r\n  PARSE_ERROR: {\r\n    code: 'DC104',\r\n    level: 'warning',\r\n    path: 'parse',\r\n    message: 'Could not parse {attribute} value \"{value}\", defaulting to {default}'\r\n  },\r\n\r\n  /**\r\n   * Invalid format string\r\n   */\r\n  FORMAT_INVALID: {\r\n    code: 'DC105',\r\n    level: 'warning',\r\n    path: 'format.invalid',\r\n    message: 'Invalid format string: \"{format}\", using default'\r\n  },\r\n\r\n  /**\r\n   * Time axis has insufficient valid dates\r\n   */\r\n  TIME_AXIS_FEW_DATES: {\r\n    code: 'DC106',\r\n    level: 'warning',\r\n    path: 'timeAxis',\r\n    message: \"Type is 'time' but only {count} valid date(s) found\"\r\n  },\r\n\r\n  /**\r\n   * Too many bars for the available plot width. Gutters have been compressed\r\n   * (and bars clamped to a minimum) so the chart still renders.\r\n   */\r\n  BAR_SPACE_EXHAUSTED: {\r\n    code: 'DC107',\r\n    level: 'warning',\r\n    path: 'bars.layout',\r\n    message: '{count} bars exceed the available {available} units; gutters compressed to {gutterScale}x to keep bars at least {minSize} unit(s) wide'\r\n  },\r\n\r\n  // ===========================================================================\r\n  // DC200-DC299: Reference Errors\r\n  // ===========================================================================\r\n\r\n  /**\r\n   * An unrecognised shape name was given to a stage chart\r\n   */\r\n  STAGE_SHAPE_INVALID: {\r\n    code: 'DC110',\r\n    level: 'warning',\r\n    path: 'stage.shape',\r\n    message: 'Unrecognised shape \"{value}\"; using rectangle instead'\r\n  },\r\n\r\n  /**\r\n   * An unrecognised value was given for the logging or console-log attribute\r\n   */\r\n  LOG_LEVEL_INVALID: {\r\n    code: 'DC109',\r\n    level: 'warning',\r\n    path: 'logging.level',\r\n    message: 'Unrecognised {attribute} value \"{value}\"; using the default instead'\r\n  },\r\n\r\n  /**\r\n   * A filename passed to downloadSvg() was unusable and had to be adjusted\r\n   */\r\n  EXPORT_FILENAME_INVALID: {\r\n    code: 'DC108',\r\n    level: 'warning',\r\n    path: 'export.filename',\r\n    message: 'Filename \"{value}\" is not usable as-is and was adjusted'\r\n  },\r\n\r\n  /**\r\n   * A radar point names an axis that does not exist\r\n   */\r\n  RADAR_POINT_NO_AXIS: {\r\n    code: 'DC111',\r\n    level: 'warning',\r\n    path: 'radar.pointNoAxis',\r\n    message: '{count} point(s) in {series} name an axis that does not exist and were not drawn: {labels}'\r\n  },\r\n\r\n  /**\r\n   * A radar chart with fewer than three axes\r\n   */\r\n  RADAR_TOO_FEW_AXES: {\r\n    code: 'DC112',\r\n    level: 'warning',\r\n    path: 'radar.tooFewAxes',\r\n    message: 'A radar chart needs at least 3 axes to enclose an area; {count} given'\r\n  },\r\n\r\n  /**\r\n   * Palette not found\r\n   */\r\n  PALETTE_NOT_FOUND: {\r\n    code: 'DC201',\r\n    level: 'warning',\r\n    path: 'colors.palette',\r\n    message: 'Palette \"{id}\" not found (no DOM element or built-in with that name)'\r\n  },\r\n\r\n  /**\r\n   * Pattern not found or invalid\r\n   */\r\n  PATTERN_NOT_FOUND: {\r\n    code: 'DC202',\r\n    level: 'warning',\r\n    path: 'pattern.resolve',\r\n    message: 'Pattern \"{id}\" is not a valid type or ID reference'\r\n  },\r\n\r\n  /**\r\n   * Zero-fill element not found\r\n   */\r\n  ZERO_FILL_NOT_FOUND: {\r\n    code: 'DC203',\r\n    level: 'warning',\r\n    path: 'zero.fillNotFound',\r\n    message: 'Zero-fill element with id \"{id}\" not found'\r\n  },\r\n\r\n  /**\r\n   * SVG element not found in shadow DOM (internal error)\r\n   */\r\n  SVG_NOT_FOUND: {\r\n    code: 'DC204',\r\n    level: 'warning',\r\n    path: 'render.svgNotFound',\r\n    message: 'No SVG element found in chart shadow DOM'\r\n  },\r\n\r\n  // ===========================================================================\r\n  // DC300-DC399: Style Warnings\r\n  // ===========================================================================\r\n\r\n  /**\r\n   * CSS attribute used instead of SVG attribute on title\r\n   */\r\n  TITLE_STYLE_WARNING: {\r\n    code: 'DC301',\r\n    level: 'warning',\r\n    path: 'title.style',\r\n    message: '{message}'\r\n  },\r\n\r\n  /**\r\n   * CSS attribute used instead of SVG attribute on legend\r\n   */\r\n  LEGEND_STYLE_WARNING: {\r\n    code: 'DC302',\r\n    level: 'warning',\r\n    path: 'legend.style',\r\n    message: '{message}'\r\n  },\r\n\r\n  /**\r\n   * CSS attribute used instead of SVG attribute on axis\r\n   */\r\n  AXIS_STYLE_WARNING: {\r\n    code: 'DC303',\r\n    level: 'warning',\r\n    path: 'axis.style',\r\n    message: '{message}'\r\n  },\r\n\r\n  // ===========================================================================\r\n  // DC400-DC499: Informational Warnings\r\n  // ===========================================================================\r\n\r\n  /**\r\n   * All elements have the same color (consider using palette)\r\n   */\r\n  COLORS_UNIFORM: {\r\n    code: 'DC401',\r\n    level: 'warning',\r\n    path: 'colors.uniform',\r\n    message: 'All {count} {elementType}s have the same fill color - consider using a palette for visual distinction'\r\n  }\r\n\r\n}"
+            "text": "{\r\n  // ===========================================================================\r\n  // DC001-DC099: Data Errors\r\n  // ===========================================================================\r\n\r\n  /**\r\n   * Chart has no data elements\r\n   */\r\n  DATA_EMPTY: {\r\n    code: 'DC001',\r\n    level: 'warning',\r\n    path: 'data.empty',\r\n    message: '{chartType} has no {expectedElements}. Add {expectedElements} to display data.'\r\n  },\r\n\r\n  /**\r\n   * All data elements are hidden\r\n   */\r\n  DATA_ALL_HIDDEN: {\r\n    code: 'DC002',\r\n    level: 'warning',\r\n    path: 'data.allHidden',\r\n    message: '{chartType} has {count} data element(s) but all are hidden. Check for hidden attributes on {elementTypes}.'\r\n  },\r\n\r\n  /**\r\n   * Total of all values is zero (pie chart)\r\n   */\r\n  DATA_ZERO_TOTAL: {\r\n    code: 'DC003',\r\n    level: 'warning',\r\n    path: 'data.zeroTotal',\r\n    message: 'All {elementType} values sum to 0. {chartType} cannot be rendered. Check that {elementType}s have positive values.'\r\n  },\r\n\r\n  /**\r\n   * Elements have zero or negative values where positive is required\r\n   */\r\n  DATA_INVALID_VALUES: {\r\n    code: 'DC004',\r\n    level: 'warning',\r\n    path: 'data.invalidValues',\r\n    message: '{count} {elementType}(s) have zero or negative values and will not be visible: {labels}. {chartType}s require positive values.'\r\n  },\r\n\r\n  /**\r\n   * Bars have value 0 and will not render\r\n   */\r\n  DATA_ZERO_BARS: {\r\n    code: 'DC005',\r\n    level: 'warning',\r\n    path: 'bars.zeroValue',\r\n    message: '{count} bar(s) have value 0 and will not be visible: {labels}'\r\n  },\r\n\r\n  /**\r\n   * Elements have negative values (stage chart warning)\r\n   */\r\n  DATA_NEGATIVE_VALUES: {\r\n    code: 'DC006',\r\n    level: 'warning',\r\n    path: 'data.negativeValues',\r\n    message: '{count} {elementType}(s) have negative values which may not display correctly: {labels}'\r\n  },\r\n\r\n  // ===========================================================================\r\n  // DC100-DC199: Configuration Errors\r\n  // ===========================================================================\r\n\r\n  /**\r\n   * Line element has no points\r\n   */\r\n  LINE_NO_POINTS: {\r\n    code: 'DC101',\r\n    level: 'warning',\r\n    path: 'lines.noPoints',\r\n    message: \"Line '{label}' has no dc-point children and will not be visible.\"\r\n  },\r\n\r\n  /**\r\n   * Area element has no points\r\n   */\r\n  AREA_NO_POINTS: {\r\n    code: 'DC102',\r\n    level: 'warning',\r\n    path: 'areas.noPoints',\r\n    message: \"Area '{label}' has no dc-point children and will not be visible.\"\r\n  },\r\n\r\n  /**\r\n   * Invalid inner radius for donut chart\r\n   */\r\n  DONUT_INVALID_RADIUS: {\r\n    code: 'DC103',\r\n    level: 'warning',\r\n    path: 'donut.invalidInnerRadius',\r\n    message: 'inner-radius=\"{value}\" is {reason}. {suggestion}'\r\n  },\r\n\r\n  /**\r\n   * Could not parse attribute value\r\n   */\r\n  PARSE_ERROR: {\r\n    code: 'DC104',\r\n    level: 'warning',\r\n    path: 'parse',\r\n    message: 'Could not parse {attribute} value \"{value}\", defaulting to {default}'\r\n  },\r\n\r\n  /**\r\n   * Invalid format string\r\n   */\r\n  FORMAT_INVALID: {\r\n    code: 'DC105',\r\n    level: 'warning',\r\n    path: 'format.invalid',\r\n    message: 'Invalid format string: \"{format}\", using default'\r\n  },\r\n\r\n  /**\r\n   * Time axis has insufficient valid dates\r\n   */\r\n  TIME_AXIS_FEW_DATES: {\r\n    code: 'DC106',\r\n    level: 'warning',\r\n    path: 'timeAxis',\r\n    message: \"Type is 'time' but only {count} valid date(s) found\"\r\n  },\r\n\r\n  /**\r\n   * Too many bars for the available plot width. Gutters have been compressed\r\n   * (and bars clamped to a minimum) so the chart still renders.\r\n   */\r\n  BAR_SPACE_EXHAUSTED: {\r\n    code: 'DC107',\r\n    level: 'warning',\r\n    path: 'bars.layout',\r\n    message: '{count} bars exceed the available {available} units; gutters compressed to {gutterScale}x to keep bars at least {minSize} unit(s) wide'\r\n  },\r\n\r\n  // ===========================================================================\r\n  // DC200-DC299: Reference Errors\r\n  // ===========================================================================\r\n\r\n  /**\r\n   * An unrecognised shape name was given to a stage chart\r\n   */\r\n  STAGE_SHAPE_INVALID: {\r\n    code: 'DC110',\r\n    level: 'warning',\r\n    path: 'stage.shape',\r\n    message: 'Unrecognised shape \"{value}\"; using rectangle instead'\r\n  },\r\n\r\n  /**\r\n   * An unrecognised value was given for the logging or console-log attribute\r\n   */\r\n  LOG_LEVEL_INVALID: {\r\n    code: 'DC109',\r\n    level: 'warning',\r\n    path: 'logging.level',\r\n    message: 'Unrecognised {attribute} value \"{value}\"; using the default instead'\r\n  },\r\n\r\n  /**\r\n   * A filename passed to downloadSvg() was unusable and had to be adjusted\r\n   */\r\n  EXPORT_FILENAME_INVALID: {\r\n    code: 'DC108',\r\n    level: 'warning',\r\n    path: 'export.filename',\r\n    message: 'Filename \"{value}\" is not usable as-is and was adjusted'\r\n  },\r\n\r\n  /**\r\n   * A radar point names an axis that does not exist\r\n   */\r\n  RADAR_POINT_NO_AXIS: {\r\n    code: 'DC111',\r\n    level: 'warning',\r\n    path: 'radar.pointNoAxis',\r\n    message: '{count} point(s) in {series} name an axis that does not exist and were not drawn: {labels}'\r\n  },\r\n\r\n  /**\r\n   * A radar chart with fewer than three axes\r\n   */\r\n  RADAR_TOO_FEW_AXES: {\r\n    code: 'DC112',\r\n    level: 'warning',\r\n    path: 'radar.tooFewAxes',\r\n    message: 'A radar chart needs at least 3 axes to enclose an area; {count} given'\r\n  },\r\n\r\n  /**\r\n   * A <dc-reference> declares neither a value nor a bound, so there is nothing\r\n   * to draw\r\n   */\r\n  REFERENCE_EMPTY: {\r\n    code: 'DC113',\r\n    level: 'warning',\r\n    path: 'reference.empty',\r\n    message: '{count} <dc-reference> element(s) set neither value nor min/max and drew nothing'\r\n  },\r\n\r\n  /**\r\n   * A reference line falls outside an explicitly bounded axis\r\n   */\r\n  REFERENCE_OUT_OF_RANGE: {\r\n    code: 'DC114',\r\n    level: 'warning',\r\n    path: 'reference.outOfRange',\r\n    message: 'Reference {label} at {value} is outside the axis range [{min}, {max}] and was not drawn'\r\n  },\r\n\r\n  /**\r\n   * Palette not found\r\n   */\r\n  PALETTE_NOT_FOUND: {\r\n    code: 'DC201',\r\n    level: 'warning',\r\n    path: 'colors.palette',\r\n    message: 'Palette \"{id}\" not found (no DOM element or built-in with that name)'\r\n  },\r\n\r\n  /**\r\n   * Pattern not found or invalid\r\n   */\r\n  PATTERN_NOT_FOUND: {\r\n    code: 'DC202',\r\n    level: 'warning',\r\n    path: 'pattern.resolve',\r\n    message: 'Pattern \"{id}\" is not a valid type or ID reference'\r\n  },\r\n\r\n  /**\r\n   * Zero-fill element not found\r\n   */\r\n  ZERO_FILL_NOT_FOUND: {\r\n    code: 'DC203',\r\n    level: 'warning',\r\n    path: 'zero.fillNotFound',\r\n    message: 'Zero-fill element with id \"{id}\" not found'\r\n  },\r\n\r\n  /**\r\n   * SVG element not found in shadow DOM (internal error)\r\n   */\r\n  SVG_NOT_FOUND: {\r\n    code: 'DC204',\r\n    level: 'warning',\r\n    path: 'render.svgNotFound',\r\n    message: 'No SVG element found in chart shadow DOM'\r\n  },\r\n\r\n  // ===========================================================================\r\n  // DC300-DC399: Style Warnings\r\n  // ===========================================================================\r\n\r\n  /**\r\n   * CSS attribute used instead of SVG attribute on title\r\n   */\r\n  TITLE_STYLE_WARNING: {\r\n    code: 'DC301',\r\n    level: 'warning',\r\n    path: 'title.style',\r\n    message: '{message}'\r\n  },\r\n\r\n  /**\r\n   * CSS attribute used instead of SVG attribute on legend\r\n   */\r\n  LEGEND_STYLE_WARNING: {\r\n    code: 'DC302',\r\n    level: 'warning',\r\n    path: 'legend.style',\r\n    message: '{message}'\r\n  },\r\n\r\n  /**\r\n   * CSS attribute used instead of SVG attribute on axis\r\n   */\r\n  AXIS_STYLE_WARNING: {\r\n    code: 'DC303',\r\n    level: 'warning',\r\n    path: 'axis.style',\r\n    message: '{message}'\r\n  },\r\n\r\n  // ===========================================================================\r\n  // DC400-DC499: Informational Warnings\r\n  // ===========================================================================\r\n\r\n  /**\r\n   * All elements have the same color (consider using palette)\r\n   */\r\n  COLORS_UNIFORM: {\r\n    code: 'DC401',\r\n    level: 'warning',\r\n    path: 'colors.uniform',\r\n    message: 'All {count} {elementType}s have the same fill color - consider using a palette for visual distinction'\r\n  }\r\n\r\n}"
           },
-          "default": "{ // =========================================================================== // DC001-DC099: Data Errors // =========================================================================== /** * Chart has no data elements */ DATA_EMPTY: { code: 'DC001', level: 'warning', path: 'data.empty', message: '{chartType} has no {expectedElements}. Add {expectedElements} to display data.' }, /** * All data elements are hidden */ DATA_ALL_HIDDEN: { code: 'DC002', level: 'warning', path: 'data.allHidden', message: '{chartType} has {count} data element(s) but all are hidden. Check for hidden attributes on {elementTypes}.' }, /** * Total of all values is zero (pie chart) */ DATA_ZERO_TOTAL: { code: 'DC003', level: 'warning', path: 'data.zeroTotal', message: 'All {elementType} values sum to 0. {chartType} cannot be rendered. Check that {elementType}s have positive values.' }, /** * Elements have zero or negative values where positive is required */ DATA_INVALID_VALUES: { code: 'DC004', level: 'warning', path: 'data.invalidValues', message: '{count} {elementType}(s) have zero or negative values and will not be visible: {labels}. {chartType}s require positive values.' }, /** * Bars have value 0 and will not render */ DATA_ZERO_BARS: { code: 'DC005', level: 'warning', path: 'bars.zeroValue', message: '{count} bar(s) have value 0 and will not be visible: {labels}' }, /** * Elements have negative values (stage chart warning) */ DATA_NEGATIVE_VALUES: { code: 'DC006', level: 'warning', path: 'data.negativeValues', message: '{count} {elementType}(s) have negative values which may not display correctly: {labels}' }, // =========================================================================== // DC100-DC199: Configuration Errors // =========================================================================== /** * Line element has no points */ LINE_NO_POINTS: { code: 'DC101', level: 'warning', path: 'lines.noPoints', message: \"Line '{label}' has no dc-point children and will not be visible.\" }, /** * Area element has no points */ AREA_NO_POINTS: { code: 'DC102', level: 'warning', path: 'areas.noPoints', message: \"Area '{label}' has no dc-point children and will not be visible.\" }, /** * Invalid inner radius for donut chart */ DONUT_INVALID_RADIUS: { code: 'DC103', level: 'warning', path: 'donut.invalidInnerRadius', message: 'inner-radius=\"{value}\" is {reason}. {suggestion}' }, /** * Could not parse attribute value */ PARSE_ERROR: { code: 'DC104', level: 'warning', path: 'parse', message: 'Could not parse {attribute} value \"{value}\", defaulting to {default}' }, /** * Invalid format string */ FORMAT_INVALID: { code: 'DC105', level: 'warning', path: 'format.invalid', message: 'Invalid format string: \"{format}\", using default' }, /** * Time axis has insufficient valid dates */ TIME_AXIS_FEW_DATES: { code: 'DC106', level: 'warning', path: 'timeAxis', message: \"Type is 'time' but only {count} valid date(s) found\" }, /** * Too many bars for the available plot width. Gutters have been compressed * (and bars clamped to a minimum) so the chart still renders. */ BAR_SPACE_EXHAUSTED: { code: 'DC107', level: 'warning', path: 'bars.layout', message: '{count} bars exceed the available {available} units; gutters compressed to {gutterScale}x to keep bars at least {minSize} unit(s) wide' }, // =========================================================================== // DC200-DC299: Reference Errors // =========================================================================== /** * An unrecognised shape name was given to a stage chart */ STAGE_SHAPE_INVALID: { code: 'DC110', level: 'warning', path: 'stage.shape', message: 'Unrecognised shape \"{value}\"; using rectangle instead' }, /** * An unrecognised value was given for the logging or console-log attribute */ LOG_LEVEL_INVALID: { code: 'DC109', level: 'warning', path: 'logging.level', message: 'Unrecognised {attribute} value \"{value}\"; using the default instead' }, /** * A filename passed to downloadSvg() was unusable and had to be adjusted */ EXPORT_FILENAME_INVALID: { code: 'DC108', level: 'warning', path: 'export.filename', message: 'Filename \"{value}\" is not usable as-is and was adjusted' }, /** * A radar point names an axis that does not exist */ RADAR_POINT_NO_AXIS: { code: 'DC111', level: 'warning', path: 'radar.pointNoAxis', message: '{count} point(s) in {series} name an axis that does not exist and were not drawn: {labels}' }, /** * A radar chart with fewer than three axes */ RADAR_TOO_FEW_AXES: { code: 'DC112', level: 'warning', path: 'radar.tooFewAxes', message: 'A radar chart needs at least 3 axes to enclose an area; {count} given' }, /** * Palette not found */ PALETTE_NOT_FOUND: { code: 'DC201', level: 'warning', path: 'colors.palette', message: 'Palette \"{id}\" not found (no DOM element or built-in with that name)' }, /** * Pattern not found or invalid */ PATTERN_NOT_FOUND: { code: 'DC202', level: 'warning', path: 'pattern.resolve', message: 'Pattern \"{id}\" is not a valid type or ID reference' }, /** * Zero-fill element not found */ ZERO_FILL_NOT_FOUND: { code: 'DC203', level: 'warning', path: 'zero.fillNotFound', message: 'Zero-fill element with id \"{id}\" not found' }, /** * SVG element not found in shadow DOM (internal error) */ SVG_NOT_FOUND: { code: 'DC204', level: 'warning', path: 'render.svgNotFound', message: 'No SVG element found in chart shadow DOM' }, // =========================================================================== // DC300-DC399: Style Warnings // =========================================================================== /** * CSS attribute used instead of SVG attribute on title */ TITLE_STYLE_WARNING: { code: 'DC301', level: 'warning', path: 'title.style', message: '{message}' }, /** * CSS attribute used instead of SVG attribute on legend */ LEGEND_STYLE_WARNING: { code: 'DC302', level: 'warning', path: 'legend.style', message: '{message}' }, /** * CSS attribute used instead of SVG attribute on axis */ AXIS_STYLE_WARNING: { code: 'DC303', level: 'warning', path: 'axis.style', message: '{message}' }, // =========================================================================== // DC400-DC499: Informational Warnings // =========================================================================== /** * All elements have the same color (consider using palette) */ COLORS_UNIFORM: { code: 'DC401', level: 'warning', path: 'colors.uniform', message: 'All {count} {elementType}s have the same fill color - consider using a palette for visual distinction' } }",
+          "default": "{ // =========================================================================== // DC001-DC099: Data Errors // =========================================================================== /** * Chart has no data elements */ DATA_EMPTY: { code: 'DC001', level: 'warning', path: 'data.empty', message: '{chartType} has no {expectedElements}. Add {expectedElements} to display data.' }, /** * All data elements are hidden */ DATA_ALL_HIDDEN: { code: 'DC002', level: 'warning', path: 'data.allHidden', message: '{chartType} has {count} data element(s) but all are hidden. Check for hidden attributes on {elementTypes}.' }, /** * Total of all values is zero (pie chart) */ DATA_ZERO_TOTAL: { code: 'DC003', level: 'warning', path: 'data.zeroTotal', message: 'All {elementType} values sum to 0. {chartType} cannot be rendered. Check that {elementType}s have positive values.' }, /** * Elements have zero or negative values where positive is required */ DATA_INVALID_VALUES: { code: 'DC004', level: 'warning', path: 'data.invalidValues', message: '{count} {elementType}(s) have zero or negative values and will not be visible: {labels}. {chartType}s require positive values.' }, /** * Bars have value 0 and will not render */ DATA_ZERO_BARS: { code: 'DC005', level: 'warning', path: 'bars.zeroValue', message: '{count} bar(s) have value 0 and will not be visible: {labels}' }, /** * Elements have negative values (stage chart warning) */ DATA_NEGATIVE_VALUES: { code: 'DC006', level: 'warning', path: 'data.negativeValues', message: '{count} {elementType}(s) have negative values which may not display correctly: {labels}' }, // =========================================================================== // DC100-DC199: Configuration Errors // =========================================================================== /** * Line element has no points */ LINE_NO_POINTS: { code: 'DC101', level: 'warning', path: 'lines.noPoints', message: \"Line '{label}' has no dc-point children and will not be visible.\" }, /** * Area element has no points */ AREA_NO_POINTS: { code: 'DC102', level: 'warning', path: 'areas.noPoints', message: \"Area '{label}' has no dc-point children and will not be visible.\" }, /** * Invalid inner radius for donut chart */ DONUT_INVALID_RADIUS: { code: 'DC103', level: 'warning', path: 'donut.invalidInnerRadius', message: 'inner-radius=\"{value}\" is {reason}. {suggestion}' }, /** * Could not parse attribute value */ PARSE_ERROR: { code: 'DC104', level: 'warning', path: 'parse', message: 'Could not parse {attribute} value \"{value}\", defaulting to {default}' }, /** * Invalid format string */ FORMAT_INVALID: { code: 'DC105', level: 'warning', path: 'format.invalid', message: 'Invalid format string: \"{format}\", using default' }, /** * Time axis has insufficient valid dates */ TIME_AXIS_FEW_DATES: { code: 'DC106', level: 'warning', path: 'timeAxis', message: \"Type is 'time' but only {count} valid date(s) found\" }, /** * Too many bars for the available plot width. Gutters have been compressed * (and bars clamped to a minimum) so the chart still renders. */ BAR_SPACE_EXHAUSTED: { code: 'DC107', level: 'warning', path: 'bars.layout', message: '{count} bars exceed the available {available} units; gutters compressed to {gutterScale}x to keep bars at least {minSize} unit(s) wide' }, // =========================================================================== // DC200-DC299: Reference Errors // =========================================================================== /** * An unrecognised shape name was given to a stage chart */ STAGE_SHAPE_INVALID: { code: 'DC110', level: 'warning', path: 'stage.shape', message: 'Unrecognised shape \"{value}\"; using rectangle instead' }, /** * An unrecognised value was given for the logging or console-log attribute */ LOG_LEVEL_INVALID: { code: 'DC109', level: 'warning', path: 'logging.level', message: 'Unrecognised {attribute} value \"{value}\"; using the default instead' }, /** * A filename passed to downloadSvg() was unusable and had to be adjusted */ EXPORT_FILENAME_INVALID: { code: 'DC108', level: 'warning', path: 'export.filename', message: 'Filename \"{value}\" is not usable as-is and was adjusted' }, /** * A radar point names an axis that does not exist */ RADAR_POINT_NO_AXIS: { code: 'DC111', level: 'warning', path: 'radar.pointNoAxis', message: '{count} point(s) in {series} name an axis that does not exist and were not drawn: {labels}' }, /** * A radar chart with fewer than three axes */ RADAR_TOO_FEW_AXES: { code: 'DC112', level: 'warning', path: 'radar.tooFewAxes', message: 'A radar chart needs at least 3 axes to enclose an area; {count} given' }, /** * A <dc-reference> declares neither a value nor a bound, so there is nothing * to draw */ REFERENCE_EMPTY: { code: 'DC113', level: 'warning', path: 'reference.empty', message: '{count} <dc-reference> element(s) set neither value nor min/max and drew nothing' }, /** * A reference line falls outside an explicitly bounded axis */ REFERENCE_OUT_OF_RANGE: { code: 'DC114', level: 'warning', path: 'reference.outOfRange', message: 'Reference {label} at {value} is outside the axis range [{min}, {max}] and was not drawn' }, /** * Palette not found */ PALETTE_NOT_FOUND: { code: 'DC201', level: 'warning', path: 'colors.palette', message: 'Palette \"{id}\" not found (no DOM element or built-in with that name)' }, /** * Pattern not found or invalid */ PATTERN_NOT_FOUND: { code: 'DC202', level: 'warning', path: 'pattern.resolve', message: 'Pattern \"{id}\" is not a valid type or ID reference' }, /** * Zero-fill element not found */ ZERO_FILL_NOT_FOUND: { code: 'DC203', level: 'warning', path: 'zero.fillNotFound', message: 'Zero-fill element with id \"{id}\" not found' }, /** * SVG element not found in shadow DOM (internal error) */ SVG_NOT_FOUND: { code: 'DC204', level: 'warning', path: 'render.svgNotFound', message: 'No SVG element found in chart shadow DOM' }, // =========================================================================== // DC300-DC399: Style Warnings // =========================================================================== /** * CSS attribute used instead of SVG attribute on title */ TITLE_STYLE_WARNING: { code: 'DC301', level: 'warning', path: 'title.style', message: '{message}' }, /** * CSS attribute used instead of SVG attribute on legend */ LEGEND_STYLE_WARNING: { code: 'DC302', level: 'warning', path: 'legend.style', message: '{message}' }, /** * CSS attribute used instead of SVG attribute on axis */ AXIS_STYLE_WARNING: { code: 'DC303', level: 'warning', path: 'axis.style', message: '{message}' }, // =========================================================================== // DC400-DC499: Informational Warnings // =========================================================================== /** * All elements have the same color (consider using palette) */ COLORS_UNIFORM: { code: 'DC401', level: 'warning', path: 'colors.uniform', message: 'All {count} {elementType}s have the same fill color - consider using a palette for visual distinction' } }",
           "description": "Error code registry.\r\nUse ErrorCode.XXX to reference errors throughout the codebase."
         },
         {
@@ -34620,6 +35592,14 @@
           "declaration": {
             "name": "ChartScatter",
             "module": "./chart-scatter.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ChartReference",
+          "declaration": {
+            "name": "ChartReference",
+            "module": "./chart-reference.js"
           }
         },
         {

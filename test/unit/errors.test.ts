@@ -359,9 +359,9 @@ describe('createErrorLog', () => {
 describe('Error code count', () => {
   it('has expected number of error codes', () => {
     const count = Object.keys(ErrorCode).length;
-    // 6 data + 12 config + 4 reference + 3 style + 1 info = 26
-    // (DC111/DC112 arrived with the radar chart)
-    expect(count).toBe(26);
+    // 6 data + 14 config + 4 reference + 3 style + 1 info = 28
+    // (DC111/DC112 arrived with the radar chart, DC113/DC114 with <dc-reference>)
+    expect(count).toBe(28);
   });
 
   it('data errors count', () => {
@@ -377,7 +377,7 @@ describe('Error code count', () => {
       const num = parseInt(e.code.slice(2), 10);
       return num >= 100 && num <= 199;
     });
-    expect(configErrors.length).toBe(12);
+    expect(configErrors.length).toBe(14);
   });
 
   it('reference errors count', () => {

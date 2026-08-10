@@ -1951,6 +1951,76 @@ radar than it does on a line.
 **Child Elements:**
 - `<dc-point>` - One per axis; `label` names the axis it belongs to
 
+### `<dc-reference>`
+
+A target, threshold, budget or SLA drawn across the plot of a `<dc-chart>` —
+bars, lines, areas, bubbles or scatter. It needs a value axis, so the
+proportional charts (pie, funnel, stage) and `<dc-radar-chart>` do not take one.
+
+One element covers both shapes an annotation takes, because they are the same
+idea at different widths:
+
+- `value` draws a **line** at that point on the value axis.
+- `min` and `max` draw a **band** between them.
+- Either bound alone draws a **half-open band** — `min="80"` shades everything
+  from 80 to the top of the plot, which is how a danger zone is usually stated.
+
+Setting `value` alongside a band is not a conflict: it draws the band's centre
+line, which is exactly what "acceptable range, target 100" means.
+
+**Attributes:**
+- `value` (number) - Where to draw a line on the value axis
+- `min` (number) - Lower bound of a band
+- `max` (number) - Upper bound of a band
+- `label` (string) - Text drawn at the end of the line, or at the band's upper edge
+- `label-position` (string) - `"end"` (default) or `"start"` of the line
+- `stroke` (string) - Line colour (default: `#dc2626`)
+- `stroke-width` (number) - Line width (default: 2)
+- `stroke-dasharray` (string) - Named pattern or dash list (default: `dashed`)
+- `fill` (string) - Band fill; falls back to `stroke`, so one colour attribute usually does
+- `fill-opacity` (number) - Band opacity (default: 0.12)
+- Plus the standard HTML `hidden`, which removes the annotation
+
+**Example:**
+
+```html
+<dc-chart width="600" height="400">
+  <dc-reference min="80" max="120" fill="#16a34a" label="Acceptable"></dc-reference>
+  <dc-reference value="100" label="Target"></dc-reference>
+  <dc-bar value="95" label="Q1"></dc-bar>
+  <dc-bar value="70" label="Q2"></dc-bar>
+</dc-chart>
+```
+
+**An annotation is not data.** A reference is not focusable, contributes nothing
+to any total or percentage, and does not appear in the legend — its `label` is
+drawn on the line itself, so a legend entry would only repeat it. A chart
+holding nothing but references still shows the [empty
+state](#empty-and-loading-states): there is nothing for the annotation to be
+about.
+
+**It does widen an automatic axis**, because a target the axis crops off is
+worse than no target — the chart looks complete and quietly omits the thing it
+was annotated with. Where the axis is bounded outright with `min-value` /
+`max-value`, the two kinds part company:
+
+- A **band** that runs past the edge is **clamped**. Part of the region really
+  is on screen, and drawing that part is honest.
+- A **line** outside the range is **dropped**, and reported as `DC114`. Clamping
+  it would place it somewhere it is not, and the reader has no way to tell.
+
+On a horizontal chart the line is drawn vertically and the band as a vertical
+stripe: a reference is positioned on the value axis, wherever that axis happens
+to be.
+
+**Styling:** `::part(reference-line)`, `::part(reference-band)` and
+`::part(reference-label)` — see [Styling with CSS](#styling-with-css).
+
+**Accessibility:** the first reference that draws a line becomes the target the
+screen-reader description compares the bars against — "all exceed target",
+"target met in Q1, Q3". A band alone is not a target: "between 80 and 120" has
+no single number to be above or below.
+
 ### `<dc-axis>`
 
 Configures an axis on bar charts and line charts.
@@ -2772,6 +2842,8 @@ you where to look before you read the message.
 | `DC110` | Unrecognised stage `shape`; `rectangle` used |
 | `DC111` | A radar point names an axis that does not exist |
 | `DC112` | A radar chart has fewer than three axes |
+| `DC113` | A `<dc-reference>` set neither `value` nor `min`/`max` and drew nothing |
+| `DC114` | A reference line falls outside the axis range and was not drawn |
 | `DC201` | Palette not found — check the name against [Palettes](#palettes-and-pattern-fills) |
 | `DC202` | Pattern is not a valid type or ID reference |
 | `DC203` | `zero-fill` referenced an element that does not exist |

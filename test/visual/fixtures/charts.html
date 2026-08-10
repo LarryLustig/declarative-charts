@@ -378,6 +378,34 @@
     </dc-radar-chart>
   </div>
 
+  <!-- Reference Lines and Bands -->
+  <div id="reference-basic" class="chart-container">
+    <h2>Reference Lines and Bands</h2>
+    <dc-chart width="500" height="350" value-format="number 0">
+      <dc-title>Quarterly Revenue</dc-title>
+      <dc-axis position="left"><dc-grid stroke="#e5e7eb"></dc-grid></dc-axis>
+      <dc-reference min="80" max="120" fill="#16a34a" label="Acceptable"></dc-reference>
+      <dc-reference value="140" stroke="#dc2626" label="Limit"></dc-reference>
+      <dc-reference value="100" stroke="#2563eb" label="Target" label-position="start"></dc-reference>
+      <dc-bar value="95" label="Q1" fill="#94a3b8"></dc-bar>
+      <dc-bar value="112" label="Q2" fill="#94a3b8"></dc-bar>
+      <dc-bar value="74" label="Q3" fill="#94a3b8"></dc-bar>
+      <dc-bar value="131" label="Q4" fill="#94a3b8"></dc-bar>
+    </dc-chart>
+  </div>
+
+  <!-- Reference on a Horizontal Chart -->
+  <div id="reference-horizontal" class="chart-container">
+    <h2>Reference on a Horizontal Chart</h2>
+    <dc-chart width="500" height="350" orientation="horizontal" value-format="number 0">
+      <dc-reference min="90" fill="#dc2626" label="Over budget"></dc-reference>
+      <dc-reference value="60" stroke="#2563eb" label="Target"></dc-reference>
+      <dc-bar value="45" label="Alpha" fill="#94a3b8"></dc-bar>
+      <dc-bar value="72" label="Beta" fill="#94a3b8"></dc-bar>
+      <dc-bar value="98" label="Gamma" fill="#94a3b8"></dc-bar>
+    </dc-chart>
+  </div>
+
   <!-- Scatter Plot -->
   <div id="scatter-basic" class="chart-container">
     <h2>Scatter Plot</h2>

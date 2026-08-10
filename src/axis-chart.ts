@@ -3,6 +3,8 @@ import { BaseChart } from './base-chart.js';
 import { ErrorCode } from './errors.js';
 import type { ChartAxis, AxisPosition, AxisType } from './chart-axis.js';
 import type { GridConfig } from './chart-grid.js';
+import type { ChartReference } from './chart-reference.js';
+import { resolveDasharray } from './chart-fill.js';
 import { calculateLabelLines, calculateLabelInterval, calculateTicks,
   niceNumber
 } from './chart-utils.js';
@@ -24,6 +26,33 @@ export interface ValueRange {
   hasNegatives: boolean;
   /** Whether the range includes positive values */
   hasPositives: boolean;
+}
+
+/**
+ * A resolved `<dc-reference>`: a line, a band, or both.
+ *
+ * `min`/`max` are already normalised — swapped if given the wrong way round,
+ * and left as NaN where the band is half-open, which the renderer reads as
+ * "clamp to the edge of the plot".
+ */
+export interface ReferenceData {
+  /** Value axis position of the line, or NaN when this is a band only */
+  value: number;
+  /** Lower bound of the band, or NaN for open-ended below */
+  min: number;
+  /** Upper bound of the band, or NaN for open-ended above */
+  max: number;
+  hasLine: boolean;
+  hasBand: boolean;
+  label: string;
+  stroke: string;
+  strokeWidth: number;
+  strokeDasharray: string;
+  fill: string;
+  fillOpacity: number;
+  labelPosition: string;
+  valueFormat?: string;
+  element: ChartReference;
 }
 
 /**
@@ -852,6 +881,254 @@ export abstract class AxisChart extends BaseChart {
    * @param axisConfig Optional axis configuration for tick customization
    * @returns SVG template result for grid lines
    */
+  // ============================================================================
+  // Reference Lines and Bands
+  // ============================================================================
+
+  /**
+   * Resolved `<dc-reference>` children.
+   *
+   * Cached per render: it is read by the range calculation, by two render
+   * passes and by the insight generator, and it walks the DOM.
+   */
+  protected getReferences(): ReferenceData[] {
+    return this.cachePerRender('references', () => this.extractReferences());
+  }
+
+  private extractReferences(): ReferenceData[] {
+    const elements = Array.from(this.querySelectorAll('dc-reference'))
+      .filter(el => !el.hasAttribute('hidden')) as ChartReference[];
+    if (elements.length === 0) return [];
+
+    const empty = elements.filter(el => !el.hasLine && !el.hasBand);
+    if (empty.length > 0) {
+      this.logError(ErrorCode.REFERENCE_EMPTY, { count: empty.length }, empty.length);
+    }
+
+    return elements
+      .filter(el => el.hasLine || el.hasBand)
+      .map(el => {
+        // A band given the wrong way round is a typo, not an instruction to
+        // draw nothing. Both bounds are only comparable when both are present.
+        let min = el.min;
+        let max = el.max;
+        if (Number.isFinite(min) && Number.isFinite(max) && min > max) {
+          [min, max] = [max, min];
+        }
+
+        return {
+          value: el.value,
+          min,
+          max,
+          hasLine: el.hasLine,
+          hasBand: el.hasBand,
+          label: el.label || '',
+          stroke: el.stroke,
+          strokeWidth: el.strokeWidth,
+          strokeDasharray: resolveDasharray(el.strokeDasharray) ?? '',
+          fill: el.fill || el.stroke,
+          fillOpacity: el.fillOpacity,
+          labelPosition: el.labelPosition || 'end',
+          valueFormat: el.valueFormat,
+          element: el
+        };
+      });
+  }
+
+  /**
+   * Every value a reference asks the axis to reach.
+   *
+   * Folded into the chart's own min/max so an automatic axis grows to show the
+   * target. A target the axis crops off is worse than no target: the chart
+   * looks complete and quietly omits the thing it was annotated with.
+   */
+  protected getReferenceValues(): number[] {
+    return this.getReferences().flatMap(r =>
+      [r.value, r.min, r.max].filter(v => Number.isFinite(v))
+    );
+  }
+
+  /** Value axis coordinate for a value, in the given orientation. */
+  private referenceCoordinate(
+    value: number,
+    padding: { top: number; right: number; bottom: number; left: number },
+    chartWidth: number,
+    chartHeight: number,
+    range: ValueRange,
+    orientation: 'vertical' | 'horizontal'
+  ): number {
+    const totalRange = range.max - range.min || 1;
+    const fraction = (value - range.min) / totalRange;
+    return orientation === 'vertical'
+      ? this.height - padding.bottom - fraction * chartHeight
+      : padding.left + fraction * chartWidth;
+  }
+
+  /**
+   * Bands, drawn behind the data.
+   *
+   * A band is a region of the plot rather than a mark on it, so anything it
+   * overlaps must stay readable — which means underneath. Lines go on top, in
+   * `renderReferenceLines()`.
+   */
+  protected renderReferenceBands(
+    padding: { top: number; right: number; bottom: number; left: number },
+    chartWidth: number,
+    chartHeight: number,
+    range: ValueRange,
+    orientation: 'vertical' | 'horizontal' = 'vertical'
+  ): SVGTemplateResult {
+    const bands = this.getReferences().filter(r => r.hasBand);
+    if (bands.length === 0) return svg``;
+
+    const at = (v: number) =>
+      this.referenceCoordinate(v, padding, chartWidth, chartHeight, range, orientation);
+
+    return svg`
+      ${bands.map(band => {
+        // An open end is the edge of the plot. Clamping rather than skipping is
+        // right for a band: a range that runs off the top is still partly on
+        // screen, and showing that part is the honest thing to draw.
+        const lo = Number.isFinite(band.min) ? Math.max(band.min, range.min) : range.min;
+        const hi = Number.isFinite(band.max) ? Math.min(band.max, range.max) : range.max;
+        if (hi <= lo) return '';
+
+        const a = at(lo);
+        const b = at(hi);
+
+        return orientation === 'vertical'
+          ? svg`
+            <rect
+              class="reference-band"
+              x="${padding.left}"
+              y="${Math.min(a, b)}"
+              width="${chartWidth}"
+              height="${Math.abs(b - a)}"
+              fill="${band.fill}"
+              fill-opacity="${band.fillOpacity}"
+            />`
+          : svg`
+            <rect
+              class="reference-band"
+              x="${Math.min(a, b)}"
+              y="${padding.top}"
+              width="${Math.abs(b - a)}"
+              height="${chartHeight}"
+              fill="${band.fill}"
+              fill-opacity="${band.fillOpacity}"
+            />`;
+      })}
+    `;
+  }
+
+  /**
+   * Lines and their labels, drawn over the data.
+   *
+   * A line outside the axis range is skipped rather than clamped. Clamping a
+   * band shows part of a region that really is partly on screen; clamping a
+   * line would draw it somewhere it is not, which is a lie the reader cannot
+   * detect.
+   */
+  protected renderReferenceLines(
+    padding: { top: number; right: number; bottom: number; left: number },
+    chartWidth: number,
+    chartHeight: number,
+    range: ValueRange,
+    orientation: 'vertical' | 'horizontal' = 'vertical'
+  ): SVGTemplateResult {
+    const withLine = this.getReferences().filter(r => r.hasLine);
+    const labelled = this.getReferences().filter(r => r.label && (r.hasLine || r.hasBand));
+    if (withLine.length === 0 && labelled.length === 0) return svg``;
+
+    const inRange = (v: number) => v >= range.min && v <= range.max;
+    const at = (v: number) =>
+      this.referenceCoordinate(v, padding, chartWidth, chartHeight, range, orientation);
+
+    const drawn = withLine.filter(r => {
+      if (inRange(r.value)) return true;
+      this.logError(ErrorCode.REFERENCE_OUT_OF_RANGE, {
+        label: r.label ? `"${r.label}"` : '(unlabelled)',
+        value: this.formatValue(r.value, r.valueFormat),
+        min: this.formatValue(range.min),
+        max: this.formatValue(range.max)
+      }, r.value);
+      return false;
+    });
+
+    const fontSize = this.fontSize(11);
+
+    return svg`
+      ${drawn.map(ref => {
+        const c = at(ref.value);
+        return orientation === 'vertical'
+          ? svg`
+            <line
+              class="reference-line"
+              x1="${padding.left}" y1="${c}"
+              x2="${this.width - padding.right}" y2="${c}"
+              stroke="${ref.stroke}"
+              stroke-width="${ref.strokeWidth}"
+              stroke-dasharray="${ref.strokeDasharray}"
+            />`
+          : svg`
+            <line
+              class="reference-line"
+              x1="${c}" y1="${padding.top}"
+              x2="${c}" y2="${this.height - padding.bottom}"
+              stroke="${ref.stroke}"
+              stroke-width="${ref.strokeWidth}"
+              stroke-dasharray="${ref.strokeDasharray}"
+            />`;
+      })}
+      ${labelled.map(ref => {
+        // A band labels its own upper edge; a line labels itself. Where an
+        // element is both, the line wins - it is the more precise statement.
+        const anchorValue = ref.hasLine
+          ? ref.value
+          : Number.isFinite(ref.max) ? ref.max : ref.min;
+        if (!inRange(anchorValue)) return '';
+
+        const c = at(anchorValue);
+        const atStart = ref.labelPosition === 'start';
+        // A band with no line has no stroke on screen, so `fill` is the colour
+        // the reader associates with it. Taking `stroke` here painted a green
+        // band's label in the default red.
+        const labelFill = ref.hasLine ? ref.stroke : ref.fill;
+
+        if (orientation === 'vertical') {
+          const x = atStart ? padding.left + 4 : this.width - padding.right - 4;
+          return svg`
+            <text
+              class="reference-label"
+              x="${x}"
+              y="${c - 4}"
+              text-anchor="${atStart ? 'start' : 'end'}"
+              font-size="${fontSize}"
+              fill="${labelFill}"
+            >${ref.label}</text>`;
+        }
+
+        // On a horizontal chart the label runs sideways from the line, so a
+        // reference near the right-hand edge - which is exactly where a limit
+        // or an over-budget band sits - pushes its label off the plot. Measure
+        // rather than guess, and put it on the other side when it will not fit.
+        const y = atStart ? this.height - padding.bottom - 4 : padding.top + fontSize;
+        const labelWidth = this.measureText(ref.label, fontSize);
+        const overflows = c + 4 + labelWidth > this.width - padding.right;
+
+        return svg`
+          <text
+            class="reference-label"
+            x="${overflows ? c - 4 : c + 4}"
+            y="${y}"
+            text-anchor="${overflows ? 'end' : 'start'}"
+            font-size="${fontSize}"
+            fill="${labelFill}"
+          >${ref.label}</text>`;
+      })}
+    `;
+  }
+
   protected renderGridLines(
     padding: { top: number; right: number; bottom: number; left: number },
     chartWidth: number,

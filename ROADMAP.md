@@ -64,24 +64,39 @@ A `<dc-scatter>` series wraps the points, rather than loose `<dc-point>`
 children of the chart: a scatter usually compares groups, and a group needs a
 name for the legend and a colour of its own.
 
-### 2. Reference lines and bands
+### 2. Reference lines and bands — **done**
 
 **Why:** a target, a threshold, a budget, an SLA. It is the most common
-annotation on a business chart, and its absence is conspicuous the moment anyone
-uses this at work. There is already a stub — `getReferenceLineValue()` in
-`chart.ts` returns `undefined` and the insight generator calls it — so part of
-the design has been anticipated.
+annotation on a business chart, and its absence was conspicuous the moment
+anyone used this at work. A stub had been waiting since the accessibility work —
+`getReferenceLineValue()` in `chart.ts` returned `undefined` and the insight
+generator was already calling it.
 
 ```html
 <dc-chart>
-  <dc-reference value="100" label="Target" stroke="#dc2626"></dc-reference>
   <dc-reference min="80" max="120" fill="#fef3c7" label="Acceptable"></dc-reference>
+  <dc-reference value="100" label="Target" stroke="#dc2626"></dc-reference>
   <dc-bar value="95" label="Q1"></dc-bar>
 </dc-chart>
 ```
 
-**Cost:** small. It renders in the existing value-axis coordinate space, and
-`<dc-reference>` is a data element like any other.
+Shipped as sketched, in the existing value-axis coordinate space. Three
+decisions came out of building it:
+
+- **Bands beneath the data, lines above it.** A band is a region of the plot, so
+  whatever it overlaps has to stay readable. A line is a mark on the plot, and a
+  target hidden behind a bar is no target.
+- **A reference widens an automatic axis.** Otherwise the chart looks complete
+  and quietly omits the annotation it was given.
+- **Clamp a band, drop a line.** Against an axis bounded outright, part of an
+  overhanging band really is on screen and drawing that part is honest. Clamping
+  a *line* would put it somewhere it is not, which the reader cannot detect — so
+  it is dropped and reported as `DC114`.
+
+**Not yet:** references live on `AxisChart`, so `<dc-radar-chart>` and the
+proportional charts do not take one. A ring on a radar is the obvious extension.
+A reference on a scatter's *x* axis is the other — the value axis is covered,
+the numeric category axis is not.
 
 ### 3. Label collision handling
 

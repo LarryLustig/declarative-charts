@@ -9,6 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`<dc-reference>`** — target lines and threshold bands on `<dc-chart>`. One element covers
+  both shapes an annotation takes, because they are the same idea at different widths: `value`
+  draws a line, `min`/`max` draw a band, and either bound alone draws a half-open band —
+  `min="80"` shades everything above 80, which is how a danger zone is usually stated
+  - `value` alongside a band is not a conflict: it draws the band's centre line, which is
+    exactly what "acceptable range, target 100" means
+  - **Bands are drawn beneath the data, lines above it.** A band is a region of the plot, so
+    whatever it overlaps has to stay readable; a line is a mark on the plot, and a target hidden
+    behind a bar is no target at all
+  - **A reference widens an automatic axis.** A target the axis crops off is worse than no
+    target, because the chart looks complete and quietly omits the thing it was annotated with
+  - Against an axis bounded outright, the two kinds part company: a band that runs past the edge
+    is **clamped**, because part of the region really is on screen; a line outside the range is
+    **dropped** and reported as `DC114`, because clamping it would place it somewhere it is not
+    and the reader has no way to tell
+  - An annotation is not data: not focusable, absent from the legend (its label is on the line
+    already), and outside every total and percentage
+  - Fills the stub the roadmap anticipated — `getReferenceLineValue()` in `chart.ts` returned
+    `undefined` and the insight generator has been calling it since the accessibility work. A
+    chart with a target now says "all exceed target" or "target met in Q1, Q3"
+  - New diagnostics `DC113` (a reference sets neither `value` nor a bound) and `DC114`
+  - Parts `reference-line`, `reference-band` and `reference-label`
+
 - **`<dc-scatter>`** — unconnected points positioned by two numbers, inside the existing
   `<dc-chart>`. It is the one *shape of data* the library could not express: every other chart
   plots a value against a category, and none plotted a value against another value

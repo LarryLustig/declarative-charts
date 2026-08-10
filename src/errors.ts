@@ -233,6 +233,27 @@ export const ErrorCode = {
   },
 
   /**
+   * A <dc-reference> declares neither a value nor a bound, so there is nothing
+   * to draw
+   */
+  REFERENCE_EMPTY: {
+    code: 'DC113',
+    level: 'warning',
+    path: 'reference.empty',
+    message: '{count} <dc-reference> element(s) set neither value nor min/max and drew nothing'
+  },
+
+  /**
+   * A reference line falls outside an explicitly bounded axis
+   */
+  REFERENCE_OUT_OF_RANGE: {
+    code: 'DC114',
+    level: 'warning',
+    path: 'reference.outOfRange',
+    message: 'Reference {label} at {value} is outside the axis range [{min}, {max}] and was not drawn'
+  },
+
+  /**
    * Palette not found
    */
   PALETTE_NOT_FOUND: {

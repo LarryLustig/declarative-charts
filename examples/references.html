@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reference Lines & Bands - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+</head>
+<body>
+    <h1>Reference Lines &amp; Bands</h1>
+    <p>Targets, thresholds, budgets and SLAs drawn across the plot</p>
+
+    <nav></nav>
+
+    <div class="example">
+        <h2>Lines and Bands</h2>
+        <p>One element covers both shapes an annotation takes, because they are the same idea at different widths. <code>value</code> draws a line; <code>min</code> and <code>max</code> draw a band between them.</p>
+
+        <div class="grid">
+            <div>
+                <h3>A Target Line</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" value-format="number 0"&gt;
+  &lt;dc-reference value="100" label="Target"&gt;&lt;/dc-reference&gt;
+  &lt;dc-bar value="95" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="112" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="74" label="Q3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="131" label="Q4"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" value-format="number 0">
+                    <dc-reference value="100" label="Target"></dc-reference>
+                    <dc-bar value="95" label="Q1" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="112" label="Q2" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="74" label="Q3" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="131" label="Q4" fill="#94a3b8"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>An Acceptable Band</h3>
+                <pre><code>&lt;dc-reference min="80" max="120"
+              fill="#16a34a"
+              label="Acceptable"&gt;&lt;/dc-reference&gt;
+&lt;!-- same bars --&gt;</code></pre>
+                <dc-chart width="500" height="350" value-format="number 0">
+                    <dc-reference min="80" max="120" fill="#16a34a" label="Acceptable"></dc-reference>
+                    <dc-bar value="95" label="Q1" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="112" label="Q2" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="74" label="Q3" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="131" label="Q4" fill="#94a3b8"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+        <p>Bands are drawn <strong>beneath</strong> the data and lines <strong>above</strong> it. A band is a region of the plot, so whatever it overlaps has to stay readable; a line is a mark on the plot, and a target hidden behind a bar is no target at all.</p>
+    </div>
+
+    <div class="example">
+        <h2>Half-Open Bands</h2>
+        <p>Either bound alone shades everything beyond it. That is how a danger zone is usually stated &mdash; &ldquo;anything over 90&rdquo; &mdash; and it should not need a maximum nobody has in mind.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Everything Above</h3>
+                <pre><code>&lt;dc-reference min="90" fill="#dc2626"
+              label="Over budget"&gt;&lt;/dc-reference&gt;</code></pre>
+                <dc-chart width="500" height="350" value-format="number 0">
+                    <dc-reference min="90" fill="#dc2626" label="Over budget"></dc-reference>
+                    <dc-bar value="45" label="Alpha" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="72" label="Beta" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="98" label="Gamma" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="61" label="Delta" fill="#94a3b8"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Everything Below</h3>
+                <pre><code>&lt;dc-reference max="50" fill="#ea580c"
+              label="Under target"&gt;&lt;/dc-reference&gt;</code></pre>
+                <dc-chart width="500" height="350" value-format="number 0">
+                    <dc-reference max="50" fill="#ea580c" label="Under target"></dc-reference>
+                    <dc-bar value="45" label="Alpha" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="72" label="Beta" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="98" label="Gamma" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="61" label="Delta" fill="#94a3b8"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>A Band and Its Target Together</h2>
+        <p>Setting <code>value</code> alongside <code>min</code> and <code>max</code> is not a conflict. It draws the band's centre line, which is exactly what &ldquo;acceptable range, target 100&rdquo; means &mdash; one statement, one element.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Range Plus Centre</h3>
+                <pre><code>&lt;dc-reference min="80" max="120" value="100"
+              fill="#16a34a" stroke="#16a34a"
+              label="Target"&gt;&lt;/dc-reference&gt;</code></pre>
+                <dc-chart width="500" height="350" value-format="number 0">
+                    <dc-reference min="80" max="120" value="100" fill="#16a34a" stroke="#16a34a" label="Target"></dc-reference>
+                    <dc-bar value="95" label="Q1" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="112" label="Q2" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="74" label="Q3" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="131" label="Q4" fill="#94a3b8"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Several Annotations</h3>
+                <pre><code>&lt;dc-reference min="80" max="120" fill="#16a34a"
+              label="Acceptable"&gt;&lt;/dc-reference&gt;
+&lt;dc-reference value="140" stroke="#dc2626"
+              label="Limit"&gt;&lt;/dc-reference&gt;
+&lt;dc-reference value="100" stroke="#2563eb"
+              label="Target"
+              label-position="start"&gt;&lt;/dc-reference&gt;</code></pre>
+                <dc-chart width="500" height="350" value-format="number 0">
+                    <dc-reference min="80" max="120" fill="#16a34a" label="Acceptable"></dc-reference>
+                    <dc-reference value="140" stroke="#dc2626" label="Limit"></dc-reference>
+                    <dc-reference value="100" stroke="#2563eb" label="Target" label-position="start"></dc-reference>
+                    <dc-bar value="95" label="Q1" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="112" label="Q2" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="74" label="Q3" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="131" label="Q4" fill="#94a3b8"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+        <p><code>label-position="start"</code> moves a label to the left-hand end, which is the way to stop two of them landing on top of each other.</p>
+    </div>
+
+    <div class="example">
+        <h2>Styling</h2>
+        <p>Lines are dashed red by default: dashed because a solid line the same weight as a data line reads as data, and red because the overwhelming majority of these are a limit someone is trying not to cross. <code>fill</code> falls back to <code>stroke</code>, so one colour attribute usually does.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Line Style</h3>
+                <pre><code>&lt;dc-reference value="120" stroke="#7c3aed"
+              stroke-width="3"
+              stroke-dasharray="dotted"
+              label="Stretch"&gt;&lt;/dc-reference&gt;
+&lt;dc-reference value="60" stroke="#0891b2"
+              stroke-dasharray="solid"
+              label="Floor"&gt;&lt;/dc-reference&gt;</code></pre>
+                <dc-chart width="500" height="350" value-format="number 0">
+                    <dc-reference value="120" stroke="#7c3aed" stroke-width="3" stroke-dasharray="dotted" label="Stretch"></dc-reference>
+                    <dc-reference value="60" stroke="#0891b2" stroke-dasharray="solid" label="Floor"></dc-reference>
+                    <dc-bar value="95" label="Q1" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="112" label="Q2" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="74" label="Q3" fill="#94a3b8"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>On a Line Chart</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-reference min="0" max="40" fill="#dc2626"
+                label="Critical"&gt;&lt;/dc-reference&gt;
+  &lt;dc-line label="Uptime"&gt;...&lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" value-format="number 0">
+                    <dc-reference min="0" max="40" fill="#dc2626" label="Critical"></dc-reference>
+                    <dc-line label="Uptime" stroke="#2563eb" show-value="false">
+                        <dc-point value="72" label="Mon"></dc-point>
+                        <dc-point value="65" label="Tue"></dc-point>
+                        <dc-point value="38" label="Wed"></dc-point>
+                        <dc-point value="54" label="Thu"></dc-point>
+                        <dc-point value="81" label="Fri"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Horizontal Charts</h2>
+        <p>A reference is positioned on the <em>value</em> axis, wherever that axis happens to be. On a horizontal chart the line is drawn vertically and the band as a vertical stripe &mdash; the markup does not change.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Same Markup, Rotated</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"
+          orientation="horizontal"&gt;
+  &lt;dc-reference min="90" fill="#dc2626"
+                label="Over budget"&gt;&lt;/dc-reference&gt;
+  &lt;dc-reference value="60" stroke="#2563eb"
+                label="Target"&gt;&lt;/dc-reference&gt;
+  &lt;dc-bar value="45" label="Alpha"&gt;&lt;/dc-bar&gt;
+  ...
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" orientation="horizontal" value-format="number 0">
+                    <dc-reference min="90" fill="#dc2626" label="Over budget"></dc-reference>
+                    <dc-reference value="60" stroke="#2563eb" label="Target"></dc-reference>
+                    <dc-bar value="45" label="Alpha" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="72" label="Beta" fill="#94a3b8"></dc-bar>
+                    <dc-bar value="98" label="Gamma" fill="#94a3b8"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>On a Scatter Plot</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-reference value="40" label="Spec limit"&gt;&lt;/dc-reference&gt;
+  &lt;dc-scatter label="Readings"&gt;...&lt;/dc-scatter&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" value-format="number 0">
+                    <dc-reference value="40" label="Spec limit"></dc-reference>
+                    <dc-scatter label="Readings" fill="#2563eb">
+                        <dc-point x="5" value="12"></dc-point>
+                        <dc-point x="12" value="19"></dc-point>
+                        <dc-point x="18" value="31"></dc-point>
+                        <dc-point x="26" value="28"></dc-point>
+                        <dc-point x="34" value="46"></dc-point>
+                        <dc-point x="41" value="52"></dc-point>
+                    </dc-scatter>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>How It Works</h2>
+
+        <h3>An annotation is not data</h3>
+        <p>A reference is not focusable, contributes nothing to any total or percentage, and does not appear in the legend &mdash; its <code>label</code> is drawn on the line itself, so a legend entry would only repeat it. A chart holding nothing but references still shows the empty state: there is nothing for the annotation to be about.</p>
+
+        <h3>It does widen an automatic axis</h3>
+        <p>A target the axis crops off is worse than no target, because the chart looks complete and quietly omits the thing it was annotated with. Where the axis is bounded outright with <code>min-value</code> and <code>max-value</code>, the two kinds part company: a <strong>band</strong> that runs past the edge is <strong>clamped</strong>, because part of the region really is on screen and drawing that part is honest; a <strong>line</strong> outside the range is <strong>dropped</strong> and reported as <code>DC114</code>, because clamping it would place it somewhere it is not and the reader has no way to tell.</p>
+
+        <h3>Screen readers get the comparison</h3>
+        <p>The first reference that draws a line becomes the target the chart description compares the bars against &mdash; &ldquo;all exceed target&rdquo;, &ldquo;target met in Q1, Q3&rdquo;. A band alone is not a target: &ldquo;between 80 and 120&rdquo; has no single number to be above or below.</p>
+
+        <h3>Styling from CSS</h3>
+        <p>Three parts are exposed: <code>::part(reference-line)</code>, <code>::part(reference-band)</code> and <code>::part(reference-label)</code>.</p>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+</body>
+</html>

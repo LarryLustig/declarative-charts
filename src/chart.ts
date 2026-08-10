@@ -577,7 +577,9 @@ export class Chart extends AxisChart {
     const bubbleMax = this.getBubbleMaxValue();
     const areaMax = this.getAreaMaxValue();
     const scatterMax = this.getScatterMaxValue();
-    return Math.max(barMax, lineMax, bubbleMax, areaMax, scatterMax);
+    const referenceValues = this.getReferenceValues();
+    const referenceMax = referenceValues.length > 0 ? Math.max(...referenceValues) : -Infinity;
+    return Math.max(barMax, lineMax, bubbleMax, areaMax, scatterMax, referenceMax);
   }
 
   protected getMinValue(): number {
@@ -586,8 +588,10 @@ export class Chart extends AxisChart {
     const bubbleMin = this.getBubbleMinValue();
     const areaMin = this.getAreaMinValue();
     const scatterMin = this.getScatterMinValue();
+    const referenceValues = this.getReferenceValues();
+    const referenceMin = referenceValues.length > 0 ? Math.min(...referenceValues) : Infinity;
     // Return the minimum, but don't go below 0 if all values are positive
-    return Math.min(barMin, lineMin, bubbleMin, areaMin, scatterMin);
+    return Math.min(barMin, lineMin, bubbleMin, areaMin, scatterMin, referenceMin);
   }
 
   private getBarMaxValue(): number {
@@ -1938,7 +1942,10 @@ export class Chart extends AxisChart {
       'path.area-path': 'area',
       'g.point-marker': 'point',
       'circle.bubble-shape': 'bubble',
-      '[data-segment-index]': 'bar-segment'
+      '[data-segment-index]': 'bar-segment',
+      'line.reference-line': 'reference-line',
+      'rect.reference-band': 'reference-band',
+      'text.reference-label': 'reference-label'
     };
   }
 
@@ -2029,6 +2036,9 @@ export class Chart extends AxisChart {
       <!-- Grid lines -->
       ${this.renderGridLines(padding, chartWidth, chartHeight, range, isHorizontal ? 'horizontal' : 'vertical', valueAxisConfig)}
 
+      <!-- Reference bands (a region of the plot, so beneath everything drawn on it) -->
+      ${this.renderReferenceBands(padding, chartWidth, chartHeight, range, isHorizontal ? 'horizontal' : 'vertical')}
+
       <!-- Bars -->
       ${bars.length > 0 ? this.renderBars(bars, structure, padding, chartWidth, chartHeight, range, total, deferredLabels) : ''}
 
@@ -2071,6 +2081,9 @@ export class Chart extends AxisChart {
       ${this.hasNumericX()
         ? this.renderNumericCategoryLabels(padding, chartWidth, chartHeight)
         : this.renderCategoryAxisLabels(bars, lines, bubbles, padding, chartWidth, chartHeight, structure, range)}
+
+      <!-- Reference lines and their labels, over the data they annotate -->
+      ${this.renderReferenceLines(padding, chartWidth, chartHeight, range, isHorizontal ? 'horizontal' : 'vertical')}
 
       <!-- Axis Titles -->
       ${this.renderAxisTitle('left', padding, chartWidth, chartHeight)}
@@ -4505,13 +4518,19 @@ export class Chart extends AxisChart {
   }
 
   /**
-   * Get the reference line value for target comparisons.
-   * Stub - returns undefined until reference lines feature is implemented.
+   * The value a screen-reader description compares the bars against.
+   *
+   * The first `<dc-reference>` that draws a line. A chart can carry several -
+   * a target and a limit, say - but the insight sentence reads "all exceed
+   * target", singular, and naming which one is meant would need the sentence
+   * rewritten. First-declared is at least predictable from the markup.
+   *
+   * A band alone is not a target: "between 80 and 120" has no single number to
+   * be above or below.
    */
   private getReferenceLineValue(): number | undefined {
-    // TODO: Implement when reference lines feature is added
-    // This would query for <dc-reference-line> elements and return the value
-    return undefined;
+    const line = this.getReferences().find(r => r.hasLine);
+    return line?.value;
   }
 
   // ============================================================================
