@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **ROADMAP rewritten**, 1,031 lines to 202. The old one listed twenty-odd features by phase and
+  its status markers had gone stale — several items marked "Not Started" had shipped. The new one
+  admits only two grounds for the 1.0 list: a capability the library cannot express at all, or a
+  chart that proves an architectural seam while breaking changes are still free. Everything else
+  is deferred with a reason, and the non-goals are recorded so they are not re-proposed
+
 ### Added
 
 - **Time axes work.** `<dc-axis type="time">` now positions points by their date rather than by
