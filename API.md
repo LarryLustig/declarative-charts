@@ -2132,6 +2132,18 @@ Container for reusable fill definitions.
 
 Defines a fill style (solid color and/or pattern) within a palette, or standalone with an ID for reference (e.g., from `zero-fill`).
 
+When a `<dc-fill>` in a palette matches an element, its SVG paint attributes —
+`fill-opacity`, `fill-rule`, and the `stroke-*` family — are applied to that
+element's shape. An attribute written on the element itself takes precedence,
+and an element that sets its own `fill` opts out of palette painting entirely.
+
+```html
+<dc-palette id="status">
+  <dc-fill label="Breached" fill="#fee2e2"
+           stroke="#dc2626" stroke-width="2" stroke-dasharray="dashed"></dc-fill>
+</dc-palette>
+```
+
 **Attributes:**
 - `id` (string) - Optional ID for direct reference via `pattern="id"` or `zero-fill="id"`
 - `label` (string) - Match elements with this label

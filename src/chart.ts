@@ -45,6 +45,8 @@ interface SegmentData {
   showPercent: ShowCondition;
   element?: ChartBarSegment;
   passthroughAttrs?: Record<string, string>;
+  /** SVG paint attributes inherited from a matched <dc-fill>. */
+  paint?: Record<string, string>;
   valueFormat?: string;
 }
 
@@ -60,11 +62,15 @@ interface BarData {
   popup?: { content: string; trigger: string };
   autoPopup?: boolean;
   showValue: ShowCondition;
+  /** Per-element show-label, resolved against the chart default. */
+  showLabel?: ShowCondition;
   showPercent: ShowCondition;
   width?: string;
   gutter?: number;
   element?: ChartBar;
   passthroughAttrs?: Record<string, string>;
+  /** SVG paint attributes inherited from a matched <dc-fill>. */
+  paint?: Record<string, string>;
   segments?: SegmentData[];
   // Pattern properties
   pattern?: string;
@@ -141,6 +147,8 @@ interface LineData {
   autoPopup?: boolean;
   element?: ChartLine;
   passthroughAttrs?: Record<string, string>;
+  /** SVG paint attributes inherited from a matched <dc-fill>. */
+  paint?: Record<string, string>;
   points: PointData[];
   // Label positioning (inherited by child points)
   labelPosition?: string;
@@ -176,6 +184,8 @@ interface AreaData {
   autoPopup?: boolean;
   element?: ChartArea;
   passthroughAttrs?: Record<string, string>;
+  /** SVG paint attributes inherited from a matched <dc-fill>. */
+  paint?: Record<string, string>;
   valueFormat?: string;
   // Label positioning (inherited by child points)
   labelPosition?: string;
@@ -204,6 +214,8 @@ interface BubbleData {
   showValue: ShowCondition;
   showPercent: ShowCondition;
   passthroughAttrs?: Record<string, string>;
+  /** SVG paint attributes inherited from a matched <dc-fill>. */
+  paint?: Record<string, string>;
   // Pattern properties
   pattern?: string;
   patternStroke?: string;
@@ -534,6 +546,10 @@ export class Chart extends AxisChart {
     const barFill = elementFill || '';
     const showValue = bar.hasAttribute('show-value') ? bar.showValue : this.showValue;
     const showPercent = bar.hasAttribute('show-percent') ? bar.showPercent! : this.showPercent;
+    // Per-element show-label. BaseFilledShape declared it from the start and
+    // nothing here read it, so <dc-bar show-label="false"> was inert.
+    const showLabel = bar.hasAttribute('show-label') ? bar.showLabel! : this.showLabel;
+    const paint = this.getPalettePaint(bar);
 
     let width: string | undefined;
     if (bar.hasAttribute('bar-width')) {
@@ -583,6 +599,8 @@ export class Chart extends AxisChart {
       autoPopup: bar.autoPopup,
       showValue,
       showPercent,
+      showLabel,
+      paint,
       width,
       gutter,
       element: bar,
@@ -1070,6 +1088,7 @@ export class Chart extends AxisChart {
         labelOffsetX: areaLabelOffsetX,
         labelOffsetY: areaLabelOffsetY,
         labelOffsetR: areaLabelOffsetR,
+        paint: this.getPalettePaint(area),
         labelFill: areaLabelFill,
         points: pointElements.map(point => {
           const pointPopupEl = point.querySelector('dc-popup') as ChartPopup | null;
@@ -1202,7 +1221,8 @@ export class Chart extends AxisChart {
         labelOffsetX: bubble.labelOffsetX ?? this.labelOffsetX,
         labelOffsetY: bubble.labelOffsetY ?? this.labelOffsetY,
         labelOffsetR: bubble.labelOffsetR ?? this.labelOffsetR,
-        labelFill: bubble.labelFill ?? this.labelFill
+        labelFill: bubble.labelFill ?? this.labelFill,
+        paint: this.getPalettePaint(bubble)
       };
     });
 
@@ -3318,13 +3338,25 @@ export class Chart extends AxisChart {
     const { slots, units: unitSpans } = this.computeBarLayout(
       bars, structure, unitSizes, gutterScale, isHorizontal ? padding.top : padding.left);
 
+    // Summed once, not per label. Deriving a total inside the label loop is
+    // exactly the shape that made rendering quadratic before (see CLAUDE.md).
+    const labelTotal = bars.reduce((sum, b) => sum + (Number.isFinite(b.value) ? b.value : 0), 0);
+    const labelPercent = (value: number) =>
+      labelTotal > 0 && Number.isFinite(value) ? (value / labelTotal) * 100 : 0;
+
     if (isHorizontal) {
       // Horizontal bars: labels on the left (or right if reverse)
       return svg`
         ${bars.map((bar, index) => {
           const slot = slots[index];
 
+          // Per-element show-label. `shouldShowLabel` handles the interval and
+          // the chart-level switch; this is the element's own say.
           if (!bar.label || !this.shouldShowLabel(index, bars.length)) return '';
+          if (bar.showLabel !== undefined &&
+              !this.evaluateShowCondition(bar.showLabel, bar.value, labelPercent(bar.value))) {
+            return '';
+          }
 
           const labelX = isReverse
             ? this.width - padding.right + 10 + this.getLabelLineOffset(index, 60)
@@ -3370,7 +3402,13 @@ export class Chart extends AxisChart {
         ${bars.map((bar, index) => {
           const slot = slots[index];
 
+          // Per-element show-label. `shouldShowLabel` handles the interval and
+          // the chart-level switch; this is the element's own say.
           if (!bar.label || !this.shouldShowLabel(index, bars.length)) return '';
+          if (bar.showLabel !== undefined &&
+              !this.evaluateShowCondition(bar.showLabel, bar.value, labelPercent(bar.value))) {
+            return '';
+          }
 
           // Position at top for reverse OR all-negative charts
           const labelY = (isReverse || labelsAtTop)

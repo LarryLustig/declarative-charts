@@ -11,6 +11,11 @@ export interface PaletteColorResult {
   stroke?: string;
   /** Pattern configuration if a pattern was matched */
   pattern?: PatternConfig;
+  /**
+   * SVG paint attributes the matched `<dc-fill>` sets, to stamp on the shape.
+   * Empty when the fill sets none, so it can never override by accident.
+   */
+  paint?: Record<string, string>;
 }
 
 /**
@@ -117,7 +122,8 @@ export class ChartPalette extends LitElement {
               stroke: fill.stroke || '#000',
               fill: fill.fill,
               scale: fill.patternScale
-            }
+            },
+            paint: fill.getPaintAttributes()
           };
         }
       }
@@ -135,7 +141,8 @@ export class ChartPalette extends LitElement {
               stroke: fill.stroke || '#000',
               fill: fill.fill,
               scale: fill.patternScale
-            }
+            },
+            paint: fill.getPaintAttributes()
           };
         }
       }
@@ -147,7 +154,8 @@ export class ChartPalette extends LitElement {
         if (!fill.hasPattern() && fill.matchesValue(value)) {
           return {
             fill: fill.fill,
-            stroke: fill.stroke
+            stroke: fill.stroke,
+            paint: fill.getPaintAttributes()
           };
         }
       }
@@ -159,7 +167,8 @@ export class ChartPalette extends LitElement {
         if (!fill.hasPattern() && fill.matchesLabel(label)) {
           return {
             fill: fill.fill,
-            stroke: fill.stroke
+            stroke: fill.stroke,
+            paint: fill.getPaintAttributes()
           };
         }
       }

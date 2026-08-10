@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **All ten known dead attributes now work.** Each was declared, documented in API.md, and read by
+  nothing
+  - **`<dc-fill>`'s nine SVG paint attributes** — `fill-opacity`, `fill-rule`, `stroke-width`,
+    `stroke-opacity`, `stroke-dasharray`, `stroke-dashoffset`, `stroke-linecap`, `stroke-linejoin`
+    and `stroke-miterlimit` — are applied to the shape a palette entry matches, in all four chart
+    types. `stroke-dasharray` accepts the same named patterns as `<dc-grid>`. An attribute on the
+    element itself wins, and an element with its own `fill` opts out of palette painting
+  - **Per-element `show-label`** on data elements, including the `"50%"` and `"100"` thresholds the
+    other `show-*` attributes accept. It was declared on `BaseFilledShape` and never carried into
+    the render
+
+### Changed
+
+- `KNOWN_DEAD` in `no-dead-attributes.test.ts` is now empty, and the guard checks 149 of 170
+  element/attribute pairs (up from 139). A new entry in that list means a new bug
+
+
 - **`show-label` did nothing on `<dc-chart>`.** API.md's table promises it for Bar and Line
   charts, but only `<dc-pie-chart>` and `<dc-funnel-chart>` read it — `show-label="false"` on a
   bar chart left every label in place. Now honoured at chart level. Per-element `show-label` on

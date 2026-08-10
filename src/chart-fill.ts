@@ -268,6 +268,38 @@ export class ChartFill extends LitElement {
   }
 
   /**
+   * The SVG paint attributes this fill sets, ready to stamp onto a shape.
+   *
+   * Only attributes actually present are returned, so a fill that sets nothing
+   * paints nothing and cannot override an element's own styling by accident.
+   *
+   * These nine were declared and documented from the start and read by nothing:
+   * a `<dc-fill stroke-width="4">` in a palette parsed, matched, and changed no
+   * pixel. `fill` and `stroke` are deliberately absent - the colour resolver
+   * already owns those, and returning them here would fight it.
+   */
+  getPaintAttributes(): Record<string, string> {
+    const attrs: Record<string, string> = {};
+    const set = (name: string, value: string | number | undefined) => {
+      if (value !== undefined && value !== null && `${value}` !== '') {
+        attrs[name] = String(value);
+      }
+    };
+
+    set('fill-opacity', this.fillOpacity);
+    set('fill-rule', this.fillRule);
+    set('stroke-width', this.strokeWidth);
+    set('stroke-opacity', this.strokeOpacity);
+    set('stroke-dasharray', this.getResolvedDasharray());
+    set('stroke-dashoffset', this.strokeDashoffset);
+    set('stroke-linecap', this.strokeLinecap);
+    set('stroke-linejoin', this.strokeLinejoin);
+    set('stroke-miterlimit', this.strokeMiterlimit);
+
+    return attrs;
+  }
+
+  /**
    * Check if a value matches this fill definition's value range.
    * @param value The numeric value to check
    * @returns true if the value falls within this fill's range

@@ -2964,21 +2964,50 @@ export abstract class BaseChart extends LitElement {
    *
    * @param shapes Array of shape data items that may contain passthroughAttrs
    */
-  protected applyPassthroughAttributes<T extends { passthroughAttrs?: Record<string, string> }>(
-    shapes: T[]
-  ): void {
+  /**
+   * SVG paint attributes a palette's `<dc-fill>` supplies for this element.
+   *
+   * Resolved where the element data is extracted, because that is the array the
+   * post-render stamping pass walks. An element with its own `fill` opts out -
+   * it has said how it wants to look.
+   */
+  protected getPalettePaint(element: Element & {
+    label?: string;
+    value?: number;
+    fill?: string;
+  }): Record<string, string> | undefined {
+    if (!this.paletteId || element.fill) return undefined;
+
+    const paint = this.lookupPaletteColor(element.label, element.value).paint;
+    if (!paint) return undefined;
+
+    // An attribute written on the element itself is more specific than one
+    // inherited from a palette entry, so the element keeps it. Without this the
+    // post-render stamp would overwrite the value the renderer already emitted
+    // from the element's own `stroke-width`.
+    const own = Object.fromEntries(
+      Object.entries(paint).filter(([name]) => !element.hasAttribute(name))
+    );
+    return Object.keys(own).length > 0 ? own : undefined;
+  }
+
+  protected applyPassthroughAttributes<
+    T extends { passthroughAttrs?: Record<string, string>; paint?: Record<string, string> }
+  >(shapes: T[]): void {
     const svg = this.shadowRoot?.querySelector('svg');
     if (!svg) return;
 
     shapes.forEach((shape, index) => {
-      if (shape.passthroughAttrs) {
-        const element = svg.querySelector(`[data-shape-index="${index}"]`);
-        if (element) {
-          Object.entries(shape.passthroughAttrs).forEach(([key, value]) => {
-            element.setAttribute(key, value);
-          });
-        }
-      }
+      // `paint` first, so an author's own passthrough attribute still wins over
+      // one inherited from a palette entry.
+      const attrs = { ...shape.paint, ...shape.passthroughAttrs };
+      if (Object.keys(attrs).length === 0) return;
+
+      const element = svg.querySelector(`[data-shape-index="${index}"]`);
+      if (!element) return;
+      Object.entries(attrs).forEach(([key, value]) => {
+        element.setAttribute(key, value);
+      });
     });
 
     // Notify htmx about new elements (if htmx is loaded)

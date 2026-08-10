@@ -100,10 +100,6 @@ const PALETTE_FILL = (a: string, base: string) =>
   `<dc-palette id="pf"><dc-fill ${a} ${base} fill="#f00"></dc-fill></dc-palette>
    <dc-chart width="600" height="400" palette="pf">${BARS}</dc-chart>`;
 
-/** A standalone <dc-fill> referenced by a bar, which takes its stroke styling. */
-const STANDALONE_FILL = (a: string) =>
-  `<dc-fill id="sf" ${a} fill="#f00" stroke="#00f" pattern="dots"></dc-fill>
-   <dc-chart width="600" height="400"><dc-bar value="30" label="Alpha" pattern="sf"></dc-bar>${BARS}</dc-chart>`;
 
 const LINE_LEGEND_ITEM = (a: string) =>
   `<dc-chart width="600" height="400">
@@ -284,15 +280,15 @@ const CONTEXT_FOR_ELEMENT: Record<string, (attrs: string) => string> = {
   'dc-fill:pattern': a => PALETTE_FILL(a, ''),
   'dc-fill:pattern-scale': a => PALETTE_FILL(a, 'pattern="dots"'),
   'dc-fill:stroke': a => PALETTE_FILL(a, 'pattern="dots"'),
-  'dc-fill:stroke-width': a => STANDALONE_FILL(a),
-  'dc-fill:stroke-opacity': a => STANDALONE_FILL(a),
-  'dc-fill:stroke-dasharray': a => STANDALONE_FILL(a),
-  'dc-fill:stroke-dashoffset': a => STANDALONE_FILL(a),
-  'dc-fill:stroke-linecap': a => STANDALONE_FILL(a),
-  'dc-fill:stroke-linejoin': a => STANDALONE_FILL(a),
-  'dc-fill:stroke-miterlimit': a => STANDALONE_FILL(a),
-  'dc-fill:fill-opacity': a => STANDALONE_FILL(a),
-  'dc-fill:fill-rule': a => STANDALONE_FILL(a),
+  'dc-fill:stroke-width': a => PALETTE_FILL(a, 'label="Alpha"'),
+  'dc-fill:stroke-opacity': a => PALETTE_FILL(a, 'label="Alpha"'),
+  'dc-fill:stroke-dasharray': a => PALETTE_FILL(a, 'label="Alpha"'),
+  'dc-fill:stroke-dashoffset': a => PALETTE_FILL(a, 'label="Alpha"'),
+  'dc-fill:stroke-linecap': a => PALETTE_FILL(a, 'label="Alpha"'),
+  'dc-fill:stroke-linejoin': a => PALETTE_FILL(a, 'label="Alpha"'),
+  'dc-fill:stroke-miterlimit': a => PALETTE_FILL(a, 'label="Alpha"'),
+  'dc-fill:fill-opacity': a => PALETTE_FILL(a, 'label="Alpha"'),
+  'dc-fill:fill-rule': a => PALETTE_FILL(a, 'label="Alpha"'),
 
   // --- a legend item's stroke and dash only apply to a line swatch ----------
   'dc-legend-item:stroke': a => LINE_LEGEND_ITEM(a),
@@ -345,8 +341,8 @@ const CONTEXT_FOR_ELEMENT: Record<string, (attrs: string) => string> = {
 const VALUE_FOR_ELEMENT: Record<string, string> = {
   // Restating a default changes nothing; each of these flips one.
   'dc-chart:show-label': 'false',
-  'dc-bar:show-label': 'true',
-  'dc-bar-segment:show-label': 'true',
+  'dc-bar:show-label': 'false',
+  'dc-bar-segment:show-label': 'false',
   'dc-pie-chart:show-value': 'true',
   'dc-pie-chart:show-percent': 'false',
   'dc-pie-slice:show-value': 'true',
@@ -388,18 +384,9 @@ const NO_VISUAL_EFFECT: Record<string, string> = {
  * the code and forget.
  */
 const KNOWN_DEAD: Record<string, string> = {
-  'dc-bar:show-label':
-    'BaseFilledShape declares showLabel, but BarData never carries it and no ' +
-    'chart.ts render site reads it. Chart-level show-label now works; per-element does not.',
-  'dc-fill:fill-rule': 'no reference outside chart-fill.ts',
-  'dc-fill:stroke-linecap': 'no reference outside chart-fill.ts',
-  'dc-fill:stroke-linejoin': 'no reference outside chart-fill.ts',
-  'dc-fill:stroke-miterlimit': 'no reference outside chart-fill.ts',
-  'dc-fill:stroke-width': 'not carried into the generated <pattern>',
-  'dc-fill:stroke-opacity': 'not carried into the generated <pattern>',
-  'dc-fill:stroke-dashoffset': 'not carried into the generated <pattern>',
-  'dc-fill:stroke-dasharray': 'not carried into the generated <pattern>',
-  'dc-fill:fill-opacity': 'not carried into the generated <pattern>'
+  // Empty, and worth keeping that way. The ten that were here - per-element
+  // show-label, and <dc-fill>'s fill-rule, fill-opacity and six stroke-*
+  // attributes - are all wired up now. A new entry means a new bug.
 };
 
 /**

@@ -3658,6 +3658,33 @@
             },
             {
               "kind": "method",
+              "name": "getPalettePaint",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "Record<string, string> | undefined"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "element",
+                  "type": {
+                    "text": "Element & {\r\n    label?: string;\r\n    value?: number;\r\n    fill?: string;\r\n  }"
+                  }
+                },
+                {
+                  "description": "Array of shape data items that may contain passthroughAttrs",
+                  "name": "shapes"
+                }
+              ],
+              "description": "SVG paint attributes a palette's `<dc-fill>` supplies for this element.\r\n\r\nResolved where the element data is extracted, because that is the array the\r\npost-render stamping pass walks. An element with its own `fill` opts out -\r\nit has said how it wants to look.",
+              "inheritedFrom": {
+                "name": "BaseChart",
+                "module": "src/base-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
               "name": "applyPassthroughAttributes",
               "privacy": "protected",
               "return": {
@@ -3670,11 +3697,9 @@
                   "name": "shapes",
                   "type": {
                     "text": "T[]"
-                  },
-                  "description": "Array of shape data items that may contain passthroughAttrs"
+                  }
                 }
               ],
-              "description": "Apply passthrough attributes to SVG elements after rendering\r\nThis is a generic helper used by all chart types to support htmx and other attribute-based libraries",
               "inheritedFrom": {
                 "name": "BaseChart",
                 "module": "src/base-chart.ts"
@@ -7095,6 +7120,29 @@
             },
             {
               "kind": "method",
+              "name": "getPalettePaint",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "Record<string, string> | undefined"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "element",
+                  "type": {
+                    "text": "Element & {\r\n    label?: string;\r\n    value?: number;\r\n    fill?: string;\r\n  }"
+                  }
+                },
+                {
+                  "description": "Array of shape data items that may contain passthroughAttrs",
+                  "name": "shapes"
+                }
+              ],
+              "description": "SVG paint attributes a palette's `<dc-fill>` supplies for this element.\r\n\r\nResolved where the element data is extracted, because that is the array the\r\npost-render stamping pass walks. An element with its own `fill` opts out -\r\nit has said how it wants to look."
+            },
+            {
+              "kind": "method",
               "name": "applyPassthroughAttributes",
               "privacy": "protected",
               "return": {
@@ -7107,11 +7155,9 @@
                   "name": "shapes",
                   "type": {
                     "text": "T[]"
-                  },
-                  "description": "Array of shape data items that may contain passthroughAttrs"
+                  }
                 }
-              ],
-              "description": "Apply passthrough attributes to SVG elements after rendering\r\nThis is a generic helper used by all chart types to support htmx and other attribute-based libraries"
+              ]
             },
             {
               "kind": "method",
@@ -13173,6 +13219,16 @@
                 }
               },
               "description": "Get the resolved stroke-dasharray value.\r\nConverts named patterns (e.g., \"dashed\") to numeric values."
+            },
+            {
+              "kind": "method",
+              "name": "getPaintAttributes",
+              "return": {
+                "type": {
+                  "text": "Record<string, string>"
+                }
+              },
+              "description": "The SVG paint attributes this fill sets, ready to stamp onto a shape.\r\n\r\nOnly attributes actually present are returned, so a fill that sets nothing\r\npaints nothing and cannot override an element's own styling by accident.\r\n\r\nThese nine were declared and documented from the start and read by nothing:\r\na `<dc-fill stroke-width=\"4\">` in a palette parsed, matched, and changed no\r\npixel. `fill` and `stroke` are deliberately absent - the colour resolver\r\nalready owns those, and returning them here would fight it."
             },
             {
               "kind": "method",
@@ -25880,6 +25936,33 @@
             },
             {
               "kind": "method",
+              "name": "getPalettePaint",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "Record<string, string> | undefined"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "element",
+                  "type": {
+                    "text": "Element & {\r\n    label?: string;\r\n    value?: number;\r\n    fill?: string;\r\n  }"
+                  }
+                },
+                {
+                  "description": "Array of shape data items that may contain passthroughAttrs",
+                  "name": "shapes"
+                }
+              ],
+              "description": "SVG paint attributes a palette's `<dc-fill>` supplies for this element.\r\n\r\nResolved where the element data is extracted, because that is the array the\r\npost-render stamping pass walks. An element with its own `fill` opts out -\r\nit has said how it wants to look.",
+              "inheritedFrom": {
+                "name": "BaseChart",
+                "module": "src/base-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
               "name": "applyPassthroughAttributes",
               "privacy": "protected",
               "return": {
@@ -25892,11 +25975,9 @@
                   "name": "shapes",
                   "type": {
                     "text": "T[]"
-                  },
-                  "description": "Array of shape data items that may contain passthroughAttrs"
+                  }
                 }
               ],
-              "description": "Apply passthrough attributes to SVG elements after rendering\r\nThis is a generic helper used by all chart types to support htmx and other attribute-based libraries",
               "inheritedFrom": {
                 "name": "BaseChart",
                 "module": "src/base-chart.ts"
@@ -28281,7 +28362,7 @@
               "privacy": "private",
               "return": {
                 "type": {
-                  "text": "Array<{\r\n    value: number;\r\n    label: string;\r\n    fill?: string;\r\n    stroke?: string;\r\n    strokeWidth?: number;\r\n    showValue: ShowCondition;\r\n    showLabel: ShowCondition;\r\n    showPercent: ShowCondition;\r\n    popup?: { content: string; trigger: string };\r\n    autoPopup?: boolean;\r\n    passthroughAttrs?: Record<string, string>;\r\n    // Pattern properties\r\n    pattern?: string;\r\n    patternStroke?: string;\r\n    patternFill?: string;\r\n    patternScale?: number;\r\n    valueFormat?: string;\r\n    // Label positioning\r\n    labelPosition?: string;\r\n    labelOffsetX?: number;\r\n    labelOffsetY?: number;\r\n    labelOffsetR?: number;\r\n    labelFill?: string;\r\n  }>"
+                  "text": "Array<{\r\n    value: number;\r\n    label: string;\r\n    fill?: string;\r\n    stroke?: string;\r\n    strokeWidth?: number;\r\n    showValue: ShowCondition;\r\n    showLabel: ShowCondition;\r\n    showPercent: ShowCondition;\r\n    popup?: { content: string; trigger: string };\r\n    autoPopup?: boolean;\r\n    passthroughAttrs?: Record<string, string>;\r\n    /** SVG paint attributes inherited from a matched <dc-fill>. */\r\n    paint?: Record<string, string>;\r\n    // Pattern properties\r\n    pattern?: string;\r\n    patternStroke?: string;\r\n    patternFill?: string;\r\n    patternScale?: number;\r\n    valueFormat?: string;\r\n    // Label positioning\r\n    labelPosition?: string;\r\n    labelOffsetX?: number;\r\n    labelOffsetY?: number;\r\n    labelOffsetR?: number;\r\n    labelFill?: string;\r\n  }>"
                 }
               }
             },
@@ -28358,7 +28439,7 @@
               "privacy": "private",
               "return": {
                 "type": {
-                  "text": "{\r\n    stages: Array<{\r\n      index: number;\r\n      label: string;\r\n      value: number;\r\n      y: number;\r\n      height: number;\r\n      topWidth: number;\r\n      bottomWidth: number;\r\n      topLeft: number;\r\n      topRight: number;\r\n      bottomLeft: number;\r\n      bottomRight: number;\r\n      fillColor: string;\r\n      originalColor: string;  // Original solid color for legend (fillColor may be pattern URL)\r\n      strokeColor: string;\r\n      strokeWidth: number;\r\n      showValue: ShowCondition;\r\n      showLabel: ShowCondition;\r\n      showPercent: ShowCondition;\r\n      popup?: { content: string; trigger: string };\r\n      autoPopup?: boolean;\r\n      passthroughAttrs?: Record<string, string>;\r\n      valueFormat?: string;\r\n      // Label positioning\r\n      labelPosition?: string;\r\n      labelOffsetX?: number;\r\n      labelOffsetY?: number;\r\n      labelOffsetR?: number;\r\n      labelFill?: string;\r\n    }>;\r\n    padding: { top: number; right: number; bottom: number; left: number };\r\n    chartWidth: number;\r\n    chartHeight: number;\r\n    total: number;\r\n    funnelFactor: number;\r\n    topWidth: number;\r\n    bottomWidth: number;\r\n    widthReduction: number;\r\n    chevronDepth: number;\r\n    chartCenterX: number;\r\n    heightMode: string;\r\n  } | null"
+                  "text": "{\r\n    stages: Array<{\r\n      index: number;\r\n      label: string;\r\n      value: number;\r\n      y: number;\r\n      height: number;\r\n      topWidth: number;\r\n      bottomWidth: number;\r\n      topLeft: number;\r\n      topRight: number;\r\n      bottomLeft: number;\r\n      bottomRight: number;\r\n      fillColor: string;\r\n      originalColor: string;  // Original solid color for legend (fillColor may be pattern URL)\r\n      strokeColor: string;\r\n      strokeWidth: number;\r\n      showValue: ShowCondition;\r\n      showLabel: ShowCondition;\r\n      showPercent: ShowCondition;\r\n      popup?: { content: string; trigger: string };\r\n      autoPopup?: boolean;\r\n      passthroughAttrs?: Record<string, string>;\r\n      paint?: Record<string, string>;\r\n      valueFormat?: string;\r\n      // Label positioning\r\n      labelPosition?: string;\r\n      labelOffsetX?: number;\r\n      labelOffsetY?: number;\r\n      labelOffsetR?: number;\r\n      labelFill?: string;\r\n    }>;\r\n    padding: { top: number; right: number; bottom: number; left: number };\r\n    chartWidth: number;\r\n    chartHeight: number;\r\n    total: number;\r\n    funnelFactor: number;\r\n    topWidth: number;\r\n    bottomWidth: number;\r\n    widthReduction: number;\r\n    chevronDepth: number;\r\n    chartCenterX: number;\r\n    heightMode: string;\r\n  } | null"
                 }
               },
               "description": "Calculate layout for all stages. Single source of truth for rendering and legend."
@@ -31223,6 +31304,33 @@
             },
             {
               "kind": "method",
+              "name": "getPalettePaint",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "Record<string, string> | undefined"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "element",
+                  "type": {
+                    "text": "Element & {\r\n    label?: string;\r\n    value?: number;\r\n    fill?: string;\r\n  }"
+                  }
+                },
+                {
+                  "description": "Array of shape data items that may contain passthroughAttrs",
+                  "name": "shapes"
+                }
+              ],
+              "description": "SVG paint attributes a palette's `<dc-fill>` supplies for this element.\r\n\r\nResolved where the element data is extracted, because that is the array the\r\npost-render stamping pass walks. An element with its own `fill` opts out -\r\nit has said how it wants to look.",
+              "inheritedFrom": {
+                "name": "BaseChart",
+                "module": "src/base-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
               "name": "applyPassthroughAttributes",
               "privacy": "protected",
               "return": {
@@ -31235,11 +31343,9 @@
                   "name": "shapes",
                   "type": {
                     "text": "T[]"
-                  },
-                  "description": "Array of shape data items that may contain passthroughAttrs"
+                  }
                 }
               ],
-              "description": "Apply passthrough attributes to SVG elements after rendering\r\nThis is a generic helper used by all chart types to support htmx and other attribute-based libraries",
               "inheritedFrom": {
                 "name": "BaseChart",
                 "module": "src/base-chart.ts"
@@ -33177,7 +33283,7 @@
             "text": "Record<PatternType, PatternGenerator>"
           },
           "default": "{ /** * Diagonal lines from bottom-left to top-right (/) */ 'diagonal-lines': (id, stroke, fill, scale) => { const size = 10 * scale; return `<pattern id=\"${id}\" patternUnits=\"userSpaceOnUse\" width=\"${size}\" height=\"${size}\"> <rect width=\"${size}\" height=\"${size}\" fill=\"${fill}\"/> <line x1=\"0\" y1=\"${size}\" x2=\"${size}\" y2=\"0\" stroke=\"${stroke}\" stroke-width=\"${1.5 * scale}\"/> </pattern>`; }, /** * Diagonal lines from top-left to bottom-right (\\) */ 'diagonal-lines-reverse': (id, stroke, fill, scale) => { const size = 10 * scale; return `<pattern id=\"${id}\" patternUnits=\"userSpaceOnUse\" width=\"${size}\" height=\"${size}\"> <rect width=\"${size}\" height=\"${size}\" fill=\"${fill}\"/> <line x1=\"0\" y1=\"0\" x2=\"${size}\" y2=\"${size}\" stroke=\"${stroke}\" stroke-width=\"${1.5 * scale}\"/> </pattern>`; }, /** * Regular dot grid. * Note: `stroke` is used as the fill color for the dots. */ 'dots': (id, stroke, fill, scale) => { const size = 10 * scale; const radius = 2 * scale; return `<pattern id=\"${id}\" patternUnits=\"userSpaceOnUse\" width=\"${size}\" height=\"${size}\"> <rect width=\"${size}\" height=\"${size}\" fill=\"${fill}\"/> <circle cx=\"${size / 2}\" cy=\"${size / 2}\" r=\"${radius}\" fill=\"${stroke}\"/> </pattern>`; }, /** * Diagonal lines in both directions (X pattern) */ 'crosshatch': (id, stroke, fill, scale) => { const size = 10 * scale; const strokeWidth = 1.5 * scale; return `<pattern id=\"${id}\" patternUnits=\"userSpaceOnUse\" width=\"${size}\" height=\"${size}\"> <rect width=\"${size}\" height=\"${size}\" fill=\"${fill}\"/> <line x1=\"0\" y1=\"${size}\" x2=\"${size}\" y2=\"0\" stroke=\"${stroke}\" stroke-width=\"${strokeWidth}\"/> <line x1=\"0\" y1=\"0\" x2=\"${size}\" y2=\"${size}\" stroke=\"${stroke}\" stroke-width=\"${strokeWidth}\"/> </pattern>`; }, /** * Horizontal parallel lines */ 'horizontal-lines': (id, stroke, fill, scale) => { const size = 8 * scale; return `<pattern id=\"${id}\" patternUnits=\"userSpaceOnUse\" width=\"${size}\" height=\"${size}\"> <rect width=\"${size}\" height=\"${size}\" fill=\"${fill}\"/> <line x1=\"0\" y1=\"${size / 2}\" x2=\"${size}\" y2=\"${size / 2}\" stroke=\"${stroke}\" stroke-width=\"${1.5 * scale}\"/> </pattern>`; }, /** * Vertical parallel lines */ 'vertical-lines': (id, stroke, fill, scale) => { const size = 8 * scale; return `<pattern id=\"${id}\" patternUnits=\"userSpaceOnUse\" width=\"${size}\" height=\"${size}\"> <rect width=\"${size}\" height=\"${size}\" fill=\"${fill}\"/> <line x1=\"${size / 2}\" y1=\"0\" x2=\"${size / 2}\" y2=\"${size}\" stroke=\"${stroke}\" stroke-width=\"${1.5 * scale}\"/> </pattern>`; }, /** * Horizontal + vertical lines forming a grid */ 'grid': (id, stroke, fill, scale) => { const size = 10 * scale; const strokeWidth = 1 * scale; return `<pattern id=\"${id}\" patternUnits=\"userSpaceOnUse\" width=\"${size}\" height=\"${size}\"> <rect width=\"${size}\" height=\"${size}\" fill=\"${fill}\"/> <line x1=\"0\" y1=\"${size / 2}\" x2=\"${size}\" y2=\"${size / 2}\" stroke=\"${stroke}\" stroke-width=\"${strokeWidth}\"/> <line x1=\"${size / 2}\" y1=\"0\" x2=\"${size / 2}\" y2=\"${size}\" stroke=\"${stroke}\" stroke-width=\"${strokeWidth}\"/> </pattern>`; }, /** * Alternating filled squares (checkerboard pattern). * Note: `stroke` is used as the fill color for the alternating squares. */ 'checkerboard': (id, stroke, fill, scale) => { const size = 10 * scale; const half = size / 2; return `<pattern id=\"${id}\" patternUnits=\"userSpaceOnUse\" width=\"${size}\" height=\"${size}\"> <rect width=\"${size}\" height=\"${size}\" fill=\"${fill}\"/> <rect x=\"0\" y=\"0\" width=\"${half}\" height=\"${half}\" fill=\"${stroke}\"/> <rect x=\"${half}\" y=\"${half}\" width=\"${half}\" height=\"${half}\" fill=\"${stroke}\"/> </pattern>`; } }",
-          "description": "SVG pattern generators for each pattern type.\n\nEach generator returns an SVG <pattern> element string.\nPatterns use userSpaceOnUse for consistent sizing across shapes."
+          "description": "SVG pattern generators for each pattern type.\r\n\r\nEach generator returns an SVG <pattern> element string.\r\nPatterns use userSpaceOnUse for consistent sizing across shapes."
         },
         {
           "kind": "variable",
@@ -33186,7 +33292,7 @@
             "text": "PatternType[]"
           },
           "default": "[ 'diagonal-lines', 'dots', 'crosshatch', 'horizontal-lines', 'diagonal-lines-reverse', 'vertical-lines', 'grid', 'checkerboard' ]",
-          "description": "Pattern sequence for high contrast mode auto-assignment.\n\nThese patterns are ordered to maximize visual distinction between\nadjacent elements. The first patterns are the most visually distinct."
+          "description": "Pattern sequence for high contrast mode auto-assignment.\r\n\r\nThese patterns are ordered to maximize visual distinction between\r\nadjacent elements. The first patterns are the most visually distinct."
         },
         {
           "kind": "variable",
@@ -33195,7 +33301,7 @@
             "text": "string[]"
           },
           "default": "[ '#0057b8', // Strong blue '#d32f2f', // Strong red '#2e7d32', // Strong green '#7b1fa2', // Strong purple '#e65100', // Strong orange '#0097a7', // Strong cyan '#c2185b', // Strong pink '#5d4037' // Strong brown ]",
-          "description": "WCAG AA compliant colors for high contrast mode.\n\nThese colors are selected to:\n- Have sufficient contrast against white backgrounds\n- Be visually distinct from each other\n- Work well with pattern overlays"
+          "description": "WCAG AA compliant colors for high contrast mode.\r\n\r\nThese colors are selected to:\r\n- Have sufficient contrast against white backgrounds\r\n- Be visually distinct from each other\r\n- Work well with pattern overlays"
         },
         {
           "kind": "function",
@@ -33265,7 +33371,7 @@
               "description": "Number of colors needed"
             }
           ],
-          "description": "Get high contrast colors for a given count.\n\nIf count exceeds available colors, colors are cycled."
+          "description": "Get high contrast colors for a given count.\r\n\r\nIf count exceeds available colors, colors are cycled."
         },
         {
           "kind": "function",
@@ -33284,7 +33390,7 @@
               "description": "Element index"
             }
           ],
-          "description": "Get the pattern type for a given index in high contrast mode.\n\nCycles through the pattern sequence."
+          "description": "Get the pattern type for a given index in high contrast mode.\r\n\r\nCycles through the pattern sequence."
         }
       ],
       "exports": [
@@ -33431,7 +33537,7 @@
               "privacy": "private",
               "return": {
                 "type": {
-                  "text": "Array<{\r\n    value: number;\r\n    label: string;\r\n    fill?: string;\r\n    stroke?: string;\r\n    strokeWidth?: number;\r\n    pattern?: string;\r\n    patternStroke?: string;\r\n    patternFill?: string;\r\n    patternScale?: number;\r\n    showValue: ShowCondition;\r\n    showLabel: ShowCondition;\r\n    showPercent: ShowCondition;\r\n    popup?: { content: string; trigger: string };\r\n    autoPopup?: boolean;\r\n    element?: ChartPieSlice;\r\n    passthroughAttrs?: Record<string, string>;\r\n    valueFormat?: string;\r\n    labelPosition?: string;\r\n    labelOffsetX?: number;\r\n    labelOffsetY?: number;\r\n    labelOffsetR?: number;\r\n    labelFill?: string;\r\n  }>"
+                  "text": "Array<{\r\n    value: number;\r\n    label: string;\r\n    fill?: string;\r\n    stroke?: string;\r\n    strokeWidth?: number;\r\n    pattern?: string;\r\n    patternStroke?: string;\r\n    patternFill?: string;\r\n    patternScale?: number;\r\n    showValue: ShowCondition;\r\n    showLabel: ShowCondition;\r\n    showPercent: ShowCondition;\r\n    popup?: { content: string; trigger: string };\r\n    autoPopup?: boolean;\r\n    element?: ChartPieSlice;\r\n    passthroughAttrs?: Record<string, string>;\r\n    /** SVG paint attributes inherited from a matched <dc-fill>. */\r\n    paint?: Record<string, string>;\r\n    valueFormat?: string;\r\n    labelPosition?: string;\r\n    labelOffsetX?: number;\r\n    labelOffsetY?: number;\r\n    labelOffsetR?: number;\r\n    labelFill?: string;\r\n  }>"
                 }
               }
             },
@@ -36383,6 +36489,33 @@
             },
             {
               "kind": "method",
+              "name": "getPalettePaint",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "Record<string, string> | undefined"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "element",
+                  "type": {
+                    "text": "Element & {\r\n    label?: string;\r\n    value?: number;\r\n    fill?: string;\r\n  }"
+                  }
+                },
+                {
+                  "description": "Array of shape data items that may contain passthroughAttrs",
+                  "name": "shapes"
+                }
+              ],
+              "description": "SVG paint attributes a palette's `<dc-fill>` supplies for this element.\r\n\r\nResolved where the element data is extracted, because that is the array the\r\npost-render stamping pass walks. An element with its own `fill` opts out -\r\nit has said how it wants to look.",
+              "inheritedFrom": {
+                "name": "BaseChart",
+                "module": "src/base-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
               "name": "applyPassthroughAttributes",
               "privacy": "protected",
               "return": {
@@ -36395,11 +36528,9 @@
                   "name": "shapes",
                   "type": {
                     "text": "T[]"
-                  },
-                  "description": "Array of shape data items that may contain passthroughAttrs"
+                  }
                 }
               ],
-              "description": "Apply passthrough attributes to SVG elements after rendering\r\nThis is a generic helper used by all chart types to support htmx and other attribute-based libraries",
               "inheritedFrom": {
                 "name": "BaseChart",
                 "module": "src/base-chart.ts"
@@ -37655,7 +37786,7 @@
               "privacy": "private",
               "return": {
                 "type": {
-                  "text": "Array<{\r\n    value: number;\r\n    label: string;\r\n    fill?: string;\r\n    stroke?: string;\r\n    strokeWidth?: number;\r\n    shape?: StageShape;\r\n    cornerRadius?: string;\r\n    showValue: ShowCondition;\r\n    showLabel: ShowCondition;\r\n    showPercent: ShowCondition;\r\n    popup?: { content: string; trigger: string };\r\n    autoPopup?: boolean;\r\n    passthroughAttrs?: Record<string, string>;\r\n    pattern?: string;\r\n    patternStroke?: string;\r\n    patternFill?: string;\r\n    patternScale?: number;\r\n    valueFormat?: string;\r\n    // Label positioning\r\n    labelPosition?: string;\r\n    labelOffsetX?: number;\r\n    labelOffsetY?: number;\r\n    labelOffsetR?: number;\r\n    labelFill?: string;\r\n  }>"
+                  "text": "Array<{\r\n    value: number;\r\n    label: string;\r\n    fill?: string;\r\n    stroke?: string;\r\n    strokeWidth?: number;\r\n    shape?: StageShape;\r\n    cornerRadius?: string;\r\n    showValue: ShowCondition;\r\n    showLabel: ShowCondition;\r\n    showPercent: ShowCondition;\r\n    popup?: { content: string; trigger: string };\r\n    autoPopup?: boolean;\r\n    passthroughAttrs?: Record<string, string>;\r\n    /** SVG paint attributes inherited from a matched <dc-fill>. */\r\n    paint?: Record<string, string>;\r\n    pattern?: string;\r\n    patternStroke?: string;\r\n    patternFill?: string;\r\n    patternScale?: number;\r\n    valueFormat?: string;\r\n    // Label positioning\r\n    labelPosition?: string;\r\n    labelOffsetX?: number;\r\n    labelOffsetY?: number;\r\n    labelOffsetR?: number;\r\n    labelFill?: string;\r\n  }>"
                 }
               },
               "description": "Get all stage elements from the DOM"
@@ -37843,7 +37974,7 @@
               "privacy": "private",
               "return": {
                 "type": {
-                  "text": "{\r\n    stages: Array<{\r\n      index: number;\r\n      label: string;\r\n      value: number;\r\n      x: number;\r\n      y: number;\r\n      width: number;\r\n      height: number;\r\n      shape: StageShape;\r\n      cornerRadius: number;\r\n      fillColor: string;\r\n      originalColor: string;\r\n      strokeColor: string;\r\n      strokeWidth: number;\r\n      showValue: ShowCondition;\r\n      showLabel: ShowCondition;\r\n      showPercent: ShowCondition;\r\n      popup?: { content: string; trigger: string };\r\n      autoPopup?: boolean;\r\n      passthroughAttrs?: Record<string, string>;\r\n      valueFormat?: string;\r\n      isZero: boolean;\r\n      isHidden: boolean;\r\n      zeroFillOverride?: {\r\n        fill?: string;\r\n        stroke?: string;\r\n        strokeWidth?: number;\r\n        strokeDasharray?: string;\r\n        fillOpacity?: number;\r\n        strokeOpacity?: number;\r\n        pattern?: string;\r\n      };\r\n      // Label positioning\r\n      labelPosition?: string;\r\n      labelOffsetX?: number;\r\n      labelOffsetY?: number;\r\n      labelOffsetR?: number;\r\n      labelFill?: string;\r\n    }>;\r\n    connectorConfig: ConnectorConfig;\r\n    padding: { top: number; right: number; bottom: number; left: number };\r\n    chartWidth: number;\r\n    chartHeight: number;\r\n    total: number;\r\n    orientation: 'vertical' | 'horizontal';\r\n    zeroSettings: {\r\n      hidden: boolean;\r\n      sizeValue: number | 'auto' | undefined;\r\n      shape: StageShape | undefined;\r\n      fillId: string | undefined;\r\n    };\r\n  } | null"
+                  "text": "{\r\n    stages: Array<{\r\n      index: number;\r\n      label: string;\r\n      value: number;\r\n      x: number;\r\n      y: number;\r\n      width: number;\r\n      height: number;\r\n      shape: StageShape;\r\n      cornerRadius: number;\r\n      fillColor: string;\r\n      originalColor: string;\r\n      strokeColor: string;\r\n      strokeWidth: number;\r\n      showValue: ShowCondition;\r\n      showLabel: ShowCondition;\r\n      showPercent: ShowCondition;\r\n      popup?: { content: string; trigger: string };\r\n      autoPopup?: boolean;\r\n      passthroughAttrs?: Record<string, string>;\r\n      paint?: Record<string, string>;\r\n      valueFormat?: string;\r\n      isZero: boolean;\r\n      isHidden: boolean;\r\n      zeroFillOverride?: {\r\n        fill?: string;\r\n        stroke?: string;\r\n        strokeWidth?: number;\r\n        strokeDasharray?: string;\r\n        fillOpacity?: number;\r\n        strokeOpacity?: number;\r\n        pattern?: string;\r\n      };\r\n      // Label positioning\r\n      labelPosition?: string;\r\n      labelOffsetX?: number;\r\n      labelOffsetY?: number;\r\n      labelOffsetR?: number;\r\n      labelFill?: string;\r\n    }>;\r\n    connectorConfig: ConnectorConfig;\r\n    padding: { top: number; right: number; bottom: number; left: number };\r\n    chartWidth: number;\r\n    chartHeight: number;\r\n    total: number;\r\n    orientation: 'vertical' | 'horizontal';\r\n    zeroSettings: {\r\n      hidden: boolean;\r\n      sizeValue: number | 'auto' | undefined;\r\n      shape: StageShape | undefined;\r\n      fillId: string | undefined;\r\n    };\r\n  } | null"
                 }
               },
               "description": "Calculate layout for all stages"
@@ -40930,6 +41061,33 @@
             },
             {
               "kind": "method",
+              "name": "getPalettePaint",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "Record<string, string> | undefined"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "element",
+                  "type": {
+                    "text": "Element & {\r\n    label?: string;\r\n    value?: number;\r\n    fill?: string;\r\n  }"
+                  }
+                },
+                {
+                  "description": "Array of shape data items that may contain passthroughAttrs",
+                  "name": "shapes"
+                }
+              ],
+              "description": "SVG paint attributes a palette's `<dc-fill>` supplies for this element.\r\n\r\nResolved where the element data is extracted, because that is the array the\r\npost-render stamping pass walks. An element with its own `fill` opts out -\r\nit has said how it wants to look.",
+              "inheritedFrom": {
+                "name": "BaseChart",
+                "module": "src/base-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
               "name": "applyPassthroughAttributes",
               "privacy": "protected",
               "return": {
@@ -40942,11 +41100,9 @@
                   "name": "shapes",
                   "type": {
                     "text": "T[]"
-                  },
-                  "description": "Array of shape data items that may contain passthroughAttrs"
+                  }
                 }
               ],
-              "description": "Apply passthrough attributes to SVG elements after rendering\r\nThis is a generic helper used by all chart types to support htmx and other attribute-based libraries",
               "inheritedFrom": {
                 "name": "BaseChart",
                 "module": "src/base-chart.ts"

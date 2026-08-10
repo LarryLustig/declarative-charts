@@ -83,6 +83,8 @@ export class PieChart extends BaseChart {
     autoPopup?: boolean;
     element?: ChartPieSlice;
     passthroughAttrs?: Record<string, string>;
+    /** SVG paint attributes inherited from a matched <dc-fill>. */
+    paint?: Record<string, string>;
     valueFormat?: string;
     labelPosition?: string;
     labelOffsetX?: number;
@@ -129,6 +131,9 @@ export class PieChart extends BaseChart {
         autoPopup: slice.autoPopup,
         element: slice,
         passthroughAttrs: Object.keys(passthroughAttrs).length > 0 ? passthroughAttrs : undefined,
+        // Paint attributes from a matched <dc-fill>, resolved here rather than
+        // during layout because the stamping pass reads this extraction array.
+        paint: this.getPalettePaint(slice),
         valueFormat: slice.valueFormat,
         // Label positioning: slice → chart → default
         labelPosition: slice.labelPosition ?? this.labelPosition,

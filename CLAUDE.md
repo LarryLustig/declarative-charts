@@ -636,6 +636,13 @@ maintainability arguments, not coverage ones.
 `stage-chart.ts` 73% → 88%. Each round of characterizing untested code turned up real defects,
 which is the usual return — see CHANGELOG.
 
+**A palette's `<dc-fill>` paints the shapes it matches.** Its `fill-opacity`, `fill-rule` and
+`stroke-*` attributes are collected by `ChartFill.getPaintAttributes()`, resolved per element by
+`BaseChart.getPalettePaint()` **at extraction time**, and stamped after render by
+`applyPassthroughAttributes()`. Extraction time matters: that is the array the stamping pass walks,
+and resolving during layout instead leaves the attributes nowhere the stamp can see them. The
+element's own attribute wins over the palette's, and an element with its own `fill` opts out.
+
 **⚠️ Every declared attribute must change something.**
 `test/component/no-dead-attributes.test.ts` renders each element twice, with and without each
 attribute, and fails if the output is byte-identical. It exists because ten attributes have now
@@ -652,7 +659,7 @@ cannot quietly grow:
 
 | List | Meaning |
 |---|---|
-| `KNOWN_DEAD` | Confirmed unread. **These are open bugs.** A test fails if one starts working, so the list cannot rot |
+| `KNOWN_DEAD` | Confirmed unread. **These are open bugs**, and the list is currently empty. A test fails if an entry starts working, so it cannot rot |
 | `NEEDS_CONTEXT` | The attribute *is* read; this test has not yet been given a context that reaches it. Shrink this |
 | `NO_VISUAL_EFFECT` | Genuinely changes no rendered output — `logging`, `console-log`, `trigger`, and the two that need real layout (`fit`, `text-scaling`) |
 

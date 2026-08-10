@@ -87,6 +87,8 @@ export class FunnelChart extends BaseChart {
     popup?: { content: string; trigger: string };
     autoPopup?: boolean;
     passthroughAttrs?: Record<string, string>;
+    /** SVG paint attributes inherited from a matched <dc-fill>. */
+    paint?: Record<string, string>;
     // Pattern properties
     pattern?: string;
     patternStroke?: string;
@@ -137,6 +139,9 @@ export class FunnelChart extends BaseChart {
           : undefined,
         autoPopup: stage.autoPopup,
         passthroughAttrs: Object.keys(passthroughAttrs).length > 0 ? passthroughAttrs : undefined,
+        // Paint attributes from a matched <dc-fill>, resolved here rather than
+        // during layout because the stamping pass reads this extraction array.
+        paint: this.getPalettePaint(stage),
         // Pattern properties
         pattern: stage.pattern,
         patternStroke: stage.patternStroke,
@@ -370,6 +375,7 @@ export class FunnelChart extends BaseChart {
       popup?: { content: string; trigger: string };
       autoPopup?: boolean;
       passthroughAttrs?: Record<string, string>;
+      paint?: Record<string, string>;
       valueFormat?: string;
       // Label positioning
       labelPosition?: string;

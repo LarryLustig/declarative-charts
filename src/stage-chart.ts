@@ -162,6 +162,8 @@ export class StageChart extends BaseChart {
     popup?: { content: string; trigger: string };
     autoPopup?: boolean;
     passthroughAttrs?: Record<string, string>;
+    /** SVG paint attributes inherited from a matched <dc-fill>. */
+    paint?: Record<string, string>;
     pattern?: string;
     patternStroke?: string;
     patternFill?: string;
@@ -209,6 +211,9 @@ export class StageChart extends BaseChart {
           : undefined,
         autoPopup: stage.autoPopup,
         passthroughAttrs: Object.keys(passthroughAttrs).length > 0 ? passthroughAttrs : undefined,
+        // Paint attributes from a matched <dc-fill>, resolved here rather than
+        // during layout because the stamping pass reads this extraction array.
+        paint: this.getPalettePaint(stage),
         pattern: stage.pattern as string | undefined,
         patternStroke: stage.patternStroke,
         patternFill: stage.patternFill,
@@ -586,6 +591,7 @@ export class StageChart extends BaseChart {
       popup?: { content: string; trigger: string };
       autoPopup?: boolean;
       passthroughAttrs?: Record<string, string>;
+      paint?: Record<string, string>;
       valueFormat?: string;
       isZero: boolean;
       isHidden: boolean;
