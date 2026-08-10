@@ -1646,12 +1646,20 @@ px↔viewBox conversion first, since §4.1(a) and (b) depend on it · §4.3 even
 high-value item in the review) · §4.2 empty/loading states · §4.4 `::part` + `--dc-*` tokens ·
 §4.5 gap rendering · §4.6 `values`/`labels` attributes, then `.data`.
 
-**Phase 3 — docs and distribution.** Fix the §7 drift, especially the `<dc-axis>` and
-`<dc-grid>` gaps. Ship a custom-elements manifest. Then rewrite the README around the actual
-pitch — *charts you can render from any server template, no JSON endpoint, no build step* — with
-a Django or Rails template loop emitting `<dc-bar>` as the hero example and an htmx swap as the
-follow-up demo. Add `hypermedia`, `no-build`, `server-rendered`, `htmx` to the npm keywords.
-Then one good post to r/htmx, r/django, and Lobsters.
+**Phase 3 — docs and distribution. ✅ COMPLETE except the outreach.** The §7 drift is fixed and
+guarded by tests; the custom-elements manifest ships; the README now leads with the pitch, a
+Django and a Rails template loop, and an htmx swap; the npm keywords include `hypermedia`,
+`no-build`, `server-rendered`, `htmx`, plus `html-first`, `django` and `rails`.
+
+> **One discovery from this phase changes what "complete" means.** The time-axis feature —
+> `type="time"`, `date-format`, `date-label-format` — is **entirely unwired**. `parseTimeScale`,
+> `getTimeX` and `renderTimeAxis` all exist in `axis-chart.ts` and nothing calls them, so a time
+> axis renders raw label strings spaced by index. It is documented in API.md, demonstrated in
+> `examples/`, and has a *passing visual baseline of the broken output*. Decide whether to build
+> it or withdraw it before posting anywhere: a reader who tries the documented example gets a
+> chart that quietly ignores half its configuration.
+
+**Still to do:** one good post to r/htmx, r/django, and Lobsters.
 
 Discovery is the binding constraint, not features. Freeze the roadmap — no radar, gauge,
 treemap, dual axes, or zoom until a user asks for one.

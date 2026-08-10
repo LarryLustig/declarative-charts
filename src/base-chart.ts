@@ -1265,7 +1265,7 @@ export abstract class BaseChart extends LitElement {
     // In high contrast mode, use high contrast colors instead of normal resolution
     let fillColors: string[];
     if (highContrast) {
-      fillColors = this.getHighContrastColors(count);
+      fillColors = this.getHighContrastPaletteColors(count) ?? this.getHighContrastColors(count);
     } else {
       fillColors = this.resolveFillColorsWithPalette(
         elements.map(e => ({ fill: e.fill, label: e.label, value: e.value })),
@@ -2971,6 +2971,29 @@ export abstract class BaseChart extends LitElement {
    * post-render stamping pass walks. An element with its own `fill` opts out -
    * it has said how it wants to look.
    */
+  /**
+   * Colours from a `<dc-palette high-contrast>` child, if the page supplies one.
+   *
+   * Documented behaviour ("Override colors with `<dc-palette high-contrast>`
+   * child") that nothing implemented: the palette's own `high-contrast`
+   * attribute was declared, documented, and read by no one, so a page that
+   * chose accessible colours by hand silently got the generated set instead.
+   *
+   * @returns One colour per element, or null to fall back to the generated set
+   */
+  protected getHighContrastPaletteColors(count: number): string[] | null {
+    const palette = this.querySelector<ChartPalette>('dc-palette[high-contrast]');
+    if (!palette) return null;
+
+    const colors = palette
+      .getFills()
+      .map(f => f.fill)
+      .filter((c): c is string => !!c);
+    if (colors.length === 0) return null;
+
+    return Array.from({ length: count }, (_, i) => colors[i % colors.length]);
+  }
+
   protected getPalettePaint(element: Element & {
     label?: string;
     value?: number;

@@ -9,6 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`<dc-palette high-contrast>` did nothing.** CLAUDE.md documents it as the way to override
+  high-contrast colours, and nothing read the palette's own flag — a page that chose accessible
+  colours by hand silently got the generated set. A `<dc-palette high-contrast>` child of a chart
+  in high-contrast mode now supplies the colours
+
+### Changed
+
+- **README leads with what the library is actually for** — charts a server template can render,
+  with no JSON endpoint, no build step and no chart code. A Django loop and a Rails loop are the
+  hero examples, followed by an htmx swap. All eight chart examples in the file were rendered in
+  Chromium to confirm they work
+- npm keywords gain `hypermedia`, `no-build`, `server-rendered`, `htmx`, `html-first`, `django`
+  and `rails`
+- `NEEDS_CONTEXT` in `no-dead-attributes.test.ts` is empty: the guard now checks 159 of 170
+  element/attribute pairs, up from 149
+
+### Known gaps
+
+- **The time-axis feature is unwired.** `type="time"`, `date-format` and `date-label-format` are
+  documented in API.md, demonstrated in `examples/`, and have a passing visual baseline — but
+  `parseTimeScale`, `getTimeX` and `renderTimeAxis` in `axis-chart.ts` have no caller, so a time
+  axis renders raw label strings spaced by index rather than by date. Recorded in `KNOWN_DEAD`
+
+
 - **All ten known dead attributes now work.** Each was declared, documented in API.md, and read by
   nothing
   - **`<dc-fill>`'s nine SVG paint attributes** — `fill-opacity`, `fill-rule`, `stroke-width`,

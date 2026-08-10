@@ -194,7 +194,7 @@ Use `getPaletteColors(count, colorType)` in chart code to resolve palette colors
 
 **Exception**: The `chart` attribute on `<dc-log-console>` takes a CSS selector (e.g., `chart="#my-chart"` or `chart="dc-chart"`) because that component is designed to monitor multiple charts via tabbed display.
 
-**High Contrast Mode**: Enable with `high-contrast` attribute or auto-detect via `prefers-contrast: high`. Override colors with `<dc-palette high-contrast>` child.
+**High Contrast Mode**: Enable with `high-contrast` attribute or auto-detect via `prefers-contrast: high`. Override colors with a `<dc-palette high-contrast>` child of the chart — its `<dc-fill>` colours replace the generated high-contrast set. That override was documented from the start and unimplemented until the dead-attribute sweep found it.
 
 **Hidden Attribute**: Standard HTML `hidden` on data elements (`<dc-line>`, `<dc-bar>`, etc.) hides them. Toggling it re-renders the chart automatically — see **Child Reactivity** below.
 
@@ -660,7 +660,7 @@ cannot quietly grow:
 | List | Meaning |
 |---|---|
 | `KNOWN_DEAD` | Confirmed unread. **These are open bugs**, and the list is currently empty. A test fails if an entry starts working, so it cannot rot |
-| `NEEDS_CONTEXT` | The attribute *is* read; this test has not yet been given a context that reaches it. Shrink this |
+| `NEEDS_CONTEXT` | The attribute *is* read; this test has not yet been given a context that reaches it. Currently empty |
 | `NO_VISUAL_EFFECT` | Genuinely changes no rendered output — `logging`, `console-log`, `trigger`, and the two that need real layout (`fit`, `text-scaling`) |
 
 When adding a `@property`, expect this test to demand either a rendering change or a line in one

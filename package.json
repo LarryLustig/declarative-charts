@@ -62,7 +62,14 @@
     "visualization",
     "bar-chart",
     "line-chart",
-    "data-visualization"
+    "data-visualization",
+    "hypermedia",
+    "no-build",
+    "server-rendered",
+    "htmx",
+    "html-first",
+    "django",
+    "rails"
   ],
   "author": "Lawrence Lustig <larrylustig@gmail.com>",
   "license": "MIT",

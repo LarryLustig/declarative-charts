@@ -95,6 +95,18 @@ const TIME_AXIS = (a: string) =>
      </dc-line>
    </dc-chart>`;
 
+/**
+ * Two fills whose palette order is the reverse of the bars', so a match and the
+ * positional fallback give different colours. The attribute under test goes on
+ * the first fill.
+ */
+const MATCHED_PALETTE = (a: string, base: string) =>
+  `<dc-palette id="mp">
+     <dc-fill ${a} ${base} fill="#0000ff"></dc-fill>
+     <dc-fill label="Alpha" fill="#ff0000"></dc-fill>
+   </dc-palette>
+   <dc-chart width="600" height="400" palette="mp">${BARS}</dc-chart>`;
+
 /** A <dc-fill> inside a palette the chart uses. */
 const PALETTE_FILL = (a: string, base: string) =>
   `<dc-palette id="pf"><dc-fill ${a} ${base} fill="#f00"></dc-fill></dc-palette>
@@ -265,7 +277,12 @@ const CONTEXT_FOR_ELEMENT: Record<string, (attrs: string) => string> = {
     `<dc-chart width="600" height="400"><dc-area ${a} label="A">${MANY_POINTS}</dc-area></dc-chart>`,
 
   // --- axis configuration only shows on the axis it configures --------------
-  'dc-axis:position': a => `<dc-chart width="600" height="400"><dc-axis ${a}></dc-axis>${BARS}</dc-chart>`,
+  // Position moves the axis *title*; without one, a lone <dc-axis> just
+  // reconfigures an axis the chart was already drawing in the same place.
+  'dc-axis:position': a =>
+    `<dc-chart width="600" height="400">
+       <dc-axis ${a}><dc-title>Axis title</dc-title></dc-axis>${BARS}
+     </dc-chart>`,
   'dc-axis:type': a => `<dc-chart width="600" height="400"><dc-axis position="bottom" ${a}></dc-axis>${BARS}</dc-chart>`,
   'dc-axis:label-interval': a => MANY_BAR_AXIS(a),
   'dc-axis:label-lines': a => MANY_BAR_AXIS(a),
@@ -273,13 +290,18 @@ const CONTEXT_FOR_ELEMENT: Record<string, (attrs: string) => string> = {
   'dc-axis:date-label-format': a => TIME_AXIS(a),
 
   // --- a <dc-fill> in a palette only supplies what the chart asks it for ----
-  'dc-fill:label': a => PALETTE_FILL(a, 'label="Alpha"'),
-  'dc-fill:value': a => PALETTE_FILL(a, 'value="30"'),
-  'dc-fill:min-value': a => PALETTE_FILL(a, 'min-value="0" max-value="100"'),
-  'dc-fill:max-value': a => PALETTE_FILL(a, 'min-value="0" max-value="100"'),
-  'dc-fill:pattern': a => PALETTE_FILL(a, ''),
-  'dc-fill:pattern-scale': a => PALETTE_FILL(a, 'pattern="dots"'),
-  'dc-fill:stroke': a => PALETTE_FILL(a, 'pattern="dots"'),
+  // Matching routes need the *positional* fallback to differ from the match,
+  // or a failed match lands on the same colour and looks like no change. These
+  // palettes are deliberately ordered against the bars.
+  'dc-fill:label': a => MATCHED_PALETTE(a, 'label="Beta"'),
+  'dc-fill:value': a => MATCHED_PALETTE(a, 'value="70"'),
+  'dc-fill:min-value': a => MATCHED_PALETTE(a, 'min-value="60" max-value="100"'),
+  'dc-fill:max-value': a => MATCHED_PALETTE(a, 'min-value="60" max-value="100"'),
+  // The pattern routes need a label match first, since that is what carries a
+  // pattern out of a palette.
+  'dc-fill:pattern': a => PALETTE_FILL(a, 'label="Alpha"'),
+  'dc-fill:pattern-scale': a => PALETTE_FILL(a, 'label="Alpha" pattern="dots"'),
+  'dc-fill:stroke': a => PALETTE_FILL(a, 'label="Alpha" pattern="dots"'),
   'dc-fill:stroke-width': a => PALETTE_FILL(a, 'label="Alpha"'),
   'dc-fill:stroke-opacity': a => PALETTE_FILL(a, 'label="Alpha"'),
   'dc-fill:stroke-dasharray': a => PALETTE_FILL(a, 'label="Alpha"'),
@@ -297,10 +319,11 @@ const CONTEXT_FOR_ELEMENT: Record<string, (attrs: string) => string> = {
   // --- the legend needs values and long labels to show these ----------------
   'dc-legend:percent-format': a =>
     `<dc-chart width="600" height="400" show-percent><dc-legend ${a} show-percent></dc-legend>${BARS}</dc-chart>`,
+  // max-width caps the wrapped layout; the tabular one sizes to its columns.
   'dc-legend:max-width': a =>
-    `<dc-chart width="600" height="400"><dc-legend ${a}></dc-legend>
-       <dc-bar value="30" label="A Very Long Series Name Indeed"></dc-bar>
-       <dc-bar value="70" label="Another Extremely Long Series Name"></dc-bar>
+    `<dc-chart width="600" height="400"><dc-legend ${a} columns="*"></dc-legend>
+       <dc-bar value="30" label="An Extremely Long Series Name For Wrapping"></dc-bar>
+       <dc-bar value="70" label="Another Very Long Series Name Indeed Here"></dc-bar>
      </dc-chart>`,
 
   // --- funnel: flat edges only exist when there is a chevron to flatten -----
@@ -323,9 +346,13 @@ const CONTEXT_FOR_ELEMENT: Record<string, (attrs: string) => string> = {
   'dc-stage-chart:zero-hidden': a => ZERO_STAGE(a),
 
   // --- a palette's high-contrast set is only consulted in high contrast -----
+  // The documented form is a <dc-palette high-contrast> *child* of the chart,
+  // overriding the generated high-contrast colours.
   'dc-palette:high-contrast': a =>
-    `<dc-palette id="hc" ${a}><dc-fill fill="#f00"></dc-fill><dc-fill fill="#0f0"></dc-fill></dc-palette>
-     <dc-chart width="600" height="400" palette="hc" high-contrast>${BARS}</dc-chart>`,
+    `<dc-chart width="600" height="400" high-contrast>
+       <dc-palette ${a}><dc-fill fill="#123456"></dc-fill><dc-fill fill="#654321"></dc-fill></dc-palette>
+       ${BARS}
+     </dc-chart>`,
 
   'dc-swatch:label': a =>
     `<dc-palette id="swl">
@@ -339,6 +366,9 @@ const CONTEXT_FOR_ELEMENT: Record<string, (attrs: string) => string> = {
 };
 
 const VALUE_FOR_ELEMENT: Record<string, string> = {
+  // The generic 500 still spans the matched bar, so the match - and therefore
+  // the rendering - is unchanged. 65 drops the 70-value bar out of the range.
+  'dc-fill:max-value': '65',
   // Restating a default changes nothing; each of these flips one.
   'dc-chart:show-label': 'false',
   'dc-bar:show-label': 'false',
@@ -347,9 +377,10 @@ const VALUE_FOR_ELEMENT: Record<string, string> = {
   'dc-pie-chart:show-percent': 'false',
   'dc-pie-slice:show-value': 'true',
   'dc-legend:show-value': 'false',
+  // 'bottom' is the default, so it restates rather than changes. 'top' moves
+  // the axis title, which is what makes the change observable at all.
   'dc-axis:position': 'top',
   'dc-axis:type': 'value',
-  'dc-fill:pattern': 'crosshatch',
   'dc-legend-item:stroke': '#ff00ff',
 
   // 'circle' is already the swatch default, so it would change nothing.
@@ -384,9 +415,19 @@ const NO_VISUAL_EFFECT: Record<string, string> = {
  * the code and forget.
  */
 const KNOWN_DEAD: Record<string, string> = {
-  // Empty, and worth keeping that way. The ten that were here - per-element
-  // show-label, and <dc-fill>'s fill-rule, fill-opacity and six stroke-*
-  // attributes - are all wired up now. A new entry means a new bug.
+  /**
+   * The whole time-axis feature is unwired, not just these three attributes.
+   * `parseTimeScale`, `getTimeX` and `renderTimeAxis` all exist in
+   * `axis-chart.ts` and **nothing calls them** - so `type="time"` leaves the
+   * raw label strings in place, spaced by index rather than by date.
+   *
+   * It is documented in API.md, demonstrated in the examples, and has a passing
+   * visual baseline showing the un-implemented output. Fixing it means wiring
+   * the feature up, not writing a better test context.
+   */
+  'dc-axis:type': 'axisConfig.type is read only by parseTimeScale, which has no caller',
+  'dc-axis:date-format': 'the time axis never runs; see dc-axis:type',
+  'dc-axis:date-label-format': 'the time axis never runs; see dc-axis:type'
 };
 
 /**
@@ -395,19 +436,7 @@ const KNOWN_DEAD: Record<string, string> = {
  * so these are gaps in the test, not in the library. Shrink this list.
  */
 const NEEDS_CONTEXT: Record<string, string> = {
-  'dc-axis:position': 'a lone <dc-axis> configures an axis the chart already draws by default',
-  'dc-axis:type': 'as above',
-  'dc-axis:date-format': 'needs a time axis whose labels actually reparse',
-  'dc-axis:date-label-format': 'as above',
-  'dc-fill:label': 'needs a palette whose label match is the only colour route',
-  'dc-fill:value': 'needs a value-matched palette entry',
-  'dc-fill:min-value': 'as above',
-  'dc-fill:max-value': 'as above',
-  'dc-fill:pattern': 'needs the palette pattern route rather than a direct reference',
-  'dc-fill:stroke': 'as above',
-  'dc-fill:pattern-scale': 'as above',
-  'dc-legend:max-width': 'maxWidth is read four times in chart-legend.ts; the cap needs a legend wide enough to clip',
-  'dc-palette:high-contrast': 'needs a chart in high-contrast mode with a matching high-contrast palette'
+  // Empty. Every attribute now has a context that reaches it.
 };
 
 const files = declaredByFile();

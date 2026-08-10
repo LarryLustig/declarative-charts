@@ -3658,6 +3658,33 @@
             },
             {
               "kind": "method",
+              "name": "getHighContrastPaletteColors",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": ""
+                }
+              },
+              "parameters": [
+                {
+                  "name": "count",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "description": "Array of shape data items that may contain passthroughAttrs",
+                  "name": "shapes"
+                }
+              ],
+              "description": "Colours from a `<dc-palette high-contrast>` child, if the page supplies one.\r\n\r\nDocumented behaviour (\"Override colors with `<dc-palette high-contrast>`\r\nchild\") that nothing implemented: the palette's own `high-contrast`\r\nattribute was declared, documented, and read by no one, so a page that\r\nchose accessible colours by hand silently got the generated set instead.",
+              "inheritedFrom": {
+                "name": "BaseChart",
+                "module": "src/base-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
               "name": "getPalettePaint",
               "privacy": "protected",
               "return": {
@@ -3671,13 +3698,8 @@
                   "type": {
                     "text": "Element & {\r\n    label?: string;\r\n    value?: number;\r\n    fill?: string;\r\n  }"
                   }
-                },
-                {
-                  "description": "Array of shape data items that may contain passthroughAttrs",
-                  "name": "shapes"
                 }
               ],
-              "description": "SVG paint attributes a palette's `<dc-fill>` supplies for this element.\r\n\r\nResolved where the element data is extracted, because that is the array the\r\npost-render stamping pass walks. An element with its own `fill` opts out -\r\nit has said how it wants to look.",
               "inheritedFrom": {
                 "name": "BaseChart",
                 "module": "src/base-chart.ts"
@@ -7120,6 +7142,29 @@
             },
             {
               "kind": "method",
+              "name": "getHighContrastPaletteColors",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": ""
+                }
+              },
+              "parameters": [
+                {
+                  "name": "count",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "description": "Array of shape data items that may contain passthroughAttrs",
+                  "name": "shapes"
+                }
+              ],
+              "description": "Colours from a `<dc-palette high-contrast>` child, if the page supplies one.\r\n\r\nDocumented behaviour (\"Override colors with `<dc-palette high-contrast>`\r\nchild\") that nothing implemented: the palette's own `high-contrast`\r\nattribute was declared, documented, and read by no one, so a page that\r\nchose accessible colours by hand silently got the generated set instead."
+            },
+            {
+              "kind": "method",
               "name": "getPalettePaint",
               "privacy": "protected",
               "return": {
@@ -7133,13 +7178,8 @@
                   "type": {
                     "text": "Element & {\r\n    label?: string;\r\n    value?: number;\r\n    fill?: string;\r\n  }"
                   }
-                },
-                {
-                  "description": "Array of shape data items that may contain passthroughAttrs",
-                  "name": "shapes"
                 }
-              ],
-              "description": "SVG paint attributes a palette's `<dc-fill>` supplies for this element.\r\n\r\nResolved where the element data is extracted, because that is the array the\r\npost-render stamping pass walks. An element with its own `fill` opts out -\r\nit has said how it wants to look."
+              ]
             },
             {
               "kind": "method",
@@ -25936,6 +25976,33 @@
             },
             {
               "kind": "method",
+              "name": "getHighContrastPaletteColors",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": ""
+                }
+              },
+              "parameters": [
+                {
+                  "name": "count",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "description": "Array of shape data items that may contain passthroughAttrs",
+                  "name": "shapes"
+                }
+              ],
+              "description": "Colours from a `<dc-palette high-contrast>` child, if the page supplies one.\r\n\r\nDocumented behaviour (\"Override colors with `<dc-palette high-contrast>`\r\nchild\") that nothing implemented: the palette's own `high-contrast`\r\nattribute was declared, documented, and read by no one, so a page that\r\nchose accessible colours by hand silently got the generated set instead.",
+              "inheritedFrom": {
+                "name": "BaseChart",
+                "module": "src/base-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
               "name": "getPalettePaint",
               "privacy": "protected",
               "return": {
@@ -25949,13 +26016,8 @@
                   "type": {
                     "text": "Element & {\r\n    label?: string;\r\n    value?: number;\r\n    fill?: string;\r\n  }"
                   }
-                },
-                {
-                  "description": "Array of shape data items that may contain passthroughAttrs",
-                  "name": "shapes"
                 }
               ],
-              "description": "SVG paint attributes a palette's `<dc-fill>` supplies for this element.\r\n\r\nResolved where the element data is extracted, because that is the array the\r\npost-render stamping pass walks. An element with its own `fill` opts out -\r\nit has said how it wants to look.",
               "inheritedFrom": {
                 "name": "BaseChart",
                 "module": "src/base-chart.ts"
@@ -31304,6 +31366,33 @@
             },
             {
               "kind": "method",
+              "name": "getHighContrastPaletteColors",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": ""
+                }
+              },
+              "parameters": [
+                {
+                  "name": "count",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "description": "Array of shape data items that may contain passthroughAttrs",
+                  "name": "shapes"
+                }
+              ],
+              "description": "Colours from a `<dc-palette high-contrast>` child, if the page supplies one.\r\n\r\nDocumented behaviour (\"Override colors with `<dc-palette high-contrast>`\r\nchild\") that nothing implemented: the palette's own `high-contrast`\r\nattribute was declared, documented, and read by no one, so a page that\r\nchose accessible colours by hand silently got the generated set instead.",
+              "inheritedFrom": {
+                "name": "BaseChart",
+                "module": "src/base-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
               "name": "getPalettePaint",
               "privacy": "protected",
               "return": {
@@ -31317,13 +31406,8 @@
                   "type": {
                     "text": "Element & {\r\n    label?: string;\r\n    value?: number;\r\n    fill?: string;\r\n  }"
                   }
-                },
-                {
-                  "description": "Array of shape data items that may contain passthroughAttrs",
-                  "name": "shapes"
                 }
               ],
-              "description": "SVG paint attributes a palette's `<dc-fill>` supplies for this element.\r\n\r\nResolved where the element data is extracted, because that is the array the\r\npost-render stamping pass walks. An element with its own `fill` opts out -\r\nit has said how it wants to look.",
               "inheritedFrom": {
                 "name": "BaseChart",
                 "module": "src/base-chart.ts"
@@ -36489,6 +36573,33 @@
             },
             {
               "kind": "method",
+              "name": "getHighContrastPaletteColors",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": ""
+                }
+              },
+              "parameters": [
+                {
+                  "name": "count",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "description": "Array of shape data items that may contain passthroughAttrs",
+                  "name": "shapes"
+                }
+              ],
+              "description": "Colours from a `<dc-palette high-contrast>` child, if the page supplies one.\r\n\r\nDocumented behaviour (\"Override colors with `<dc-palette high-contrast>`\r\nchild\") that nothing implemented: the palette's own `high-contrast`\r\nattribute was declared, documented, and read by no one, so a page that\r\nchose accessible colours by hand silently got the generated set instead.",
+              "inheritedFrom": {
+                "name": "BaseChart",
+                "module": "src/base-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
               "name": "getPalettePaint",
               "privacy": "protected",
               "return": {
@@ -36502,13 +36613,8 @@
                   "type": {
                     "text": "Element & {\r\n    label?: string;\r\n    value?: number;\r\n    fill?: string;\r\n  }"
                   }
-                },
-                {
-                  "description": "Array of shape data items that may contain passthroughAttrs",
-                  "name": "shapes"
                 }
               ],
-              "description": "SVG paint attributes a palette's `<dc-fill>` supplies for this element.\r\n\r\nResolved where the element data is extracted, because that is the array the\r\npost-render stamping pass walks. An element with its own `fill` opts out -\r\nit has said how it wants to look.",
               "inheritedFrom": {
                 "name": "BaseChart",
                 "module": "src/base-chart.ts"
@@ -41061,6 +41167,33 @@
             },
             {
               "kind": "method",
+              "name": "getHighContrastPaletteColors",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": ""
+                }
+              },
+              "parameters": [
+                {
+                  "name": "count",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "description": "Array of shape data items that may contain passthroughAttrs",
+                  "name": "shapes"
+                }
+              ],
+              "description": "Colours from a `<dc-palette high-contrast>` child, if the page supplies one.\r\n\r\nDocumented behaviour (\"Override colors with `<dc-palette high-contrast>`\r\nchild\") that nothing implemented: the palette's own `high-contrast`\r\nattribute was declared, documented, and read by no one, so a page that\r\nchose accessible colours by hand silently got the generated set instead.",
+              "inheritedFrom": {
+                "name": "BaseChart",
+                "module": "src/base-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
               "name": "getPalettePaint",
               "privacy": "protected",
               "return": {
@@ -41074,13 +41207,8 @@
                   "type": {
                     "text": "Element & {\r\n    label?: string;\r\n    value?: number;\r\n    fill?: string;\r\n  }"
                   }
-                },
-                {
-                  "description": "Array of shape data items that may contain passthroughAttrs",
-                  "name": "shapes"
                 }
               ],
-              "description": "SVG paint attributes a palette's `<dc-fill>` supplies for this element.\r\n\r\nResolved where the element data is extracted, because that is the array the\r\npost-render stamping pass walks. An element with its own `fill` opts out -\r\nit has said how it wants to look.",
               "inheritedFrom": {
                 "name": "BaseChart",
                 "module": "src/base-chart.ts"

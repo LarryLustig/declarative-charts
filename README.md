@@ -1,6 +1,65 @@
 # Declarative Chart Library
 
-A modern Web Components-based chart library built with Lit that allows you to create charts using simple, declarative HTML.
+**Charts your server can render. No JSON endpoint, no build step, no chart code.**
+
+Most chart libraries want your data as JavaScript. You add an API endpoint,
+serialise your rows to JSON, ship a config object to the browser, and the shape
+of your chart ends up in a different language from the rest of your page.
+
+This one takes HTML:
+
+```html
+<dc-chart width="600" height="400">
+  <dc-title>Revenue by Region</dc-title>
+  <dc-bar value="4200" label="North"></dc-bar>
+  <dc-bar value="3800" label="South"></dc-bar>
+  <dc-bar value="5100" label="East"></dc-bar>
+</dc-chart>
+```
+
+Which means your existing template loop already knows how to write it:
+
+```html
+<!-- Django -->
+<dc-chart width="600" height="400">
+  <dc-title>Revenue by Region</dc-title>
+  {% for region in regions %}
+    <dc-bar value="{{ region.revenue }}" label="{{ region.name }}"></dc-bar>
+  {% endfor %}
+</dc-chart>
+```
+
+```erb
+<%# Rails %>
+<dc-chart width="600" height="400">
+  <dc-title>Revenue by Region</dc-title>
+  <% @regions.each do |region| %>
+    <dc-bar value="<%= region.revenue %>" label="<%= region.name %>"></dc-bar>
+  <% end %>
+</dc-chart>
+```
+
+No endpoint to build, no serialisation to keep in step with your models, and the
+chart is in your page's source where you can read it.
+
+### It updates the way the rest of your page does
+
+Charts watch their own children, so anything that changes the markup redraws the
+chart — including an htmx swap. There is no `requestUpdate()` to remember and no
+JavaScript to write:
+
+```html
+<div hx-get="/reports/q3" hx-trigger="click" hx-target="#sales">
+  Load Q3
+</div>
+
+<dc-chart id="sales" width="600" height="400">
+  <!-- htmx replaces these <dc-bar> elements; the chart redraws itself -->
+</dc-chart>
+```
+
+Every element also takes `hx-*` and other unknown attributes and passes them
+through to the SVG shape, so a bar can be a drop target or trigger a request.
 
 ## Features
 
