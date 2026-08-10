@@ -82,45 +82,152 @@ gate every label passes through, so there is one place to put it.
 
 **Cost:** small to moderate, and it needs `measureText`, which exists.
 
-### 4. Radar chart — as the polar exemplar
+### 4. Radar chart — as the scaled-polar exemplar
 
-See the next section for why this one is on the *release* list rather than the
-deferred list.
+The one item here that is not a capability gap. See the next section for why it
+is on the release list rather than the deferred one.
 
 ---
 
 ## Structural exemplars
 
-The argument: a base chart class is only proven by a chart that uses it. Four
-seams exist today and each has at least one chart standing on it —
+The argument: a base chart class is only proven by a chart that uses it.
 
-| Seam | Coordinate system | Proven by |
-|---|---|---|
-| Cartesian axes | x/y with scales | `<dc-chart>` (bar, line, area, bubble) |
-| Angular | proportion of a circle | `<dc-pie-chart>` |
-| Flow | stacked bands, tapering | `<dc-funnel-chart>` |
-| Area-proportional | shape area encodes value | `<dc-stage-chart>` |
-| **Polar axes** | **radiating scaled axes** | **nothing** |
+There are **two** seams today. The distinction that matters is not the
+shape drawn but whether the chart has a *scale*:
 
-**Radar is the only common chart that needs a polar axis system**, and nothing
-in the library exercises one. Shipping a single radar chart answers a question
-that is otherwise open at 1.0: *can `BaseChart` host an axis system that is not
-cartesian?* If the answer turns out to be "not without changing `BaseChart`",
-that is a change worth discovering now, when it is free.
+| Seam | What it means | Base class | Proven by |
+|---|---|---|---|
+| **Scaled, cartesian** | a value axis with a domain, nice numbers and ticks | `AxisChart` | `<dc-chart>` |
+| **Proportional** | value maps straight to a size or angle; no domain | `BaseChart` | `<dc-pie-chart>`, `<dc-funnel-chart>`, `<dc-stage-chart>` |
+| **Scaled, polar** | a radial domain with ticks and rings | — | **nothing** |
+
+Verified rather than assumed: `getNiceRange`, `ValueRange` and the tick
+calculations appear **zero times** in `pie-chart.ts`, `funnel-chart.ts` and
+`stage-chart.ts`. All three normalise or map directly. Only `chart.ts` has a
+scale, and it gets it from `AxisChart`.
+
+**Radar is the only common chart that needs a scale in a non-cartesian space.**
+It answers a question otherwise left open at 1.0: *can the scale machinery leave
+the cartesian grid, or is it welded to x and y?* If the answer is "not without
+changing `AxisChart`", that is worth discovering while it is free.
+
+Note this is **not** the same as "polar". A pie is already polar — angle and
+radius. What a pie lacks is a *domain*: it normalises to a total, so there is
+nothing to tick and nothing to label. A radar has a real radial scale, and
+optionally a different one per axis. That is the difference, and it is why a
+pie does not already prove this seam.
+
+### Proposed API
 
 ```html
-<dc-radar-chart>
-  <dc-radar-axis label="Speed"></dc-radar-axis>
-  <dc-radar-axis label="Power"></dc-radar-axis>
-  <dc-radar-axis label="Range"></dc-radar-axis>
+<dc-radar-chart width="500" height="500" rings="4" max-value="100">
+  <dc-title>Model Comparison</dc-title>
+  <dc-grid stroke="#e5e7eb" stroke-dasharray="dotted"></dc-grid>
 
-  <dc-radar-series label="Model A">
+  <dc-radar-axis label="Speed"></dc-radar-axis>
+  <dc-radar-axis label="Power" max-value="500" value-format="number 0"></dc-radar-axis>
+  <dc-radar-axis label="Range"></dc-radar-axis>
+  <dc-radar-axis label="Comfort"></dc-radar-axis>
+
+  <dc-radar-series label="Model A" fill="#2563eb">
     <dc-point value="80" label="Speed"></dc-point>
-    <dc-point value="60" label="Power"></dc-point>
+    <dc-point value="420" label="Power"></dc-point>
     <dc-point value="90" label="Range"></dc-point>
+    <dc-point value="55" label="Comfort"></dc-point>
   </dc-radar-series>
+
+  <dc-radar-series label="Model B" fill="#dc2626" missing="gap">
+    <dc-point value="70" label="Speed"></dc-point>
+    <dc-point value="310" label="Power"></dc-point>
+    <dc-point label="Range"></dc-point>          <!-- not measured -->
+    <dc-point value="85" label="Comfort"></dc-point>
+  </dc-radar-series>
+
+  <dc-legend position="bottom"></dc-legend>
 </dc-radar-chart>
 ```
+
+#### `<dc-radar-chart>`
+
+| Attribute | Meaning |
+|---|---|
+| `min-value` / `max-value` | Default radial domain for every axis. `min-value` defaults to 0, which is the only honest default for a radar — a non-zero origin exaggerates differences |
+| `rings` | Number of concentric grid rings (default 5) |
+| `grid-shape` | `polygon` (default, rings follow the axes) or `circle` |
+| `start-angle` | Where the first axis points, in degrees. Default `-90`, straight up |
+| `clockwise` | Direction of subsequent axes (default true) |
+
+Plus the common chart attributes — `width`, `height`, `palette`, `padding`,
+`show-value`, `value-format`, `animations`, `high-contrast`, `loading`,
+`logging`, and the rest.
+
+#### `<dc-radar-axis>`
+
+One per dimension. A new element rather than reusing `<dc-axis>`: that element's
+`position="left|bottom"` is cartesian by definition, and giving one tag two
+meanings depending on its parent is the `<dc-grid style>` mistake in a new suit.
+
+| Attribute | Meaning |
+|---|---|
+| `label` | The dimension name. **Points bind to it**, so it is required |
+| `min-value` / `max-value` | Per-axis domain, overriding the chart default |
+| `value-format` | Per-axis formatting — `"km/h"` and `"hp"` are not the same units |
+| `hidden` | Standard; removes the spoke and any points bound to it |
+
+**Per-axis domains are the attribute that makes radar honest.** A radar with one
+shared scale is only meaningful when every dimension is commensurable, which is
+rare. Independent domains are what let Speed in km/h sit beside Power in hp
+without the polygon lying about their relationship.
+
+**Axes may be omitted entirely**, in which case they are inferred from the union
+of point labels in document order. That keeps the simple case simple; declare
+them when you need a specific order, a per-axis domain, or an axis that no
+series has data for yet.
+
+#### `<dc-radar-series>`
+
+One polygon. Mirrors `<dc-line>` — a container whose `<dc-point>` children are
+the data.
+
+| Attribute | Meaning |
+|---|---|
+| `label` | Series name, used by the legend |
+| `stroke`, `stroke-width`, `stroke-dasharray` | The outline |
+| `fill`, `fill-opacity` | The filled area. **Defaults to roughly 0.25** — opaque polygons make a two-series radar unreadable, so translucency is a default rather than an option |
+| `pattern`, `pattern-*` | As any other filled shape |
+| `missing` | `gap` (default), `skip` or `zero` — the existing policy, reused |
+| `show-value`, `show-label`, `value-format`, `auto-popup`, `href`, `target`, `hidden` | As other data elements |
+
+`missing` reuse is worth spelling out, because the three policies mean something
+specific here: `gap` breaks the polygon at that axis, `skip` joins the two
+neighbouring axes directly, and `zero` pulls the vertex to the centre. `zero` is
+the one that lies, exactly as it does on a line chart.
+
+#### `<dc-point>`
+
+Unchanged. A radar datum is what `<dc-point>` already models — a value at a
+position — and it brings `value`, `label`, `fill`, `href`, `target`,
+`show-value`, `hidden`, `<dc-popup>` children and the missing-value handling
+with it. `label` names the axis rather than a category, which is the same
+binding-by-label the combo charts already use.
+
+#### `<dc-grid>` — reused as-is
+
+`<dc-grid stroke="…" stroke-dasharray="…">` already describes *how grid lines
+look*, in SVG's own vocabulary, with no assumption about geometry. As a direct
+child of `<dc-radar-chart>` it styles the rings. Same tag, same meaning,
+different parent — which is the test `<dc-axis>` fails and this one passes.
+
+#### Diagnostics
+
+Two new codes, following the existing conventions:
+
+- A `<dc-point>` whose `label` matches no axis — the data references a dimension
+  that does not exist, and silently dropping it is how a chart comes to show
+  four of five measurements.
+- Fewer than three axes — a two-axis radar is a line and a one-axis radar is a
+  dot. Warn and render what was asked for.
 
 **One element per value, and `<dc-point>` specifically.** An earlier draft used
 `values="80, 60, 90"` — a serialised array in an attribute, which is the shape
@@ -130,16 +237,12 @@ value inside a comma-separated string can carry none of them, and the radar
 chart would silently support half the library. A radar datum *is* a point — a
 value at a position — which `<dc-point>` already models.
 
-**Points bind to axes by label**, the way line points align with bar categories
-in a combo chart today. Order becomes irrelevant, a missing axis is visible
-rather than silently shifting everything, and an omitted axis is missing data
-rather than zero.
-
 ### Charts that are *not* exemplars
 
 Deliberately excluded, because they add no seam:
 
-- **Gauge** — a partial arc. The angular seam, already proven by pie.
+- **Gauge** — a partial arc with no domain of its own. The proportional seam,
+  already proven by pie.
 - **Heatmap** — a cartesian grid. The seam `<dc-chart>` already stands on.
 - **Treemap** — a new *layout*, but no new coordinate system, and nothing about
   `BaseChart` blocks it. A contributor can add it after 1.0 without the base
