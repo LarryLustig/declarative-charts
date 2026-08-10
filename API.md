@@ -1796,6 +1796,93 @@ Defines a single stage in a stage chart.
 - `show-label` (boolean|string) - Whether to show the label on this stage
 - `show-percent` (boolean|string) - Whether to show the percentage on this stage
 
+### `<dc-radar-chart>`
+
+Plots several dimensions on radiating scaled axes. Unlike `<dc-pie-chart>`, which
+normalises to a total, a radar has a real radial domain — a minimum, a maximum
+and rings you can read values off.
+
+**Attributes:**
+- `min-value` (number) - Domain minimum for every axis (default: 0). Radar conventionally starts at zero; a non-zero origin exaggerates small differences
+- `max-value` (number) - Domain maximum for every axis. Inferred from the data when omitted
+- `rings` (number) - Concentric grid rings (default: 5)
+- `grid-shape` (string) - `"polygon"` (default, rings follow the axes) or `"circle"`
+- `start-angle` (number) - Degrees for the first axis (default: -90, straight up)
+- `counter-clockwise` (boolean) - Lay subsequent axes out anticlockwise
+- `show-value` (boolean|string) - Whether to print each value beside its vertex (default: false). A radar's message is the shape; the numbers are a hover away
+- Plus all [common chart attributes](#common-chart-attributes)
+
+**Child Elements:**
+- `<dc-radar-axis>` - One per dimension. Optional; inferred from point labels when omitted
+- `<dc-radar-series>` - One polygon per series
+- `<dc-grid>` - Optional ring styling
+- `<dc-title>`, `<dc-legend>`, `<dc-empty>` - As on any chart
+
+**Example:**
+
+```html
+<dc-radar-chart width="500" height="500" max-value="100">
+  <dc-title>Model Comparison</dc-title>
+  <dc-grid stroke="#e5e7eb" stroke-dasharray="dotted"></dc-grid>
+
+  <dc-radar-axis label="Speed"></dc-radar-axis>
+  <dc-radar-axis label="Power" max-value="500"></dc-radar-axis>
+  <dc-radar-axis label="Range"></dc-radar-axis>
+  <dc-radar-axis label="Comfort"></dc-radar-axis>
+
+  <dc-radar-series label="Model A" fill="#2563eb">
+    <dc-point value="80" label="Speed"></dc-point>
+    <dc-point value="420" label="Power"></dc-point>
+    <dc-point value="90" label="Range"></dc-point>
+    <dc-point value="55" label="Comfort"></dc-point>
+  </dc-radar-series>
+
+  <dc-legend position="bottom"></dc-legend>
+</dc-radar-chart>
+```
+
+### `<dc-radar-axis>`
+
+One dimension of a radar chart. Optional — when no axes are declared they are
+inferred from the union of point labels, in document order. Declare them when
+you need a specific order, a per-axis domain, or an axis no series has data for
+yet.
+
+**Attributes:**
+- `label` (string) - The dimension's name. Points bind to it, so it is required
+- `min-value` (number) - Domain minimum for this axis, overriding the chart's
+- `max-value` (number) - Domain maximum for this axis, overriding the chart's
+- `value-format` (string) - Number format for this axis's values
+- `hidden` (boolean) - Removes the spoke and any points bound to it
+
+**Per-axis domains are what make a radar honest.** A single shared scale is only
+meaningful when every dimension is commensurable, which is rare. Independent
+domains let speed in km/h sit beside power in hp without the polygon implying a
+relationship between the raw numbers.
+
+### `<dc-radar-series>`
+
+One polygon. A container for the `<dc-point>` elements that carry the data, in
+the same way `<dc-line>` contains the points of a line.
+
+**Attributes:**
+- `label` (string) - Series name, used by the legend
+- `fill` (string) - Fill colour for the polygon
+- `fill-opacity` (number) - Fill opacity (default: 0.25). Translucent by default because two opaque polygons hide each other
+- `stroke` (string) - Outline colour
+- `stroke-width` (number) - Outline width
+- `stroke-dasharray` (string) - Outline dash pattern, named or numeric
+- `missing` (string) - How to treat an axis with no value: `"gap"` (default), `"skip"` or `"zero"`
+- Plus `pattern`, `show-value`, `value-format`, `auto-popup`, `href`, `target`, `hidden`
+
+`missing` means something specific here: `gap` breaks the polygon at that axis,
+`skip` joins the two neighbouring axes directly, and `zero` pulls the vertex to
+the centre. `zero` distorts the whole silhouette, so it lies more loudly on a
+radar than it does on a line.
+
+**Child Elements:**
+- `<dc-point>` - One per axis; `label` names the axis it belongs to
+
 ### `<dc-axis>`
 
 Configures an axis on bar charts and line charts.
@@ -2615,6 +2702,8 @@ you where to look before you read the message.
 | `DC108` | A filename passed to `downloadSvg()` was adjusted |
 | `DC109` | Unrecognised `logging` or `console-log` value; default used |
 | `DC110` | Unrecognised stage `shape`; `rectangle` used |
+| `DC111` | A radar point names an axis that does not exist |
+| `DC112` | A radar chart has fewer than three axes |
 | `DC201` | Palette not found — check the name against [Palettes](#palettes-and-pattern-fills) |
 | `DC202` | Pattern is not a valid type or ID reference |
 | `DC203` | `zero-fill` referenced an element that does not exist |

@@ -24,6 +24,7 @@ const CHART_TAGS = [
   'dc-pie-chart',
   'dc-funnel-chart',
   'dc-stage-chart',
+  'dc-radar-chart',
 ] as const;
 
 const CHART_SELECTOR = CHART_TAGS.join(', ');
@@ -282,6 +283,16 @@ test.describe('Swatches', () => {
 
     const container = await getChartContainer(page, 'swatches');
     await expect(container).toHaveScreenshot('swatches.png');
+  });
+});
+
+test.describe('Radar Charts', () => {
+  test('radar chart with two series', async ({ page }) => {
+    await page.goto(`${FIXTURES_URL}?chart=radar-basic`);
+    await waitForChartRender(page);
+
+    const container = await getChartContainer(page, 'radar-basic');
+    await expect(container).toHaveScreenshot('radar-basic.png');
   });
 });
 

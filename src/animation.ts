@@ -32,7 +32,7 @@ export const DEFAULT_ANIMATION_OPTIONS: AnimationOptions = {
 /**
  * Chart types for animation dispatch.
  */
-export type AnimatableChartType = 'bar' | 'line' | 'area' | 'pie' | 'funnel' | 'stage' | 'mixed';
+export type AnimatableChartType = 'bar' | 'line' | 'area' | 'pie' | 'funnel' | 'stage' | 'radar' | 'mixed';
 
 /**
  * Check if user prefers reduced motion.

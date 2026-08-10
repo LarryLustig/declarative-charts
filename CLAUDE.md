@@ -86,6 +86,25 @@ BaseChartElement
 - `PieChart` (src/pie-chart.ts): `<dc-pie-chart>` - radial charts, donut via `inner-radius`
 - `FunnelChart` (src/funnel-chart.ts): `<dc-funnel-chart>` - chevron-shaped stages for conversion flows
 - `StageChart` (src/stage-chart.ts): `<dc-stage-chart>` - stages as shapes with proportional areas
+- `RadarChart` (src/radar-chart.ts): `<dc-radar-chart>` - dimensions on radiating scaled axes
+
+**Two structural seams, not five.** The distinction is whether a chart has a *scale*:
+`<dc-chart>` (via `AxisChart`) and `<dc-radar-chart>` have domains with ticks; pie, funnel and
+stage are proportional and map value straight to a size or angle. `getNiceRange`, `ValueRange`
+and the tick calculations appear nowhere in `pie-chart.ts`, `funnel-chart.ts` or
+`stage-chart.ts`.
+
+`<dc-radar-chart>` is the library's proof that a scale can leave the cartesian grid. It could not
+reuse `AxisChart.getNiceRange()` - that expresses zero as a fraction from the top of a rectangle -
+but `calculateNiceTicks()` in `chart-utils.ts` was already pure and did the job. **If you add
+another non-cartesian scaled chart, reach for the pure helpers in `chart-utils.ts`, not for
+`AxisChart`.**
+
+**⚠️ `getLegendItems()` must not call the layout.** The legend is sized inside
+`getChartPadding()`, and a layout needs the padding, so routing legend items through the layout
+recurses until the stack gives out. `<dc-pie-chart>` and `<dc-radar-chart>` both build legend
+items from their elements directly, and both carry a note saying why. This one is not caught by
+the unit tests - happy-dom took a different path - and surfaced only in the browser.
 
 ### ⚠️ CRITICAL: Element Naming
 
@@ -95,6 +114,7 @@ BaseChartElement
 | Pie | `<dc-pie-chart>` | No axes, radial rendering |
 | Funnel | `<dc-funnel-chart>` | No axes, chevron rendering |
 | Stage | `<dc-stage-chart>` | No axes, shape-based rendering |
+| Radar | `<dc-radar-chart>` | Polar axes with a radial scale |
 
 **NEVER change `<dc-pie-chart>` to `<dc-chart>` or vice versa.**
 

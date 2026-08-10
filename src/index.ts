@@ -38,6 +38,7 @@ export { Chart } from './chart.js';
 export { FunnelChart } from './funnel-chart.js';
 export { PieChart } from './pie-chart.js';
 export { StageChart } from './stage-chart.js';
+export { RadarChart } from './radar-chart.js';
 export type { ConnectorType } from './stage-chart.js';
 
 // ---------------------------------------------------------------------------
@@ -54,6 +55,8 @@ export { ChartArea } from './chart-area.js';
 export { ChartPoint } from './chart-point.js';
 export { ChartFunnelStage } from './chart-funnel-stage.js';
 export { ChartStage } from './chart-stage.js';
+export { ChartRadarAxis } from './chart-radar-axis.js';
+export { ChartRadarSeries } from './chart-radar-series.js';
 export type { StageShape } from './chart-stage.js';
 export { ChartPieSlice } from './chart-pie-slice.js';
 

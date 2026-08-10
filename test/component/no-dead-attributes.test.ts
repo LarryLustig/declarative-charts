@@ -135,6 +135,22 @@ const ZERO_STAGE = (a: string) =>
  * test. Every context switches on whatever makes the attribute observable —
  * `show-value`, for instance, is the only way a `value-format` can show up.
  */
+/**
+ * A radar chart with three axes and one series. `extraAxis` replaces the first
+ * declared axis so an attribute under test can be applied to it.
+ */
+const RADAR = (firstAxis: string, chartAttrs = '') =>
+  `<dc-radar-chart width="500" height="500" max-value="100" ${chartAttrs}>
+     ${firstAxis}
+     <dc-radar-axis label="Power"></dc-radar-axis>
+     <dc-radar-axis label="Range"></dc-radar-axis>
+     <dc-radar-series label="A">
+       <dc-point value="80" label="Speed"></dc-point>
+       <dc-point value="60" label="Power"></dc-point>
+       <dc-point value="90" label="Range"></dc-point>
+     </dc-radar-series>
+   </dc-radar-chart>`;
+
 const CONTEXT: Record<string, (attrs: string) => string> = {
   'dc-chart': a => `<dc-chart ${a} width="600" height="400" show-value>${BARS}</dc-chart>`,
   'dc-bar': a =>
@@ -180,6 +196,34 @@ const CONTEXT: Record<string, (attrs: string) => string> = {
     `<dc-stage-chart ${a} width="600" height="500"><dc-stage value="100" label="A"></dc-stage><dc-stage value="50" label="B"></dc-stage></dc-stage-chart>`,
   'dc-stage': a =>
     `<dc-stage-chart width="600" height="500"><dc-stage ${a} value="100" label="A"></dc-stage><dc-stage value="50" label="B"></dc-stage></dc-stage-chart>`,
+  'dc-radar-chart': a =>
+    `<dc-radar-chart ${a} width="500" height="500" max-value="100">
+       <dc-radar-axis label="Speed"></dc-radar-axis>
+       <dc-radar-axis label="Power"></dc-radar-axis>
+       <dc-radar-axis label="Range"></dc-radar-axis>
+       <dc-radar-series label="A">
+         <dc-point value="80" label="Speed"></dc-point>
+         <dc-point value="60" label="Power"></dc-point>
+         <dc-point value="90" label="Range"></dc-point>
+       </dc-radar-series>
+     </dc-radar-chart>`,
+  'dc-radar-axis': a => RADAR(`<dc-radar-axis ${a} label="Speed"></dc-radar-axis>`),
+  'dc-radar-series': a =>
+    `<dc-radar-chart width="500" height="500" max-value="100">
+       <dc-radar-axis label="Speed"></dc-radar-axis>
+       <dc-radar-axis label="Power"></dc-radar-axis>
+       <dc-radar-axis label="Range"></dc-radar-axis>
+       <dc-radar-series ${a} label="A">
+         <dc-point value="80" label="Speed"></dc-point>
+         <dc-point value="60" label="Power"></dc-point>
+         <dc-point value="90" label="Range"></dc-point>
+       </dc-radar-series>
+     </dc-radar-chart>`,
+  // A default only shows when the chart does not state the same thing itself,
+  // so this chart deliberately sets nothing beyond its size.
+  'dc-defaults': a =>
+    `<dc-defaults ${a}></dc-defaults>
+     <dc-chart width="600" height="400">${BARS}</dc-chart>`,
   'dc-swatch': a =>
     `<dc-palette id="sw">
        <dc-fill label="Alpha" min-value="0" max-value="40" fill="#f00"></dc-fill>
@@ -203,6 +247,7 @@ const VALUE: Record<string, string> = {
   'size-value': '400', 'stage-size': 'value', 'stage-min-size': '60', 'stage-max-size': '70',
   'stage-height': 'value', 'stage-min-height': '60', 'stage-max-height': '120',
   chevron: '25', 'funnel-factor': '40', 'flat-top': '', 'flat-bottom': '',
+  rings: '3', 'grid-shape': 'circle', 'start-angle': '30', 'counter-clockwise': '',
   overlapping: '', connector: 'arrow', size: '40', index: '1',
 
   // colour and fill
@@ -362,6 +407,29 @@ const CONTEXT_FOR_ELEMENT: Record<string, (attrs: string) => string> = {
        ${BARS}
      </dc-chart>`,
 
+  // `missing` needs an axis with no value for it to decide anything about.
+  'dc-radar-series:missing': a =>
+    `<dc-radar-chart width="500" height="500" max-value="100">
+       <dc-radar-axis label="Speed"></dc-radar-axis>
+       <dc-radar-axis label="Power"></dc-radar-axis>
+       <dc-radar-axis label="Range"></dc-radar-axis>
+       <dc-radar-series ${a} label="A">
+         <dc-point value="80" label="Speed"></dc-point>
+         <dc-point value="60" label="Power"></dc-point>
+         <dc-point label="Range"></dc-point>
+       </dc-radar-series>
+     </dc-radar-chart>`,
+  // A percent format needs percentages on screen to format.
+  'dc-defaults:percent-format': a =>
+    `<dc-defaults ${a} show-percent></dc-defaults>
+     <dc-chart width="600" height="400">${BARS}</dc-chart>`,
+  'dc-radar-axis:min-value': a => RADAR(`<dc-radar-axis ${a} label="Speed"></dc-radar-axis>`),
+  'dc-radar-axis:max-value': a => RADAR(`<dc-radar-axis ${a} label="Speed"></dc-radar-axis>`),
+  'dc-radar-axis:value-format': a =>
+    RADAR(`<dc-radar-axis ${a} label="Speed"></dc-radar-axis>`, 'show-value'),
+  'dc-radar-axis:hidden': a => RADAR(`<dc-radar-axis ${a} label="Speed"></dc-radar-axis>`),
+  'dc-radar-axis:label': a => RADAR(`<dc-radar-axis ${a} label="Speed"></dc-radar-axis>`),
+
   'dc-swatch:label': a =>
     `<dc-palette id="swl">
        <dc-fill label="Alpha" fill="#f00"></dc-fill>
@@ -374,6 +442,8 @@ const CONTEXT_FOR_ELEMENT: Record<string, (attrs: string) => string> = {
 };
 
 const VALUE_FOR_ELEMENT: Record<string, string> = {
+  // 0.25 is the <dc-radar-series> default, so it would restate rather than change.
+  'dc-radar-series:fill-opacity': '0.7',
   // The generic 500 still spans the matched bar, so the match - and therefore
   // the rendering - is unchanged. 65 drops the 70-value bar out of the range.
   'dc-fill:max-value': '65',
@@ -382,6 +452,8 @@ const VALUE_FOR_ELEMENT: Record<string, string> = {
   'dc-bar:show-label': 'false',
   'dc-bar-segment:show-label': 'false',
   'dc-pie-chart:show-value': 'true',
+  // Radar hides values by default, as pie does, so 'false' restates it.
+  'dc-radar-chart:show-value': 'true',
   'dc-pie-chart:show-percent': 'false',
   'dc-pie-slice:show-value': 'true',
   'dc-legend:show-value': 'false',
@@ -443,9 +515,26 @@ const files = declaredByFile();
 
 /** (tag, attribute) pairs to check, from the source. */
 const CASES: Array<{ tag: string; attr: string; file: string }> = [];
+/**
+ * Elements this harness genuinely cannot render a chart from.
+ * `<dc-log-console>` displays another chart's diagnostics and draws no chart of
+ * its own; its single attribute is a selector, already in NO_VISUAL_EFFECT.
+ */
+const NOT_RENDERABLE = new Set(['dc-log-console']);
+
+/** Elements with no context, which is a gap in this file rather than a design. */
+const UNREACHABLE: string[] = [];
 for (const [file, { tag, attrs }] of files) {
   const host = HOST_FOR_FILE[file] ?? tag;
-  if (!host || !CONTEXT[host]) continue;
+  if (!host) continue;
+  if (NOT_RENDERABLE.has(host)) continue;
+  if (!CONTEXT[host]) {
+    // Silently skipping here is how a whole new element escapes the guard: the
+    // radar chart's three elements were invisible to it until this check
+    // existed, because no context named them.
+    UNREACHABLE.push(host);
+    continue;
+  }
   for (const attr of attrs) CASES.push({ tag: host, attr, file });
 }
 
@@ -453,7 +542,7 @@ for (const [file, { tag, attrs }] of files) {
 async function renderShadow(html: string): Promise<string> {
   const wrapper = await fixture<HTMLElement>('div', {}, html);
   const chart = wrapper.querySelector(
-    'dc-chart, dc-pie-chart, dc-funnel-chart, dc-stage-chart, dc-swatch'
+    'dc-chart, dc-pie-chart, dc-funnel-chart, dc-stage-chart, dc-radar-chart, dc-swatch'
   ) as HTMLElement & { updateComplete?: Promise<boolean> };
   for (let i = 0; i < 10; i++) if (await chart.updateComplete) break;
 
@@ -489,6 +578,14 @@ function normaliseInstanceIds(html: string): string {
 }
 
 describe('no attribute is declared and then ignored', () => {
+  it('can render every custom element', () => {
+    expect(
+      UNREACHABLE,
+      `these elements have no entry in CONTEXT, so none of their attributes are ` +
+        `checked: ${UNREACHABLE.join(', ')}`
+    ).toEqual([]);
+  });
+
   it('has a context and a value for every declared attribute', () => {
     const missingValue = [...new Set(CASES.map(c => c.attr))].filter(a => !(a in VALUE));
     expect(

@@ -213,6 +213,26 @@ export const ErrorCode = {
   },
 
   /**
+   * A radar point names an axis that does not exist
+   */
+  RADAR_POINT_NO_AXIS: {
+    code: 'DC111',
+    level: 'warning',
+    path: 'radar.pointNoAxis',
+    message: '{count} point(s) in {series} name an axis that does not exist and were not drawn: {labels}'
+  },
+
+  /**
+   * A radar chart with fewer than three axes
+   */
+  RADAR_TOO_FEW_AXES: {
+    code: 'DC112',
+    level: 'warning',
+    path: 'radar.tooFewAxes',
+    message: 'A radar chart needs at least 3 axes to enclose an area; {count} given'
+  },
+
+  /**
    * Palette not found
    */
   PALETTE_NOT_FOUND: {

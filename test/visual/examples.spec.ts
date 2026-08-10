@@ -66,7 +66,7 @@ test.describe('example pages', () => {
       // Settle on conditions, never on a sleep - see charts.spec.ts.
       await page.evaluate(async () => {
         const charts = Array.from(
-          document.querySelectorAll('dc-chart, dc-pie-chart, dc-funnel-chart, dc-stage-chart')
+          document.querySelectorAll('dc-chart, dc-pie-chart, dc-funnel-chart, dc-stage-chart, dc-radar-chart')
         ) as Array<{ updateComplete?: Promise<boolean> }>;
         for (let i = 0; i < 20; i++) {
           const settled = await Promise.all(charts.map(c => c.updateComplete ?? true));
@@ -78,7 +78,7 @@ test.describe('example pages', () => {
 
       const result = await page.evaluate(() => {
         const charts = Array.from(
-          document.querySelectorAll('dc-chart, dc-pie-chart, dc-funnel-chart, dc-stage-chart')
+          document.querySelectorAll('dc-chart, dc-pie-chart, dc-funnel-chart, dc-stage-chart, dc-radar-chart')
         );
         return {
           total: charts.length,

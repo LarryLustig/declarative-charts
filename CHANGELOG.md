@@ -7,7 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`<dc-radar-chart>`** — several dimensions plotted on radiating scaled axes, with
+  `<dc-radar-axis>` and `<dc-radar-series>`. It is the library's third structural seam: unlike
+  pie, funnel and stage, which map value straight to a size, a radar has a real radial *domain*
+  with a minimum, a maximum and rings
+  - Per-axis `min-value` / `max-value`, so speed in km/h can sit beside power in hp without the
+    polygon implying a relationship between the raw numbers
+  - Axes are optional and inferred from point labels when omitted; declare them for a specific
+    order, a per-axis domain, or an axis no series has data for yet
+  - Reuses `<dc-point>` for the data and `<dc-grid>` for ring styling, and the existing
+    `missing="gap|skip|zero"` policy, which here means break the polygon, join the neighbours,
+    or pull the vertex to the centre
+  - `fill-opacity` defaults to translucent and `show-value` to false: two opaque polygons hide
+    each other, and a radar's message is the silhouette rather than the ten numbers on it
+  - New diagnostics `DC111` (a point names an axis that does not exist) and `DC112` (fewer than
+    three axes)
+
 ### Changed
+
+- `no-dead-attributes.test.ts` **fails when an element has no render context**, instead of
+  skipping it. The three radar elements were invisible to the guard until this existed — and so,
+  it turned out, were `<dc-defaults>`'s twenty attributes, which had never been checked
 
 - **ROADMAP rewritten**, 1,031 lines to 202. The old one listed twenty-odd features by phase and
   its status markers had gone stale — several items marked "Not Started" had shipped. The new one

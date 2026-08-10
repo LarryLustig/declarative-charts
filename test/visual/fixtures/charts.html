@@ -349,6 +349,35 @@
     </dc-chart>
   </div>
 
+  <!-- Radar Chart -->
+  <div id="radar-basic" class="chart-container">
+    <h2>Radar Chart</h2>
+    <dc-radar-chart width="500" height="500" max-value="100">
+      <dc-title>Model Comparison</dc-title>
+      <dc-grid stroke="#e5e7eb"></dc-grid>
+      <dc-radar-axis label="Speed"></dc-radar-axis>
+      <dc-radar-axis label="Power"></dc-radar-axis>
+      <dc-radar-axis label="Range"></dc-radar-axis>
+      <dc-radar-axis label="Comfort"></dc-radar-axis>
+      <dc-radar-axis label="Economy"></dc-radar-axis>
+      <dc-radar-series label="Model A" fill="#2563eb" stroke="#2563eb">
+        <dc-point value="80" label="Speed"></dc-point>
+        <dc-point value="65" label="Power"></dc-point>
+        <dc-point value="90" label="Range"></dc-point>
+        <dc-point value="45" label="Comfort"></dc-point>
+        <dc-point value="70" label="Economy"></dc-point>
+      </dc-radar-series>
+      <dc-radar-series label="Model B" fill="#dc2626" stroke="#dc2626">
+        <dc-point value="55" label="Speed"></dc-point>
+        <dc-point value="90" label="Power"></dc-point>
+        <dc-point value="40" label="Range"></dc-point>
+        <dc-point value="85" label="Comfort"></dc-point>
+        <dc-point value="50" label="Economy"></dc-point>
+      </dc-radar-series>
+      <dc-legend position="bottom"></dc-legend>
+    </dc-radar-chart>
+  </div>
+
   <!-- Stage Chart - Basic -->
   <div id="stage-basic" class="chart-container">
     <h2>Stage Chart - Basic</h2>

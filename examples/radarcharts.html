@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radar Charts - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+</head>
+<body>
+    <h1>Radar Charts</h1>
+    <p>Several dimensions plotted on radiating scaled axes, for comparing profiles rather than magnitudes</p>
+
+    <nav></nav>
+
+    <div class="example">
+        <h2>Basic Radar Chart</h2>
+        <p>Declare one <code>&lt;dc-radar-axis&gt;</code> per dimension and one <code>&lt;dc-radar-series&gt;</code> per thing being compared. Points bind to axes by <code>label</code>, so the order you write them in does not matter.</p>
+
+        <div class="grid">
+            <div>
+                <h3>One Series</h3>
+                <pre><code>&lt;dc-radar-chart width="500" height="500" max-value="100"&gt;
+  &lt;dc-radar-axis label="Speed"&gt;&lt;/dc-radar-axis&gt;
+  &lt;dc-radar-axis label="Power"&gt;&lt;/dc-radar-axis&gt;
+  &lt;dc-radar-axis label="Range"&gt;&lt;/dc-radar-axis&gt;
+  &lt;dc-radar-axis label="Comfort"&gt;&lt;/dc-radar-axis&gt;
+  &lt;dc-radar-series label="Model A"&gt;
+    &lt;dc-point value="80" label="Speed"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="65" label="Power"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="90" label="Range"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="45" label="Comfort"&gt;&lt;/dc-point&gt;
+  &lt;/dc-radar-series&gt;
+&lt;/dc-radar-chart&gt;</code></pre>
+                <dc-radar-chart width="500" height="500" max-value="100">
+                    <dc-radar-axis label="Speed"></dc-radar-axis>
+                    <dc-radar-axis label="Power"></dc-radar-axis>
+                    <dc-radar-axis label="Range"></dc-radar-axis>
+                    <dc-radar-axis label="Comfort"></dc-radar-axis>
+                    <dc-radar-series label="Model A">
+                        <dc-point value="80" label="Speed"></dc-point>
+                        <dc-point value="65" label="Power"></dc-point>
+                        <dc-point value="90" label="Range"></dc-point>
+                        <dc-point value="45" label="Comfort"></dc-point>
+                    </dc-radar-series>
+                </dc-radar-chart>
+            </div>
+
+            <div>
+                <h3>Comparing Two</h3>
+                <pre><code>&lt;dc-radar-chart width="500" height="500" max-value="100"&gt;
+  &lt;!-- same axes --&gt;
+  &lt;dc-radar-series label="Model A"&gt;...&lt;/dc-radar-series&gt;
+  &lt;dc-radar-series label="Model B"&gt;...&lt;/dc-radar-series&gt;
+  &lt;dc-legend position="bottom"&gt;&lt;/dc-legend&gt;
+&lt;/dc-radar-chart&gt;</code></pre>
+                <dc-radar-chart width="500" height="500" max-value="100">
+                    <dc-radar-axis label="Speed"></dc-radar-axis>
+                    <dc-radar-axis label="Power"></dc-radar-axis>
+                    <dc-radar-axis label="Range"></dc-radar-axis>
+                    <dc-radar-axis label="Comfort"></dc-radar-axis>
+                    <dc-radar-series label="Model A">
+                        <dc-point value="80" label="Speed"></dc-point>
+                        <dc-point value="65" label="Power"></dc-point>
+                        <dc-point value="90" label="Range"></dc-point>
+                        <dc-point value="45" label="Comfort"></dc-point>
+                    </dc-radar-series>
+                    <dc-radar-series label="Model B">
+                        <dc-point value="55" label="Speed"></dc-point>
+                        <dc-point value="90" label="Power"></dc-point>
+                        <dc-point value="40" label="Range"></dc-point>
+                        <dc-point value="85" label="Comfort"></dc-point>
+                    </dc-radar-series>
+                    <dc-legend position="bottom"></dc-legend>
+                </dc-radar-chart>
+            </div>
+        </div>
+        <p>Series are translucent by default. Two opaque polygons would hide each other, and comparison is the only reason to draw a second one.</p>
+    </div>
+
+    <div class="example">
+        <h2>Per-Axis Scales</h2>
+        <p>Give an axis its own <code>min-value</code> and <code>max-value</code> when its units differ from the rest. This is what makes a radar honest: one shared scale is only meaningful when every dimension measures the same kind of thing, which is rare.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Independent Domains</h3>
+                <pre><code>&lt;dc-radar-chart width="500" height="500" max-value="100"&gt;
+  &lt;dc-radar-axis label="Speed (km/h)" max-value="250"&gt;&lt;/dc-radar-axis&gt;
+  &lt;dc-radar-axis label="Power (hp)" max-value="500"&gt;&lt;/dc-radar-axis&gt;
+  &lt;dc-radar-axis label="Economy (mpg)" max-value="60"&gt;&lt;/dc-radar-axis&gt;
+  &lt;dc-radar-series label="Model A"&gt;
+    &lt;dc-point value="200" label="Speed (km/h)"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="400" label="Power (hp)"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="30" label="Economy (mpg)"&gt;&lt;/dc-point&gt;
+  &lt;/dc-radar-series&gt;
+&lt;/dc-radar-chart&gt;</code></pre>
+                <dc-radar-chart width="500" height="500" max-value="100">
+                    <dc-radar-axis label="Speed (km/h)" max-value="250"></dc-radar-axis>
+                    <dc-radar-axis label="Power (hp)" max-value="500"></dc-radar-axis>
+                    <dc-radar-axis label="Economy (mpg)" max-value="60"></dc-radar-axis>
+                    <dc-radar-series label="Model A">
+                        <dc-point value="200" label="Speed (km/h)"></dc-point>
+                        <dc-point value="400" label="Power (hp)"></dc-point>
+                        <dc-point value="30" label="Economy (mpg)"></dc-point>
+                    </dc-radar-series>
+                </dc-radar-chart>
+            </div>
+
+            <div>
+                <h3>Values Shown</h3>
+                <pre><code>&lt;dc-radar-chart width="500" height="500"
+                max-value="100" show-value
+                value-format="number 0"&gt;
+  &lt;!-- same axes and series as above --&gt;
+&lt;/dc-radar-chart&gt;</code></pre>
+                <dc-radar-chart width="500" height="500" max-value="100" show-value value-format="number 0">
+                    <dc-radar-axis label="Speed"></dc-radar-axis>
+                    <dc-radar-axis label="Power"></dc-radar-axis>
+                    <dc-radar-axis label="Range"></dc-radar-axis>
+                    <dc-radar-axis label="Comfort"></dc-radar-axis>
+                    <dc-radar-series label="Model A">
+                        <dc-point value="80" label="Speed"></dc-point>
+                        <dc-point value="65" label="Power"></dc-point>
+                        <dc-point value="90" label="Range"></dc-point>
+                        <dc-point value="45" label="Comfort"></dc-point>
+                    </dc-radar-series>
+                </dc-radar-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Grid and Orientation</h2>
+        <p>Rings can follow the axes as polygons or be drawn as circles, and the whole chart can be rotated or reversed.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Circular Rings</h3>
+                <pre><code>&lt;dc-radar-chart width="500" height="500" max-value="100"
+                grid-shape="circle" rings="4"&gt;
+  &lt;dc-grid stroke="#cbd5e1" stroke-dasharray="dotted"&gt;&lt;/dc-grid&gt;
+  &lt;!-- same axes and series as above --&gt;
+&lt;/dc-radar-chart&gt;</code></pre>
+                <dc-radar-chart width="500" height="500" max-value="100" grid-shape="circle" rings="4">
+                    <dc-grid stroke="#cbd5e1" stroke-dasharray="dotted"></dc-grid>
+                    <dc-radar-axis label="Speed"></dc-radar-axis>
+                    <dc-radar-axis label="Power"></dc-radar-axis>
+                    <dc-radar-axis label="Range"></dc-radar-axis>
+                    <dc-radar-axis label="Comfort"></dc-radar-axis>
+                    <dc-radar-axis label="Economy"></dc-radar-axis>
+                    <dc-radar-series label="Model A">
+                        <dc-point value="80" label="Speed"></dc-point>
+                        <dc-point value="65" label="Power"></dc-point>
+                        <dc-point value="90" label="Range"></dc-point>
+                        <dc-point value="45" label="Comfort"></dc-point>
+                        <dc-point value="70" label="Economy"></dc-point>
+                    </dc-radar-series>
+                </dc-radar-chart>
+            </div>
+
+            <div>
+                <h3>Rotated</h3>
+                <pre><code>&lt;dc-radar-chart width="500" height="500" max-value="100"
+                start-angle="-54"&gt;
+  &lt;!-- same axes and series as above --&gt;
+&lt;/dc-radar-chart&gt;</code></pre>
+                <dc-radar-chart width="500" height="500" max-value="100" start-angle="-54">
+                    <dc-radar-axis label="Speed"></dc-radar-axis>
+                    <dc-radar-axis label="Power"></dc-radar-axis>
+                    <dc-radar-axis label="Range"></dc-radar-axis>
+                    <dc-radar-axis label="Comfort"></dc-radar-axis>
+                    <dc-radar-axis label="Economy"></dc-radar-axis>
+                    <dc-radar-series label="Model A">
+                        <dc-point value="80" label="Speed"></dc-point>
+                        <dc-point value="65" label="Power"></dc-point>
+                        <dc-point value="90" label="Range"></dc-point>
+                        <dc-point value="45" label="Comfort"></dc-point>
+                        <dc-point value="70" label="Economy"></dc-point>
+                    </dc-radar-series>
+                </dc-radar-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>Missing Values</h2>
+        <p>A dimension a series has no reading for uses the same <code>missing</code> policy as lines and areas &mdash; and it means the corresponding thing here.</p>
+
+        <div class="grid">
+            <div>
+                <h3>gap (default)</h3>
+                <pre><code>&lt;dc-radar-series label="Model B" missing="gap"&gt;
+  &lt;dc-point value="55" label="Speed"&gt;&lt;/dc-point&gt;
+  &lt;dc-point value="90" label="Power"&gt;&lt;/dc-point&gt;
+  &lt;dc-point label="Range"&gt;&lt;/dc-point&gt;
+  &lt;dc-point value="85" label="Comfort"&gt;&lt;/dc-point&gt;
+&lt;/dc-radar-series&gt;</code></pre>
+                <dc-radar-chart width="500" height="500" max-value="100">
+                    <dc-radar-axis label="Speed"></dc-radar-axis>
+                    <dc-radar-axis label="Power"></dc-radar-axis>
+                    <dc-radar-axis label="Range"></dc-radar-axis>
+                    <dc-radar-axis label="Comfort"></dc-radar-axis>
+                    <dc-radar-series label="Model B" missing="gap">
+                        <dc-point value="55" label="Speed"></dc-point>
+                        <dc-point value="90" label="Power"></dc-point>
+                        <dc-point label="Range"></dc-point>
+                        <dc-point value="85" label="Comfort"></dc-point>
+                    </dc-radar-series>
+                </dc-radar-chart>
+            </div>
+
+            <div>
+                <h3>skip</h3>
+                <pre><code>&lt;dc-radar-series label="Model B" missing="skip"&gt;
+  &lt;!-- same points --&gt;
+&lt;/dc-radar-series&gt;</code></pre>
+                <dc-radar-chart width="500" height="500" max-value="100">
+                    <dc-radar-axis label="Speed"></dc-radar-axis>
+                    <dc-radar-axis label="Power"></dc-radar-axis>
+                    <dc-radar-axis label="Range"></dc-radar-axis>
+                    <dc-radar-axis label="Comfort"></dc-radar-axis>
+                    <dc-radar-series label="Model B" missing="skip">
+                        <dc-point value="55" label="Speed"></dc-point>
+                        <dc-point value="90" label="Power"></dc-point>
+                        <dc-point label="Range"></dc-point>
+                        <dc-point value="85" label="Comfort"></dc-point>
+                    </dc-radar-series>
+                </dc-radar-chart>
+            </div>
+        </div>
+        <p><strong><code>zero</code> is available and rarely right.</strong> Pulling the vertex to the centre changes the whole silhouette, which is the chart's entire message &mdash; it lies more loudly here than it does on a line.</p>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+</body>
+</html>

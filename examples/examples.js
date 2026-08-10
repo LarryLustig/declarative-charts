@@ -32,6 +32,7 @@ const NAV_CONFIG = {
         },
         { href: 'funnelcharts.html', label: 'Funnel Charts' },
         { href: 'stagecharts.html', label: 'Stage Charts' },
+        { href: 'radarcharts.html', label: 'Radar Charts' },
     ],
     // Minor nav: Features and configuration options
     minor: [

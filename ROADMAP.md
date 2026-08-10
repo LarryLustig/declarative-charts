@@ -82,10 +82,17 @@ gate every label passes through, so there is one place to put it.
 
 **Cost:** small to moderate, and it needs `measureText`, which exists.
 
-### 4. Radar chart — as the scaled-polar exemplar
+### 4. Radar chart — as the scaled-polar exemplar ✅ BUILT
 
-The one item here that is not a capability gap. See the next section for why it
-is on the release list rather than the deferred one.
+The one item here that was not a capability gap. See the next section for why it
+was on the release list rather than the deferred one.
+
+**It answered its question.** The scale machinery *can* leave the cartesian grid,
+but not by reusing `AxisChart.getNiceRange()` — that expresses zero as a fraction
+from the top of a rectangle, which is meaningless on a spoke. What transferred
+was `calculateNiceTicks()` in `chart-utils.ts`, already pure. So the seam holds,
+and the lesson for the next non-cartesian chart is to reach for the pure helpers
+rather than the base class.
 
 ---
 

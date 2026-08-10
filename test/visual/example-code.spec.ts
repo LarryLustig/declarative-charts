@@ -33,7 +33,7 @@ test.describe('example code blocks', () => {
       await page.goto(`/examples/${file}`, { waitUntil: 'networkidle' });
 
       const found = await page.evaluate(() => {
-        const CHART_TAGS = ['DC-CHART', 'DC-PIE-CHART', 'DC-FUNNEL-CHART', 'DC-STAGE-CHART'];
+        const CHART_TAGS = ['DC-CHART', 'DC-PIE-CHART', 'DC-FUNNEL-CHART', 'DC-STAGE-CHART', 'DC-RADAR-CHART'];
 
         /**
          * Attributes that are page housekeeping or written back by Lit, not
