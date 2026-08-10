@@ -48,9 +48,29 @@ export class ChartPoint extends BaseFilledShape {
   @property({ converter: optionalNumberConverter })
   override value = NaN;
 
+  /**
+   * Position along the category axis, as a number.
+   *
+   * Set this and the axis becomes numeric: the point sits where its `x` falls
+   * rather than where its turn comes. That is what makes a scatter plot
+   * possible, and it applies to lines and areas too — the same points, joined.
+   *
+   * The pair is `x` and `value`, not `x` and `y`. Every data element in this
+   * library calls its magnitude `value`, and it carries the formatting,
+   * `show-value` thresholds and missing-data handling with it; a `y` alias
+   * would be a second spelling for one concept.
+   */
+  @property({ converter: optionalNumberConverter })
+  x = NaN;
+
   /** True when this point carries no data. */
   get isMissing(): boolean {
     return !Number.isFinite(this.value);
+  }
+
+  /** True when this point states a numeric position of its own. */
+  get hasX(): boolean {
+    return Number.isFinite(this.x);
   }
 
   // Override showValue to default to true for points (inherited from BaseChartElement)

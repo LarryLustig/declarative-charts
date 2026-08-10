@@ -294,6 +294,14 @@ test.describe('Radar Charts', () => {
     const container = await getChartContainer(page, 'radar-basic');
     await expect(container).toHaveScreenshot('radar-basic.png');
   });
+
+  test('scatter plot with two series', async ({ page }) => {
+    await page.goto(`${FIXTURES_URL}?chart=scatter-basic`);
+    await waitForChartRender(page);
+
+    const container = await getChartContainer(page, 'scatter-basic');
+    await expect(container).toHaveScreenshot('scatter-basic.png');
+  });
 });
 
 test.describe('Chart Features', () => {

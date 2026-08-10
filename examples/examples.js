@@ -22,6 +22,7 @@ const NAV_CONFIG = {
         },
         { href: 'areacharts.html', label: 'Area Charts' },
         { href: 'bubblecharts.html', label: 'Bubble Charts' },
+        { href: 'scatterplots.html', label: 'Scatter Plots' },
         { href: 'combo-charts.html', label: 'Combo Charts' },
         {
             label: 'Pie Charts',

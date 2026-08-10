@@ -28,27 +28,41 @@ a plan when it is really a wish.
 
 ## Required for 1.0
 
-### 1. Scatter / XY plots
+### 1. Scatter / XY plots — **done**
 
-**Why:** it is the only *shape of data* the library cannot express. Every chart
-here plots a value against a category — a bar per region, a point per date. None
-plots a value against another value. Correlation is an ordinary question and the
-answer today is "use a different library".
+**Why:** it was the only *shape of data* the library could not express. Every
+other chart plots a value against a category — a bar per region, a point per
+date. None plotted a value against another value, and correlation is an ordinary
+question.
 
 `<dc-bubble>` looks like it should cover this and does not: it takes `value` and
-`size-value` and positions by index, so the x axis is still categorical.
+`size-value` and positions by index, so its x axis is still categorical.
 
 ```html
 <dc-chart>
-  <dc-axis position="bottom" type="value"></dc-axis>
-  <dc-point x="10" y="20" label="A"></dc-point>
-  <dc-point x="15" y="35" label="B"></dc-point>
+  <dc-axis position="bottom"><dc-title>Dose (mg)</dc-title></dc-axis>
+  <dc-scatter label="Control">
+    <dc-point x="10" value="20"></dc-point>
+    <dc-point x="15" value="35"></dc-point>
+  </dc-scatter>
 </dc-chart>
 ```
 
-**Cost:** moderate, and no new base class. `AxisChart` already owns value axes;
-this needs a numeric category axis and an `x` on `<dc-point>`. The `type="value"`
-path on a category axis is the piece that does not exist yet.
+Shipped as sketched — no new base class, and `AxisChart` needed only a numeric
+category axis. Two things came out differently:
+
+- **`x` + `value`, not `x` + `y`.** `value` is the universal magnitude name in
+  this library and already carries formatting, missing-value policy and the
+  show/hide conditions. A `y` alias would have been a second name for the same
+  thing on the same element.
+- **No `type="value"` required.** The axis becomes numeric because a point
+  states an `x`. Requiring a second attribute to activate the first is exactly
+  the class of silent misconfiguration this project keeps finding in its own
+  code.
+
+A `<dc-scatter>` series wraps the points, rather than loose `<dc-point>`
+children of the chart: a scatter usually compares groups, and a group needs a
+name for the legend and a colour of its own.
 
 ### 2. Reference lines and bands
 

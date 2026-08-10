@@ -1441,6 +1441,9 @@ Defines a single line in a line chart. Contains multiple `<dc-point>` elements.
 **Child Elements:**
 - `<dc-point>` - Individual points (one or more)
 
+For unconnected points positioned by a numeric x rather than by category, see
+[`<dc-scatter>`](#dc-scatter).
+
 ### `<dc-area>`
 
 Defines a filled area in an area chart. Contains multiple `<dc-point>` elements.
@@ -1509,14 +1512,79 @@ Overlapping areas (year-over-year comparison):
 
 ### `<dc-point>`
 
-Defines a single point in a line.
+Defines a single point in a line, area, radar series, or scatter series.
 
 **Attributes:**
 - `value` (number) - The point's value (required)
+- `x` (number) - Position along a numeric x-axis. Read by `<dc-scatter>` only; a line, area or radar series places its points by category or axis instead
 - `label` (string) - Label displayed below the point
 - `show-value` (boolean|string) - Whether to display the value for this point
 - `show-percent` (boolean|string) - Whether to display the percentage for this point
 - `shape` (string) - Shape for this point
+
+Omitting `value` leaves the point missing rather than zero, so an absent reading
+stays distinguishable from a real zero — see [Missing Values](#missing-values).
+
+### `<dc-scatter>`
+
+A set of unconnected points — one series of a scatter plot. A container for
+`<dc-point>` elements, the way `<dc-line>` is, with two differences: nothing is
+drawn between the points, and each point states its own `x`.
+
+A series rather than loose points because a scatter usually compares groups, and
+a group needs a name for the legend and a colour of its own.
+
+**Attributes:**
+- `label` (string) - Series name, used by the legend
+- `fill` (string) - Marker colour
+- `fill-opacity` (number) - Marker opacity (default: 1). Lower it when the cloud is dense and points overlap
+- `shape` (string) - Marker shape: "circle" (default), "square", "triangle", "diamond", "cross", "plus", "star" — the same vocabulary `point-shape` uses
+- `size` (number) - Marker radius in viewBox units (default: 4)
+- Plus `pattern`, `stroke`, `value-format`, `auto-popup`, `href`, `target`, `hidden`
+
+**Child Elements:**
+- `<dc-point>` - One per reading; `x` and `value` are its two coordinates
+
+**Example:**
+
+```html
+<dc-chart width="600" height="400">
+  <dc-axis position="bottom"><dc-title>Dose (mg)</dc-title></dc-axis>
+  <dc-axis position="left"><dc-title>Response</dc-title></dc-axis>
+
+  <dc-scatter label="Control" fill="#2563eb">
+    <dc-point x="10" value="22"></dc-point>
+    <dc-point x="15" value="35"></dc-point>
+    <dc-point x="40" value="30"></dc-point>
+  </dc-scatter>
+
+  <dc-scatter label="Treated" fill="#dc2626" shape="triangle" size="6">
+    <dc-point x="12" value="40"></dc-point>
+    <dc-point x="30" value="55"></dc-point>
+  </dc-scatter>
+</dc-chart>
+```
+
+**The x-axis becomes numeric on its own.** A chart containing any point with an
+`x` scales its category axis to that domain and draws numeric ticks, rather than
+one slot per element. No `type="value"` is needed — an `x` silently ignored
+because a second attribute was missing is exactly the failure this library tries
+not to have. Declaring the axis is still worth doing for its title, and for
+`min-value`, `max-value`, `tick-count` and the rest, which all apply:
+
+```html
+<dc-axis position="bottom" type="value" min-value="0" max-value="50"
+         tick-interval="10" value-format="number 0"></dc-axis>
+```
+
+Scatter series appear in the legend as circles and are **dimensionless** — a
+cloud of readings has no single aggregate value, so none is invented. Screen
+readers get the correlation instead: the description reports direction and
+strength (Pearson's r, read conventionally at 0.7 / 0.4 / 0.2), because a
+scatter is read for its shape rather than its individual readings.
+
+Points sit above areas and beneath lines, so a fitted `<dc-line>` drawn over the
+same chart lies on top of the cloud.
 
 ### `<dc-bubble>`
 

@@ -55,6 +55,7 @@ export { ChartArea } from './chart-area.js';
 export { ChartPoint } from './chart-point.js';
 export { ChartFunnelStage } from './chart-funnel-stage.js';
 export { ChartStage } from './chart-stage.js';
+export { ChartScatter } from './chart-scatter.js';
 export { ChartRadarAxis } from './chart-radar-axis.js';
 export { ChartRadarSeries } from './chart-radar-series.js';
 export type { StageShape } from './chart-stage.js';

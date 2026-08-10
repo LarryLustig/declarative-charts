@@ -9,6 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`<dc-scatter>`** — unconnected points positioned by two numbers, inside the existing
+  `<dc-chart>`. It is the one *shape of data* the library could not express: every other chart
+  plots a value against a category, and none plotted a value against another value
+  - `<dc-point>` gains `x`. A chart holding any point with an `x` scales its category axis to
+    that domain and draws numeric ticks — no `type="value"` needed, because an attribute
+    silently ignored for want of a second one is the failure mode this library keeps finding
+  - `x` + `value`, not `x` + `y`: `value` is the universal magnitude name here and already
+    carries formatting, missing-value handling and the show/hide conditions. A `y` alias would
+    have split the API in half
+  - Per-series `shape`, `size` and `fill-opacity`; `shape` reuses the `point-shape` vocabulary,
+    so a scatter and a line's markers are drawn from one place
+  - The domain rounds outward to whole ticks, as the value axis does, so the extreme readings
+    sit inside the plot rather than straddling the axis lines. `min-value`, `max-value`,
+    `tick-interval` and `range-padding` on `<dc-axis>` all apply
+  - Screen readers get the **correlation** rather than a list of readings — direction and
+    strength from Pearson's r, read at the conventional 0.7 / 0.4 / 0.2 — because a scatter is
+    read for its shape. New pure helpers `correlation()` and `analyzeScatter()` in
+    `accessibility/insights.ts`
+  - Legend entries are dimensionless, and scatter values stay out of the percentage denominator:
+    a cloud of readings has no share of a whole, and including it would quietly change the
+    percentages on the bars beside it
+
 - **`<dc-radar-chart>`** — several dimensions plotted on radiating scaled axes, with
   `<dc-radar-axis>` and `<dc-radar-series>`. It is the library's third structural seam: unlike
   pie, funnel and stage, which map value straight to a size, a radar has a real radial *domain*

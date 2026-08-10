@@ -3,13 +3,15 @@ import { svg, SVGTemplateResult } from 'lit';
 import { AxisChart, type ValueRange } from './axis-chart.js';
 import { type ShowCondition, type FocusableElement, type AnimatableChartType } from './base-chart.js';
 import { ErrorCode } from './errors.js';
-import { analyzeLines, analyzeBars, analyzeBubbles, type LineData as InsightLineData, type BarData as InsightBarData, type BubbleData as InsightBubbleData } from './accessibility/index.js';
+import { analyzeLines, analyzeBars, analyzeBubbles, analyzeScatter, type LineData as InsightLineData, type BarData as InsightBarData, type BubbleData as InsightBubbleData } from './accessibility/index.js';
 import type { LegendItem, DimensionlessLegendItem } from './chart-legend.js';
 import type { ChartBar } from './chart-bar.js';
 import type { ChartBarGroup } from './chart-bar-group.js';
 import type { ChartBarSegment } from './chart-bar-segment.js';
 import type { ChartLine, CurveFit } from './chart-line.js';
 import type { ChartPoint } from './chart-point.js';
+import type { ChartScatter } from './chart-scatter.js';
+import { calculateNiceTicks } from './chart-utils.js';
 import type { ChartBubble } from './chart-bubble.js';
 import type { ChartPopup } from './chart-popup.js';
 import type { ChartArea } from './chart-area.js';
@@ -98,6 +100,34 @@ interface UngroupedBarData extends BarData {
 }
 
 type BarOrGroup = BarGroupData | UngroupedBarData;
+
+/** One marker in a scatter series. */
+interface ScatterPoint {
+  x: number;
+  value: number;
+  label: string;
+  fill?: string;
+  href?: string;
+  target?: string;
+  autoPopup?: boolean;
+  valueFormat?: string;
+  element: ChartPoint;
+}
+
+/** One scatter series. */
+interface ScatterData {
+  label: string;
+  fill: string;
+  originalFill: string;
+  fillOpacity: number;
+  shape: string;
+  size: number;
+  autoPopup?: boolean;
+  element: ChartScatter;
+  passthroughAttrs?: Record<string, string>;
+  paint?: Record<string, string>;
+  points: ScatterPoint[];
+}
 
 interface FlattenedBar extends BarData {
   groupLabel?: string;
@@ -400,6 +430,144 @@ export class Chart extends AxisChart {
   }
 
   // ============================================================================
+  // Scatter
+  // ============================================================================
+
+  /**
+   * Scatter series, with each point's numeric position resolved.
+   *
+   * Cached per render, like the other extractions: this is reached from inside
+   * per-point render loops and from the padding calculation.
+   */
+  private getScatterSeries(): ScatterData[] {
+    return this.cachePerRender('scatter', () => this.extractScatterSeries());
+  }
+
+  private extractScatterSeries(): ScatterData[] {
+    const elements = Array.from(this.querySelectorAll('dc-scatter'))
+      .filter(el => !el.hasAttribute('hidden')) as ChartScatter[];
+    if (elements.length === 0) return [];
+
+    const resolved = this.resolveFillsWithPatterns(
+      elements.map(el => ({
+        fill: el.fill || undefined,
+        label: el.label,
+        pattern: el.pattern,
+        patternStroke: el.patternStroke,
+        patternFill: el.patternFill,
+        patternScale: el.patternScale
+      }))
+    );
+
+    return elements.map((el, index) => {
+      const points = Array.from(el.querySelectorAll('dc-point')) as ChartPoint[];
+      return {
+        label: el.label,
+        fill: resolved[index].fill,
+        originalFill: resolved[index].originalFill,
+        fillOpacity: el.fillOpacity ?? 1,
+        shape: el.shape || 'circle',
+        size: el.size ?? 4,
+        autoPopup: el.autoPopup,
+        element: el,
+        passthroughAttrs: el.getPassthroughAttributes(
+          new Set(['label', 'fill', 'fill-opacity', 'shape', 'size'])
+        ),
+        paint: this.getPalettePaint(el),
+        points: points
+          .filter(pt => Number.isFinite(pt.value))
+          .map(pt => ({
+            x: pt.x,
+            value: pt.value,
+            label: pt.label,
+            fill: pt.fill || undefined,
+            href: pt.href || undefined,
+            target: pt.target || undefined,
+            autoPopup: pt.autoPopup,
+            valueFormat: pt.valueFormat,
+            element: pt
+          }))
+      };
+    });
+  }
+
+  /**
+   * Whether any point states a numeric `x`, making the category axis numeric.
+   *
+   * Inferred rather than requiring `type="value"` on the axis: an `x` that a
+   * chart silently ignored because a second attribute was missing is precisely
+   * the failure this project keeps finding. Declaring the axis type still
+   * works, and is worth doing for the axis title.
+   */
+  protected hasNumericX(): boolean {
+    return this.cachePerRender('hasNumericX', () => {
+      const points = Array.from(this.querySelectorAll('dc-point')) as ChartPoint[];
+      return points.some(pt => pt.hasX);
+    });
+  }
+
+  /** Domain of the numeric category axis, or null when there is not one. */
+  protected getXRange(): { min: number; max: number } | null {
+    return this.cachePerRender('xRange', () => {
+      if (!this.hasNumericX()) return null;
+
+      const xs = (Array.from(this.querySelectorAll('dc-point')) as ChartPoint[])
+        .filter(pt => pt.hasX && Number.isFinite(pt.value))
+        .map(pt => pt.x);
+      if (xs.length === 0) return null;
+
+      const config = this.getAxisConfig(this.getCategoryAxisPosition());
+      const hasMin = typeof config.minValue === 'number';
+      const hasMax = typeof config.maxValue === 'number';
+      let min = hasMin ? (config.minValue as number) : Math.min(...xs);
+      let max = hasMax ? (config.maxValue as number) : Math.max(...xs);
+
+      // A single x, or every x identical, gives a zero-width domain that would
+      // stack the whole series on one pixel. Widen it around the value.
+      if (max <= min) return { min: min - 1, max: max + 1 };
+
+      // Round the ends outward to whole ticks, the way the value axis does.
+      // Without it the domain ends exactly at the extreme readings, so the
+      // outermost markers straddle the axis lines - and the tick labels there
+      // are whatever the data happened to be rather than round numbers.
+      const ticks = calculateNiceTicks(min, max, this.gridSteps);
+      const step = ticks.length > 1 ? ticks[1] - ticks[0] : 0;
+      if (step > 0) {
+        if (!hasMin) min = Math.floor(min / step) * step;
+        if (!hasMax) max = Math.ceil(max / step) * step;
+      }
+
+      // `range-padding` then applies on top, as it does on a value axis, and
+      // only where the bound was not stated outright.
+      const rangePadding = config.rangePadding ?? 0;
+      if (rangePadding > 0) {
+        const span = (max - min) * rangePadding;
+        if (!hasMin) min -= span;
+        if (!hasMax) max += span;
+      }
+
+      return { min, max };
+    });
+  }
+
+  /** X coordinate for a numeric position, or null when the axis is categorical. */
+  protected getNumericX(x: number, padding: { left: number }, chartWidth: number): number | null {
+    const range = this.getXRange();
+    if (!range || !Number.isFinite(x)) return null;
+    return padding.left + ((x - range.min) / (range.max - range.min)) * chartWidth;
+  }
+
+  private getScatterMaxValue(): number {
+    const values = this.getScatterSeries().flatMap(s => s.points.map(p => p.value));
+    return values.length > 0 ? Math.max(...values) : -Infinity;
+  }
+
+  private getScatterMinValue(): number {
+    const values = this.getScatterSeries().flatMap(s => s.points.map(p => p.value));
+    return values.length > 0 ? Math.min(...values) : Infinity;
+  }
+
+  // ============================================================================
   // AxisChart Abstract Method Implementations
   // ============================================================================
 
@@ -408,7 +576,8 @@ export class Chart extends AxisChart {
     const lineMax = this.getLineMaxValue();
     const bubbleMax = this.getBubbleMaxValue();
     const areaMax = this.getAreaMaxValue();
-    return Math.max(barMax, lineMax, bubbleMax, areaMax);
+    const scatterMax = this.getScatterMaxValue();
+    return Math.max(barMax, lineMax, bubbleMax, areaMax, scatterMax);
   }
 
   protected getMinValue(): number {
@@ -416,8 +585,9 @@ export class Chart extends AxisChart {
     const lineMin = this.getLineMinValue();
     const bubbleMin = this.getBubbleMinValue();
     const areaMin = this.getAreaMinValue();
+    const scatterMin = this.getScatterMinValue();
     // Return the minimum, but don't go below 0 if all values are positive
-    return Math.min(barMin, lineMin, bubbleMin, areaMin);
+    return Math.min(barMin, lineMin, bubbleMin, areaMin, scatterMin);
   }
 
   private getBarMaxValue(): number {
@@ -484,7 +654,10 @@ export class Chart extends AxisChart {
     const lineValues = this.getLines().flatMap(line => line.points.map(p => p.value)).filter(Number.isFinite);
     const bubbleValues = this.getBubbles().map(b => b.value);
     const areaValues = this.getAreas().flatMap(area => area.points.map(p => p.value)).filter(Number.isFinite);
-    // Include stacked area maximums for proper axis scaling
+    // Scatter values are deliberately absent: this feeds the percentage
+    // denominator, and a cloud of readings has no share of a whole. Including
+    // them would quietly change the percentages shown on the bars beside them.
+    // Axis scaling comes from getMaxValue()/getMinValue(), which do count them.
     const stackedMaximums = this.getAreaStackedMaximums();
     return [...barValues, ...lineValues, ...bubbleValues, ...areaValues, ...stackedMaximums];
   }
@@ -1776,6 +1949,7 @@ export class Chart extends AxisChart {
     this.applyPassthroughAttributes(this.getLines());
     this.applyPassthroughAttributes(this.getAreas());
     this.applyPassthroughAttributes(this.getBubbles());
+    this.applyPassthroughAttributes(this.getScatterSeries());
   }
 
   protected renderChart(): SVGTemplateResult {
@@ -1787,9 +1961,11 @@ export class Chart extends AxisChart {
     const lines = this.getLines();
     const areas = this.getAreas();
     const bubbles = this.getBubbles();
+    const scatter = this.getScatterSeries();
     const structure = this.getBarStructure();
 
-    if (bars.length === 0 && lines.length === 0 && areas.length === 0 && bubbles.length === 0) {
+    if (bars.length === 0 && lines.length === 0 && areas.length === 0 && bubbles.length === 0
+        && scatter.length === 0) {
       // DC001/DC002 are emitted from the empty-state path in BaseChart, which
       // replaces this method entirely when there is no data - see
       // getEmptyStateDiagnostic().
@@ -1859,6 +2035,9 @@ export class Chart extends AxisChart {
       <!-- Areas (rendered after bars but before lines) -->
       ${areas.length > 0 ? this.renderAreas(areas, padding, chartWidth, chartHeight, range, total, deferredLabels, labelPositions) : ''}
 
+      <!-- Scatter markers (individual readings, beneath any fitted line) -->
+      ${scatter.length > 0 ? this.renderScatter(scatter, padding, chartWidth, chartHeight, range) : ''}
+
       <!-- Bubbles (rendered after areas but before lines) -->
       ${bubbles.length > 0 ? this.renderBubbles(bubbles, padding, chartWidth, chartHeight, range, total, deferredLabels) : ''}
 
@@ -1889,7 +2068,9 @@ export class Chart extends AxisChart {
       )}
 
       <!-- Category axis labels -->
-      ${this.renderCategoryAxisLabels(bars, lines, bubbles, padding, chartWidth, chartHeight, structure, range)}
+      ${this.hasNumericX()
+        ? this.renderNumericCategoryLabels(padding, chartWidth, chartHeight)
+        : this.renderCategoryAxisLabels(bars, lines, bubbles, padding, chartWidth, chartHeight, structure, range)}
 
       <!-- Axis Titles -->
       ${this.renderAxisTitle('left', padding, chartWidth, chartHeight)}
@@ -3310,6 +3491,140 @@ export class Chart extends AxisChart {
   // Category Axis Labels
   // ============================================================================
 
+  /**
+   * Scatter markers.
+   *
+   * Drawn beneath lines and above areas, matching where bubbles sit: a scatter
+   * is a cloud of individual readings, and a line drawn through the same data
+   * should stay legible on top of it.
+   */
+  private renderScatter(
+    series: ScatterData[],
+    padding: { top: number; right: number; bottom: number; left: number },
+    chartWidth: number,
+    chartHeight: number,
+    range: ValueRange
+  ): SVGTemplateResult {
+    const { min, max } = range;
+    const totalRange = max - min || 1;
+
+    return svg`
+      ${series.map((s, seriesIndex) => svg`
+        <g part="scatter-series">
+          ${s.points.map((point, pointIndex) => {
+            const x = this.getNumericX(point.x, padding, chartWidth);
+            if (x === null) return '';
+            const y = this.height - padding.bottom - ((point.value - min) / totalRange) * chartHeight;
+
+            const hasPopup = point.href || this.shouldShowAutoPopup(point.autoPopup, s.autoPopup);
+            // Reuses the marker vocabulary `point-shape` already defines, so a
+            // scatter and a line's points draw the same shapes from one place.
+            // Opacity rides on the wrapping group, which covers every shape
+            // whether it is filled or stroked.
+            const marker = svg`
+              <g
+                class="scatter-marker"
+                data-shape-index="${seriesIndex}"
+                opacity="${s.fillOpacity}"
+              >
+                ${this.renderPointShape(
+                  s.shape,
+                  x,
+                  y,
+                  s.size,
+                  point.fill || s.fill,
+                  hasPopup ? 'pointer' : 'default',
+                  {
+                    mouseenter: (e: MouseEvent) => this.handleScatterEnter(e, seriesIndex, pointIndex),
+                    mouseleave: () => this.handleScatterLeave(seriesIndex, pointIndex),
+                    click: (e: MouseEvent) => this.handleScatterClick(e, seriesIndex, pointIndex)
+                  }
+                )}
+              </g>`;
+
+            return point.href
+              ? svg`<a href="${point.href}" target="${point.target || '_self'}">${marker}</a>`
+              : marker;
+          })}
+        </g>`)}
+    `;
+  }
+
+  private scatterDetail(seriesIndex: number, pointIndex: number) {
+    const series = this.getScatterSeries()[seriesIndex];
+    const point = series?.points[pointIndex];
+    return {
+      chart: this,
+      element: point?.element ?? series?.element,
+      index: pointIndex,
+      label: point?.label || series?.label || '',
+      value: point?.value ?? NaN,
+      percent: null
+    };
+  }
+
+  /**
+   * Popup content for a scatter marker.
+   *
+   * Both coordinates are reported, because a scatter marker means nothing
+   * without its x - unlike every other element here, whose position along the
+   * category axis is already spelled out as a label.
+   */
+  private getScatterPopupContent(series: ScatterData, point: ScatterPoint): string | null {
+    if (!this.shouldShowAutoPopup(point.autoPopup, series.autoPopup)) return null;
+
+    const name = point.label || series.label;
+    return `${name ? `<strong>${name}</strong><br>` : ''}`
+      + `x: ${this.formatValue(point.x, point.valueFormat)}<br>`
+      + `y: ${this.formatValue(point.value, point.valueFormat)}`;
+  }
+
+  private handleScatterEnter(e: MouseEvent, seriesIndex: number, pointIndex: number): void {
+    this.emitInteraction('dc-mouseenter', this.scatterDetail(seriesIndex, pointIndex), e);
+    const series = this.getScatterSeries()[seriesIndex];
+    const point = series?.points[pointIndex];
+    if (!point) return;
+
+    const content = this.getScatterPopupContent(series, point);
+    if (content) this.showPopup(content, e.clientX, e.clientY);
+  }
+
+  private handleScatterLeave(seriesIndex: number, pointIndex: number): void {
+    this.emitInteraction('dc-mouseleave', this.scatterDetail(seriesIndex, pointIndex));
+    this.hidePopup();
+  }
+
+  private handleScatterClick(e: MouseEvent, seriesIndex: number, pointIndex: number): void {
+    this.emitInteraction('dc-click', this.scatterDetail(seriesIndex, pointIndex), e);
+  }
+
+  /**
+   * Ticks for a numeric category axis.
+   *
+   * Reuses `renderValueAxisLabels` in its horizontal orientation, which already
+   * draws evenly spaced numeric ticks along the bottom — the same job, and the
+   * reason a scatter needed no new axis rendering at all.
+   */
+  private renderNumericCategoryLabels(
+    padding: { top: number; right: number; bottom: number; left: number },
+    chartWidth: number,
+    chartHeight: number
+  ): SVGTemplateResult {
+    const xRange = this.getXRange();
+    if (!xRange) return svg``;
+
+    const config = this.getAxisConfig(this.getCategoryAxisPosition());
+    return this.renderValueAxisLabels(
+      padding,
+      chartWidth,
+      chartHeight,
+      { ...xRange, zeroPosition: 1, hasNegatives: xRange.min < 0, hasPositives: xRange.max > 0 },
+      'horizontal',
+      false,
+      config
+    );
+  }
+
   private renderCategoryAxisLabels(
     bars: FlattenedBar[],
     lines: LineData[],
@@ -4022,6 +4337,18 @@ export class Chart extends AxisChart {
       });
     });
 
+    // Add scatter items (shape: circle)
+    // Dimensionless like lines and areas: a cloud of readings has no single
+    // aggregate value, and summing them would invent one.
+    this.getScatterSeries().forEach(series => {
+      items.push({
+        label: series.label,
+        color: series.originalFill || series.fill,
+        dimensionless: true,
+        shape: 'circle'
+      } as DimensionlessLegendItem);
+    });
+
     return items;
   }
 
@@ -4038,15 +4365,19 @@ export class Chart extends AxisChart {
     const hasLines = this.getLines().length > 0;
     const hasAreas = this.getAreas().length > 0;
     const hasBubbles = this.getBubbles().length > 0;
+    const hasScatter = this.getScatterSeries().length > 0;
 
     const types: string[] = [];
     if (hasBars) types.push('bar');
     if (hasAreas) types.push('area');
     if (hasLines) types.push('line');
     if (hasBubbles) types.push('bubble');
+    // "scatter chart" is not what anyone calls it, so it names itself in full
+    // and the shared suffix is dropped when it is the only kind present.
+    if (hasScatter) types.push('scatter');
 
     if (types.length === 0) return 'chart';
-    if (types.length === 1) return `${types[0]} chart`;
+    if (types.length === 1) return types[0] === 'scatter' ? 'scatter plot' : `${types[0]} chart`;
     return `${types.join(' and ')} chart`;
   }
 
@@ -4084,6 +4415,16 @@ export class Chart extends AxisChart {
       const min = Math.min(...values);
       const max = Math.max(...values);
       parts.push(`${bubbles.length} bubble${bubbles.length !== 1 ? 's' : ''}, values from ${this.formatValue(min)} to ${this.formatValue(max)}`);
+    }
+
+    const scatter = this.getScatterSeries();
+    if (scatter.length > 0) {
+      const totalPoints = scatter.reduce((sum, s) => sum + s.points.length, 0);
+      const xRange = this.getXRange();
+      const xSpan = xRange ? `, x from ${this.formatValue(xRange.min)} to ${this.formatValue(xRange.max)}` : '';
+      parts.push(
+        `${scatter.length} scatter series with ${totalPoints} point${totalPoints !== 1 ? 's' : ''}${xSpan}`
+      );
     }
 
     return parts.join('; ');
@@ -4145,6 +4486,21 @@ export class Chart extends AxisChart {
       }
     }
 
+    // Generate scatter insights
+    const scatter = this.getScatterSeries();
+    if (scatter.length > 0) {
+      const scatterInsight = analyzeScatter(
+        scatter.map(s => ({
+          label: s.label,
+          points: s.points.map(p => ({ x: p.x, value: p.value }))
+        })),
+        formatValue
+      );
+      if (scatterInsight) {
+        insights.push(scatterInsight);
+      }
+    }
+
     return insights.join('. ');
   }
 
@@ -4187,7 +4543,8 @@ export class Chart extends AxisChart {
     return this.getFlattenedBars().length
       + this.getBubbles().length
       + this.getLines().reduce((sum, line) => sum + line.points.length, 0)
-      + this.getAreas().reduce((sum, area) => sum + area.points.length, 0);
+      + this.getAreas().reduce((sum, area) => sum + area.points.length, 0)
+      + this.getScatterSeries().reduce((sum, s) => sum + s.points.length, 0);
   }
 
   protected override getFocusableElements(): FocusableElement[] {
@@ -4255,6 +4612,24 @@ export class Chart extends AxisChart {
       index++;
     });
 
+    // Add scatter markers as focusable elements
+    this.getScatterSeries().forEach(series => {
+      series.points.forEach(point => {
+        const hasAction = !!(point.href || this.shouldShowAutoPopup(point.autoPopup, series.autoPopup));
+        const name = point.label ? `${series.label}, ${point.label}` : series.label;
+        elements.push({
+          index,
+          // Both coordinates, in the reading order of the axes.
+          label: `${name}: x ${this.formatValue(point.x, point.valueFormat)}`
+            + `, y ${this.formatValue(point.value, point.valueFormat)}`,
+          hasAction,
+          href: point.href,
+          popupTrigger: this.shouldShowAutoPopup(point.autoPopup, series.autoPopup) ? 'hover' : undefined
+        });
+        index++;
+      });
+    });
+
     return elements;
   }
 
@@ -4262,7 +4637,61 @@ export class Chart extends AxisChart {
   /**
    * Get the bounds of a shape by index, accounting for different element types.
    */
+  /**
+   * Where a scatter marker sits, computed rather than looked up.
+   *
+   * Markers share one `data-shape-index` per series, the way a line's path does,
+   * so the DOM cannot distinguish one point from another. Recomputing from the
+   * same layout the renderer used is exact, and needs no per-point attribute.
+   */
+  private getScatterMarkerBounds(
+    seriesIndex: number,
+    pointIndex: number
+  ): { x: number; y: number; width: number; height: number } | null {
+    const series = this.getScatterSeries()[seriesIndex];
+    const point = series?.points[pointIndex];
+    if (!point) return null;
+
+    const padding = this.getChartPadding();
+    const chartWidth = this.width - padding.left - padding.right;
+    const chartHeight = this.height - padding.top - padding.bottom;
+    const x = this.getNumericX(point.x, padding, chartWidth);
+    if (x === null) return null;
+
+    const range = this.getNiceRange(this.getAxisConfig('left'));
+    const totalRange = range.max - range.min || 1;
+    const y = this.height - padding.bottom - ((point.value - range.min) / totalRange) * chartHeight;
+
+    return { x: x - series.size, y: y - series.size, width: series.size * 2, height: series.size * 2 };
+  }
+
+  /** Resolve a focus index that falls past the bars, line points and bubbles. */
+  private locateScatterFocus(index: number): { seriesIndex: number; pointIndex: number } | null {
+    let remaining = index
+      - this.getFlattenedBars().length
+      - this.getLines().reduce((sum, l) => sum + l.points.filter(p => !p.missing).length, 0)
+      - this.getBubbles().length;
+    if (remaining < 0) return null;
+
+    const series = this.getScatterSeries();
+    for (let seriesIndex = 0; seriesIndex < series.length; seriesIndex++) {
+      if (remaining < series[seriesIndex].points.length) {
+        return { seriesIndex, pointIndex: remaining };
+      }
+      remaining -= series[seriesIndex].points.length;
+    }
+    return null;
+  }
+
   protected override getShapeBounds(index: number): { x: number; y: number; width: number; height: number } | null {
+    // Scatter is checked first: its markers share a per-series `data-shape-index`
+    // with nothing to tell the points apart, so a DOM lookup would land on the
+    // wrong one.
+    const scatterFocus = this.locateScatterFocus(index);
+    if (scatterFocus) {
+      return this.getScatterMarkerBounds(scatterFocus.seriesIndex, scatterFocus.pointIndex);
+    }
+
     // First try the parent's implementation
     const parentBounds = super.getShapeBounds(index);
     if (parentBounds) return parentBounds;
@@ -4301,6 +4730,14 @@ export class Chart extends AxisChart {
     let content: string | null = null;
     const bounds = this.getShapeBounds(index);
     if (!bounds) return;
+
+    const scatterFocus = this.locateScatterFocus(index);
+    if (scatterFocus) {
+      const series = this.getScatterSeries()[scatterFocus.seriesIndex];
+      const content = this.getScatterPopupContent(series, series.points[scatterFocus.pointIndex]);
+      if (content) this.showPopupAtBounds(content, bounds);
+      return;
+    }
 
     if (index < bars.length) {
       // It's a bar

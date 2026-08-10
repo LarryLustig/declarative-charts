@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scatter Plots - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+</head>
+<body>
+    <h1>Scatter Plots</h1>
+    <p>Unconnected points positioned by two numbers, for showing how one variable moves with another</p>
+
+    <nav></nav>
+
+    <div class="example">
+        <h2>Basic Scatter Plot</h2>
+        <p>Group points into a <code>&lt;dc-scatter&gt;</code> series and give each <code>&lt;dc-point&gt;</code> an <code>x</code> alongside its <code>value</code>. The x-axis becomes numeric on its own &mdash; no <code>type="value"</code> needed, because an <code>x</code> quietly ignored for want of a second attribute is exactly the failure this library tries not to have.</p>
+
+        <div class="grid">
+            <div>
+                <h3>One Series</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-scatter label="Readings" fill="#2563eb"&gt;
+    &lt;dc-point x="5" value="12"&gt;&lt;/dc-point&gt;
+    &lt;dc-point x="12" value="19"&gt;&lt;/dc-point&gt;
+    &lt;dc-point x="18" value="31"&gt;&lt;/dc-point&gt;
+    &lt;dc-point x="26" value="28"&gt;&lt;/dc-point&gt;
+    &lt;dc-point x="34" value="46"&gt;&lt;/dc-point&gt;
+    &lt;dc-point x="41" value="52"&gt;&lt;/dc-point&gt;
+  &lt;/dc-scatter&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-scatter label="Readings" fill="#2563eb">
+                        <dc-point x="5" value="12"></dc-point>
+                        <dc-point x="12" value="19"></dc-point>
+                        <dc-point x="18" value="31"></dc-point>
+                        <dc-point x="26" value="28"></dc-point>
+                        <dc-point x="34" value="46"></dc-point>
+                        <dc-point x="41" value="52"></dc-point>
+                    </dc-scatter>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Comparing Two Groups</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-scatter label="Control" fill="#2563eb"&gt;
+    &lt;dc-point x="5" value="12"&gt;&lt;/dc-point&gt;
+    ...
+  &lt;/dc-scatter&gt;
+  &lt;dc-scatter label="Treated" fill="#dc2626"
+              shape="triangle"&gt;
+    &lt;dc-point x="5" value="28"&gt;&lt;/dc-point&gt;
+    ...
+  &lt;/dc-scatter&gt;
+  &lt;dc-legend position="bottom"&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-scatter label="Control" fill="#2563eb">
+                        <dc-point x="5" value="12"></dc-point>
+                        <dc-point x="12" value="19"></dc-point>
+                        <dc-point x="18" value="31"></dc-point>
+                        <dc-point x="26" value="28"></dc-point>
+                        <dc-point x="34" value="46"></dc-point>
+                        <dc-point x="41" value="52"></dc-point>
+                    </dc-scatter>
+                    <dc-scatter label="Treated" fill="#dc2626" shape="triangle">
+                        <dc-point x="5" value="28"></dc-point>
+                        <dc-point x="14" value="37"></dc-point>
+                        <dc-point x="21" value="49"></dc-point>
+                        <dc-point x="29" value="58"></dc-point>
+                        <dc-point x="38" value="71"></dc-point>
+                    </dc-scatter>
+                    <dc-legend position="bottom"></dc-legend>
+                </dc-chart>
+            </div>
+        </div>
+        <p>Series are <strong>dimensionless</strong> in the legend: a cloud of readings has no single aggregate value, so none is invented.</p>
+    </div>
+
+    <div class="example">
+        <h2>Naming the Axes</h2>
+        <p>A scatter's axes both mean something, and neither is self-describing the way a category label is. Titles are worth the two lines. Everything <code>&lt;dc-axis&gt;</code> already does applies &mdash; <code>min-value</code>, <code>max-value</code>, <code>tick-interval</code>, <code>value-format</code> and the rest.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Titles and Formats</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-axis position="bottom" value-format="number 0"&gt;
+    &lt;dc-title&gt;Dose (mg)&lt;/dc-title&gt;
+  &lt;/dc-axis&gt;
+  &lt;dc-axis position="left" value-format="number 0"&gt;
+    &lt;dc-title&gt;Response&lt;/dc-title&gt;
+  &lt;/dc-axis&gt;
+  &lt;dc-scatter label="Readings"&gt;...&lt;/dc-scatter&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-axis position="bottom" value-format="number 0"><dc-title>Dose (mg)</dc-title></dc-axis>
+                    <dc-axis position="left" value-format="number 0"><dc-title>Response</dc-title></dc-axis>
+                    <dc-scatter label="Readings" fill="#7c3aed">
+                        <dc-point x="5" value="12"></dc-point>
+                        <dc-point x="12" value="19"></dc-point>
+                        <dc-point x="18" value="31"></dc-point>
+                        <dc-point x="26" value="28"></dc-point>
+                        <dc-point x="34" value="46"></dc-point>
+                        <dc-point x="41" value="52"></dc-point>
+                    </dc-scatter>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>A Fixed Domain</h3>
+                <pre><code>&lt;dc-axis position="bottom" type="value"
+         min-value="0" max-value="50"
+         tick-interval="10"
+         value-format="number 0"&gt;
+  &lt;dc-title&gt;Dose (mg)&lt;/dc-title&gt;
+&lt;/dc-axis&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-axis position="bottom" type="value" min-value="0" max-value="50" tick-interval="10" value-format="number 0"><dc-title>Dose (mg)</dc-title></dc-axis>
+                    <dc-axis position="left" min-value="0" max-value="60" value-format="number 0"><dc-title>Response</dc-title></dc-axis>
+                    <dc-scatter label="Readings" fill="#7c3aed">
+                        <dc-point x="5" value="12"></dc-point>
+                        <dc-point x="12" value="19"></dc-point>
+                        <dc-point x="18" value="31"></dc-point>
+                        <dc-point x="26" value="28"></dc-point>
+                        <dc-point x="34" value="46"></dc-point>
+                        <dc-point x="41" value="52"></dc-point>
+                    </dc-scatter>
+                </dc-chart>
+            </div>
+        </div>
+        <p>Left to itself the domain rounds outward to whole ticks, so the extreme readings sit inside the plot rather than straddling the axis lines.</p>
+    </div>
+
+    <div class="example">
+        <h2>Marker Shape, Size and Opacity</h2>
+        <p><code>shape</code> takes the same vocabulary as <code>point-shape</code> on a line. <code>size</code> is the marker radius in viewBox units. <code>fill-opacity</code> earns its keep when the cloud is dense: overlapping translucent markers show where the readings pile up, which opaque ones hide.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Shapes per Series</h3>
+                <pre><code>&lt;dc-scatter label="Site A" shape="circle"&gt;...&lt;/dc-scatter&gt;
+&lt;dc-scatter label="Site B" shape="square"&gt;...&lt;/dc-scatter&gt;
+&lt;dc-scatter label="Site C" shape="diamond"&gt;...&lt;/dc-scatter&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-scatter label="Site A" shape="circle" fill="#2563eb">
+                        <dc-point x="4" value="20"></dc-point>
+                        <dc-point x="15" value="26"></dc-point>
+                        <dc-point x="28" value="24"></dc-point>
+                        <dc-point x="39" value="33"></dc-point>
+                    </dc-scatter>
+                    <dc-scatter label="Site B" shape="square" fill="#16a34a">
+                        <dc-point x="7" value="38"></dc-point>
+                        <dc-point x="19" value="44"></dc-point>
+                        <dc-point x="31" value="41"></dc-point>
+                    </dc-scatter>
+                    <dc-scatter label="Site C" shape="diamond" fill="#ea580c" size="6">
+                        <dc-point x="10" value="55"></dc-point>
+                        <dc-point x="24" value="61"></dc-point>
+                        <dc-point x="36" value="57"></dc-point>
+                    </dc-scatter>
+                    <dc-legend position="bottom"></dc-legend>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Dense Cloud</h3>
+                <pre><code>&lt;dc-scatter label="Samples" size="7"
+            fill-opacity="0.35"&gt;
+  &lt;dc-point x="10" value="22"&gt;&lt;/dc-point&gt;
+  &lt;dc-point x="11" value="24"&gt;&lt;/dc-point&gt;
+  ...
+&lt;/dc-scatter&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-scatter label="Samples" fill="#0891b2" size="7" fill-opacity="0.35">
+                        <dc-point x="10" value="22"></dc-point>
+                        <dc-point x="11" value="24"></dc-point>
+                        <dc-point x="12" value="21"></dc-point>
+                        <dc-point x="12" value="26"></dc-point>
+                        <dc-point x="13" value="23"></dc-point>
+                        <dc-point x="14" value="27"></dc-point>
+                        <dc-point x="14" value="22"></dc-point>
+                        <dc-point x="15" value="25"></dc-point>
+                        <dc-point x="22" value="34"></dc-point>
+                        <dc-point x="23" value="31"></dc-point>
+                        <dc-point x="23" value="36"></dc-point>
+                        <dc-point x="24" value="33"></dc-point>
+                        <dc-point x="25" value="38"></dc-point>
+                        <dc-point x="25" value="32"></dc-point>
+                        <dc-point x="34" value="45"></dc-point>
+                        <dc-point x="35" value="48"></dc-point>
+                        <dc-point x="36" value="43"></dc-point>
+                    </dc-scatter>
+                </dc-chart>
+            </div>
+        </div>
+    </div>
+
+    <div class="example">
+        <h2>With a Trend Line</h2>
+        <p>Scatter markers are drawn above areas and beneath lines, so a <code>&lt;dc-line&gt;</code> over the same chart lies on top of the cloud. The line places its points by category rather than by <code>x</code>, so give it points that span the plot.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Cloud and Fit</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-scatter label="Readings" fill-opacity="0.6"&gt;
+    ...
+  &lt;/dc-scatter&gt;
+  &lt;dc-line label="Trend" stroke="#dc2626"
+           show-value="false"&gt;
+    &lt;dc-point value="14"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="52"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-legend position="bottom"&gt;&lt;/dc-legend&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-scatter label="Readings" fill="#2563eb" fill-opacity="0.6">
+                        <dc-point x="5" value="12"></dc-point>
+                        <dc-point x="12" value="19"></dc-point>
+                        <dc-point x="18" value="31"></dc-point>
+                        <dc-point x="26" value="28"></dc-point>
+                        <dc-point x="34" value="46"></dc-point>
+                        <dc-point x="41" value="52"></dc-point>
+                    </dc-scatter>
+                    <dc-line label="Trend" stroke="#dc2626" show-value="false">
+                        <dc-point value="14"></dc-point>
+                        <dc-point value="52"></dc-point>
+                    </dc-line>
+                    <dc-legend position="bottom"></dc-legend>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Popups and Links</h3>
+                <pre><code>&lt;dc-scatter label="Readings" auto-popup&gt;
+  &lt;dc-point x="5" value="12" href="/sample/1"&gt;&lt;/dc-point&gt;
+  ...
+&lt;/dc-scatter&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-axis position="bottom" value-format="number 0"></dc-axis>
+                    <dc-axis position="left" value-format="number 0"></dc-axis>
+                    <dc-scatter label="Readings" fill="#16a34a" auto-popup size="6">
+                        <dc-point x="5" value="12" label="Sample 1"></dc-point>
+                        <dc-point x="12" value="19" label="Sample 2"></dc-point>
+                        <dc-point x="18" value="31" label="Sample 3"></dc-point>
+                        <dc-point x="26" value="28" label="Sample 4"></dc-point>
+                        <dc-point x="34" value="46" label="Sample 5"></dc-point>
+                        <dc-point x="41" value="52" label="Sample 6"></dc-point>
+                    </dc-scatter>
+                </dc-chart>
+            </div>
+        </div>
+        <p>Hover a marker: the popup names both coordinates, because a scatter point means nothing without its <code>x</code>. Tab into the chart and the same information is announced, along with the correlation for each series.</p>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+</body>
+</html>

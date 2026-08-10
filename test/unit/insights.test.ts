@@ -10,6 +10,8 @@ import {
   analyzePie,
   analyzeFunnel,
   analyzeBubbles,
+  analyzeScatter,
+  correlation,
   type LinePoint,
   type LineData,
   type BarData,
@@ -626,5 +628,120 @@ describe('analyzeBubbles', () => {
     const formatter = (v: number) => `$${v}`;
     const result = analyzeBubbles(bubbles, formatter);
     expect(result).toContain('$1000');
+  });
+});
+
+describe('correlation', () => {
+  it('returns 1 for a perfect positive relationship', () => {
+    expect(correlation([1, 2, 3, 4], [10, 20, 30, 40])).toBeCloseTo(1, 10);
+  });
+
+  it('returns -1 for a perfect negative relationship', () => {
+    expect(correlation([1, 2, 3, 4], [40, 30, 20, 10])).toBeCloseTo(-1, 10);
+  });
+
+  it('is unaffected by scale or offset', () => {
+    const r = correlation([1, 2, 3, 4], [3, 5, 4, 8]);
+    expect(correlation([10, 20, 30, 40], [3, 5, 4, 8])).toBeCloseTo(r, 10);
+    expect(correlation([1, 2, 3, 4], [103, 105, 104, 108])).toBeCloseTo(r, 10);
+  });
+
+  it('is symmetric', () => {
+    const xs = [1, 4, 2, 8];
+    const ys = [3, 5, 4, 9];
+    expect(correlation(xs, ys)).toBeCloseTo(correlation(ys, xs), 10);
+  });
+
+  it('is NaN for fewer than two points', () => {
+    expect(correlation([1], [10])).toBeNaN();
+    expect(correlation([], [])).toBeNaN();
+  });
+
+  it('is NaN when one variable never varies', () => {
+    // The denominator is zero. There is genuinely no direction to report, which
+    // is a different statement from "no correlation".
+    expect(correlation([5, 5, 5], [1, 2, 3])).toBeNaN();
+    expect(correlation([1, 2, 3], [5, 5, 5])).toBeNaN();
+  });
+
+  it('uses only as many pairs as the shorter input has', () => {
+    expect(correlation([1, 2, 3, 99], [10, 20, 30])).toBeCloseTo(1, 10);
+  });
+});
+
+describe('analyzeScatter', () => {
+  const pts = (pairs: Array<[number, number]>) =>
+    pairs.map(([x, value]) => ({ x, value }));
+
+  it('returns empty string for no series', () => {
+    expect(analyzeScatter([])).toBe('');
+  });
+
+  it('returns empty string for a series with no points', () => {
+    expect(analyzeScatter([{ label: 'A', points: [] }])).toBe('');
+  });
+
+  it('describes a single point by its coordinates', () => {
+    const r = analyzeScatter([{ label: 'A', points: pts([[10, 20]]) }]);
+    expect(r).toBe('A: single point at x 10, y 20');
+  });
+
+  it('reports point count and y span', () => {
+    const r = analyzeScatter([{ label: 'A', points: pts([[1, 10], [2, 30], [3, 20]]) }]);
+    expect(r).toContain('3 points');
+    expect(r).toContain('y from 10 to 30');
+  });
+
+  it('names a strong positive correlation', () => {
+    const r = analyzeScatter([{ label: 'A', points: pts([[1, 10], [2, 20], [3, 30]]) }]);
+    expect(r).toContain('strong positive correlation');
+  });
+
+  it('names a strong negative correlation', () => {
+    const r = analyzeScatter([{ label: 'A', points: pts([[1, 30], [2, 20], [3, 10]]) }]);
+    expect(r).toContain('strong negative correlation');
+  });
+
+  it('says there is none when the relationship is below the weak threshold', () => {
+    // Symmetric about the mean of x, so r is exactly 0. Below 0.2 naming a
+    // direction would overstate what the data shows.
+    const r = analyzeScatter([{ label: 'A', points: pts([[1, 10], [2, 30], [3, 30], [4, 10]]) }]);
+    expect(r).toContain('no clear correlation');
+  });
+
+  it('omits the relationship when it is undefined rather than absent', () => {
+    const r = analyzeScatter([{ label: 'A', points: pts([[5, 10], [5, 20], [5, 30]]) }]);
+    expect(r).toContain('3 points');
+    expect(r).not.toContain('correlation');
+  });
+
+  it('ignores points with a missing coordinate', () => {
+    const r = analyzeScatter([
+      { label: 'A', points: [{ x: 1, value: 10 }, { x: NaN, value: 999 }, { x: 2, value: 20 }] }
+    ]);
+    expect(r).toContain('2 points');
+    expect(r).not.toContain('999');
+  });
+
+  it('joins several series with semicolons', () => {
+    const r = analyzeScatter([
+      { label: 'A', points: pts([[1, 10], [2, 20]]) },
+      { label: 'B', points: pts([[1, 30], [2, 40]]) }
+    ]);
+    expect(r).toContain('A: ');
+    expect(r).toContain('; B: ');
+  });
+
+  it('omits the name prefix for an unlabelled series', () => {
+    const r = analyzeScatter([{ label: '', points: pts([[1, 10], [2, 20]]) }]);
+    expect(r.startsWith('2 points')).toBe(true);
+  });
+
+  it('uses a custom formatter', () => {
+    const r = analyzeScatter(
+      [{ label: 'A', points: pts([[1, 10], [2, 20]]) }],
+      v => `$${v}`
+    );
+    expect(r).toContain('$10');
   });
 });

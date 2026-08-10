@@ -378,6 +378,35 @@
     </dc-radar-chart>
   </div>
 
+  <!-- Scatter Plot -->
+  <div id="scatter-basic" class="chart-container">
+    <h2>Scatter Plot</h2>
+    <dc-chart width="500" height="350">
+      <dc-title>Dose Response</dc-title>
+      <dc-axis position="bottom" value-format="number 0"><dc-title>Dose (mg)</dc-title></dc-axis>
+      <dc-axis position="left" value-format="number 0"><dc-title>Response</dc-title></dc-axis>
+      <dc-scatter label="Control" fill="#2563eb">
+        <dc-point x="5" value="12"></dc-point>
+        <dc-point x="10" value="18"></dc-point>
+        <dc-point x="15" value="26"></dc-point>
+        <dc-point x="20" value="31"></dc-point>
+        <dc-point x="25" value="30"></dc-point>
+        <dc-point x="30" value="42"></dc-point>
+        <dc-point x="35" value="45"></dc-point>
+        <dc-point x="40" value="52"></dc-point>
+      </dc-scatter>
+      <dc-scatter label="Treated" fill="#dc2626" shape="triangle" size="5" fill-opacity="0.7">
+        <dc-point x="5" value="28"></dc-point>
+        <dc-point x="12" value="35"></dc-point>
+        <dc-point x="18" value="48"></dc-point>
+        <dc-point x="24" value="55"></dc-point>
+        <dc-point x="31" value="61"></dc-point>
+        <dc-point x="38" value="72"></dc-point>
+      </dc-scatter>
+      <dc-legend position="top"></dc-legend>
+    </dc-chart>
+  </div>
+
   <!-- Stage Chart - Basic -->
   <div id="stage-basic" class="chart-container">
     <h2>Stage Chart - Basic</h2>

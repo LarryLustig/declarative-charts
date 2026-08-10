@@ -377,6 +377,99 @@ export interface BubbleData {
   sizeValue: number;
 }
 
+export interface ScatterPointData {
+  x: number;
+  value: number;
+}
+
+export interface ScatterSeriesData {
+  label: string;
+  points: ScatterPointData[];
+}
+
+/**
+ * Pearson correlation coefficient, or NaN when it is undefined.
+ *
+ * Undefined for fewer than two points, and for a set where every x or every y
+ * is identical — the denominator is zero, and there is genuinely no direction
+ * to report. Returning NaN rather than 0 keeps "no correlation" distinct from
+ * "cannot say".
+ */
+export function correlation(xs: number[], ys: number[]): number {
+  const n = Math.min(xs.length, ys.length);
+  if (n < 2) return NaN;
+
+  const meanX = average(xs.slice(0, n));
+  const meanY = average(ys.slice(0, n));
+
+  let sxy = 0;
+  let sxx = 0;
+  let syy = 0;
+  for (let i = 0; i < n; i++) {
+    const dx = xs[i] - meanX;
+    const dy = ys[i] - meanY;
+    sxy += dx * dy;
+    sxx += dx * dx;
+    syy += dy * dy;
+  }
+
+  const denominator = Math.sqrt(sxx * syy);
+  return denominator === 0 ? NaN : sxy / denominator;
+}
+
+/**
+ * Analyze scatter series and generate a description.
+ *
+ * A scatter is read for its shape, not its individual readings, so the
+ * description reports the relationship between the two variables rather than
+ * naming points. Thresholds follow the conventional reading of |r|: 0.7 strong,
+ * 0.4 moderate, 0.2 weak.
+ *
+ * @param series - The scatter series to analyze
+ * @param format - Optional formatter function for values
+ */
+export function analyzeScatter(
+  series: ScatterSeriesData[],
+  format: ValueFormatter = defaultFormatter
+): string {
+  const parts: string[] = [];
+
+  for (const s of series) {
+    const points = s.points.filter(p => Number.isFinite(p.x) && Number.isFinite(p.value));
+    const name = s.label ? `${s.label}: ` : '';
+
+    if (points.length === 0) continue;
+    if (points.length === 1) {
+      parts.push(`${name}single point at x ${format(points[0].x)}, y ${format(points[0].value)}`);
+      continue;
+    }
+
+    const ys = points.map(p => p.value);
+    const r = correlation(points.map(p => p.x), ys);
+
+    const spread = `${points.length} points, y from ${format(Math.min(...ys))} to ${format(Math.max(...ys))}`;
+
+    if (!Number.isFinite(r)) {
+      parts.push(`${name}${spread}`);
+      continue;
+    }
+
+    const magnitude = Math.abs(r);
+    const strength =
+      magnitude >= 0.7 ? 'strong' :
+      magnitude >= 0.4 ? 'moderate' :
+      magnitude >= 0.2 ? 'weak' : '';
+    const direction = r > 0 ? 'positive' : 'negative';
+    const relationship = strength
+      ? `${strength} ${direction} correlation`
+      : 'no clear correlation';
+
+    parts.push(`${name}${spread}, ${relationship}`);
+  }
+
+  return parts.join('; ');
+}
+
 /**
  * Analyze bubble chart data and generate a description.
  * @param bubbles - The bubbles to analyze

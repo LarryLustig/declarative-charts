@@ -165,6 +165,8 @@ const CONTEXT: Record<string, (attrs: string) => string> = {
     `<dc-chart width="600" height="400" show-value><dc-area ${a} label="A">${POINTS}</dc-area></dc-chart>`,
   'dc-point': a =>
     `<dc-chart width="600" height="400" show-value><dc-line label="L"><dc-point ${a} value="30" label="A"></dc-point><dc-point value="70" label="B"></dc-point></dc-line></dc-chart>`,
+  'dc-scatter': a =>
+    `<dc-chart width="600" height="400"><dc-scatter ${a} label="S"><dc-point x="10" value="30"></dc-point><dc-point x="40" value="70"></dc-point></dc-scatter><dc-scatter label="T"><dc-point x="20" value="50"></dc-point></dc-scatter></dc-chart>`,
   'dc-bubble': a =>
     `<dc-chart width="600" height="400" show-value><dc-bubble ${a} value="30" size-value="100" label="A"></dc-bubble><dc-bubble value="70" size-value="200" label="B"></dc-bubble></dc-chart>`,
   'dc-axis': a =>
@@ -242,7 +244,7 @@ const VALUE: Record<string, string> = {
   width: '450', height: '250', padding: '70', 'padding-top': '80', 'padding-right': '80',
   'padding-bottom': '80', 'padding-left': '80', orientation: 'horizontal', fit: 'fill',
   'text-scaling': 'fixed', gutter: '30', 'bar-width': '25', 'aspect-ratio': '3', gap: '40',
-  'corner-radius': '12', shape: 'circle', 'point-shape': 'square', 'curve-fit': 'smooth',
+  'corner-radius': '12', shape: 'circle', x: '25', 'point-shape': 'square', 'curve-fit': 'smooth',
   'inner-radius': '55', 'max-bubble-radius': '55', 'min-bubble-radius': '20',
   'size-value': '400', 'stage-size': 'value', 'stage-min-size': '60', 'stage-max-size': '70',
   'stage-height': 'value', 'stage-min-height': '60', 'stage-max-height': '120',
@@ -295,7 +297,13 @@ const VALUE: Record<string, string> = {
  * label alone still resolves through the value, and the index never gets a
  * look-in. Each needs the higher-priority routes removed.
  */
+const SCATTER_POINT = (a: string) =>
+  `<dc-chart width="600" height="400"><dc-scatter label="S"><dc-point ${a} value="30"></dc-point><dc-point x="40" value="70"></dc-point></dc-scatter></dc-chart>`;
+
 const CONTEXT_FOR_ELEMENT: Record<string, (attrs: string) => string> = {
+  // --- <dc-point> attributes only a scatter reads ---------------------------
+  'dc-point:x': a => SCATTER_POINT(a),
+
   // --- <dc-chart> attributes a bars-only chart cannot show ------------------
   'dc-chart:line-color': a => LINE_CHART(a),
   'dc-chart:point-shape': a => LINE_CHART(a),
@@ -442,6 +450,8 @@ const CONTEXT_FOR_ELEMENT: Record<string, (attrs: string) => string> = {
 };
 
 const VALUE_FOR_ELEMENT: Record<string, string> = {
+  // 'circle' is the <dc-scatter> default, so it would restate rather than change.
+  'dc-scatter:shape': 'square',
   // 0.25 is the <dc-radar-series> default, so it would restate rather than change.
   'dc-radar-series:fill-opacity': '0.7',
   // The generic 500 still spans the matched bar, so the match - and therefore

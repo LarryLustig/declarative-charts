@@ -18,6 +18,8 @@ export {
   analyzePie,
   analyzeFunnel,
   analyzeBubbles,
+  analyzeScatter,
+  correlation,
 
   // Types
   type LinePoint,
@@ -26,5 +28,7 @@ export {
   type SliceData,
   type StageData,
   type BubbleData,
+  type ScatterPointData,
+  type ScatterSeriesData,
   type ValueFormatter
 } from './insights.js';

@@ -16811,11 +16811,27 @@
             },
             {
               "kind": "field",
+              "name": "x",
+              "default": "NaN",
+              "description": "Position along the category axis, as a number.\r\n\r\nSet this and the axis becomes numeric: the point sits where its `x` falls\r\nrather than where its turn comes. That is what makes a scatter plot\r\npossible, and it applies to lines and areas too — the same points, joined.\r\n\r\nThe pair is `x` and `value`, not `x` and `y`. Every data element in this\r\nlibrary calls its magnitude `value`, and it carries the formatting,\r\n`show-value` thresholds and missing-data handling with it; a `y` alias\r\nwould be a second spelling for one concept.",
+              "attribute": "x"
+            },
+            {
+              "kind": "field",
               "name": "isMissing",
               "type": {
                 "text": "boolean"
               },
               "description": "True when this point carries no data.",
+              "readonly": true
+            },
+            {
+              "kind": "field",
+              "name": "hasX",
+              "type": {
+                "text": "boolean"
+              },
+              "description": "True when this point states a numeric position of its own.",
               "readonly": true
             },
             {
@@ -17254,6 +17270,12 @@
               "name": "shape",
               "default": "'circle'",
               "fieldName": "shape"
+            },
+            {
+              "name": "x",
+              "default": "NaN",
+              "description": "Position along the category axis, as a number.\r\n\r\nSet this and the axis becomes numeric: the point sits where its `x` falls\r\nrather than where its turn comes. That is what makes a scatter plot\r\npossible, and it applies to lines and areas too — the same points, joined.\r\n\r\nThe pair is `x` and `value`, not `x` and `y`. Every data element in this\r\nlibrary calls its magnitude `value`, and it carries the formatting,\r\n`show-value` thresholds and missing-data handling with it; a `y` alias\r\nwould be a second spelling for one concept.",
+              "fieldName": "x"
             },
             {
               "name": "pattern",
@@ -18354,6 +18376,709 @@
           "declaration": {
             "name": "ChartRadarSeries",
             "module": "src/chart-radar-series.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/chart-scatter.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "A set of unconnected points — one series of a scatter plot.\n\nA container for `<dc-point>` children, the way `<dc-line>` and\n`<dc-area>` are, and the same points: what distinguishes a scatter is that\nnothing is drawn between them, and that each point states its own `x`.\n\nA series rather than loose points because a scatter usually compares groups,\nand a group needs a name for the legend and a colour of its own.",
+          "name": "ChartScatter",
+          "members": [
+            {
+              "kind": "field",
+              "name": "shape",
+              "type": {
+                "text": "string"
+              },
+              "default": "'circle'",
+              "description": "Marker shape. The same vocabulary `<dc-line point-shape>` uses.",
+              "attribute": "shape"
+            },
+            {
+              "kind": "field",
+              "name": "size",
+              "type": {
+                "text": "number"
+              },
+              "default": "4",
+              "description": "Marker radius, in viewBox units.",
+              "attribute": "size"
+            },
+            {
+              "kind": "field",
+              "name": "fillOpacity",
+              "type": {
+                "text": "number"
+              },
+              "default": "1",
+              "description": "Marker opacity.\n\nScatter points overlap by nature, and a translucent marker shows density\nwhere an opaque one shows only the topmost point. Left at 1 by default so a\nsparse plot stays crisp; lower it when the cloud is dense.",
+              "attribute": "fill-opacity"
+            },
+            {
+              "kind": "field",
+              "name": "value",
+              "type": {
+                "text": "number"
+              },
+              "default": "0",
+              "description": "The numeric value for this shape element.",
+              "attribute": "value",
+              "inheritedFrom": {
+                "name": "BaseFilledShape",
+                "module": "src/base-filled-shape.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "fill",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Fill color for this element (SVG standard attribute).\r\nTakes precedence over chart-level defaults and palette matches.",
+              "attribute": "fill",
+              "inheritedFrom": {
+                "name": "BaseFilledShape",
+                "module": "src/base-filled-shape.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "pattern",
+              "type": {
+                "text": "string | PatternType | undefined"
+              },
+              "description": "Pattern to apply to this shape.\r\n\r\nCan be:\r\n- A built-in pattern type name (e.g., \"diagonal-lines\", \"dots\", \"crosshatch\")\r\n- An ID reference to a <dc-pattern> element defined elsewhere in the document",
+              "attribute": "pattern",
+              "inheritedFrom": {
+                "name": "BaseFilledShape",
+                "module": "src/base-filled-shape.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "patternStroke",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Color of the pattern elements.\r\n\r\nFor line-based patterns (diagonal-lines, crosshatch, etc.), this is the stroke color.\r\nFor shape-based patterns (dots, checkerboard), this is the fill color of the shapes.\r\n\r\nIf not set, a contrasting color will be auto-calculated based on the pattern fill.",
+              "attribute": "pattern-stroke",
+              "inheritedFrom": {
+                "name": "BaseFilledShape",
+                "module": "src/base-filled-shape.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "patternFill",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Fill color behind the pattern.\r\n\r\nIf not set, the element's fill color will be used.",
+              "attribute": "pattern-fill",
+              "inheritedFrom": {
+                "name": "BaseFilledShape",
+                "module": "src/base-filled-shape.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "patternScale",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Size multiplier for the pattern. Default is 1.\r\n\r\nLarger values create bigger pattern elements, which can be useful\r\nfor larger charts or when patterns need to be more visible.",
+              "attribute": "pattern-scale",
+              "inheritedFrom": {
+                "name": "BaseFilledShape",
+                "module": "src/base-filled-shape.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "showLabel",
+              "type": {
+                "text": "ShowCondition | undefined"
+              },
+              "description": "Whether to show the label on this shape.\r\nCan be true/false or a threshold like \"5%\" or \"100\".\r\nInherits from chart if not specified.",
+              "attribute": "show-label",
+              "inheritedFrom": {
+                "name": "BaseFilledShape",
+                "module": "src/base-filled-shape.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "BASE_KNOWN_ATTRS",
+              "static": true,
+              "readonly": true,
+              "default": "new Set([ ...BaseChartElement.BASE_KNOWN_ATTRS, 'value', 'fill', 'pattern', 'pattern-stroke', 'pattern-fill', 'pattern-scale', 'show-label' ])",
+              "description": "Known attributes for filled shapes.\r\nExtends BaseChartElement.BASE_KNOWN_ATTRS with fill and pattern attributes.",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getEffectiveFill",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              },
+              "description": "Get the effective fill color for this element.\r\nReturns `fill` if set, otherwise falls back to `color` for backwards compatibility.",
+              "inheritedFrom": {
+                "name": "BaseFilledShape",
+                "module": "src/base-filled-shape.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getPassthroughAttributes",
+              "return": {
+                "type": {
+                  "text": "Record<string, string>"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "knownAttrs",
+                  "type": {
+                    "text": "Set<string>"
+                  }
+                }
+              ],
+              "description": "Override to use BaseFilledShape's extended BASE_KNOWN_ATTRS.",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "label",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "stroke",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Stroke color for this element (SVG standard attribute).\r\nTakes precedence over chart-level stroke-color, stroke-colors, and gradient settings.",
+              "attribute": "stroke",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "strokeWidth",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Stroke width for this element (SVG standard attribute).\r\nTakes precedence over chart-level stroke-width.",
+              "attribute": "stroke-width",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "href",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "href",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "target",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "attribute": "target",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "autoPopup",
+              "type": {
+                "text": "boolean | undefined"
+              },
+              "description": "Whether to show an automatic popup for this element.\r\n- undefined: inherit from chart's auto-popup setting\r\n- true: show auto popup (unless explicit <dc-popup> is present)\r\n- false: do not show auto popup\r\n\r\nIf an explicit <dc-popup> child element is present, it takes precedence.",
+              "attribute": "auto-popup",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "valueFormat",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Format for values displayed on this element's label.\r\nOverrides the chart's value-format for this element only.\r\nUses the same format syntax as chart's value-format attribute.",
+              "attribute": "value-format",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "showValue",
+              "type": {
+                "text": "ShowCondition | undefined"
+              },
+              "description": "Whether to display the numeric value on this element.\r\nCan be true, false, a percentage threshold (e.g., \"5%\"), or a value threshold (e.g., \"100\").\r\nIf not set, inherits from parent element or chart-level setting.",
+              "attribute": "show-value",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "showPercent",
+              "type": {
+                "text": "ShowCondition | undefined"
+              },
+              "description": "Whether to display the percentage on this element.\r\nCan be true, false, a percentage threshold (e.g., \"5%\"), or a value threshold (e.g., \"100\").\r\nIf not set, inherits from parent element or chart-level setting.",
+              "attribute": "show-percent",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "labelPosition",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Position for labels on this element.\r\nValid values depend on element type:\r\n- Bars: \"outside\", \"inside-top\", \"inside-center\", \"inside-bottom\", \"outside-top\", \"outside-bottom\"\r\n- Points: \"above\", \"above-left\", \"above-right\", \"below\", \"below-left\", \"below-right\", \"left\", \"right\", \"center\"\r\n- Bubbles: Same as points, plus \"inside\"\r\n- Pie slices: \"inside\", \"outside\"\r\n- Funnel/Stage: \"inside\", \"outside-left\", \"outside-right\"\r\n- Stage chart: Also supports \"above\", \"below\"\r\nIf not set, inherits from parent element or chart-level setting.",
+              "attribute": "label-position",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "labelOffsetX",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Horizontal offset for labels in viewBox units.\r\nPositive values move right, negative values move left.\r\nIf not set, inherits from parent element or chart-level setting.",
+              "attribute": "label-offset-x",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "labelOffsetY",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Vertical offset for labels in viewBox units.\r\nPositive values move down (SVG convention), negative values move up.\r\nIf not set, inherits from parent element or chart-level setting.",
+              "attribute": "label-offset-y",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "labelOffsetR",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Radial offset for labels in viewBox units.\r\nMeaning depends on element type:\r\n- Bars: away from zero line\r\n- Pie/Bubbles: away from center\r\n- Points: away from point center\r\n- Funnel/Stage: away from stage center\r\nPositive values move outward, negative values move inward.\r\nIf not set, inherits from parent element or chart-level setting.",
+              "attribute": "label-offset-r",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "labelFill",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Fill color for labels on this element (SVG text fill).\r\n- \"auto\" (default): Automatically calculate based on background\r\n  - Inside shapes: Contrast against shape fill color\r\n  - Outside shapes: Use dark text (#333) for light backgrounds\r\n- Any CSS color: Use the specified color\r\nIf not set, inherits from parent element or chart-level setting.",
+              "attribute": "label-fill",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getEffectiveStroke",
+              "return": {
+                "type": {
+                  "text": "string"
+                }
+              },
+              "description": "Get the effective stroke color for this element.",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            }
+          ],
+          "attributes": [
+            {
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "label",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              },
+              "description": "Series name, used by the legend"
+            },
+            {
+              "name": "fill",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Marker colour",
+              "fieldName": "fill",
+              "inheritedFrom": {
+                "name": "BaseFilledShape",
+                "module": "src/base-filled-shape.ts"
+              }
+            },
+            {
+              "type": {
+                "text": "number"
+              },
+              "description": "Marker opacity.\n\nScatter points overlap by nature, and a translucent marker shows density\nwhere an opaque one shows only the topmost point. Left at 1 by default so a\nsparse plot stays crisp; lower it when the cloud is dense.",
+              "name": "fill-opacity",
+              "default": "1",
+              "fieldName": "fillOpacity"
+            },
+            {
+              "type": {
+                "text": "string"
+              },
+              "description": "Marker shape. The same vocabulary `<dc-line point-shape>` uses.",
+              "name": "shape",
+              "default": "'circle'",
+              "fieldName": "shape"
+            },
+            {
+              "type": {
+                "text": "number"
+              },
+              "description": "Marker radius, in viewBox units.",
+              "name": "size",
+              "default": "4",
+              "fieldName": "size"
+            },
+            {
+              "name": "pattern",
+              "type": {
+                "text": "string | PatternType | undefined"
+              },
+              "description": "Pattern to apply to this shape.\r\n\r\nCan be:\r\n- A built-in pattern type name (e.g., \"diagonal-lines\", \"dots\", \"crosshatch\")\r\n- An ID reference to a <dc-pattern> element defined elsewhere in the document",
+              "fieldName": "pattern",
+              "attribute": "pattern",
+              "inheritedFrom": {
+                "name": "BaseFilledShape",
+                "module": "src/base-filled-shape.ts"
+              }
+            },
+            {
+              "name": "pattern-stroke",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Color of the pattern elements.\r\n\r\nFor line-based patterns (diagonal-lines, crosshatch, etc.), this is the stroke color.\r\nFor shape-based patterns (dots, checkerboard), this is the fill color of the shapes.\r\n\r\nIf not set, a contrasting color will be auto-calculated based on the pattern fill.",
+              "fieldName": "patternStroke",
+              "attribute": "pattern-stroke",
+              "inheritedFrom": {
+                "name": "BaseFilledShape",
+                "module": "src/base-filled-shape.ts"
+              }
+            },
+            {
+              "name": "pattern-fill",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Fill color behind the pattern.\r\n\r\nIf not set, the element's fill color will be used.",
+              "fieldName": "patternFill",
+              "attribute": "pattern-fill",
+              "inheritedFrom": {
+                "name": "BaseFilledShape",
+                "module": "src/base-filled-shape.ts"
+              }
+            },
+            {
+              "name": "pattern-scale",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Size multiplier for the pattern. Default is 1.\r\n\r\nLarger values create bigger pattern elements, which can be useful\r\nfor larger charts or when patterns need to be more visible.",
+              "fieldName": "patternScale",
+              "attribute": "pattern-scale",
+              "inheritedFrom": {
+                "name": "BaseFilledShape",
+                "module": "src/base-filled-shape.ts"
+              }
+            },
+            {
+              "name": "value",
+              "type": {
+                "text": "number"
+              },
+              "default": "0",
+              "description": "The numeric value for this shape element.",
+              "fieldName": "value",
+              "inheritedFrom": {
+                "name": "BaseFilledShape",
+                "module": "src/base-filled-shape.ts"
+              }
+            },
+            {
+              "name": "show-label",
+              "type": {
+                "text": "ShowCondition | undefined"
+              },
+              "description": "Whether to show the label on this shape.\r\nCan be true/false or a threshold like \"5%\" or \"100\".\r\nInherits from chart if not specified.",
+              "fieldName": "showLabel",
+              "inheritedFrom": {
+                "name": "BaseFilledShape",
+                "module": "src/base-filled-shape.ts"
+              }
+            },
+            {
+              "name": "auto-popup",
+              "type": {
+                "text": "boolean | undefined"
+              },
+              "description": "Whether to show an automatic popup for this element.\r\n- undefined: inherit from chart's auto-popup setting\r\n- true: show auto popup (unless explicit <dc-popup> is present)\r\n- false: do not show auto popup\r\n\r\nIf an explicit <dc-popup> child element is present, it takes precedence.",
+              "fieldName": "autoPopup",
+              "attribute": "auto-popup",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "value-format",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Format for values displayed on this element's label.\r\nOverrides the chart's value-format for this element only.\r\nUses the same format syntax as chart's value-format attribute.",
+              "fieldName": "valueFormat",
+              "attribute": "value-format",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "show-value",
+              "type": {
+                "text": "ShowCondition | undefined"
+              },
+              "description": "Whether to display the numeric value on this element.\r\nCan be true, false, a percentage threshold (e.g., \"5%\"), or a value threshold (e.g., \"100\").\r\nIf not set, inherits from parent element or chart-level setting.",
+              "fieldName": "showValue",
+              "attribute": "show-value",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "show-percent",
+              "type": {
+                "text": "ShowCondition | undefined"
+              },
+              "description": "Whether to display the percentage on this element.\r\nCan be true, false, a percentage threshold (e.g., \"5%\"), or a value threshold (e.g., \"100\").\r\nIf not set, inherits from parent element or chart-level setting.",
+              "fieldName": "showPercent",
+              "attribute": "show-percent",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "label-position",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Position for labels on this element.\r\nValid values depend on element type:\r\n- Bars: \"outside\", \"inside-top\", \"inside-center\", \"inside-bottom\", \"outside-top\", \"outside-bottom\"\r\n- Points: \"above\", \"above-left\", \"above-right\", \"below\", \"below-left\", \"below-right\", \"left\", \"right\", \"center\"\r\n- Bubbles: Same as points, plus \"inside\"\r\n- Pie slices: \"inside\", \"outside\"\r\n- Funnel/Stage: \"inside\", \"outside-left\", \"outside-right\"\r\n- Stage chart: Also supports \"above\", \"below\"\r\nIf not set, inherits from parent element or chart-level setting.",
+              "fieldName": "labelPosition",
+              "attribute": "label-position",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "label-offset-x",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Horizontal offset for labels in viewBox units.\r\nPositive values move right, negative values move left.\r\nIf not set, inherits from parent element or chart-level setting.",
+              "fieldName": "labelOffsetX",
+              "attribute": "label-offset-x",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "label-offset-y",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Vertical offset for labels in viewBox units.\r\nPositive values move down (SVG convention), negative values move up.\r\nIf not set, inherits from parent element or chart-level setting.",
+              "fieldName": "labelOffsetY",
+              "attribute": "label-offset-y",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "label-offset-r",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Radial offset for labels in viewBox units.\r\nMeaning depends on element type:\r\n- Bars: away from zero line\r\n- Pie/Bubbles: away from center\r\n- Points: away from point center\r\n- Funnel/Stage: away from stage center\r\nPositive values move outward, negative values move inward.\r\nIf not set, inherits from parent element or chart-level setting.",
+              "fieldName": "labelOffsetR",
+              "attribute": "label-offset-r",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "label-fill",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Fill color for labels on this element (SVG text fill).\r\n- \"auto\" (default): Automatically calculate based on background\r\n  - Inside shapes: Contrast against shape fill color\r\n  - Outside shapes: Use dark text (#333) for light backgrounds\r\n- Any CSS color: Use the specified color\r\nIf not set, inherits from parent element or chart-level setting.",
+              "fieldName": "labelFill",
+              "attribute": "label-fill",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "stroke",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "Stroke color for this element (SVG standard attribute).\r\nTakes precedence over chart-level stroke-color, stroke-colors, and gradient settings.",
+              "fieldName": "stroke",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "stroke-width",
+              "type": {
+                "text": "number | undefined"
+              },
+              "description": "Stroke width for this element (SVG standard attribute).\r\nTakes precedence over chart-level stroke-width.",
+              "fieldName": "strokeWidth",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "href",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "href",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            },
+            {
+              "name": "target",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "fieldName": "target",
+              "inheritedFrom": {
+                "name": "BaseChartElement",
+                "module": "src/base-chart-element.ts"
+              }
+            }
+          ],
+          "superclass": {
+            "name": "BaseFilledShape",
+            "module": "/src/base-filled-shape.js"
+          },
+          "tagName": "dc-scatter",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "ChartScatter",
+          "declaration": {
+            "name": "ChartScatter",
+            "module": "src/chart-scatter.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "dc-scatter",
+          "declaration": {
+            "name": "ChartScatter",
+            "module": "src/chart-scatter.ts"
           }
         }
       ]
@@ -20624,6 +21349,100 @@
             },
             {
               "kind": "method",
+              "name": "getScatterSeries",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "ScatterData[]"
+                }
+              },
+              "description": "Scatter series, with each point's numeric position resolved.\r\n\r\nCached per render, like the other extractions: this is reached from inside\r\nper-point render loops and from the padding calculation."
+            },
+            {
+              "kind": "method",
+              "name": "extractScatterSeries",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "ScatterData[]"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "hasNumericX",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "boolean"
+                }
+              },
+              "description": "Whether any point states a numeric `x`, making the category axis numeric.\r\n\r\nInferred rather than requiring `type=\"value\"` on the axis: an `x` that a\r\nchart silently ignored because a second attribute was missing is precisely\r\nthe failure this project keeps finding. Declaring the axis type still\r\nworks, and is worth doing for the axis title."
+            },
+            {
+              "kind": "method",
+              "name": "getXRange",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "{ min: number; max: number } | null"
+                }
+              },
+              "description": "Domain of the numeric category axis, or null when there is not one."
+            },
+            {
+              "kind": "method",
+              "name": "getNumericX",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "number | null"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "padding",
+                  "type": {
+                    "text": "{ left: number }"
+                  }
+                },
+                {
+                  "name": "chartWidth",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "description": "X coordinate for a numeric position, or null when the axis is categorical."
+            },
+            {
+              "kind": "method",
+              "name": "getScatterMaxValue",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "number"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getScatterMinValue",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "number"
+                }
+              }
+            },
+            {
+              "kind": "method",
               "name": "getMaxValue",
               "privacy": "protected",
               "return": {
@@ -22586,6 +23405,208 @@
             },
             {
               "kind": "method",
+              "name": "renderScatter",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "SVGTemplateResult"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "series",
+                  "type": {
+                    "text": "ScatterData[]"
+                  }
+                },
+                {
+                  "name": "padding",
+                  "type": {
+                    "text": "{ top: number; right: number; bottom: number; left: number }"
+                  }
+                },
+                {
+                  "name": "chartWidth",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "chartHeight",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "range",
+                  "type": {
+                    "text": "ValueRange"
+                  }
+                }
+              ],
+              "description": "Scatter markers.\r\n\r\nDrawn beneath lines and above areas, matching where bubbles sit: a scatter\r\nis a cloud of individual readings, and a line drawn through the same data\r\nshould stay legible on top of it."
+            },
+            {
+              "kind": "method",
+              "name": "scatterDetail",
+              "privacy": "private",
+              "parameters": [
+                {
+                  "name": "seriesIndex",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "pointIndex",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "getScatterPopupContent",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "string | null"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "series",
+                  "type": {
+                    "text": "ScatterData"
+                  }
+                },
+                {
+                  "name": "point",
+                  "type": {
+                    "text": "ScatterPoint"
+                  }
+                }
+              ],
+              "description": "Popup content for a scatter marker.\r\n\r\nBoth coordinates are reported, because a scatter marker means nothing\r\nwithout its x - unlike every other element here, whose position along the\r\ncategory axis is already spelled out as a label."
+            },
+            {
+              "kind": "method",
+              "name": "handleScatterEnter",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "e",
+                  "type": {
+                    "text": "MouseEvent"
+                  }
+                },
+                {
+                  "name": "seriesIndex",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "pointIndex",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "handleScatterLeave",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "seriesIndex",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "pointIndex",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "handleScatterClick",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "e",
+                  "type": {
+                    "text": "MouseEvent"
+                  }
+                },
+                {
+                  "name": "seriesIndex",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "pointIndex",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "method",
+              "name": "renderNumericCategoryLabels",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "SVGTemplateResult"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "padding",
+                  "type": {
+                    "text": "{ top: number; right: number; bottom: number; left: number }"
+                  }
+                },
+                {
+                  "name": "chartWidth",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "chartHeight",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "description": "Ticks for a numeric category axis.\r\n\r\nReuses `renderValueAxisLabels` in its horizontal orientation, which already\r\ndraws evenly spaced numeric ticks along the bottom — the same job, and the\r\nreason a scatter needed no new axis rendering at all."
+            },
+            {
+              "kind": "method",
               "name": "renderCategoryAxisLabels",
               "privacy": "private",
               "return": {
@@ -23478,6 +24499,50 @@
             },
             {
               "kind": "method",
+              "name": "getScatterMarkerBounds",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "{ x: number; y: number; width: number; height: number } | null"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "seriesIndex",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "pointIndex",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "description": "Where a scatter marker sits, computed rather than looked up.\r\n\r\nMarkers share one `data-shape-index` per series, the way a line's path does,\r\nso the DOM cannot distinguish one point from another. Recomputing from the\r\nsame layout the renderer used is exact, and needs no per-point attribute."
+            },
+            {
+              "kind": "method",
+              "name": "locateScatterFocus",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "{ seriesIndex: number; pointIndex: number } | null"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "index",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "description": "Resolve a focus index that falls past the bars, line points and bubbles."
+            },
+            {
+              "kind": "method",
               "name": "getShapeBounds",
               "privacy": "protected",
               "return": {
@@ -23493,7 +24558,7 @@
                   }
                 }
               ],
-              "description": "Get the bounds of a shape by index, accounting for different element types.",
+              "description": "Get the bounding box of a shape element by its index.\r\nUsed for rendering focus indicators.",
               "inheritedFrom": {
                 "name": "BaseChart",
                 "module": "src/base-chart.ts"
@@ -33547,6 +34612,14 @@
           "declaration": {
             "name": "ChartStage",
             "module": "./chart-stage.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ChartScatter",
+          "declaration": {
+            "name": "ChartScatter",
+            "module": "./chart-scatter.js"
           }
         },
         {
@@ -47942,6 +49015,22 @@
         },
         {
           "kind": "js",
+          "name": "analyzeScatter",
+          "declaration": {
+            "name": "analyzeScatter",
+            "module": "./insights.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "correlation",
+          "declaration": {
+            "name": "correlation",
+            "module": "./insights.js"
+          }
+        },
+        {
+          "kind": "js",
           "name": "LinePoint",
           "declaration": {
             "name": "LinePoint",
@@ -47985,6 +49074,22 @@
           "name": "BubbleData",
           "declaration": {
             "name": "BubbleData",
+            "module": "./insights.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ScatterPointData",
+          "declaration": {
+            "name": "ScatterPointData",
+            "module": "./insights.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "ScatterSeriesData",
+          "declaration": {
+            "name": "ScatterSeriesData",
             "module": "./insights.js"
           }
         },
@@ -48234,6 +49339,57 @@
         },
         {
           "kind": "function",
+          "name": "correlation",
+          "return": {
+            "type": {
+              "text": "number"
+            }
+          },
+          "parameters": [
+            {
+              "name": "xs",
+              "type": {
+                "text": "number[]"
+              }
+            },
+            {
+              "name": "ys",
+              "type": {
+                "text": "number[]"
+              }
+            }
+          ],
+          "description": "Pearson correlation coefficient, or NaN when it is undefined.\n\nUndefined for fewer than two points, and for a set where every x or every y\nis identical — the denominator is zero, and there is genuinely no direction\nto report. Returning NaN rather than 0 keeps \"no correlation\" distinct from\n\"cannot say\"."
+        },
+        {
+          "kind": "function",
+          "name": "analyzeScatter",
+          "return": {
+            "type": {
+              "text": "string"
+            }
+          },
+          "parameters": [
+            {
+              "name": "series",
+              "type": {
+                "text": "ScatterSeriesData[]"
+              },
+              "description": "The scatter series to analyze"
+            },
+            {
+              "name": "format",
+              "default": "defaultFormatter",
+              "type": {
+                "text": "ValueFormatter"
+              },
+              "description": "Optional formatter function for values"
+            }
+          ],
+          "description": "Analyze scatter series and generate a description.\n\nA scatter is read for its shape, not its individual readings, so the\ndescription reports the relationship between the two variables rather than\nnaming points. Thresholds follow the conventional reading of |r|: 0.7 strong,\n0.4 moderate, 0.2 weak."
+        },
+        {
+          "kind": "function",
           "name": "analyzeBubbles",
           "return": {
             "type": {
@@ -48330,6 +49486,22 @@
           "name": "analyzeFunnel",
           "declaration": {
             "name": "analyzeFunnel",
+            "module": "src/accessibility/insights.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "correlation",
+          "declaration": {
+            "name": "correlation",
+            "module": "src/accessibility/insights.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "analyzeScatter",
+          "declaration": {
+            "name": "analyzeScatter",
             "module": "src/accessibility/insights.ts"
           }
         },
