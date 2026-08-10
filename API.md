@@ -6,6 +6,7 @@ Complete documentation for all elements and attributes in the Declarative Chart 
 
 - [Default Configuration](#default-configuration)
 - [Common Chart Attributes](#common-chart-attributes)
+- [Crowded Labels](#crowded-labels)
 - [Color System](#color-system)
 - [Palettes and Pattern Fills](#palettes-and-pattern-fills)
 - [Styling with CSS](#styling-with-css)
@@ -249,6 +250,90 @@ Control the spacing between the chart edge and the chart content (axes, bars, pi
 ```
 
 **Priority:** Individual side properties > shorthand > auto (calculated from chrome elements, defaults to 5% when no title/legend)
+
+---
+
+## Crowded Labels
+
+This library positions by data, so labels *will* collide. Three mechanisms
+handle it, at two different levels.
+
+### Category labels: interval, lines, or rotation
+
+The category axis has more names than it has room. Any of three remedies:
+
+| Attribute | What it does | What it costs |
+|---|---|---|
+| `label-interval` | Shows every *n*th label | The hidden ones |
+| `label-lines` | Staggers labels across 2+ rows | Vertical space |
+| `label-rotate` | Tilts labels | Vertical space, and readability at steep angles |
+
+`label-interval="auto"` is the default, and it **measures** — it works out how
+many labels fit and shows that many, always including the first and last.
+
+`label-rotate` is the one that keeps every label. A tilted label needs roughly
+`height / sin(angle)` of horizontal room instead of its full width, so 45
+degrees fits about three times as many:
+
+```html
+<dc-chart width="500" height="400">
+  <dc-axis position="bottom" label-rotate="45"></dc-axis>
+  <dc-bar value="20" label="North East Region"></dc-bar>
+  <dc-bar value="29" label="South West Region"></dc-bar>
+  <!-- six more -->
+</dc-chart>
+```
+
+The automatic interval knows about the tilt, so rotating stops labels being
+skipped rather than merely tilting the survivors. Padding grows to fit: both the
+depth below the axis and the sideways reach of the first (or last) label, which
+otherwise hangs off the edge of the chart.
+
+Rotation applies to the **category axis of a vertical chart**. A horizontal
+chart puts its category labels in the left gutter, where they already run along
+the reading direction. Group labels stay upright: they are a second tier under
+the category labels, and tilting both tiers makes an unreadable thicket.
+
+### Value labels: `label-collision`
+
+The numbers drawn on bars and points are placed by the data, and two datapoints
+close in value put their labels in the same place. `label-collision` on
+`<dc-chart>` decides what happens:
+
+- **`hide`** (default) — move a label back inside the plot if it overhangs, then
+  drop what still overlaps something already placed.
+- **`clamp`** — move labels inside the plot but never drop one. Use it when
+  every number matters more than the overlap does.
+- **`show`** — draw every label exactly where the geometry puts it. The
+  behaviour before this existed.
+
+```html
+<dc-chart width="500" height="350" label-collision="clamp">
+  <dc-line label="Plan">…</dc-line>
+  <dc-line label="Actual">…</dc-line>
+</dc-chart>
+```
+
+Two parts to the default, and they are ordered because the first loses no
+information:
+
+1. **Clamping** shifts a label sideways to keep it inside the plot. The first
+   and last points of a line sit on the plot edges, so their centred labels hang
+   over the axis gutter and land on the tick labels there. The shift is only
+   ever horizontal — that keeps the label on its datapoint's row, where a
+   vertical nudge would move it off.
+2. **Hiding** drops what still overlaps, greedily, in document order: bars, then
+   areas, then bubbles, then lines. Predictable beats clever — reorder the
+   markup and you can see why the outcome changed.
+
+Defaulting to `hide` rather than `show` is a judgement about which failure is
+worse. Two numbers printed on top of each other are unreadable *and* unmarked:
+the reader cannot tell there were two. A missing label at least leaves the shape
+it belonged to visible and correctly placed.
+
+**Scope:** this covers the value labels of `<dc-chart>`, which all pass through
+one place. `<dc-pie-chart>` positions its labels round a circle and has its own
+crowding problem — adjacent thin slices — which this does not address.
 
 ---
 
@@ -1314,6 +1399,7 @@ Renders bar, line, or bubble charts depending on child elements.
 - `line-color` (string) - Stroke for lines and areas on the same terms (default: `#2196F3`, so lines share one colour unless given their own `stroke` or a palette)
 - `max-bubble-radius` (number) - Largest bubble radius, in viewBox units (default: 30)
 - `min-bubble-radius` (number) - Smallest bubble radius (default: 5)
+- `label-collision` (string) - What to do when value labels will not all fit: `"hide"` (default), `"clamp"` or `"show"`. See [Crowded Labels](#crowded-labels)
 - Plus all [common chart attributes](#common-chart-attributes)
 
 **Child Elements:**
@@ -2030,6 +2116,7 @@ Configures an axis on bar charts and line charts.
 - `type` (string) - Axis behaviour: "value", "label", or "time". Inferred from `position` and the chart's orientation when omitted — on a vertical chart, left/right are value axes and top/bottom are label axes; on a horizontal chart, the reverse
 - `label-interval` (number|string) - Controls which category labels are shown: "auto" (default), or a number (1=all, 2=every other, etc.)
 - `label-lines` (number|string) - Staggers labels across multiple lines: 1 (default), 2, 3, etc., or "auto"
+- `label-rotate` (number) - Tilts category labels by this many degrees (default: 0). Positive tilts so the text reads upward to the right; negative the other way. See [Crowded Labels](#crowded-labels)
 - `value-format` (string) - Number format for axis labels
 
 **Range** (value and time axes only):

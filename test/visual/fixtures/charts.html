@@ -378,6 +378,41 @@
     </dc-radar-chart>
   </div>
 
+  <!-- Rotated Category Labels -->
+  <div id="label-rotate" class="chart-container">
+    <h2>Rotated Category Labels</h2>
+    <dc-chart width="500" height="400" value-format="number 0" show-value="false">
+      <dc-axis position="bottom" label-rotate="45"></dc-axis>
+      <dc-bar value="20" label="North East Region" fill="#94a3b8"></dc-bar>
+      <dc-bar value="29" label="South West Region" fill="#94a3b8"></dc-bar>
+      <dc-bar value="38" label="Central Midlands" fill="#94a3b8"></dc-bar>
+      <dc-bar value="47" label="Outer Hebrides" fill="#94a3b8"></dc-bar>
+      <dc-bar value="56" label="Greater Manchester" fill="#94a3b8"></dc-bar>
+      <dc-bar value="65" label="West Yorkshire" fill="#94a3b8"></dc-bar>
+      <dc-bar value="74" label="East Anglia" fill="#94a3b8"></dc-bar>
+      <dc-bar value="83" label="Cornwall and Devon" fill="#94a3b8"></dc-bar>
+    </dc-chart>
+  </div>
+
+  <!-- Label Collision -->
+  <div id="label-collision" class="chart-container">
+    <h2>Colliding Value Labels</h2>
+    <dc-chart width="500" height="350" value-format="number 0">
+      <dc-line label="Plan" stroke="#2563eb">
+        <dc-point value="100" label="Jan"></dc-point>
+        <dc-point value="118" label="Feb"></dc-point>
+        <dc-point value="132" label="Mar"></dc-point>
+        <dc-point value="150" label="Apr"></dc-point>
+      </dc-line>
+      <dc-line label="Actual" stroke="#dc2626">
+        <dc-point value="103" label="Jan"></dc-point>
+        <dc-point value="115" label="Feb"></dc-point>
+        <dc-point value="136" label="Mar"></dc-point>
+        <dc-point value="146" label="Apr"></dc-point>
+      </dc-line>
+    </dc-chart>
+  </div>
+
   <!-- Reference Lines and Bands -->
   <div id="reference-basic" class="chart-container">
     <h2>Reference Lines and Bands</h2>

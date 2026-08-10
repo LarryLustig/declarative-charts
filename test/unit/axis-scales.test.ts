@@ -12,6 +12,7 @@ class TestAxisChart extends AxisChart {
   private testMinValue: number;
   private testValues: number[];
   private testLabels: string[];
+  private testRotate = 0;
 
   constructor(options: {
     maxValue?: number;
@@ -87,6 +88,16 @@ class TestAxisChart extends AxisChart {
   // Allow setting labels for testing
   public setLabels(labels: string[]): void {
     this.testLabels = labels;
+  }
+
+  public setLabelRotate(degrees: number): void {
+    this.testRotate = degrees;
+  }
+
+  // Reading the real one walks to <dc-axis> through the DOM, which this stub
+  // does not have - the same reason getChartPadding is overridden below.
+  protected override getCategoryLabelRotate(): number {
+    return this.testRotate;
   }
 
   // Override measureText to return predictable values for testing
@@ -586,5 +597,48 @@ describe('getAxisLabelPadding', () => {
 
     // Top padding includes space for value labels above bars (25px default)
     expect(padding.top).toBe(25);
+  });
+});
+
+// ============================================================================
+// calculateAutoLabelInterval with a tilt
+// ============================================================================
+
+describe('calculateAutoLabelInterval with rotated labels', () => {
+  /** Eight labels of 15 characters: 120 units wide against the 8-per-char stub. */
+  const crowded = () => {
+    const chart = new TestAxisChart();
+    chart.setDimensions(600, 400);
+    chart.setLabels(Array.from({ length: 8 }, (_, i) => `Category name ${i}`));
+    return chart;
+  };
+
+  it('skips labels when they are upright and crowded', () => {
+    expect(crowded().testCalculateAutoLabelInterval()).toBeGreaterThan(1);
+  });
+
+  it('stops skipping once they are tilted', () => {
+    // The point of a tilt: it makes room rather than hiding labels, so an
+    // interval that goes on skipping them would cancel out the benefit.
+    const chart = crowded();
+    chart.setLabelRotate(45);
+    expect(chart.testCalculateAutoLabelInterval()).toBe(1);
+  });
+
+  it('needs less room the steeper the tilt', () => {
+    const shallow = crowded();
+    shallow.setLabelRotate(15);
+    const steep = crowded();
+    steep.setLabelRotate(75);
+    expect(steep.testCalculateAutoLabelInterval())
+      .toBeLessThanOrEqual(shallow.testCalculateAutoLabelInterval());
+  });
+
+  it('matches the upright result at zero degrees', () => {
+    const upright = crowded();
+    const explicit = crowded();
+    explicit.setLabelRotate(0);
+    expect(explicit.testCalculateAutoLabelInterval())
+      .toBe(upright.testCalculateAutoLabelInterval());
   });
 });

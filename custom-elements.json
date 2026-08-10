@@ -573,14 +573,121 @@
             },
             {
               "kind": "method",
-              "name": "calculateAutoLabelInterval",
+              "name": "getCategoryLabelRotate",
               "privacy": "protected",
               "return": {
                 "type": {
                   "text": ""
                 }
               },
-              "description": "Calculate interval to prevent label overlap when using single line.\r\nUses the pure calculateLabelInterval() utility function."
+              "description": "Tilt for this chart's category labels, in degrees.\r\n\r\nOnly the category axis of a vertical chart tilts. A horizontal chart puts\r\nits category labels in the left gutter, where they run along the reading\r\ndirection already and have as much room as the padding allows."
+            },
+            {
+              "kind": "method",
+              "name": "categoryLabelRotation",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "{ anchor: string; transform: string } | null"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "description": "`text-anchor` and `transform` for a tilted category label, or null when\r\nupright.\r\n\r\nThe rotation is centred on the tick point and the text anchored at its\r\n*end*, so the label hangs back from the tick it belongs to instead of\r\nrunning forward over the next one."
+            },
+            {
+              "kind": "method",
+              "name": "getRotatedLabelPadding",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "number"
+                }
+              },
+              "description": "Height a tilted category label needs below the axis, or 0 when upright.\r\n\r\nCached because it measures every label and is reached from\r\n`getAxisLabelPadding()`, which the render loop consults repeatedly."
+            },
+            {
+              "kind": "method",
+              "name": "getRotatedLabelSidePadding",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "{ left: number; right: number }"
+                }
+              },
+              "description": "Sideways reach of the outermost tilted label.\r\n\r\nA tilted label runs away from its tick at an angle, so the one at the end\r\nof the axis hangs past the edge of the plot: at 45 degrees \"North East\r\nRegion\" reached 78 units left of the first bar and the chart clipped it to\r\n\"rth East Region\".\r\n\r\nWhich side depends on the direction of the tilt, and only the outermost\r\nlabel matters - the rest hang over the plot, which is fine. The first and\r\nlast labels are always drawn whatever the interval, so those are the two to\r\nmeasure."
+            },
+            {
+              "kind": "method",
+              "name": "renderCategoryLabel",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "SVGTemplateResult"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "text",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "fontSize",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "fill",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "fontWeight",
+                  "optional": true,
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "One category label, tilted or not.\r\n\r\nEvery category-axis label on a vertical chart goes through here, which is\r\nwhat makes `label-rotate` a single change rather than four. A new render\r\npath that emits its own `<text>` would silently ignore the tilt."
+            },
+            {
+              "kind": "method",
+              "name": "calculateAutoLabelInterval",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "number"
+                }
+              }
             },
             {
               "kind": "method",
@@ -9746,6 +9853,16 @@
             },
             {
               "kind": "field",
+              "name": "labelRotate",
+              "type": {
+                "text": "number"
+              },
+              "default": "0",
+              "description": "Tilt category labels by this many degrees.\r\n\r\nThe standard remedy for long category names, and the one thing\r\n`label-interval` cannot do: an interval hides labels to make room, whereas\r\na tilt keeps all of them. Tilted labels need roughly `height / sin(angle)`\r\nof horizontal room each rather than their full width, so 45 degrees fits\r\nabout three times as many.\r\n\r\nPositive values tilt so the text reads upward to the right, which is the\r\nconvention every other charting library uses. Applies to the category axis\r\nof a vertical chart; a horizontal chart already has room for its labels.",
+              "attribute": "label-rotate"
+            },
+            {
+              "kind": "field",
               "name": "valueFormat",
               "type": {
                 "text": "string | undefined"
@@ -9896,6 +10013,16 @@
                 }
               },
               "description": "Check for common mistakes in attribute usage and return warnings."
+            },
+            {
+              "kind": "method",
+              "name": "getLabelRotate",
+              "return": {
+                "type": {
+                  "text": "number"
+                }
+              },
+              "description": "Tilt for category labels, in degrees, clamped to something drawable.\r\n\r\nBeyond 90 the text would read upside down, and a NaN from a typo would\r\nsilently produce `rotate(NaN)` and drop every label off the chart."
             },
             {
               "kind": "method",
@@ -10156,6 +10283,15 @@
               },
               "description": "Font family for axis labels",
               "name": "font-family"
+            },
+            {
+              "name": "label-rotate",
+              "type": {
+                "text": "number"
+              },
+              "default": "0",
+              "description": "Tilt category labels by this many degrees.\r\n\r\nThe standard remedy for long category names, and the one thing\r\n`label-interval` cannot do: an interval hides labels to make room, whereas\r\na tilt keeps all of them. Tilted labels need roughly `height / sin(angle)`\r\nof horizontal room each rather than their full width, so 45 degrees fits\r\nabout three times as many.\r\n\r\nPositive values tilt so the text reads upward to the right, which is the\r\nconvention every other charting library uses. Applies to the category axis\r\nof a vertical chart; a horizontal chart already has room for its labels.",
+              "fieldName": "labelRotate"
             }
           ],
           "superclass": {
@@ -21706,6 +21842,126 @@
         },
         {
           "kind": "function",
+          "name": "labelRect",
+          "return": {
+            "type": {
+              "text": "LabelRect"
+            }
+          },
+          "parameters": [
+            {
+              "name": "label",
+              "type": {
+                "text": "LabelCandidate"
+              }
+            }
+          ],
+          "description": "The box a label occupies.\r\n\r\nThe vertical extent is taken from the font size around the baseline — roughly\r\ncap height above and descender below. That is an approximation, and a\r\ndeliberate one: the exact extent needs a rendered glyph, and this has to run\r\nduring layout."
+        },
+        {
+          "kind": "function",
+          "name": "placeLabels",
+          "return": {
+            "type": {
+              "text": "LabelPlacement[]"
+            }
+          },
+          "parameters": [
+            {
+              "name": "labels",
+              "type": {
+                "text": "LabelCandidate[]"
+              },
+              "description": "Candidates, in the order they should be considered"
+            },
+            {
+              "name": "plot",
+              "type": {
+                "text": "LabelRect"
+              },
+              "description": "The plot area labels should stay within"
+            },
+            {
+              "name": "mode",
+              "default": "'hide'",
+              "type": {
+                "text": "LabelCollisionMode"
+              },
+              "description": "`hide` does both steps, `clamp` only the first, `show` neither"
+            },
+            {
+              "name": "gap",
+              "default": "2",
+              "description": "Minimum clear space between two labels"
+            }
+          ],
+          "description": "Decide where each value label goes, and which ones to drop.\r\n\r\nTwo steps, in order, because they solve different problems and the first\r\nloses no information:\r\n\r\n1. **Clamp** a label back inside the plot. The first and last points of a\r\n   line sit on the plot edges, so their centred labels hang over the axis\r\n   gutter and land on the tick labels there — on `line-basic`, four of ten\r\n   labels did. A horizontal shift keeps the label at the same height, so it\r\n   still reads as belonging to its datapoint; a vertical shift would move it\r\n   off its own row, which is why this only ever moves sideways.\r\n\r\n2. **Hide** what still overlaps something already placed. Greedy, in the\r\n   order given, which for `<dc-chart>` is document order: bars, then areas,\r\n   then bubbles, then lines. Predictable beats clever here — a reader who\r\n   reorders their markup can see why the outcome changed."
+        },
+        {
+          "kind": "function",
+          "name": "rotatedLabelFootprint",
+          "return": {
+            "type": {
+              "text": "number"
+            }
+          },
+          "parameters": [
+            {
+              "name": "width",
+              "type": {
+                "text": "number"
+              },
+              "description": "Measured text width"
+            },
+            {
+              "name": "height",
+              "type": {
+                "text": "number"
+              },
+              "description": "Line height, near enough the font size"
+            },
+            {
+              "name": "degrees",
+              "type": {
+                "text": "number"
+              },
+              "description": "Tilt, 0 for upright"
+            }
+          ],
+          "description": "Horizontal space one category label needs, given a tilt.\r\n\r\nUnrotated, a label needs its whole width. Tilted, neighbours slide past each\r\nother and what has to clear is the perpendicular gap between baselines —\r\n`height / sin(theta)` — so the space needed collapses as the angle steepens:\r\na 45-degree tilt costs about 1.4 line-heights per label regardless of how\r\nlong the text is. That is the whole reason to rotate.\r\n\r\nThe width still bounds it: rotating cannot make a label need *more* room than\r\nstanding it upright would."
+        },
+        {
+          "kind": "function",
+          "name": "rotatedLabelHeight",
+          "return": {
+            "type": {
+              "text": "number"
+            }
+          },
+          "parameters": [
+            {
+              "name": "width",
+              "type": {
+                "text": "number"
+              }
+            },
+            {
+              "name": "height",
+              "type": {
+                "text": "number"
+              }
+            },
+            {
+              "name": "degrees",
+              "type": {
+                "text": "number"
+              }
+            }
+          ],
+          "description": "Vertical space a tilted label occupies below its axis.\r\n\r\nThe bounding box of a rotated rectangle: `w*sin + h*cos`. At 0 degrees that\r\nis just the line height, which is what the unrotated path already reserves."
+        },
+        {
+          "kind": "function",
           "name": "calculatePopupPosition",
           "return": {
             "type": {
@@ -21857,6 +22113,38 @@
         },
         {
           "kind": "js",
+          "name": "labelRect",
+          "declaration": {
+            "name": "labelRect",
+            "module": "src/chart-utils.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "placeLabels",
+          "declaration": {
+            "name": "placeLabels",
+            "module": "src/chart-utils.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "rotatedLabelFootprint",
+          "declaration": {
+            "name": "rotatedLabelFootprint",
+            "module": "src/chart-utils.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "rotatedLabelHeight",
+          "declaration": {
+            "name": "rotatedLabelHeight",
+            "module": "src/chart-utils.ts"
+          }
+        },
+        {
+          "kind": "js",
           "name": "calculatePopupPosition",
           "declaration": {
             "name": "calculatePopupPosition",
@@ -21952,6 +22240,16 @@
               },
               "default": "'circle'",
               "attribute": "point-shape"
+            },
+            {
+              "kind": "field",
+              "name": "labelCollision",
+              "type": {
+                "text": "LabelCollisionMode"
+              },
+              "default": "'hide'",
+              "description": "What to do when value labels will not all fit.\r\n\r\n- `hide` (default) - move a label back inside the plot if it overhangs,\r\n  then drop what still overlaps something already placed.\r\n- `clamp` - move labels inside the plot but never drop one. Use it when\r\n  every number matters more than the overlap does.\r\n- `show` - draw every label exactly where the geometry puts it.\r\n\r\nDeclared here rather than on `BaseChart` because only `<dc-chart>` has the\r\none place every value label passes through. On a pie or a funnel it would\r\nbe an attribute that reads well and does nothing.\r\n\r\nDefaulting to `hide` rather than `show` is a judgement about which failure\r\nis worse. Two numbers printed on top of each other are unreadable *and*\r\nunmarked: the reader cannot tell there were two. A missing label at least\r\nleaves the shape it belonged to visible and correctly placed.",
+              "attribute": "label-collision"
             },
             {
               "kind": "field",
@@ -22996,6 +23294,43 @@
                 "name": "BaseChart",
                 "module": "src/base-chart.ts"
               }
+            },
+            {
+              "kind": "method",
+              "name": "renderDeferredLabels",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "SVGTemplateResult"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "labels",
+                  "type": {
+                    "text": "DeferredLabel[]"
+                  }
+                },
+                {
+                  "name": "padding",
+                  "type": {
+                    "text": "{ top: number; right: number; bottom: number; left: number }"
+                  }
+                },
+                {
+                  "name": "chartWidth",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "chartHeight",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "description": "Draw the value labels every render path has been collecting.\r\n\r\nEvery label in `<dc-chart>` - bars, stacked segments, line points, area\r\npoints, bubbles - is pushed onto one array and drawn here. That is what\r\nmakes collision handling a single pass rather than six: the geometry is\r\nalready resolved, and this is the only place that sees all of it at once.\r\n\r\nKeep it that way. A render path that emits its own `<text part=\"label\">`\r\nwould be invisible to this, and would silently overlap the ones that are\r\nnot."
             },
             {
               "kind": "method",
@@ -25696,14 +26031,141 @@
             },
             {
               "kind": "method",
-              "name": "calculateAutoLabelInterval",
+              "name": "getCategoryLabelRotate",
               "privacy": "protected",
               "return": {
                 "type": {
                   "text": ""
                 }
               },
-              "description": "Calculate interval to prevent label overlap when using single line.\r\nUses the pure calculateLabelInterval() utility function.",
+              "description": "Tilt for this chart's category labels, in degrees.\r\n\r\nOnly the category axis of a vertical chart tilts. A horizontal chart puts\r\nits category labels in the left gutter, where they run along the reading\r\ndirection already and have as much room as the padding allows.",
+              "inheritedFrom": {
+                "name": "AxisChart",
+                "module": "src/axis-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "categoryLabelRotation",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "{ anchor: string; transform: string } | null"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                }
+              ],
+              "description": "`text-anchor` and `transform` for a tilted category label, or null when\r\nupright.\r\n\r\nThe rotation is centred on the tick point and the text anchored at its\r\n*end*, so the label hangs back from the tick it belongs to instead of\r\nrunning forward over the next one.",
+              "inheritedFrom": {
+                "name": "AxisChart",
+                "module": "src/axis-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getRotatedLabelPadding",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "number"
+                }
+              },
+              "description": "Height a tilted category label needs below the axis, or 0 when upright.\r\n\r\nCached because it measures every label and is reached from\r\n`getAxisLabelPadding()`, which the render loop consults repeatedly.",
+              "inheritedFrom": {
+                "name": "AxisChart",
+                "module": "src/axis-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "getRotatedLabelSidePadding",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "{ left: number; right: number }"
+                }
+              },
+              "description": "Sideways reach of the outermost tilted label.\r\n\r\nA tilted label runs away from its tick at an angle, so the one at the end\r\nof the axis hangs past the edge of the plot: at 45 degrees \"North East\r\nRegion\" reached 78 units left of the first bar and the chart clipped it to\r\n\"rth East Region\".\r\n\r\nWhich side depends on the direction of the tilt, and only the outermost\r\nlabel matters - the rest hang over the plot, which is fine. The first and\r\nlast labels are always drawn whatever the interval, so those are the two to\r\nmeasure.",
+              "inheritedFrom": {
+                "name": "AxisChart",
+                "module": "src/axis-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "renderCategoryLabel",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "SVGTemplateResult"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "text",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "x",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "fontSize",
+                  "type": {
+                    "text": "number"
+                  }
+                },
+                {
+                  "name": "fill",
+                  "type": {
+                    "text": "string"
+                  }
+                },
+                {
+                  "name": "fontWeight",
+                  "optional": true,
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "description": "One category label, tilted or not.\r\n\r\nEvery category-axis label on a vertical chart goes through here, which is\r\nwhat makes `label-rotate` a single change rather than four. A new render\r\npath that emits its own `<text>` would silently ignore the tilt.",
+              "inheritedFrom": {
+                "name": "AxisChart",
+                "module": "src/axis-chart.ts"
+              }
+            },
+            {
+              "kind": "method",
+              "name": "calculateAutoLabelInterval",
+              "privacy": "protected",
+              "return": {
+                "type": {
+                  "text": "number"
+                }
+              },
               "inheritedFrom": {
                 "name": "AxisChart",
                 "module": "src/axis-chart.ts"
@@ -29642,6 +30104,15 @@
               },
               "default": "'#2196F3'",
               "fieldName": "lineColor"
+            },
+            {
+              "name": "label-collision",
+              "type": {
+                "text": "LabelCollisionMode"
+              },
+              "default": "'hide'",
+              "description": "What to do when value labels will not all fit.\r\n\r\n- `hide` (default) - move a label back inside the plot if it overhangs,\r\n  then drop what still overlaps something already placed.\r\n- `clamp` - move labels inside the plot but never drop one. Use it when\r\n  every number matters more than the overlap does.\r\n- `show` - draw every label exactly where the geometry puts it.\r\n\r\nDeclared here rather than on `BaseChart` because only `<dc-chart>` has the\r\none place every value label passes through. On a pie or a funnel it would\r\nbe an attribute that reads well and does nothing.\r\n\r\nDefaulting to `hide` rather than `show` is a judgement about which failure\r\nis worse. Two numbers printed on top of each other are unreadable *and*\r\nunmarked: the reader cannot tell there were two. A missing label at least\r\nleaves the shape it belonged to visible and correctly placed.",
+              "fieldName": "labelCollision"
             },
             {
               "name": "curve-fit",

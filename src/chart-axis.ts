@@ -154,6 +154,22 @@ export class ChartAxis extends LitElement {
   labelLines: number | 'auto' = 1;
 
   /**
+   * Tilt category labels by this many degrees.
+   *
+   * The standard remedy for long category names, and the one thing
+   * `label-interval` cannot do: an interval hides labels to make room, whereas
+   * a tilt keeps all of them. Tilted labels need roughly `height / sin(angle)`
+   * of horizontal room each rather than their full width, so 45 degrees fits
+   * about three times as many.
+   *
+   * Positive values tilt so the text reads upward to the right, which is the
+   * convention every other charting library uses. Applies to the category axis
+   * of a vertical chart; a horizontal chart already has room for its labels.
+   */
+  @property({ type: Number, attribute: 'label-rotate' })
+  labelRotate = 0;
+
+  /**
    * Format for value axis labels.
    * Overrides the chart's value-format for this axis only.
    * Uses the same format syntax as chart's value-format attribute.
@@ -427,6 +443,20 @@ export class ChartAxis extends LitElement {
     }
 
     return warnings;
+  }
+
+  /**
+   * Tilt for category labels, in degrees, clamped to something drawable.
+   *
+   * Beyond 90 the text would read upside down, and a NaN from a typo would
+   * silently produce `rotate(NaN)` and drop every label off the chart.
+   */
+  getLabelRotate(): number {
+    const parsed = typeof this.labelRotate === 'number'
+      ? this.labelRotate
+      : parseFloat(String(this.labelRotate));
+    if (!Number.isFinite(parsed)) return 0;
+    return Math.max(-90, Math.min(90, parsed));
   }
 
   /**

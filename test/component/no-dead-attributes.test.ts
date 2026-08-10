@@ -248,7 +248,8 @@ const VALUE: Record<string, string> = {
   width: '450', height: '250', padding: '70', 'padding-top': '80', 'padding-right': '80',
   'padding-bottom': '80', 'padding-left': '80', orientation: 'horizontal', fit: 'fill',
   'text-scaling': 'fixed', gutter: '30', 'bar-width': '25', 'aspect-ratio': '3', gap: '40',
-  'corner-radius': '12', shape: 'circle', x: '25', min: '15', max: '85', 'point-shape': 'square', 'curve-fit': 'smooth',
+  'corner-radius': '12', shape: 'circle', x: '25', min: '15', max: '85',
+  'label-collision': 'show', 'label-rotate': '45', 'point-shape': 'square', 'curve-fit': 'smooth',
   'inner-radius': '55', 'max-bubble-radius': '55', 'min-bubble-radius': '20',
   'size-value': '400', 'stage-size': 'value', 'stage-min-size': '60', 'stage-max-size': '70',
   'stage-height': 'value', 'stage-min-height': '60', 'stage-max-height': '120',
@@ -304,7 +305,18 @@ const VALUE: Record<string, string> = {
 const SCATTER_POINT = (a: string) =>
   `<dc-chart width="600" height="400"><dc-scatter label="S"><dc-point ${a} value="30"></dc-point><dc-point x="40" value="70"></dc-point></dc-scatter></dc-chart>`;
 
+const COLLIDING_LABELS = (a: string) =>
+  `<dc-chart ${a} width="600" height="400"><dc-line label="A"><dc-point value="100" label="Jan"></dc-point><dc-point value="150" label="Feb"></dc-point></dc-line><dc-line label="B"><dc-point value="101" label="Jan"></dc-point><dc-point value="149" label="Feb"></dc-point></dc-line></dc-chart>`;
+
 const CONTEXT_FOR_ELEMENT: Record<string, (attrs: string) => string> = {
+  // Short labels on a bars-only chart never collide, so nothing distinguishes
+  // 'show' from the default 'hide'.
+  'dc-chart:label-collision': a => COLLIDING_LABELS(a),
+  // The default <dc-axis> context is position="left" - the *value* axis on a
+  // vertical chart, where a category-label tilt correctly does nothing.
+  'dc-axis:label-rotate': a =>
+    `<dc-chart width="600" height="400"><dc-axis ${a} position="bottom"></dc-axis>${BARS}</dc-chart>`,
+
   // --- <dc-point> attributes only a scatter reads ---------------------------
   'dc-point:x': a => SCATTER_POINT(a),
 

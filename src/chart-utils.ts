@@ -196,6 +196,169 @@ export function calculateLabelInterval(
 }
 
 // ============================================================================
+// Label Placement
+// ============================================================================
+
+/** What to do when value labels will not all fit. */
+export type LabelCollisionMode = 'hide' | 'clamp' | 'show';
+
+/** A label the caller wants drawn, in viewBox units. */
+export interface LabelCandidate {
+  /** Anchor point, as it would be written to the `x` attribute */
+  x: number;
+  /** Text baseline, as it would be written to the `y` attribute */
+  y: number;
+  /** Measured text width */
+  width: number;
+  /** Nominal font size */
+  fontSize: number;
+  /** SVG text-anchor: 'start', 'middle' or 'end' */
+  anchor: string;
+}
+
+/** What the caller should do with each candidate. */
+export interface LabelPlacement {
+  /** Horizontal shift that keeps the label inside the plot */
+  dx: number;
+  /** Whether to draw it at all */
+  visible: boolean;
+}
+
+/** An axis-aligned box, in viewBox units. */
+export interface LabelRect {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
+
+/**
+ * The box a label occupies.
+ *
+ * The vertical extent is taken from the font size around the baseline — roughly
+ * cap height above and descender below. That is an approximation, and a
+ * deliberate one: the exact extent needs a rendered glyph, and this has to run
+ * during layout.
+ */
+export function labelRect(label: LabelCandidate): LabelRect {
+  const left =
+    label.anchor === 'start' ? label.x :
+    label.anchor === 'end' ? label.x - label.width :
+    label.x - label.width / 2;
+
+  return {
+    left,
+    right: left + label.width,
+    top: label.y - label.fontSize * 0.8,
+    bottom: label.y + label.fontSize * 0.2
+  };
+}
+
+function overlaps(a: LabelRect, b: LabelRect, gap: number): boolean {
+  return (
+    a.left < b.right + gap &&
+    b.left < a.right + gap &&
+    a.top < b.bottom + gap &&
+    b.top < a.bottom + gap
+  );
+}
+
+/**
+ * Decide where each value label goes, and which ones to drop.
+ *
+ * Two steps, in order, because they solve different problems and the first
+ * loses no information:
+ *
+ * 1. **Clamp** a label back inside the plot. The first and last points of a
+ *    line sit on the plot edges, so their centred labels hang over the axis
+ *    gutter and land on the tick labels there — on `line-basic`, four of ten
+ *    labels did. A horizontal shift keeps the label at the same height, so it
+ *    still reads as belonging to its datapoint; a vertical shift would move it
+ *    off its own row, which is why this only ever moves sideways.
+ *
+ * 2. **Hide** what still overlaps something already placed. Greedy, in the
+ *    order given, which for `<dc-chart>` is document order: bars, then areas,
+ *    then bubbles, then lines. Predictable beats clever here — a reader who
+ *    reorders their markup can see why the outcome changed.
+ *
+ * @param labels Candidates, in the order they should be considered
+ * @param plot The plot area labels should stay within
+ * @param mode `hide` does both steps, `clamp` only the first, `show` neither
+ * @param gap Minimum clear space between two labels
+ */
+export function placeLabels(
+  labels: LabelCandidate[],
+  plot: LabelRect,
+  mode: LabelCollisionMode = 'hide',
+  gap = 2
+): LabelPlacement[] {
+  if (mode === 'show') return labels.map(() => ({ dx: 0, visible: true }));
+
+  const placed: LabelRect[] = [];
+
+  return labels.map(label => {
+    const rect = labelRect(label);
+
+    // A label wider than the plot cannot be brought inside, and shifting it
+    // would only trade one overhang for another.
+    let dx = 0;
+    if (rect.right - rect.left <= plot.right - plot.left) {
+      if (rect.left < plot.left) dx = plot.left - rect.left;
+      else if (rect.right > plot.right) dx = plot.right - rect.right;
+    }
+
+    if (mode === 'clamp') return { dx, visible: true };
+
+    const shifted: LabelRect = { ...rect, left: rect.left + dx, right: rect.right + dx };
+    if (placed.some(other => overlaps(shifted, other, gap))) {
+      return { dx, visible: false };
+    }
+
+    placed.push(shifted);
+    return { dx, visible: true };
+  });
+}
+
+/**
+ * Horizontal space one category label needs, given a tilt.
+ *
+ * Unrotated, a label needs its whole width. Tilted, neighbours slide past each
+ * other and what has to clear is the perpendicular gap between baselines —
+ * `height / sin(theta)` — so the space needed collapses as the angle steepens:
+ * a 45-degree tilt costs about 1.4 line-heights per label regardless of how
+ * long the text is. That is the whole reason to rotate.
+ *
+ * The width still bounds it: rotating cannot make a label need *more* room than
+ * standing it upright would.
+ *
+ * @param width Measured text width
+ * @param height Line height, near enough the font size
+ * @param degrees Tilt, 0 for upright
+ */
+export function rotatedLabelFootprint(width: number, height: number, degrees: number): number {
+  const angle = Math.abs(degrees) % 180;
+  if (angle === 0) return width;
+
+  const radians = (angle * Math.PI) / 180;
+  const sin = Math.abs(Math.sin(radians));
+  // Exactly vertical: labels need only their own height side to side.
+  if (sin < 1e-9) return width;
+
+  return Math.min(width, height / sin);
+}
+
+/**
+ * Vertical space a tilted label occupies below its axis.
+ *
+ * The bounding box of a rotated rectangle: `w*sin + h*cos`. At 0 degrees that
+ * is just the line height, which is what the unrotated path already reserves.
+ */
+export function rotatedLabelHeight(width: number, height: number, degrees: number): number {
+  const radians = (Math.abs(degrees) % 180 * Math.PI) / 180;
+  return Math.abs(width * Math.sin(radians)) + Math.abs(height * Math.cos(radians));
+}
+
+// ============================================================================
 // Popup Position Calculations
 // ============================================================================
 

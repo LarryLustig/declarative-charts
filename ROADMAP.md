@@ -98,18 +98,31 @@ proportional charts do not take one. A ring on a radar is the obvious extension.
 A reference on a scatter's *x* axis is the other — the value axis is covered,
 the numeric category axis is not.
 
-### 3. Label collision handling
+### 3. Label collision handling — **done**
 
-**Why:** this library positions by data, so labels *will* collide — and now do.
-The irregular-sampling time chart added in this cycle overlaps its own value
-labels where three readings fall within a week. Time axes made it worse, but
-uneven categories and long labels cause it too.
+**Why:** this library positions by data, so labels *will* collide — and did.
 
-Minimum viable: skip a label that would overlap its neighbour, and allow
-rotation on the category axis. `shouldShowLabel()` is already the single
-gate every label passes through, so there is one place to put it.
+Two corrections to what this entry assumed:
 
-**Cost:** small to moderate, and it needs `measureText`, which exists.
+- **`shouldShowLabel()` was not the single gate.** It gates *category axis*
+  labels, and the labels that actually collided were the *value* labels on the
+  data. The real choke point was `deferredLabels` in `chart.ts`, an array every
+  render path already pushes to and one place draws from.
+- **The measured collisions were not the ones described.** The irregular time
+  chart's own value labels did not overlap each other; a value label overlapped
+  a *y-axis tick* label, because the first and last points of a line sit on the
+  plot edges and their centred labels hang into the gutter. Four of ten did that
+  on `line-basic`. Skipping labels would have been the wrong remedy — clamping
+  them back inside the plot loses nothing.
+
+Shipped as `label-collision` (`hide` | `clamp` | `show`, clamp-then-hide by
+default) and `label-rotate` on `<dc-axis>`. The automatic interval accounts for
+the tilt, so rotating keeps labels rather than merely tilting the survivors.
+
+**Not covered:** `<dc-pie-chart>` positions its labels round a circle and has
+its own crowding problem — adjacent thin slices, which wants leader lines or
+vertical spreading rather than this pass. The one measured overlap there is a
+2.5px sliver between two different slices' labels.
 
 ### 4. Radar chart — as the scaled-polar exemplar ✅ BUILT
 

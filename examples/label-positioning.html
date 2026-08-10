@@ -554,6 +554,105 @@
         </div>
     </div>
 
+    <div class="example">
+        <h2>Crowded Labels</h2>
+        <p>This library positions by data, so labels <em>will</em> collide. Two mechanisms, at two levels: <code>label-collision</code> on the chart handles the numbers drawn on the data, and <code>label-rotate</code> on <code>&lt;dc-axis&gt;</code> handles the names on the category axis.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Colliding Values (default)</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-line label="Plan"&gt;...&lt;/dc-line&gt;
+  &lt;dc-line label="Actual"&gt;...&lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" value-format="number 0">
+                    <dc-line label="Plan" stroke="#2563eb">
+                        <dc-point value="100" label="Jan"></dc-point>
+                        <dc-point value="118" label="Feb"></dc-point>
+                        <dc-point value="132" label="Mar"></dc-point>
+                        <dc-point value="150" label="Apr"></dc-point>
+                    </dc-line>
+                    <dc-line label="Actual" stroke="#dc2626">
+                        <dc-point value="103" label="Jan"></dc-point>
+                        <dc-point value="115" label="Feb"></dc-point>
+                        <dc-point value="136" label="Mar"></dc-point>
+                        <dc-point value="146" label="Apr"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Every Label, Overlaps and All</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"
+          label-collision="show"&gt;
+  &lt;!-- same two lines --&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350" value-format="number 0" label-collision="show">
+                    <dc-line label="Plan" stroke="#2563eb">
+                        <dc-point value="100" label="Jan"></dc-point>
+                        <dc-point value="118" label="Feb"></dc-point>
+                        <dc-point value="132" label="Mar"></dc-point>
+                        <dc-point value="150" label="Apr"></dc-point>
+                    </dc-line>
+                    <dc-line label="Actual" stroke="#dc2626">
+                        <dc-point value="103" label="Jan"></dc-point>
+                        <dc-point value="115" label="Feb"></dc-point>
+                        <dc-point value="136" label="Mar"></dc-point>
+                        <dc-point value="146" label="Apr"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+        </div>
+        <p>Two parts to the default, in order, because the first loses no information. <strong>Clamping</strong> shifts a label sideways to keep it inside the plot &mdash; the first and last points of a line sit on the plot edges, so their centred labels otherwise hang over the axis gutter and land on the tick labels there. Then <strong>hiding</strong> drops what still overlaps, in document order. <code>label-collision="clamp"</code> does the first without the second, for when every number matters more than the overlap does.</p>
+        <p>Defaulting to hiding rather than showing is a judgement about which failure is worse. Two numbers printed on top of each other are unreadable <em>and</em> unmarked: the reader cannot tell there were two. A missing label at least leaves the shape it belonged to visible and correctly placed.</p>
+    </div>
+
+    <div class="example">
+        <h2>Tilting Category Labels</h2>
+        <p>The category axis has more names than it has room. <code>label-interval</code> hides labels to make room; <code>label-rotate</code> keeps them. A tilted label needs roughly <code>height / sin(angle)</code> of horizontal space instead of its full width, so 45 degrees fits about three times as many.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Upright: Automatic Interval</h3>
+                <pre><code>&lt;dc-chart width="500" height="400"&gt;
+  &lt;dc-bar value="20" label="North East Region"&gt;&lt;/dc-bar&gt;
+  &lt;!-- seven more long names --&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="400" show-value="false">
+                    <dc-bar value="20" label="North East Region"></dc-bar>
+                    <dc-bar value="29" label="South West Region"></dc-bar>
+                    <dc-bar value="38" label="Central Midlands"></dc-bar>
+                    <dc-bar value="47" label="Outer Hebrides"></dc-bar>
+                    <dc-bar value="56" label="Greater Manchester"></dc-bar>
+                    <dc-bar value="65" label="West Yorkshire"></dc-bar>
+                    <dc-bar value="74" label="East Anglia"></dc-bar>
+                    <dc-bar value="83" label="Cornwall and Devon"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Tilted: All Eight Fit</h3>
+                <pre><code>&lt;dc-chart width="500" height="400"&gt;
+  &lt;dc-axis position="bottom" label-rotate="45"&gt;&lt;/dc-axis&gt;
+  &lt;!-- same eight bars --&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="400" show-value="false">
+                    <dc-axis position="bottom" label-rotate="45"></dc-axis>
+                    <dc-bar value="20" label="North East Region"></dc-bar>
+                    <dc-bar value="29" label="South West Region"></dc-bar>
+                    <dc-bar value="38" label="Central Midlands"></dc-bar>
+                    <dc-bar value="47" label="Outer Hebrides"></dc-bar>
+                    <dc-bar value="56" label="Greater Manchester"></dc-bar>
+                    <dc-bar value="65" label="West Yorkshire"></dc-bar>
+                    <dc-bar value="74" label="East Anglia"></dc-bar>
+                    <dc-bar value="83" label="Cornwall and Devon"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+        <p>The automatic interval knows about the tilt, so rotating stops labels being skipped rather than merely tilting the survivors. Padding grows to fit: both the depth below the axis and the sideways reach of the first label, which otherwise hangs off the edge of the chart.</p>
+        <p>Rotation applies to the category axis of a <strong>vertical</strong> chart. A horizontal chart puts its category labels in the left gutter, where they already run along the reading direction. Group labels stay upright and drop below the tilted tier &mdash; tilting both tiers makes an unreadable thicket.</p>
+    </div>
+
     <script type="module" src="../src/index.ts"></script>
     <script src="examples.js"></script>
 </body>

@@ -6,7 +6,7 @@ import type { GridConfig } from './chart-grid.js';
 import type { ChartReference } from './chart-reference.js';
 import { resolveDasharray } from './chart-fill.js';
 import { calculateLabelLines, calculateLabelInterval, calculateTicks,
-  niceNumber
+  niceNumber, rotatedLabelFootprint, rotatedLabelHeight
 } from './chart-utils.js';
 import { parseDateLabels, calculateTimeTicks, formatDate, dateToPosition } from './date-utils.js';
 import type { ParsedDates } from './date-utils.js';
@@ -77,6 +77,8 @@ export interface AxisConfig {
   labelInterval: number | 'auto';
   /** Label lines value ('auto' or number) */
   labelLines: number | 'auto';
+  /** Tilt for category labels, in degrees (0 = upright) */
+  labelRotate?: number;
   /** Axis title text, if any */
   title?: string;
   /** SVG style attributes for the title */
@@ -258,6 +260,7 @@ export abstract class AxisChart extends BaseChart {
         position,
         labelInterval: axisElement.getLabelIntervalValue(),
         labelLines: axisElement.getLabelLinesValue(),
+        labelRotate: axisElement.getLabelRotate(),
         title: titleInfo?.text,
         titleStyles: titleInfo?.svgStyles,
         labelStyles: axisElement.getSvgStyleAttributes(),
@@ -282,6 +285,7 @@ export abstract class AxisChart extends BaseChart {
       position,
       labelInterval: 'auto',
       labelLines: 1,
+      labelRotate: 0,
       type: inferredType,
     };
   }
@@ -594,15 +598,154 @@ export abstract class AxisChart extends BaseChart {
    * Uses the pure calculateLabelInterval() utility function.
    * @returns Interval for showing labels
    */
+  /**
+   * Tilt for this chart's category labels, in degrees.
+   *
+   * Only the category axis of a vertical chart tilts. A horizontal chart puts
+   * its category labels in the left gutter, where they run along the reading
+   * direction already and have as much room as the padding allows.
+   */
+  protected getCategoryLabelRotate(): number {
+    return this.cachePerRender('categoryLabelRotate', () => {
+      if (this.isHorizontalChart()) return 0;
+      return this.getAxisConfig(this.getCategoryAxisPosition()).labelRotate ?? 0;
+    });
+  }
+
+  /**
+   * `text-anchor` and `transform` for a tilted category label, or null when
+   * upright.
+   *
+   * The rotation is centred on the tick point and the text anchored at its
+   * *end*, so the label hangs back from the tick it belongs to instead of
+   * running forward over the next one.
+   */
+  protected categoryLabelRotation(
+    x: number,
+    y: number
+  ): { anchor: string; transform: string } | null {
+    const degrees = this.getCategoryLabelRotate();
+    if (degrees === 0) return null;
+
+    return {
+      anchor: degrees > 0 ? 'end' : 'start',
+      transform: `rotate(${-degrees} ${x} ${y})`
+    };
+  }
+
+  /**
+   * Height a tilted category label needs below the axis, or 0 when upright.
+   *
+   * Cached because it measures every label and is reached from
+   * `getAxisLabelPadding()`, which the render loop consults repeatedly.
+   */
+  protected getRotatedLabelPadding(): number {
+    return this.cachePerRender('rotatedLabelPadding', () => {
+      const degrees = this.getCategoryLabelRotate();
+      if (degrees === 0) return 0;
+
+      const labels = this.getCategoryLabels();
+      if (labels.length === 0) return 0;
+
+      const fontSize = this.fontSize(12);
+      const widest = Math.max(...labels.map(l => this.measureText(l, fontSize)));
+      // The 12 is the gap between the axis and the top of the text, matching
+      // the offset the unrotated path uses.
+      return rotatedLabelHeight(widest, fontSize, degrees) + 12;
+    });
+  }
+
+  /**
+   * Sideways reach of the outermost tilted label.
+   *
+   * A tilted label runs away from its tick at an angle, so the one at the end
+   * of the axis hangs past the edge of the plot: at 45 degrees "North East
+   * Region" reached 78 units left of the first bar and the chart clipped it to
+   * "rth East Region".
+   *
+   * Which side depends on the direction of the tilt, and only the outermost
+   * label matters - the rest hang over the plot, which is fine. The first and
+   * last labels are always drawn whatever the interval, so those are the two to
+   * measure.
+   */
+  protected getRotatedLabelSidePadding(): { left: number; right: number } {
+    return this.cachePerRender('rotatedLabelSidePadding', () => {
+      const degrees = this.getCategoryLabelRotate();
+      const none = { left: 0, right: 0 };
+      if (degrees === 0) return none;
+
+      const labels = this.getCategoryLabels();
+      if (labels.length === 0) return none;
+
+      const fontSize = this.fontSize(12);
+      const radians = (Math.abs(degrees) * Math.PI) / 180;
+      const reach = (text: string) => this.measureText(text, fontSize) * Math.cos(radians);
+
+      // A positive tilt reads upward to the right, so the text trails down and
+      // to the left of its tick, and it is the first label that overhangs.
+      return degrees > 0
+        ? { left: reach(labels[0]), right: 0 }
+        : { left: 0, right: reach(labels[labels.length - 1]) };
+    });
+  }
+
+  /**
+   * One category label, tilted or not.
+   *
+   * Every category-axis label on a vertical chart goes through here, which is
+   * what makes `label-rotate` a single change rather than four. A new render
+   * path that emits its own `<text>` would silently ignore the tilt.
+   */
+  protected renderCategoryLabel(
+    text: string,
+    x: number,
+    y: number,
+    fontSize: number,
+    fill: string,
+    fontWeight?: string
+  ): SVGTemplateResult {
+    const rotation = this.categoryLabelRotation(x, y);
+
+    return rotation
+      ? svg`
+        <text
+          part="label"
+          x="${x}" y="${y}"
+          text-anchor="${rotation.anchor}"
+          transform="${rotation.transform}"
+          font-size="${fontSize}"
+          font-weight="${fontWeight ?? 'normal'}"
+          fill="${fill}"
+        >${text}</text>`
+      : svg`
+        <text
+          part="label"
+          x="${x}" y="${y}"
+          text-anchor="middle"
+          font-size="${fontSize}"
+          font-weight="${fontWeight ?? 'normal'}"
+          fill="${fill}"
+        >${text}</text>`;
+  }
+
   protected calculateAutoLabelInterval(): number {
     const labels = this.getCategoryLabels();
     if (labels.length === 0) return 1;
 
-    const maxLabelWidth = Math.max(...labels.map(l => this.measureText(l, this.fontSize(12))));
+    const fontSize = this.fontSize(12);
+    const maxLabelWidth = Math.max(...labels.map(l => this.measureText(l, fontSize)));
     const padding = this.getChartPadding();
     const chartWidth = this.width - padding.left - padding.right;
 
-    const interval = calculateLabelInterval(labels.length, maxLabelWidth, chartWidth);
+    // A tilt is a way of *keeping* labels, so the interval has to know about it
+    // - otherwise auto would go on hiding labels that now fit comfortably.
+    const footprint = rotatedLabelFootprint(
+      maxLabelWidth,
+      fontSize,
+      this.getCategoryLabelRotate()
+    );
+
+    const interval = calculateLabelInterval(labels.length, footprint, chartWidth);
 
     this.log('info', 'labels.interval', `Auto: maxLabelWidth=${maxLabelWidth.toFixed(1)}, chartWidth=${chartWidth.toFixed(1)} → interval=${interval}`, interval);
     return interval;

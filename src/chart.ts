@@ -11,6 +11,7 @@ import type { ChartBarSegment } from './chart-bar-segment.js';
 import type { ChartLine, CurveFit } from './chart-line.js';
 import type { ChartPoint } from './chart-point.js';
 import type { ChartScatter } from './chart-scatter.js';
+import { placeLabels, type LabelCandidate, type LabelCollisionMode } from './chart-utils.js';
 import { calculateNiceTicks } from './chart-utils.js';
 import type { ChartBubble } from './chart-bubble.js';
 import type { ChartPopup } from './chart-popup.js';
@@ -335,6 +336,27 @@ export class Chart extends AxisChart {
 
   @property({ type: String, attribute: 'point-shape' })
   pointShape = 'circle';
+
+  /**
+   * What to do when value labels will not all fit.
+   *
+   * - `hide` (default) - move a label back inside the plot if it overhangs,
+   *   then drop what still overlaps something already placed.
+   * - `clamp` - move labels inside the plot but never drop one. Use it when
+   *   every number matters more than the overlap does.
+   * - `show` - draw every label exactly where the geometry puts it.
+   *
+   * Declared here rather than on `BaseChart` because only `<dc-chart>` has the
+   * one place every value label passes through. On a pie or a funnel it would
+   * be an attribute that reads well and does nothing.
+   *
+   * Defaulting to `hide` rather than `show` is a judgement about which failure
+   * is worse. Two numbers printed on top of each other are unreadable *and*
+   * unmarked: the reader cannot tell there were two. A missing label at least
+   * leaves the shape it belonged to visible and correctly placed.
+   */
+  @property({ type: String, attribute: 'label-collision' })
+  labelCollision: LabelCollisionMode = 'hide';
 
   @property({ type: String, attribute: 'curve-fit' })
   curveFit: CurveFit = 'linear';
@@ -1456,7 +1478,10 @@ export class Chart extends AxisChart {
 
     const hasGroups = structure.some(item => item.isGroup);
     const labelLines = this.getLabelLinesCount();
-    const barLabelHeight = 25 * labelLines;
+    // A tilted label reaches further below the axis than an upright one, and
+    // reserving only the upright height clips it against the bottom edge.
+    const rotatedHeight = this.getRotatedLabelPadding();
+    const barLabelHeight = rotatedHeight > 0 ? rotatedHeight : 25 * labelLines;
     const groupLabelHeight = hasGroups ? 25 : 0;
     const numericLabelHeight = 25;
     const valueLabelHeight = 25;
@@ -1495,11 +1520,12 @@ export class Chart extends AxisChart {
     }
 
     // Default: vertical orientation
+    const rotatedSides = this.getRotatedLabelSidePadding();
     return {
       top: valueLabelHeight + (topAxisTitle?.height || 0) + bubbleTopPadding,
-      right: (rightAxisTitle?.width || 0) + bubbleRightPadding,
+      right: Math.max((rightAxisTitle?.width || 0) + bubbleRightPadding, rotatedSides.right),
       bottom: barLabelHeight + groupLabelHeight + (bottomAxisTitle?.height || 0),
-      left: maxValueWidth + (leftAxisTitle?.width || 0)
+      left: Math.max(maxValueWidth + (leftAxisTitle?.width || 0), rotatedSides.left)
     };
   }
 
@@ -2055,16 +2081,7 @@ export class Chart extends AxisChart {
       ${lines.length > 0 ? this.renderLines(lines, padding, chartWidth, chartHeight, range, total, deferredLabels) : ''}
 
       <!-- Value labels (rendered last, on top of everything) -->
-      ${deferredLabels.map(label => svg`
-        <text
-          part="label"
-          x="${label.x}"
-          y="${label.y}"
-          text-anchor="${label.anchor || 'middle'}"
-          font-size="${this.fontSize(label.fontSize || 14)}"
-          fill="${label.fill || '#333'}"
-        >${label.text}</text>
-      `)}
+      ${this.renderDeferredLabels(deferredLabels, padding, chartWidth, chartHeight)}
 
       <!-- Axes -->
       ${this.renderAxes(padding, isHorizontal ? 'horizontal' : 'vertical', isReverse, range)}
@@ -2095,6 +2112,69 @@ export class Chart extends AxisChart {
       ${this.renderLegend(this.getLegendItems())}
 
       ${this.renderFocusIndicator()}
+    `;
+  }
+
+  /**
+   * Draw the value labels every render path has been collecting.
+   *
+   * Every label in `<dc-chart>` - bars, stacked segments, line points, area
+   * points, bubbles - is pushed onto one array and drawn here. That is what
+   * makes collision handling a single pass rather than six: the geometry is
+   * already resolved, and this is the only place that sees all of it at once.
+   *
+   * Keep it that way. A render path that emits its own `<text part="label">`
+   * would be invisible to this, and would silently overlap the ones that are
+   * not.
+   */
+  private renderDeferredLabels(
+    labels: DeferredLabel[],
+    padding: { top: number; right: number; bottom: number; left: number },
+    chartWidth: number,
+    chartHeight: number
+  ): SVGTemplateResult {
+    if (labels.length === 0) return svg``;
+
+    // measureText returns viewBox units for the size it is given, and the same
+    // size has to reach the font-size attribute or the box is measured for a
+    // label that is not the one drawn.
+    const sized = labels.map(label => this.fontSize(label.fontSize || 14));
+
+    const candidates: LabelCandidate[] = labels.map((label, i) => ({
+      x: label.x,
+      y: label.y,
+      width: this.measureText(label.text, sized[i]),
+      fontSize: sized[i],
+      anchor: label.anchor || 'middle'
+    }));
+
+    const placements = placeLabels(
+      candidates,
+      {
+        left: padding.left,
+        right: padding.left + chartWidth,
+        top: padding.top,
+        bottom: padding.top + chartHeight
+      },
+      this.labelCollision
+    );
+
+    return svg`
+      ${labels.map((label, i) => {
+        const placement = placements[i];
+        if (!placement.visible) return '';
+
+        return svg`
+          <text
+            part="label"
+            x="${label.x + placement.dx}"
+            y="${label.y}"
+            text-anchor="${label.anchor || 'middle'}"
+            font-size="${sized[i]}"
+            fill="${label.fill || '#333'}"
+          >${label.text}</text>
+        `;
+      })}
     `;
   }
 
@@ -3760,15 +3840,9 @@ export class Chart extends AxisChart {
             ? padding.top - 8 - this.getLabelLineOffset(index)
             : this.height - padding.bottom + 20 + this.getLabelLineOffset(index);
 
-          return svg`
-            <text
-              part="label"
-              x="${slot.center}"
-              y="${labelY}"
-              text-anchor="middle"
-              font-size="${this.fontSize(12)}" fill="#666"
-            >${bar.label}</text>
-          `;
+          return this.renderCategoryLabel(
+            bar.label, slot.center, labelY, this.fontSize(12), '#666'
+          );
         })}
 
         <!-- Group labels -->
@@ -3778,10 +3852,14 @@ export class Chart extends AxisChart {
 
             if (!item.isGroup) return '';
 
-            // Position at top for reverse OR all-negative charts
+            // Position at top for reverse OR all-negative charts. Group
+            // labels stay upright: they are a second tier under the category
+            // labels, and tilting both tiers makes an unreadable thicket. They
+            // do have to clear the tilted tier above them.
+            const tilt = this.getRotatedLabelPadding();
             const labelY = (isReverse || labelsAtTop)
-              ? padding.top - 28
-              : this.height - padding.bottom + 40;
+              ? padding.top - 28 - tilt
+              : this.height - padding.bottom + 40 + tilt;
 
             return svg`
               <text
@@ -3825,15 +3903,9 @@ export class Chart extends AxisChart {
           ? padding.top - 8 - this.getLabelLineOffset(index)
           : this.height - padding.bottom + 20 + this.getLabelLineOffset(index);
 
-        return svg`
-          <text
-            part="label"
-            x="${x}"
-            y="${labelY}"
-            text-anchor="middle"
-            font-size="${this.fontSize(12)}" fill="#666"
-          >${point.label}</text>
-        `;
+        return this.renderCategoryLabel(
+          point.label, x, labelY, this.fontSize(12), '#666'
+        );
       })}
     `;
   }
@@ -3857,15 +3929,9 @@ export class Chart extends AxisChart {
           ? padding.top - 8 - this.getLabelLineOffset(index)
           : this.height - padding.bottom + 20 + this.getLabelLineOffset(index);
 
-        return svg`
-          <text
-            part="label"
-            x="${x}"
-            y="${labelY}"
-            text-anchor="middle"
-            font-size="${this.fontSize(12)}" fill="#666"
-          >${bubble.label}</text>
-        `;
+        return this.renderCategoryLabel(
+          bubble.label, x, labelY, this.fontSize(12), '#666'
+        );
       })}
     `;
   }

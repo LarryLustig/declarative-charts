@@ -9,6 +9,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Label collision handling.** This library positions by data, so labels *will* collide — and
+  did. Two mechanisms, at two levels
+  - **`label-collision`** on `<dc-chart>`: `"hide"` (new default), `"clamp"` or `"show"`. Every
+    value label in `<dc-chart>` already passed through one place, which is what made this a
+    single pass rather than six
+  - Two steps, ordered because the first loses no information. **Clamping** shifts a label
+    sideways to keep it inside the plot — the first and last points of a line sit on the plot
+    edges, so their centred labels hung over the axis gutter and landed on the tick labels there;
+    four of ten did on `line-basic`. The shift is only ever horizontal, which keeps the label on
+    its datapoint's row. Then **hiding** drops what still overlaps, greedily, in document order
+  - **`label-rotate`** on `<dc-axis>`: tilts category labels. `label-interval` hides labels to
+    make room; a tilt keeps them. A tilted label needs roughly `height / sin(angle)` of
+    horizontal space rather than its full width, so 45 degrees fits about three times as many —
+    on the example page, 3 of 8 labels become 8 of 8
+  - The automatic interval knows about the tilt, so rotating stops labels being skipped rather
+    than merely tilting the survivors. Padding grows for both the depth below the axis and the
+    sideways reach of the outermost label, which otherwise hung off the edge and rendered
+    "North East Region" as "rth East Region"
+  - New pure helpers `placeLabels()`, `labelRect()`, `rotatedLabelFootprint()` and
+    `rotatedLabelHeight()` in `chart-utils.ts`, unit tested in isolation
+
+### Changed
+
+- **Value labels are hidden on collision by default.** `label-collision="show"` restores the old
+  behaviour. Defaulting to hiding is a judgement about which failure is worse: two numbers
+  printed on top of each other are unreadable *and* unmarked, so the reader cannot tell there
+  were two, whereas a missing label leaves the shape it belonged to visible and correctly placed
+
+- **Visual baselines regenerated at zero tolerance.** `maxDiffPixelRatio: 0.01` had been hiding
+  real render changes — 13 of 30 charts differed from their committed baselines, and only some of
+  that was this change. `bar-basic`'s grid *ticks* had drifted from 12/24/36/48 to 10/20/30/40/50
+  at some earlier point and the 0.986% pixel difference sat just under the threshold. The
+  baselines are now exact; the tolerance is unchanged, because it exists for cross-machine
+  antialiasing
+
+### Added
+
 - **`<dc-reference>`** — target lines and threshold bands on `<dc-chart>`. One element covers
   both shapes an annotation takes, because they are the same idea at different widths: `value`
   draws a line, `min`/`max` draw a band, and either bound alone draws a half-open band —

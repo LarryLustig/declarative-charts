@@ -322,6 +322,24 @@ test.describe('Reference Lines and Bands', () => {
   });
 });
 
+test.describe('Label Placement', () => {
+  test('rotated category labels', async ({ page }) => {
+    await page.goto(`${FIXTURES_URL}?chart=label-rotate`);
+    await waitForChartRender(page);
+
+    const container = await getChartContainer(page, 'label-rotate');
+    await expect(container).toHaveScreenshot('label-rotate.png');
+  });
+
+  test('colliding value labels', async ({ page }) => {
+    await page.goto(`${FIXTURES_URL}?chart=label-collision`);
+    await waitForChartRender(page);
+
+    const container = await getChartContainer(page, 'label-collision');
+    await expect(container).toHaveScreenshot('label-collision.png');
+  });
+});
+
 test.describe('Chart Features', () => {
   test('chart with patterns', async ({ page }) => {
     await page.goto(`${FIXTURES_URL}?chart=patterns`);
