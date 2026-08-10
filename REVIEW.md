@@ -1,4 +1,4 @@
-# decl-charts — Project Review
+# declarative-charts — Project Review
 
 *Conducted 2026-08-04, after a ~7-month pause (last commit 2026-01-02). Three independent
 reviews — market/value, API design & DX, architecture & code health — consolidated, with
@@ -94,7 +94,7 @@ eliminating it), and both of the web-component options below all sit here.
 
 ```html
 <td style="--size: 0.4"><span class="data">$40K</span></td>   <!-- Charts.css -->
-<dc-bar value="40000" label="Jan"></dc-bar>                    <!-- decl-charts -->
+<dc-bar value="40000" label="Jan"></dc-bar>                    <!-- declarative-charts -->
 ```
 
 **This category has exactly two members, and only one of them is a charting engine.**
@@ -124,7 +124,7 @@ eliminating it), and both of the web-component options below all sit here.
   know the series maximum before it can emit a row.
 
   The genuine Charts.css advantage is the flip side of the same choice: with CSS disabled or
-  unsupported, the markup degrades to a readable data table. decl-charts with JavaScript
+  unsupported, the markup degrades to a readable data table. declarative-charts with JavaScript
   disabled renders **nothing** — `BaseChartElement.render()` returns `null`
   (`base-chart-element.ts:213`), so the light DOM is empty. There is a real progressive-
   enhancement story available here that the library does not currently tell: `<dc-bar>` could
@@ -135,16 +135,16 @@ eliminating it), and both of the web-component options below all sit here.
 **These are two independent axes, and it's worth not conflating them.** "Where the data lives"
 is separate from "what draws the pixels." Nearly everything draws with JavaScript — Chart.js and
 ECharts to canvas; D3, `@carbon/charts` (D3 under the hood), `<google-chart>`, and
-`trendchart-elements` to SVG. decl-charts is in that group too: it needs Lit and it renders SVG
+`trendchart-elements` to SVG. declarative-charts is in that group too: it needs Lit and it renders SVG
 at runtime. Charts.css is the sole zero-JS entry anywhere in the table.
 
 |  | **A — data as payload** | **B — data as markup** |
 |---|---|---|
-| **Drawn by JS** | Chart.js, ECharts, D3, ApexCharts, Highcharts, Recharts, Vega-Lite, `@carbon/charts`, `<google-chart>`, `trendchart-elements` | **decl-charts — alone** |
+| **Drawn by JS** | Chart.js, ECharts, D3, ApexCharts, Highcharts, Recharts, Vega-Lite, `@carbon/charts`, `<google-chart>`, `trendchart-elements` | **declarative-charts — alone** |
 | **Drawn by CSS** | — | Charts.css |
 
 That empty-cell claim survives the second axis, but it also sets a boundary on the marketing.
-**decl-charts is not "charts without JavaScript" — it is "charts without *writing* JavaScript."**
+**declarative-charts is not "charts without JavaScript" — it is "charts without *writing* JavaScript."**
 Charts.css genuinely runs with JS disabled; this library does not, and shouldn't claim to.
 The honest pitch is about the *authoring* model — your template emits markup, no serialization
 step, no data-binding layer — not about the runtime.
@@ -152,7 +152,7 @@ step, no data-binding layer — not about the runtime.
 So the honest framing is not "no maintained library does this." It's:
 
 > **Charts.css proved there's demand for data-as-markup and stopped where real charting begins.
-> decl-charts is the only project occupying "one element per datapoint *with* a rendering
+> declarative-charts is the only project occupying "one element per datapoint *with* a rendering
 > engine" — axes, scales, legends, text fitting, interaction, accessibility.**
 
 That is a genuinely empty cell in the matrix, and it is the right thing to lead with — a much

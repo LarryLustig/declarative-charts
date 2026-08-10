@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **One name: `declarative-charts`.** The project was calling itself three things — the npm
+  package `declarative-charts`, the repository `decl-charts`, and the elements `dc-`. Standardised
+  on `declarative-charts`, which the `dc-` prefix already encodes. The prefix is public API in
+  every example and 2,861 tests, so it anchored the choice rather than the other way round
+
+- **The CDN bundle is minified.** Vite leaves ES-format library output unminified apart from
+  identifier renaming, so `@__PURE__` annotations survive for the consumer's bundler. That is
+  right for `declarative-charts.js`, which always goes through a bundler — and wrong for
+  `declarative-charts.standalone.js`, which a browser downloads whole. It was shipping 88 kB of
+  this project's own JSDoc and ~106 kB of indentation
+
+  | | raw | gzipped |
+  |---|---|---|
+  | before | 492 kB | 118 kB |
+  | after | **298 kB** | **77 kB** |
+
+  `build/minify-standalone.mjs` runs after the Vite builds. It touches only the standalone:
+  `declarative-charts.js` keeps its annotations deliberately, and the UMD is already minified by
+  Vite. Lit is inlined into the standalone, so the pass pins `legalComments: 'inline'` and aborts
+  the build if any of the ten BSD-3-Clause headers would be dropped
+
+- **Declaration maps are no longer emitted.** A `.d.ts.map` points an editor at `.ts` source that
+  is not in the tarball, so 187 kB across 53 files led nowhere. `npm pack` goes from 114 files to
+  61
+
+### Added
+
+- Four package-smoke checks covering the above, each verified to fail when what it guards is
+  removed: the standalone is whitespace-minified (by density, not line count — the SVG template
+  literals hold real newlines that survive minification, so both builds land near 1,700 lines),
+  carries no source JSDoc, keeps its licence headers, and no declaration maps reach the tarball
+
 ### Added
 
 - **Label collision handling.** This library positions by data, so labels *will* collide — and

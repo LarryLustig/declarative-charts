@@ -33,7 +33,7 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && vite build --config vite.config.standalone.ts && tsc -p tsconfig.build.json && npm run analyze",
+    "build": "tsc && vite build && vite build --config vite.config.standalone.ts && node build/minify-standalone.mjs && tsc -p tsconfig.build.json && npm run analyze",
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
@@ -48,12 +48,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/LarryLustig/decl-charts.git"
+    "url": "git+https://github.com/LarryLustig/declarative-charts.git"
   },
   "bugs": {
-    "url": "https://github.com/LarryLustig/decl-charts/issues"
+    "url": "https://github.com/LarryLustig/declarative-charts/issues"
   },
-  "homepage": "https://github.com/LarryLustig/decl-charts#readme",
+  "homepage": "https://github.com/LarryLustig/declarative-charts#readme",
   "keywords": [
     "charts",
     "web-components",

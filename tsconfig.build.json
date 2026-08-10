@@ -3,7 +3,10 @@
   "compilerOptions": {
     "noEmit": false,
     "declaration": true,
-    "declarationMap": true,
+    // Off deliberately. A declaration map points an editor at the .ts source,
+    // and source is not published — test/package/smoke.mjs asserts that. The
+    // maps were 187 kB of the tarball leading nowhere.
+    "declarationMap": false,
     "emitDeclarationOnly": true,
     "outDir": "./dist",
     "declarationDir": "./dist"

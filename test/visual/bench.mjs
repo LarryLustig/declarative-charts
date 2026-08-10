@@ -1,5 +1,5 @@
 /**
- * Render-performance harness for decl-charts.
+ * Render-performance harness for declarative-charts.
  *
  * Measures how render cost scales with datapoint count, and checks for layout
  * degeneracies (e.g. bar width crossing zero) that produce a chart which draws

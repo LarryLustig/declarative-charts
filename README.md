@@ -107,8 +107,8 @@ Or with jsdelivr:
 **Local development:**
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/decl-charts.git
-cd decl-charts
+git clone https://github.com/LarryLustig/declarative-charts.git
+cd declarative-charts
 npm install
 npm run dev
 ```

@@ -168,6 +168,48 @@ try {
 }
 
 // ------------------------------------------------------------- packed tarball
+// ------------------------------------------------------------ CDN artifact
+// Vite leaves ES-format library output unminified apart from identifier
+// renaming, so that `@__PURE__` annotations survive for the consumer's bundler.
+// Right for declarative-charts.js; wrong for the file a browser downloads
+// whole, which was 492 kB / 118 kB gzipped against 298 kB / 77 kB minified.
+// build/minify-standalone.mjs fixes that. These catch its removal, a Vite
+// change that reinstates the old behaviour, or a build run without the step.
+console.log('\nCDN artifact');
+{
+  const standalone = read('declarative-charts.standalone.js');
+
+  // Line count is not the measure: the SVG template literals hold real newlines,
+  // which are string data and survive minification. Both builds land near 1,700
+  // lines. Density is what separates them — 35 bytes per line unminified
+  // against 170 after.
+  const density = standalone.length / standalone.split('\n').length;
+  check(
+    density > 100,
+    'standalone is whitespace-minified',
+    `${density.toFixed(0)} bytes per line — is build/minify-standalone.mjs still in the build script?`
+  );
+
+  // Every /** block that is not a licence, which the next check requires be kept.
+  const jsdoc = (standalone.match(/\/\*\*[\s\S]*?\*\//g) ?? [])
+    .filter(c => !c.includes('@license'));
+  check(
+    jsdoc.length === 0,
+    'standalone carries no source JSDoc',
+    `${jsdoc.length} block(s) survived; they were 88 kB of this file`
+  );
+  // Lit is inlined here, so its BSD-3-Clause headers must survive minification.
+  check(
+    /@license/.test(standalone),
+    'standalone keeps its licence headers',
+    'minification must run with legalComments preserved'
+  );
+  check(
+    kb('declarative-charts.standalone.js') < 400,
+    `standalone is ${kb('declarative-charts.standalone.js')} kB`
+  );
+}
+
 console.log('\npublished contents');
 try {
   const listing = JSON.parse(
@@ -178,6 +220,13 @@ try {
     check(files.some(p => p.endsWith(f)), `${f} is included in the tarball`);
   }
   check(!files.some(p => p.startsWith('src/')), 'source is not published');
+  // Declaration maps point an editor at .ts source that is not in the tarball,
+  // so they were 187 kB leading nowhere. tsconfig.build.json stops emitting them.
+  check(
+    !files.some(p => p.endsWith('.d.ts.map')),
+    'no declaration maps in the tarball',
+    files.filter(p => p.endsWith('.d.ts.map')).slice(0, 3).join(', ')
+  );
 } catch (e) {
   fail('npm pack --dry-run', e.message.split('\n')[0]);
 }
