@@ -42,7 +42,7 @@
     "test:visual:update": "playwright test --update-snapshots",
     "test:visual:report": "playwright show-report test/visual/report",
     "bench": "node test/visual/bench.mjs",
-    "analyze": "cem analyze --litelement --globs \"src/**/*.ts\" --outdir .",
+    "analyze": "cem analyze --litelement --globs \"src/**/*.ts\" --outdir . && node build/compact-manifest.mjs",
     "test:package": "node test/package/smoke.mjs",
     "prepublishOnly": "npm run test:run && npm run build && npm run test:package"
   },

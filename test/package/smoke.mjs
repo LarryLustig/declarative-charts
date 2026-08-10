@@ -85,7 +85,19 @@ check(pkg.customElements === 'custom-elements.json',
   'package.json points at the custom-elements manifest');
 check(fs.existsSync(manifestPath), 'custom-elements.json exists', 'run `npm run analyze`');
 if (fs.existsSync(manifestPath)) {
-  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const manifestSrc = fs.readFileSync(manifestPath, 'utf8');
+  const manifest = JSON.parse(manifestSrc);
+
+  // The analyzer pretty-prints, and 41% of the file was indentation no machine
+  // reads: 2,015 kB against 1,193 kB compacted. build/compact-manifest.mjs
+  // strips it, which is only the right trade because the file is gitignored —
+  // a committed one-line 1.2 MB blob would poison every future diff.
+  const manifestLines = manifestSrc.split('\n').length;
+  check(
+    manifestLines <= 2,
+    'custom-elements.json is compacted',
+    `${manifestLines} lines — is build/compact-manifest.mjs still in the analyze script?`
+  );
   const tags = (manifest.modules || [])
     .flatMap(m => m.declarations || [])
     .filter(d => d.tagName)

@@ -34,10 +34,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   is not in the tarball, so 187 kB across 53 files led nowhere. `npm pack` goes from 114 files to
   61
 
+- **`custom-elements.json` is generated, not committed.** It was the largest single thing in the
+  package at 1,967 kB — bigger than all three bundles together — and it is regenerated on every
+  build and before every publish, so tracking it added nothing but history. Now gitignored and
+  shipped from the filesystem via `files`, exactly as `dist/` already is
+
+- **The manifest is compacted.** 41% of it was pretty-printing that no machine reads: 2,015 kB to
+  1,193 kB, same JSON, nothing dropped. That trade only works because the file is no longer
+  committed — a one-line 1.2 MB blob in git would poison every future diff. The remaining bulk is
+  the manifest doing its job: 44% is description text harvested from this project's JSDoc, which
+  is what gives editors autocomplete on `<dc-bar value="…">`
+
+  Cumulatively, `npm pack` goes from **648 kB packed / 3.7 MB unpacked** to **547 kB / 2.5 MB**
+
 ### Added
 
-- Four package-smoke checks covering the above, each verified to fail when what it guards is
-  removed: the standalone is whitespace-minified (by density, not line count — the SVG template
+- Five package-smoke checks covering the above, each verified to fail when what it guards is
+  removed: the manifest is compacted, the standalone is whitespace-minified (by density, not line count — the SVG template
   literals hold real newlines that survive minification, so both builds land near 1,700 lines),
   carries no source JSDoc, keeps its licence headers, and no declaration maps reach the tarball
 
