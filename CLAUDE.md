@@ -631,16 +631,33 @@ already existed. **If you update it, measure.**
 `axis-chart.ts` 85.7%, `base-chart.ts` 85.0%. The structural criticisms in REVIEW.md §5 are
 maintainability arguments, not coverage ones.
 
-**Genuinely thin, in priority order:**
+**Overall statements: 91.4%.** The files that were thin have been covered:
+`log-console.ts` 0% → 96%, `chart-legend-item.ts` 0% → 100%, `animation.ts` 36% → 94%,
+`stage-chart.ts` 73% → 88%. Each round of characterizing untested code turned up real defects,
+which is the usual return — see CHANGELOG.
 
-| File | Stmts | Why |
-|---|---|---|
-| `animation.ts` | **36%** | The `animate*` functions have no test. **Not** the happy-dom artifact an earlier note claimed — `test/component/` runs in happy-dom, which *does* provide `Element.prototype.animate`; only `test/unit/` (node) lacks a DOM, and `supportsWebAnimations()` correctly returns false there. No stub is needed |
-| `stage-chart.ts` | **72.8%** | The worst-covered real code. The geometry was extracted to `stage-layout.ts` (100%), but `calculateStageSizes` and `calculateTextFit` remain untested |
+**⚠️ Every declared attribute must change something.**
+`test/component/no-dead-attributes.test.ts` renders each element twice, with and without each
+attribute, and fails if the output is byte-identical. It exists because ten attributes have now
+been found declared, documented, and wired to nothing — `bar-color`, `fill-colors`,
+`stroke-colors`, `stroke-color`, `fill-color`, `show-label` on `<dc-chart>`, and
+`pattern`/`stroke-dasharray` on `<dc-legend-item>`. Each parsed fine, appeared in API.md, and did
+nothing.
 
-`log-console.ts` (0% → 96%) and `chart-legend-item.ts` (0% → 100%) were the two untested elements
-and are now covered. Writing those tests turned up four defects, which is the usual return on
-characterizing untested code — see CHANGELOG.
+`api-docs.test.ts` cannot catch this class: it only compares the docs against the declarations,
+and a dead attribute is present in both.
+
+Three lists in that file carry the exceptions, and all three are printed on every run so they
+cannot quietly grow:
+
+| List | Meaning |
+|---|---|
+| `KNOWN_DEAD` | Confirmed unread. **These are open bugs.** A test fails if one starts working, so the list cannot rot |
+| `NEEDS_CONTEXT` | The attribute *is* read; this test has not yet been given a context that reaches it. Shrink this |
+| `NO_VISUAL_EFFECT` | Genuinely changes no rendered output — `logging`, `console-log`, `trigger`, and the two that need real layout (`fit`, `text-scaling`) |
+
+When adding a `@property`, expect this test to demand either a rendering change or a line in one
+of those lists with a reason.
 
 `index.ts` reports 0% because it is re-exports only; nothing executes.
 

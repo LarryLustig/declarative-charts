@@ -9,6 +9,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`show-label` did nothing on `<dc-chart>`.** API.md's table promises it for Bar and Line
+  charts, but only `<dc-pie-chart>` and `<dc-funnel-chart>` read it — `show-label="false"` on a
+  bar chart left every label in place. Now honoured at chart level. Per-element `show-label` on
+  `<dc-bar>` is still not plumbed and is recorded as a known gap
+
+### Added
+
+- **`test/component/no-dead-attributes.test.ts`** — renders each element twice, with and without
+  each declared attribute, and fails if the output is byte-identical. Ten attributes have now been
+  found declared, documented, and wired to nothing; `api-docs.test.ts` cannot catch that class,
+  because a dead attribute is present in both the docs and the source. 139 of 170 element/attribute
+  pairs are checked, and the three exclusion lists are printed on every run
+- **Tests for `animation.ts`** (36% → 94%, functions to 100%) covering every animator, the
+  already-animating guard, reduced-motion, and the timing passed to `animate()`
+- **Behaviour tests for `<dc-stage-chart>`** (73% → 88%): the sizing modes including `log-value`
+  and the visibility floor, size units, the connector shorthand parser, and the interaction
+  surface. Overall coverage 88.1% → 91.4%
+
+### Known gaps
+
+- Ten attributes are declared and documented but read by nothing, listed with reasons in
+  `KNOWN_DEAD` in `no-dead-attributes.test.ts`: per-element `show-label` on data elements, and
+  `<dc-fill>`'s `fill-rule`, `fill-opacity`, `stroke-width`, `stroke-opacity`, `stroke-dasharray`,
+  `stroke-dashoffset`, `stroke-linecap`, `stroke-linejoin` and `stroke-miterlimit`, none of which
+  reach the generated `<pattern>`
+
+
 - **A `<dc-legend-item>` with no label blanked the entire legend.** `getCustomItems()` filtered
   label-less items out and returned an empty array; the caller does `customItems ?? items`, and
   `[]` is not nullish, so it counted as "custom items were supplied" and discarded the chart's own.

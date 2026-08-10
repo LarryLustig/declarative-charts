@@ -589,6 +589,12 @@ export abstract class AxisChart extends BaseChart {
    * @returns True if the label should be rendered
    */
   protected shouldShowLabel(index: number, totalLabels: number): boolean {
+    // `show-label="false"` switches category labels off entirely. It used to be
+    // declared on BaseChart, documented as supported on bar and line charts,
+    // and read only by <dc-pie-chart> - so setting it here did nothing at all.
+    // Checked before the interval logic, because "none" outranks "every other".
+    if (this.showLabel === false) return false;
+
     const interval = this.getLabelIntervalValue();
     if (interval <= 1) return true;
 
