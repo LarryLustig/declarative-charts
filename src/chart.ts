@@ -2056,6 +2056,16 @@ export class Chart extends AxisChart {
       });
     }
 
+    // SVG has no z-index: paint order *is* stacking order, so the sequence
+    // below is load-bearing. Later wins.
+    //
+    //   defs → grid → reference bands → data → reference lines → value labels
+    //   → axes → axis titles → legend → focus indicator
+    //
+    // The two rules that decide where a new pass goes: anything that describes
+    // a *region* of the plot sits under the data it overlaps, so the data stays
+    // readable; anything that *marks* a value sits over it, or a bar can hide
+    // it. Reference bands and lines split on exactly that.
     return svg`
       ${this.renderDefs()}
 

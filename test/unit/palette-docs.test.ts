@@ -6,24 +6,22 @@ import { BUILTIN_PALETTES } from '../../src/builtin-palettes';
 /**
  * Keeps the documented palette names honest.
  *
- * These lists had drifted badly: both CLAUDE.md and API.md named 18 palettes
- * that do not exist (`blue`, `plasma`, `turbo`, `tableau10`, `set1`, …) while
- * omitting 13 that do. Nothing caught it because an unrecognised name resolves
- * to `undefined` and falls back to generated colours - a typo shows up as
- * "the colours look wrong", never as an error.
+ * The documented list had drifted badly: CLAUDE.md and API.md both named 18
+ * palettes that do not exist (`blue`, `plasma`, `turbo`, `tableau10`, `set1`, …)
+ * while omitting 13 that do. Nothing caught it because an unrecognised name
+ * resolves to `undefined` and falls back to generated colours - a typo shows up
+ * as "the colours look wrong", never as an error.
+ *
+ * Only API.md is checked now. CLAUDE.md carried a second copy of the list and
+ * this test existed to stop that copy lying; the copy is gone, which is the
+ * better fix. A test asserting that prose matches code is a sign the fact was
+ * in the wrong place.
  */
 
 const root = resolve(__dirname, '../..');
 const read = (file: string) => readFileSync(resolve(root, file), 'utf8');
 
 const actual = new Set(Object.keys(BUILTIN_PALETTES));
-
-/** Palette names mentioned in a documented list, keyed by category heading. */
-function documentedNames(markdown: string, section: RegExp): Set<string> {
-  const block = markdown.match(section);
-  if (!block) return new Set();
-  return new Set([...block[1].matchAll(/`([a-z0-9-]+)`/g)].map(m => m[1]));
-}
 
 describe('documented palette names match the implementation', () => {
   it('the registry itself is the shape the docs assume', () => {
@@ -32,19 +30,6 @@ describe('documented palette names match the implementation', () => {
     expect(types.filter(t => t === 'categorical')).toHaveLength(8);
     expect(types.filter(t => t === 'sequential')).toHaveLength(9);
     expect(types.filter(t => t === 'diverging')).toHaveLength(3);
-  });
-
-  it('CLAUDE.md names exactly the palettes that exist', () => {
-    const md = read('CLAUDE.md');
-    const documented = documentedNames(
-      md, /\*\*Built-in Palettes\*\*[\s\S]*?\n((?:- \*\*(?:Categorical|Sequential|Diverging)\*\*[^\n]*\n)+)/);
-
-    expect(documented.size).toBeGreaterThan(0);
-    const invented = [...documented].filter(n => !actual.has(n));
-    const missing = [...actual].filter(n => !documented.has(n));
-
-    expect(invented, `CLAUDE.md names palettes that do not exist: ${invented.join(', ')}`).toEqual([]);
-    expect(missing, `CLAUDE.md omits real palettes: ${missing.join(', ')}`).toEqual([]);
   });
 
   it('API.md names exactly the palettes that exist', () => {
