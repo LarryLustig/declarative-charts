@@ -6,6 +6,7 @@ import type { LegendItem } from './chart-legend.js';
 import type { ChartFunnelStage } from './chart-funnel-stage.js';
 import type { ChartPopup } from './chart-popup.js';
 import { analyzeFunnel, type StageData as InsightStageData } from './accessibility/index.js';
+import { popupHtml } from './chart-utils.js';
 
 /**
  * Funnel chart component that renders stages as narrowing trapezoids
@@ -844,9 +845,9 @@ export class FunnelChart extends BaseChart {
     stage: { label: string; value: number; valueFormat?: string },
     totalValue: number
   ): string {
-    return `<strong>${stage.label}</strong>`
-      + `<br>Value: ${this.formatValue(stage.value, stage.valueFormat)}`
-      + `<br>${this.formatPercent(this.shareOf(stage.value, totalValue) ?? 0)}`;
+    return popupHtml`<strong>${stage.label}</strong>`
+      + popupHtml`<br>Value: ${this.formatValue(stage.value, stage.valueFormat)}`
+      + popupHtml`<br>${this.formatPercent(this.shareOf(stage.value, totalValue) ?? 0)}`;
   }
 
   private stageDetail(
@@ -1051,7 +1052,7 @@ export class FunnelChart extends BaseChart {
     } else if (this.shouldShowAutoPopup(stage.autoPopup)) {
       const firstValue = stages.length > 0 ? stages[0].value : 0;
       const conversionRate = firstValue > 0 ? ((stage.value / firstValue) * 100).toFixed(1) : '0';
-      content = `<strong>${stage.label}</strong><br>Value: ${stage.value}<br>Conversion: ${conversionRate}%`;
+      content = popupHtml`<strong>${stage.label}</strong><br>Value: ${stage.value}<br>Conversion: ${conversionRate}%`;
     }
 
     if (content) {

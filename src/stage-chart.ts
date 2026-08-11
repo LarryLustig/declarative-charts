@@ -8,6 +8,7 @@ import { computeStageLayout, resolveStageShape } from './stage-layout.js';
 import type { ChartPopup } from './chart-popup.js';
 import type { ChartFill } from './chart-fill.js';
 import { analyzeFunnel, type StageData as InsightStageData } from './accessibility/index.js';
+import { popupHtml } from './chart-utils.js';
 
 /**
  * Connector types for stage connections
@@ -1398,14 +1399,14 @@ export class StageChart extends BaseChart {
     showValue: boolean = true,
     showPercent: boolean = true
   ): string {
-    let content = `<strong>${stage.label}</strong>`;
+    let content = popupHtml`<strong>${stage.label}</strong>`;
     if (showValue) {
       const formattedValue = this.formatValue(stage.value, stage.valueFormat);
-      content += `<br>Value: ${formattedValue}`;
+      content += popupHtml`<br>Value: ${formattedValue}`;
     }
     if (showPercent) {
       const percentage = totalValue > 0 ? ((stage.value / totalValue) * 100).toFixed(1) : '0.0';
-      content += `<br>${percentage}%`;
+      content += popupHtml`<br>${percentage}%`;
     }
     return content;
   }
@@ -1591,7 +1592,7 @@ export class StageChart extends BaseChart {
       content = stage.popup.content;
     } else if (this.shouldShowAutoPopup(stage.autoPopup)) {
       const percentage = total > 0 ? ((stage.value / total) * 100).toFixed(1) : '0';
-      content = `<strong>${stage.label}</strong><br>Value: ${stage.value}<br>${percentage}%`;
+      content = popupHtml`<strong>${stage.label}</strong><br>Value: ${stage.value}<br>${percentage}%`;
     }
 
     if (content) {

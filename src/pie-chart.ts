@@ -7,6 +7,7 @@ import type { LegendItem } from './chart-legend.js';
 import type { ChartPieSlice } from './chart-pie-slice.js';
 import type { ChartPopup } from './chart-popup.js';
 import { analyzePie, type SliceData as InsightSliceData } from './accessibility/index.js';
+import { popupHtml } from './chart-utils.js';
 
 /**
  * Pie chart component that renders slices as circular segments
@@ -569,9 +570,9 @@ export class PieChart extends BaseChart {
     slice: { label: string; value: number; valueFormat?: string },
     totalValue: number
   ): string {
-    return `<strong>${slice.label}</strong>`
-      + `<br>Value: ${this.formatValue(slice.value, slice.valueFormat)}`
-      + `<br>${this.formatPercent(this.shareOf(slice.value, totalValue) ?? 0)}`;
+    return popupHtml`<strong>${slice.label}</strong>`
+      + popupHtml`<br>Value: ${this.formatValue(slice.value, slice.valueFormat)}`
+      + popupHtml`<br>${this.formatPercent(this.shareOf(slice.value, totalValue) ?? 0)}`;
   }
 
   private sliceDetail(
@@ -760,7 +761,7 @@ export class PieChart extends BaseChart {
     } else if (this.shouldShowAutoPopup(slice.autoPopup)) {
       const total = slices.reduce((sum, s) => sum + s.value, 0);
       const percent = total > 0 ? ((slice.value / total) * 100).toFixed(1) : '0';
-      content = `<strong>${slice.label}</strong><br>Value: ${slice.value}<br>Percent: ${percent}%`;
+      content = popupHtml`<strong>${slice.label}</strong><br>Value: ${slice.value}<br>Percent: ${percent}%`;
     }
 
     if (content) {

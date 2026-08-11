@@ -43,12 +43,13 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:visual": "playwright test",
+    "test:examples": "playwright test test/visual/examples.spec.ts test/visual/example-code.spec.ts",
     "test:visual:update": "playwright test --update-snapshots",
     "test:visual:report": "playwright show-report test/visual/report",
     "bench": "node test/visual/bench.mjs",
     "analyze": "cem analyze --litelement --globs \"src/**/*.ts\" --outdir . && node build/compact-manifest.mjs",
     "test:package": "node test/package/smoke.mjs",
-    "prepublishOnly": "npm run test:run && npm run build && npm run test:package"
+    "prepublishOnly": "npm run test:run && npm run build && npm run test:package && npm run test:visual"
   },
   "repository": {
     "type": "git",

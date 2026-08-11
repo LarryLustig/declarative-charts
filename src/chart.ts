@@ -11,7 +11,7 @@ import type { ChartBarSegment } from './chart-bar-segment.js';
 import type { ChartLine, CurveFit } from './chart-line.js';
 import type { ChartPoint } from './chart-point.js';
 import type { ChartScatter } from './chart-scatter.js';
-import { placeLabels, type LabelCandidate, type LabelCollisionMode } from './chart-utils.js';
+import { placeLabels, popupHtml, type LabelCandidate, type LabelCollisionMode } from './chart-utils.js';
 import { calculateNiceTicks } from './chart-utils.js';
 import type { ChartBubble } from './chart-bubble.js';
 import type { ChartPopup } from './chart-popup.js';
@@ -3677,9 +3677,11 @@ export class Chart extends AxisChart {
     if (!this.shouldShowAutoPopup(point.autoPopup, series.autoPopup)) return null;
 
     const name = point.label || series.label;
-    return `${name ? `<strong>${name}</strong><br>` : ''}`
-      + `x: ${this.formatValue(point.x, point.valueFormat)}<br>`
-      + `y: ${this.formatValue(point.value, point.valueFormat)}`;
+    // The inner template is tagged too. A plain one here would build real
+    // markup that the outer tag would then escape into visible text.
+    return (name ? popupHtml`<strong>${name}</strong><br>` : '')
+      + popupHtml`x: ${this.formatValue(point.x, point.valueFormat)}<br>`
+      + popupHtml`y: ${this.formatValue(point.value, point.valueFormat)}`;
   }
 
   private handleScatterEnter(e: MouseEvent, seriesIndex: number, pointIndex: number): void {
@@ -3959,10 +3961,10 @@ export class Chart extends AxisChart {
     bar: { label: string; value: number; groupLabel?: string; valueFormat?: string },
     totalValue: number
   ): string {
-    let content = `<strong>${bar.label}</strong>`;
-    if (bar.groupLabel) content += `<br>${bar.groupLabel}`;
-    content += `<br>Value: ${this.formatValue(bar.value, bar.valueFormat)}`;
-    content += `<br>${this.formatPercent(this.shareOf(bar.value, totalValue) ?? 0)}`;
+    let content = popupHtml`<strong>${bar.label}</strong>`;
+    if (bar.groupLabel) content += popupHtml`<br>${bar.groupLabel}`;
+    content += popupHtml`<br>Value: ${this.formatValue(bar.value, bar.valueFormat)}`;
+    content += popupHtml`<br>${this.formatPercent(this.shareOf(bar.value, totalValue) ?? 0)}`;
     return content;
   }
 
@@ -3971,11 +3973,11 @@ export class Chart extends AxisChart {
     bar: { label: string; groupLabel?: string },
     barTotal: number
   ): string {
-    let content = `<strong>${segment.label}</strong>`;
-    content += `<br>${bar.label}`;
+    let content = popupHtml`<strong>${segment.label}</strong>`;
+    content += popupHtml`<br>${bar.label}`;
     if (bar.groupLabel) content += ` (${bar.groupLabel})`;
-    content += `<br>Value: ${this.formatValue(segment.value, segment.valueFormat)}`;
-    content += `<br>${this.formatPercent(this.shareOf(segment.value, barTotal) ?? 0)} of bar`;
+    content += popupHtml`<br>Value: ${this.formatValue(segment.value, segment.valueFormat)}`;
+    content += popupHtml`<br>${this.formatPercent(this.shareOf(segment.value, barTotal) ?? 0)} of bar`;
     return content;
   }
 
@@ -3984,8 +3986,8 @@ export class Chart extends AxisChart {
     const present = line.points.filter(p => Number.isFinite(p.value));
     const total = present.reduce((sum, p) => sum + p.value, 0);
     const avg = present.length > 0 ? total / present.length : 0;
-    return `<strong>${line.label}</strong><br>Points: ${present.length}`
-      + `<br>Avg: ${this.formatValue(avg)}`;
+    return popupHtml`<strong>${line.label}</strong><br>Points: ${present.length}`
+      + popupHtml`<br>Avg: ${this.formatValue(avg)}`;
   }
 
   private generatePointPopupContent(
@@ -3993,19 +3995,19 @@ export class Chart extends AxisChart {
     lineName: string,
     totalValue: number
   ): string {
-    return `<strong>${point.label}</strong><br>${lineName}`
-      + `<br>Value: ${this.formatValue(point.value, point.valueFormat)}`
-      + `<br>${this.formatPercent(this.shareOf(point.value, totalValue) ?? 0)}`;
+    return popupHtml`<strong>${point.label}</strong><br>${lineName}`
+      + popupHtml`<br>Value: ${this.formatValue(point.value, point.valueFormat)}`
+      + popupHtml`<br>${this.formatPercent(this.shareOf(point.value, totalValue) ?? 0)}`;
   }
 
   private generateBubblePopupContent(
     bubble: { label: string; value: number; sizeValue: number; valueFormat?: string },
     totalValue: number
   ): string {
-    return `<strong>${bubble.label}</strong>`
-      + `<br>Value: ${this.formatValue(bubble.value, bubble.valueFormat)}`
-      + `<br>Size: ${this.formatValue(bubble.sizeValue, bubble.valueFormat)}`
-      + `<br>${this.formatPercent(this.shareOf(bubble.value, totalValue) ?? 0)}`;
+    return popupHtml`<strong>${bubble.label}</strong>`
+      + popupHtml`<br>Value: ${this.formatValue(bubble.value, bubble.valueFormat)}`
+      + popupHtml`<br>Size: ${this.formatValue(bubble.sizeValue, bubble.valueFormat)}`
+      + popupHtml`<br>${this.formatPercent(this.shareOf(bubble.value, totalValue) ?? 0)}`;
   }
 
   // ============================================================================
@@ -4882,7 +4884,7 @@ export class Chart extends AxisChart {
       const bars = this.getFlattenedBars();
       const total = bars.reduce((sum, b) => sum + b.value, 0);
       const percent = total > 0 ? ((bar.value / total) * 100).toFixed(1) : '0';
-      return `<strong>${bar.label}</strong><br>Value: ${bar.value}<br>Percent: ${percent}%`;
+      return popupHtml`<strong>${bar.label}</strong><br>Value: ${bar.value}<br>Percent: ${percent}%`;
     }
     return null;
   }
@@ -4895,7 +4897,7 @@ export class Chart extends AxisChart {
       return point.popup.content;
     }
     if (this.shouldShowAutoPopup(point.autoPopup)) {
-      return `<strong>${line.label}</strong><br>${point.label}: ${point.value}`;
+      return popupHtml`<strong>${line.label}</strong><br>${point.label}: ${point.value}`;
     }
     return null;
   }
@@ -4908,7 +4910,7 @@ export class Chart extends AxisChart {
       return bubble.popup.content;
     }
     if (this.shouldShowAutoPopup(bubble.autoPopup)) {
-      return `<strong>${bubble.label}</strong><br>Value: ${bubble.value}<br>Size: ${bubble.sizeValue}`;
+      return popupHtml`<strong>${bubble.label}</strong><br>Value: ${bubble.value}<br>Size: ${bubble.sizeValue}`;
     }
     return null;
   }

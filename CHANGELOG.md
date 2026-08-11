@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+- **Escape auto-popup content.** Popup content is bound with `.innerHTML`, deliberately — a
+  `<dc-popup>` holds markup the author wrote. The **auto**-generated content is different: the
+  library builds it from element attributes, and those went in raw, so
+
+  ```html
+  <dc-bar label='<img src=x onerror="…">' auto-popup>
+  ```
+
+  executed on hover. Verified in Chromium. `label` is the single attribute most likely to hold a
+  value from a database — a product name, a region, a customer — which is exactly what this
+  library's premise produces
+
+  Fixed across all five chart types with a ``popupHtml`…` `` tagged template that escapes every
+  interpolation by construction, rather than an `escape()` call at each of the 20 sites that
+  someone could forget. Everything interpolated is escaped, not just labels: numbers escape to
+  themselves, and a rule with no exceptions needs no case analysis. `<dc-popup>` content is
+  untouched, and a test pins that
+
 - **Escape pattern attribute values.** `pattern-stroke` and `pattern-fill` were interpolated
   unescaped into the SVG **string** that `BaseChart.renderDefs()` hands to lit's `unsafeSVG`,
   which parses markup by design. A value of

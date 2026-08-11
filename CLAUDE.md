@@ -123,6 +123,7 @@ words. Read it there; do not restate it here, or the two will drift.
 | SVG paint order is stacking order; regions go under the data, marks over it | `chart.ts` → `renderChart()` |
 | Part names are a public contract | `base-chart.ts` → `getShadowParts()` |
 | Bundler build keeps `@__PURE__`; the standalone is minified for the CDN | `build/minify-standalone.mjs` |
+| Values interpolated into markup-parsing sinks must be escaped: pattern SVG strings and auto-popup HTML | `patterns.ts` → `escapeSvgAttribute()`, `chart-utils.ts` → `popupHtml()` |
 
 **Chart type hooks.** `getAnimatableChartType()` is `protected abstract` — a new
 chart type will not compile without it. `isHorizontalChart()` and
@@ -218,6 +219,16 @@ Helpers live in each directory's `setup.ts`.
 - **Visual baselines: `maxDiffPixelRatio` is 0.01**, which has twice hidden real
   render changes. When a change should alter a chart, regenerate at zero
   tolerance and compare deliberately.
+- **The Playwright suite is split.** `charts.spec.ts` compares screenshots and
+  runs locally only — the baselines are `-chromium-win32` and no CI runner
+  reproduces them. It is bound into `prepublishOnly` so a release cannot skip
+  it. `npm run test:examples` (`examples.spec.ts`, `example-code.spec.ts`)
+  asserts on the DOM rather than pixels, so it is platform-independent and runs
+  in CI.
+- **Never escape `<dc-popup>` content, always escape auto-popup content.** The
+  first is markup the author wrote and means; the second the library builds from
+  attributes, and `label` reached `.innerHTML` raw. Build it with
+  ``popupHtml`…` `` — see `chart-utils.ts`.
 - **⚠️ Every declared attribute must change something.**
   `test/component/no-dead-attributes.test.ts` renders each element with and
   without each attribute and fails on byte-identical output. Ten attributes have

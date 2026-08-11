@@ -2,7 +2,7 @@ import { svg, SVGTemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { BaseChart, showConditionConverter, type FocusableElement, type ShowCondition } from './base-chart.js';
 import type { LegendItem } from './chart-legend.js';
-import { calculateNiceTicks } from './chart-utils.js';
+import { calculateNiceTicks, popupHtml } from './chart-utils.js';
 import { resolveDasharray } from './chart-fill.js';
 import { ErrorCode } from './errors.js';
 import type { AnimatableChartType } from './animation.js';
@@ -591,7 +591,7 @@ export class RadarChart extends BaseChart {
   private vertexPopupContent(seriesIndex: number, v: RadarVertex): string {
     const series = this.cachedLayout?.series[seriesIndex];
     const name = series?.label ? `<strong>${series.label}</strong><br>` : '';
-    return `${name}${v.label}: ${this.formatValue(v.value, v.valueFormat)}`;
+    return popupHtml`${name}${v.label}: ${this.formatValue(v.value, v.valueFormat)}`;
   }
 
   // ==========================================================================

@@ -196,6 +196,51 @@ export function calculateLabelInterval(
 }
 
 // ============================================================================
+// Popup Content
+// ============================================================================
+
+/** Escape a value for interpolation into HTML text or an attribute. */
+export function escapeHtml(value: unknown): string {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
+ * Build auto-popup content, escaping every interpolated value.
+ *
+ * Popup content is bound with `.innerHTML`, which is deliberate: `<dc-popup>`
+ * lets an author write formatted markup. The **auto**-generated content is a
+ * different thing — the library builds it from element attributes — and those
+ * went in raw:
+ *
+ *     <dc-bar label='<img src=x onerror="…">' auto-popup>
+ *
+ * fired on hover. `label` is the single attribute most likely to hold a value
+ * from a database — a product name, a region, a customer — which is exactly the
+ * case this library's premise creates.
+ *
+ * Used as a tag rather than an `escape()` call at each site so that forgetting
+ * is not possible within a template: every `${}` is escaped by construction.
+ * Concatenating two tagged templates is safe; nesting a *plain* template inside
+ * a tagged one is not, because the inner one produces real markup that the
+ * outer then escapes. Tag the inner one too, and concatenate.
+ *
+ * Numbers escape to themselves, so this is applied to formatted values as well
+ * as to labels. That is deliberate: a rule with no exceptions needs no case
+ * analysis, and `value-format` is itself an author-supplied string.
+ */
+export function popupHtml(strings: TemplateStringsArray, ...values: unknown[]): string {
+  return strings.reduce(
+    (out, chunk, i) => out + chunk + (i < values.length ? escapeHtml(values[i]) : ''),
+    ''
+  );
+}
+
+// ============================================================================
 // Label Placement
 // ============================================================================
 
