@@ -238,11 +238,15 @@ console.log('\nCDN artifact');
     `${jsdoc.length} block(s) survived; they were 88 kB of this file`
   );
   // Lit is inlined here, so its BSD-3-Clause headers must survive minification.
-  check(
-    /@license/.test(standalone),
-    'standalone keeps its licence headers',
-    'minification must run with legalComments preserved'
-  );
+  // Both no-bundler artifacts inline Lit, so both must carry its BSD-3-Clause
+  // headers. Vite 8 stripped all ten from each when it started minifying ES
+  // library output itself — a licence breach that built clean and that only
+  // this check caught.
+  for (const f of ['declarative-charts.standalone.js', 'declarative-charts.umd.cjs']) {
+    const n = (read(f).match(/@license/g) ?? []).length;
+    check(n > 0, `${f} keeps its licence headers (${n})`,
+      'Lit is inlined here; minification must preserve legalComments');
+  }
   check(
     kb('declarative-charts.standalone.js') < 400,
     `standalone is ${kb('declarative-charts.standalone.js')} kB`

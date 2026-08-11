@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- **Upgraded Vite 5 → 8 and esbuild 0.21 → 0.28**, clearing three advisories that `npm audit`
+  reported against the dev toolchain. Two are Windows-specific and this project is maintained on
+  Windows: an NTLMv2 hash disclosure via UNC path handling in `launch-editor`, and a
+  `server.fs.deny` bypass via alternate paths. The third is path traversal in optimised-deps
+  `.map` handling, plus the transitive esbuild dev-server request leakage. All are development
+  only — no published artifact was affected — but "dev only" is not "nobody" when the dev is you.
+  `npm audit` now reports zero
+
+### Fixed
+
+- **Lit's licence headers were being stripped from the shipped bundles.** Vite 8 minifies ES
+  library output itself and removes legal comments doing it, so the upgrade silently dropped all
+  ten BSD-3-Clause notices from both self-contained artifacts. Lit is *inlined* into those, so
+  redistributing them without the notice is a licence breach rather than a size saving
+
+  Vite's minification is now off for that config and `build/minify-standalone.mjs` is the only
+  pass, since it already pins `legalComments`. It also covers the UMD now, which Vite had been
+  minifying and no longer does
+
+  The guard that should have caught this compared before against after and passed vacuously:
+  nothing is "dropped" between zero and zero. It now asserts the property rather than the delta,
+  and the package smoke test checks both artifacts by name
+
+### Changed
+
+- `engines.node` is `>=20.19.0`; Vite 8 requires `^20.19.0 || >=22.12.0` and is now the binding
+  constraint. CI and the Pages workflow pin 20.19 to match
+
 ## [0.2.0] - 2026-08-11
 
 **First published release.** `0.1.0` was never put on npm — it is the state the

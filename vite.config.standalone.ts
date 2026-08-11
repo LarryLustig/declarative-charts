@@ -15,6 +15,16 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   build: {
     emptyOutDir: false,
+    // Minification is delegated to build/minify-standalone.mjs, which pins
+    // `legalComments: 'inline'`.
+    //
+    // Vite 8 began minifying ES library output itself and strips legal comments
+    // while doing it, so Lit — inlined into these artifacts — lost all ten of
+    // its BSD-3-Clause headers. Redistributing the code without the notice is a
+    // licence breach, not a size win, and the top-level `esbuild` option does
+    // not reach the build minifier. Turning Vite's pass off leaves exactly one
+    // place that minifies and exactly one place that decides about licences.
+    minify: false,
     lib: {
       entry: './src/index.ts',
       name: 'DeclarativeCharts',
