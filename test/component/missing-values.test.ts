@@ -12,7 +12,7 @@ import { ChartPoint } from '../../src/chart-point';
 /**
  * A point with no value used to plot at zero, so the line dived to the axis and
  * the chart asserted the value *was* zero. For financial or clinical data that
- * is not cosmetic - it is the chart stating something false. See REVIEW.md 4.5.
+ * is not cosmetic - it is the chart stating something false. See docs/review.md 4.5.
  */
 describe('optionalNumberConverter', () => {
   const from = (v: string | null) => optionalNumberConverter.fromAttribute(v);

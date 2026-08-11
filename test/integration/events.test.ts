@@ -14,7 +14,7 @@ import { PieChart } from '../../src/pie-chart';
  * Interaction events. Before these, the only ways to respond to a click were
  * `href` navigation and a declarative popup — "click a bar, filter the table
  * below" was impossible without reaching into the shadow DOM for a selector the
- * library never promised. See REVIEW.md 4.3.
+ * library never promised. See docs/review.md 4.3.
  */
 describe('interaction events', () => {
   const barChart = () => fixture<Chart>('dc-chart', { width: '600', height: '400' }, `

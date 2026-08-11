@@ -46,7 +46,7 @@ describe('BaseShape.BASE_KNOWN_ATTRS', () => {
   });
 
   // `color` was a day-one deprecation of fill/stroke and has been removed
-  // (REVIEW.md 6.5), so it is no longer a known attribute.
+  // (docs/review.md 6.5), so it is no longer a known attribute.
   it('no longer carries the deprecated color attribute', () => {
     expect(BaseShape.BASE_KNOWN_ATTRS.has('color')).toBe(false);
   });

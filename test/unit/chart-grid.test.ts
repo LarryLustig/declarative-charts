@@ -5,7 +5,7 @@ import { ChartGrid } from '../../src/chart-grid';
  * Tests for the ChartGrid configuration element.
  *
  * `<dc-grid>` used to take `color` and `style`. `style` is the sharpest
- * convention violation the review found (REVIEW.md 6.1): every HTML element
+ * convention violation the review found (docs/review.md 6.1): every HTML element
  * already has a `style` attribute, so `<dc-grid style="dashed">` shadowed a
  * global one and put an unparseable declaration in the DOM. The attributes are
  * now `stroke` and `stroke-dasharray`, named for the SVG properties they set

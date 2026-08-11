@@ -921,7 +921,7 @@ describe('ChartLegend component', () => {
     });
   });
   // ==========================================================================
-  // show-* conditions (REVIEW.md 6.2)
+  // show-* conditions (docs/review.md 6.2)
   //
   // <dc-legend> used to declare its own private boolean converter, so
   // show-value="10%" here meant `true` while the identical attribute on a data

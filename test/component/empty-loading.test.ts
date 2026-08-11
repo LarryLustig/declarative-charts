@@ -19,7 +19,7 @@ import { PieChart } from '../../src/pie-chart';
  * This matters more here than for a config-driven library. A chart whose markup
  * arrives from the server necessarily has a frame where the element exists and
  * its children do not - that is the normal first frame, not an error.
- * See REVIEW.md 4.2.
+ * See docs/review.md 4.2.
  */
 describe('empty state', () => {
   const emptyText = (chart: Chart | PieChart) =>

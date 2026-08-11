@@ -117,7 +117,7 @@ async function barWidthProbe() {
     console.log(`${r.n}\t${r.attrWidth}\t${r.negative}\t${r.painted}${bad ? '\t<-- FAIL' : ''}`);
   }
   if (failed) {
-    console.error(`\n${failed} size(s) produced bars that do not render. See REVIEW.md §3.5.`);
+    console.error(`\n${failed} size(s) produced bars that do not render. See docs/review.md §3.5.`);
     process.exitCode = 1;
   }
 }

@@ -6,7 +6,7 @@ import { Chart } from '../../src/chart';
 
 /**
  * `text-scaling` controls whether font sizes are viewBox units (scaling with the
- * chart) or CSS pixels (constant on screen). See REVIEW.md 4.1.
+ * chart) or CSS pixels (constant on screen). See docs/review.md 4.1.
  *
  * happy-dom has no layout, so the rendered width is never measured and
  * `fontScale` stays 1 here. These assertions therefore cover the contract and
@@ -76,7 +76,7 @@ describe('text-scaling', () => {
 
 /**
  * `fit` controls whether the chart keeps its authored proportions or adopts the
- * container's shape. See REVIEW.md 4.1(b).
+ * container's shape. See docs/review.md 4.1(b).
  *
  * happy-dom has no layout and no ResizeObserver, so nothing is ever measured and
  * `fill` cannot reshape anything here. These cover the contract and, importantly,

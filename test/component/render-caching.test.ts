@@ -14,7 +14,7 @@ import { Chart } from '../../src/chart';
  * text measurements, and 1,000 bars locked the main thread for 45 seconds.
  *
  * These assertions are about call *counts*, not wall time, so they are stable in
- * CI. `npm run bench` measures the timings. See REVIEW.md 3.4.
+ * CI. `npm run bench` measures the timings. See docs/review.md 3.4.
  */
 describe('per-render caching keeps render linear', () => {
   const restores: Array<() => void> = [];

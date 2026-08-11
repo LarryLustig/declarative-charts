@@ -14,7 +14,7 @@ import { PieChart } from '../../src/pie-chart';
  * Written *before* extracting KeyboardNavController, pinning current behaviour
  * rather than intended behaviour. Their job is to fail if the extraction changes
  * anything. Where a behaviour looks odd it is still recorded as-is - changing it
- * would be a decision, not a refactor's side effect. See REVIEW.md 5.1.
+ * would be a decision, not a refactor's side effect. See docs/review.md 5.1.
  */
 
 type NavApi = {

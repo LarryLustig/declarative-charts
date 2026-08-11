@@ -55,7 +55,7 @@ describe('showConditionConverter', () => {
 
     // An unreadable value used to mean "show". That is how show-value="off"
     // came to turn labels on. Unrecognised values now warn (DC104) and default
-    // to false rather than guessing. See REVIEW.md 6.2.
+    // to false rather than guessing. See docs/review.md 6.2.
     it('returns false for an unparseable percentage', () => {
       expect(showConditionConverter.fromAttribute('abc%')).toBe(false);
     });

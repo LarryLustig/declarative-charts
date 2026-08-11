@@ -4,7 +4,25 @@
 reviews — market/value, API design & DX, architecture & code health — consolidated, with
 claims re-verified against the source.*
 
-**Verdict: resume, but ship before you build. Do not continue the current roadmap.**
+> **Read this as history, not as a bug list.**
+>
+> Every finding below is now marked ✅ FIXED or ❌ DECLINED — 26 of them — and the
+> original wording of each is preserved beneath its resolution so the record can
+> be checked rather than taken on trust. The remaining unmarked sections are
+> those `(original)` blocks, plus §1 (what the library is), §6.6 (what was right
+> and should not change), and one diagnosis that turned out to be wrong and says
+> so.
+>
+> Section headings are therefore written in a present tense that is no longer
+> true. "The package as it stands does not work" described a version that was
+> never published.
+>
+> It is kept because two dozen tests cite it by section number to explain their
+> own existence, and because an audit whose findings were all addressed is worth
+> more as a record than as a deletion. `CHANGELOG.md` is the authority on what
+> actually shipped.
+
+**Verdict at the time: resume, but ship before you build. Do not continue the current roadmap.**
 
 The engineering is well past the hard part: 20,677 lines of source, ~19,200 lines of tests,
 `tsc --noEmit` clean under `strict` + `noUnusedLocals` + `noUnusedParameters`, only 4 `any`-ish
@@ -16,6 +34,10 @@ What's missing isn't capability. It's that **nobody has ever run this code.** `g
 is empty. `package.json` still says `YOUR_USERNAME` and `your.email@example.com`. The npm name
 `declarative-charts` returns 404 — free, never published. The CDN URL in `README.md:34` does
 not resolve.
+
+*(All four were fixed; the placeholder metadata is now asserted against by
+`test/package/smoke.mjs`, which also ties the LICENSE copyright holder to the
+`package.json` author after that turned out to name the wrong person entirely.)*
 
 ---
 
@@ -182,9 +204,10 @@ signal the project drifted from shipping into polishing.
 
 ---
 
-## 2. Ship blockers — the package as it stands does not work
+## 2. Ship blockers — ✅ ALL FIXED
 
-Ordered by cost-of-discovery-after-publish.
+*As found: the package, as it then stood, did not work when installed. Ordered
+by cost-of-discovery-after-publish.*
 
 ### 2.1 `"sideEffects": false` on a package whose entire job is `customElements.define` — ✅ FIXED
 

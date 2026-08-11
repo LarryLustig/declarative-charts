@@ -8,7 +8,7 @@ import { StageChart } from '../../src/stage-chart';
 
 /**
  * Behaviour tests for `<dc-stage-chart>`, the worst-covered real code in the
- * repo (REVIEW.md §7).
+ * repo (docs/review.md §7).
  *
  * The geometry was already extracted to `stage-layout.ts` and is covered there
  * at 100%; `test/component/stage-layout.test.ts` pins the shapes and positions.

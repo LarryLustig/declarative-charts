@@ -45,6 +45,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **README leads with what this library is.** The clearest statement of purpose in the project
+  was buried in an internal audit: the axis that matters is not "web component vs JS library" but
+  **where the data lives** — a serialised payload, or document structure. Charts.css proved there
+  is demand for the second and stopped where real charting begins; this is that approach with a
+  rendering engine behind it
+
+  With the boundary stated too, because it constrains the pitch: **this is not "charts without
+  JavaScript", it is charts without _writing_ JavaScript.** Charts.css genuinely renders with JS
+  disabled; this does not, and should not claim to. Also that htmx is not a dependency — the
+  mechanism is passthrough attributes, which serve `hx-*`, `data-*`, Alpine, Livewire and
+  Stimulus identically — and where the library does *not* fit
+
+- **`REVIEW.md` → `docs/review.md`**, with a preamble saying what it now is. Every finding in it
+  is marked fixed or declined, and its headings are written in a present tense that stopped being
+  true — "the package as it stands does not work" describes a version that was never published.
+  Kept rather than deleted because two dozen tests cite it by section number to explain their own
+  existence, and an audit whose findings were all addressed is worth more as a record than as a
+  deletion
+
+- **Bundle-size and performance figures in the README are measured, not remembered.** The table
+  claimed 302 KB / 71 KB for an "ES Module" and 190 KB / 50 KB for UMD, did not distinguish the
+  three artifacts, and attributed ~45 KB gzipped to Lit. Measured: 75 KB gzipped for either
+  self-contained build, of which Lit is about 6 KB. The performance claim is now the `npm run
+  bench` number — 1,000 bars in ~620 ms end to end, ~180 ms to re-render
+
 - **One name: `declarative-charts`.** The project was calling itself three things — the npm
   package `declarative-charts`, the repository `decl-charts`, and the elements `dc-`. Standardised
   on `declarative-charts`, which the `dc-` prefix already encodes. The prefix is public API in
@@ -406,7 +431,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- **BREAKING: the day-one deprecations are gone** (REVIEW.md §6.5). A pre-1.0 library should not
+- **BREAKING: the day-one deprecations are gone** (docs/review.md §6.5). A pre-1.0 library should not
   ship carrying deprecations
   - `color` on data elements — use `fill` (shapes) or `stroke` (lines). 128 uses across the
     example pages were migrated
@@ -415,7 +440,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **BREAKING: naming collisions resolved** (REVIEW.md §6.4)
+- **BREAKING: naming collisions resolved** (docs/review.md §6.4)
   - `<dc-bar width>` → `<dc-bar bar-width>`. `width` was a homonym of `<dc-chart width>` (the
     width of the whole chart) and the odd one of three: `<dc-chart>` and `<dc-bar-group>` already
     spelled this `bar-width`. A leftover `width` is now ignored with a `DC104` rather than passed
@@ -427,12 +452,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `<dc-fill scale>` → `<dc-fill pattern-scale>`, matching the attribute of the same meaning on
     shapes. Bare `scale` also read as though it scaled the fill rather than the pattern inside it
 
-- **BREAKING: `<dc-grid>` attributes renamed** (REVIEW.md §6.1). `style` → `stroke-dasharray`,
+- **BREAKING: `<dc-grid>` attributes renamed** (docs/review.md §6.1). `style` → `stroke-dasharray`,
   `color` → `stroke`. `style` is a global HTML attribute on every element, so the old name
   shadowed it and put an unparseable CSS declaration in the DOM. The new names match the SVG
   properties they set and accept the same named patterns as `<dc-fill>` (`solid`, `dashed`,
   `dotted`, `dash-dot`, `long-dash`) or a raw dash list such as `"5 3"`
-- **BREAKING: `show-*` attributes reject values they cannot read** (REVIEW.md §6.2). An
+- **BREAKING: `show-*` attributes reject values they cannot read** (docs/review.md §6.2). An
   unrecognised value used to mean *show*, so `show-value="off"`, `"no"` and `"none"` all turned
   labels **on**. `off`/`no`/`none`/`hidden` now mean off and `on`/`yes`/`show` mean on; anything
   else warns with `DC104` and defaults to not showing. These are enumerated attributes, not HTML
@@ -459,7 +484,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   table, and the two disagreed (`5,5` vs `5 5`). One copy now, in `<dc-fill>`
 
 - **Popups, keyboard-navigation labels and screen-reader summaries ignored `value-format`**
-  (REVIEW.md §3.3). A chart set to `value-format="currency USD"` drew `$1,000.00` on the label
+  (docs/review.md §3.3). A chart set to `value-format="currency USD"` drew `$1,000.00` on the label
   and announced `1000` in the tooltip and to a screen reader. 18 sites across the four chart
   types now route through the formatter, honouring each element's own `value-format` override
   rather than only the chart-level one. Counts are deliberately left unformatted — "3 stages" is
@@ -480,12 +505,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Stage chart geometry extracted into `src/stage-layout.ts`** (REVIEW.md §5.3)
+- **Stage chart geometry extracted into `src/stage-layout.ts`** (docs/review.md §5.3)
   - 144 lines of pure functions over numbers — no DOM, no Lit, no chart state — replacing
     geometry that was interleaved with data extraction, colour resolution and zero handling
     across a 352-line method
   - 26 characterization tests written first, on what was the worst-covered file in the repo
-- **`BaseChart` god-class work completed** (REVIEW.md §5)
+- **`BaseChart` god-class work completed** (docs/review.md §5)
   - `TextMeasurer` extracted, the sixth and last responsibility to move out. Six modules now hold
     1,592 lines that used to be inside the base class
   - **Both abstraction leaks closed.** `getAnimatableChartType()` sniffed `this.tagName` for

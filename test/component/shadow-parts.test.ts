@@ -13,7 +13,7 @@ import { PieChart } from '../../src/pie-chart';
 /**
  * `part` attributes are what make `::part()` styling possible, so they are part
  * of the public contract - renaming one is a breaking change for any consumer
- * styling it. See REVIEW.md 4.4.
+ * styling it. See docs/review.md 4.4.
  *
  * These assert the attributes are stamped. Whether the browser then applies the
  * CSS is a browser behaviour and is verified in a real Chromium run rather than

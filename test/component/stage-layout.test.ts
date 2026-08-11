@@ -10,7 +10,7 @@ import { StageChart } from '../../src/stage-chart';
  * Written before extracting the layout, and on the worst-covered file in the
  * repo (70% statements / 61% branch): `calculateStageLayout()` is 352 lines that
  * interleave data extraction, colour resolution, zero handling and geometry, and
- * almost none of it was exercised. See REVIEW.md 5.3.
+ * almost none of it was exercised. See docs/review.md 5.3.
  *
  * These pin the geometry as observable output - the position and size of every
  * rendered shape - rather than the internals, so the extraction is free to move

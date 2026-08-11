@@ -65,6 +65,76 @@ JavaScript to write:
 Every element also takes `hx-*` and other unknown attributes and passes them
 through to the SVG shape, so a bar can be a drop target or trigger a request.
 
+## Where this sits
+
+The useful distinction between charting libraries is not "web component or JS
+library" — that is cosmetic. It is **where the data lives**, and on that axis
+there are only two designs.
+
+**Data as a payload.** One element, or one call, per *chart*:
+
+```html
+<google-chart data='[["Month","Days"],["Jan",31],["Feb",28]]'></google-chart>
+```
+```js
+new Chart(ctx, { data: { labels: [...], datasets: [...] } });
+```
+
+Different clothes, same design. The data is an opaque blob you must serialise
+first, and the HTML is a mounting point. You cannot address one datapoint from
+markup, attach a handler to a single bar, or let a template emit a row without
+JSON-encoding it. Chart.js, ECharts, ApexCharts, Highcharts, Recharts,
+Vega-Lite and the web-component wrappers all work this way.
+
+**Data as markup.** One element per *datapoint*:
+
+```html
+<td style="--size: 0.4"><span class="data">$40K</span></td>   <!-- Charts.css -->
+<dc-bar value="40000" label="Jan"></dc-bar>                    <!-- this library -->
+```
+
+That category has essentially two members. [Charts.css](https://chartscss.org)
+proved there is demand for it — 6.5k stars — and stopped where real charting
+begins, because a stylesheet cannot measure text, compute a nice axis range, lay
+out a legend, fit labels, or handle interaction. Its markup also asks you to
+pre-normalise: `--size` is a ratio from 0 to 1, so the real number never appears
+in the document except as display text.
+
+**This library is the data-as-markup approach with a rendering engine behind
+it** — axes, scales, legends, text fitting, interaction, accessibility — and
+`value="40000"` is the actual number, un-normalised, so your template does not
+need to know the series maximum before it can emit a row.
+
+### What this is not
+
+**It is not "charts without JavaScript". It is charts without _writing_
+JavaScript.**
+
+Charts.css genuinely renders with JavaScript disabled. This library does not —
+it needs Lit and it renders SVG at runtime, the same as everything else that
+draws pixels. The claim is about the *authoring* model: your template emits
+markup, and there is no serialisation step and no data-binding layer.
+
+**It does not depend on htmx.** htmx works well with it, and the README shows
+that above, but the mechanism is general: any attribute the library does not
+recognise is copied onto the generated SVG shape. That serves `hx-*` equally
+well as `data-*`, Alpine's `x-on:`, Livewire's `wire:`, Stimulus's
+`data-action`, or nothing at all.
+
+### Where it fits, and where it does not
+
+The sweet spot is **small-to-medium categorical data emitted by a server
+template** — a few dozen bars, a handful of series. One element per datapoint
+has real costs at scale: DOM weight, verbosity, and markup that gets unwieldy
+past a few hundred points. Rendering scales close to linearly — 1,000 bars take
+about 620 ms from markup to painted pixels and 180 ms to re-render, measured
+with `npm run bench` — so the ceiling is practical rather than architectural. But
+if you have a 5,000-point time series, a canvas-based library is the better tool
+and this is the wrong one.
+
+A fuller version of this analysis, with the competitive matrix and its caveats,
+is in [docs/review.md](docs/review.md).
+
 ## Features
 
 - **Declarative Syntax** - Define charts with nested HTML elements
@@ -223,12 +293,21 @@ Requires native support for Web Components (Custom Elements, Shadow DOM) and ES2
 
 ## Bundle Size
 
-| Format | Size | Gzipped |
-|--------|------|---------|
-| ES Module | 302 KB | 71 KB |
-| UMD | 190 KB | 50 KB |
+Three artifacts, because three kinds of consumer need different things. You
+download exactly one.
 
-Includes Lit (~45 KB gzipped). No additional dependencies required.
+| Artifact | Lit | Raw | Gzipped | For |
+|---|---|---|---|---|
+| `declarative-charts.standalone.js` | inlined | 291 KB | **75 KB** | CDN and vendored `<script type="module">` |
+| `declarative-charts.umd.cjs` | inlined | 295 KB | **75 KB** | plain `<script src>` and `require()` |
+| `declarative-charts.js` | external | 456 KB | 108 KB | bundlers — yours will minify it |
+
+Lit accounts for about 6 KB gzipped of the self-contained builds; the library
+itself is ~69 KB gzipped. The bundler-facing build is larger because it keeps
+`/* @__PURE__ */` annotations and formatting for your bundler to tree-shake
+against and minify — it is not what a browser downloads.
+
+Figures from `npm run build`, which prints them on every build.
 
 ## Performance Guidelines
 

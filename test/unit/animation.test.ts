@@ -12,7 +12,7 @@ import {
  * attribute, and every unparseable value falls through to the default duration
  * rather than to "off", so a typo animates rather than doing nothing visible.
  *
- * Note REVIEW.md §7 attributed this file's low coverage to happy-dom lacking
+ * Note docs/review.md §7 attributed this file's low coverage to happy-dom lacking
  * the Web Animations API and recommended stubbing `Element.prototype.animate`.
  * That is only half true, and the halves matter: `test/unit/` runs in node with
  * no DOM at all, while `test/component/` runs in happy-dom, which *does* now
@@ -73,7 +73,7 @@ describe('parseAnimateAttribute', () => {
   /**
    * Every unrecognised value lands on the default duration, so a typo animates
    * rather than disabling. That is the opposite of how `show-*` now behaves
-   * (REVIEW.md §6.2), but it is the safer direction here: the failure mode is a
+   * (docs/review.md §6.2), but it is the safer direction here: the failure mode is a
    * chart that animates when you did not ask, not one that silently ignores a
    * setting you did ask for.
    */

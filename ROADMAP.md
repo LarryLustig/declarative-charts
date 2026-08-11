@@ -280,7 +280,7 @@ Two new codes, following the existing conventions:
 
 **One element per value, and `<dc-point>` specifically.** An earlier draft used
 `values="80, 60, 90"` — a serialised array in an attribute, which is the shape
-this library exists not to have (REVIEW.md §4.6). A value written as markup can
+this library exists not to have (docs/review.md §4.6). A value written as markup can
 carry `fill`, `href`, `hx-get`, a `<dc-popup>`, `hidden` or a `value-format`; a
 value inside a comma-separated string can carry none of them, and the radar
 chart would silently support half the library. A radar datum *is* a point — a
@@ -329,7 +329,7 @@ rediscovered:
   flakiness; worth a deliberate decision either way.
 - **`stage-chart.ts` at 88%** is the thinnest real coverage left, mostly in
   `calculateTextFit`.
-- **Outreach has not happened.** REVIEW.md §8 argues discovery is the binding
+- **Outreach has not happened.** docs/review.md §8 argues discovery is the binding
   constraint, not features. That remains true and is the strongest argument for
   keeping this list short.
 
@@ -340,7 +340,7 @@ rediscovered:
 Recorded so they are not proposed again without new information:
 
 - **A bulk-data attribute** (`values="[10,20,30]"`). Considered and declined —
-  REVIEW.md §4.6. It concedes the library's only differentiator, the performance
+  docs/review.md §4.6. It concedes the library's only differentiator, the performance
   case does not exist, and it splits the API. A `.data` *property* is the right
   shape if someone genuinely needs to pass an array from JavaScript; build it
   when asked.

@@ -14,7 +14,7 @@ import { Chart } from '../../src/chart';
  * to fail if the extraction changes anything, so they pin exact values - even
  * where a value looks arbitrary. If one of these ever needs updating, that is a
  * behaviour change and should be a deliberate decision, not a refactor's
- * side effect. See REVIEW.md 5.1.
+ * side effect. See docs/review.md 5.1.
  */
 
 /** Reach the protected colour API without widening it for real consumers. */

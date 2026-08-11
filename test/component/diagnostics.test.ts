@@ -12,7 +12,7 @@ import { Chart } from '../../src/chart';
  * That made misconfiguration invisible. A typo in `palette` fell back to
  * generated colours and looked merely "a bit off"; the documented palette list
  * drifted to name 18 palettes that did not exist, and the shipped examples
- * referenced them, because nothing could tell anyone. See REVIEW.md 6.3.
+ * referenced them, because nothing could tell anyone. See docs/review.md 6.3.
  */
 describe('diagnostics are visible by default', () => {
   const warnings = (chart: Chart) =>

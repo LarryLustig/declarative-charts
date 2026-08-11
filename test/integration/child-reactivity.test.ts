@@ -14,7 +14,7 @@ import { PieChart } from '../../src/pie-chart';
  * Charts read their data by querying children on every render, but until the
  * MutationObserver in BaseChart nothing told them when that data changed.
  * `slotchange` covers add/remove only, so mutating an existing child updated the
- * child and stopped there - see REVIEW.md 3.1.
+ * child and stopped there - see docs/review.md 3.1.
  *
  * Every assertion here deliberately avoids calling `chart.requestUpdate()`. That
  * call is what the old tests used to paper over the defect, and using it here

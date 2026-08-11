@@ -9,7 +9,7 @@ import { Chart } from '../../src/chart';
  * Bar width shrinks as bar count rises, because each unit carries a fixed gutter.
  * Before the fix, past ~84 bars on a 900-unit chart the computed width crossed zero;
  * a negative `width` is invalid SVG, so the browser discarded every <rect> and the
- * chart rendered nothing at all, with no warning. See REVIEW.md §3.5.
+ * chart rendered nothing at all, with no warning. See docs/review.md §3.5.
  */
 describe('bar layout: width never degenerates', () => {
   const barsMarkup = (n: number) =>
@@ -80,7 +80,7 @@ describe('bar layout: width never degenerates', () => {
  * two further copies that ignored gutters entirely.
  *
  * All six now derive from `computeBarLayout()`, so this class of bug is
- * impossible rather than merely fixed. See REVIEW.md 3.2.
+ * impossible rather than merely fixed. See docs/review.md 3.2.
  */
 describe('bar and label positions come from one traversal', () => {
   const groupedWithDifferingWidths = `
@@ -174,7 +174,7 @@ describe('bar and label positions come from one traversal', () => {
   });
 });
 
-describe('bar-width (REVIEW.md 6.4)', () => {
+describe('bar-width (docs/review.md 6.4)', () => {
   /** Widths of the rendered bars, in document order. */
   const widths = (chart: Chart): number[] =>
     Array.from(chart.shadowRoot!.querySelectorAll('rect[data-shape-index]'))

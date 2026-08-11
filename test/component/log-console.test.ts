@@ -268,7 +268,7 @@ describe('observer lifecycle', () => {
 
 describe('the Web Animations API in this test environment', () => {
   /**
-   * REVIEW.md §7 attributed `animation.ts`'s low coverage to happy-dom lacking
+   * docs/review.md §7 attributed `animation.ts`'s low coverage to happy-dom lacking
    * `Element.prototype.animate`, and recommended stubbing it. That is no longer
    * true of the component environment - the current happy-dom provides it - so
    * the remaining gap there is ordinary missing coverage, not an artifact.
