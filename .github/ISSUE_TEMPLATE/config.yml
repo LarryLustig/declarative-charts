@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/LarryLustig/declarative-charts/security/advisories/new
+    about: Report privately, not as a public issue. See SECURITY.md.
+  - name: API reference
+    url: https://github.com/LarryLustig/declarative-charts/blob/main/API.md
+    about: Every element, attribute and styling hook, plus the DC### error table.

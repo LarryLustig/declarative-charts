@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A second push to the same branch cancels the first; there is nothing to learn
+# from a run against superseded code.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Tests and package
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # The `engines.node` floor, so CI fails on the oldest supported
+          # version rather than only on whatever the maintainer happens to run.
+          # Derived from the dev toolchain: vitest needs ^20 || ^22 || >=24.
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Unit, component and integration tests
+        run: npm run test:run
+
+      - name: Build
+        run: npm run build
+
+      # The only test that exercises the published artifacts rather than the
+      # source. It has caught a `sideEffects` setting that let bundlers delete
+      # the whole library, and two copies of Lit reaching one page.
+      - name: Package smoke test
+        run: npm run test:package
+
+# Visual regression is deliberately absent.
+#
+# The baselines are named `-chromium-win32.png` and were generated on Windows.
+# Playwright looks for a platform-specific name, so a Linux runner would not
+# find them, and font rasterisation differs enough between machines that a
+# Windows runner would not match them either. Screenshot tests of this kind are
+# a local gate, not a CI gate — `npm run test:visual` before a release.

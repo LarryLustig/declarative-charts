@@ -1,0 +1,74 @@
+name: Bug report
+description: A chart renders wrongly, or does not render
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for trying this out. Bug reports are the most useful thing a
+        pre-1.0 library can receive.
+
+        **Before filing:** open your browser console. This library reports its
+        own misconfigurations as `DC###` codes and does so **by default** — a
+        palette name that does not exist, a reference line outside the axis
+        range, a value it could not parse. If you see one, its code and message
+        will usually explain the problem faster than we can.
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: From `npm ls declarative-charts`, or the CDN URL you loaded.
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: markup
+    attributes:
+      label: Markup
+      description: >
+        The smallest chart that shows the problem. This is the single most
+        useful thing you can include — the library takes HTML, so a reproduction
+        is usually just a few elements.
+      render: html
+      placeholder: |
+        <dc-chart width="600" height="400">
+          <dc-bar value="30" label="Q1"></dc-bar>
+          <dc-bar value="70" label="Q2"></dc-bar>
+        </dc-chart>
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected, and what happened
+    validations:
+      required: true
+
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Console output
+      description: >
+        Any `DC###` messages, and any errors. If there are none, say so — that
+        is itself informative, because silence where a diagnostic should have
+        fired is a bug in its own right.
+      render: text
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and OS
+      placeholder: "Chrome 140, Windows 11"
+
+  - type: dropdown
+    id: how
+    attributes:
+      label: How are you loading it?
+      options:
+        - CDN (unpkg or jsDelivr)
+        - npm with a bundler
+        - Vendored file copied into the project
+        - Other

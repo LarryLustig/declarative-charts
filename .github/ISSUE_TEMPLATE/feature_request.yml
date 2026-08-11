@@ -1,0 +1,35 @@
+name: Feature request
+description: Something the library cannot express
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please check [ROADMAP.md](../blob/main/ROADMAP.md) first. It records both
+        what is planned and what has been **explicitly declined**, with reasons —
+        a bulk-data attribute, for instance, is not an oversight.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: >
+        The problem, not the solution. What does the chart need to show, and
+        what does your data look like?
+    validations:
+      required: true
+
+  - type: textarea
+    id: markup
+    attributes:
+      label: What would the markup look like?
+      description: >
+        Optional, but valuable. This library's API *is* HTML, so a sketch of the
+        elements and attributes you would want to write is a concrete design
+        proposal.
+      render: html
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: What are you doing instead today?

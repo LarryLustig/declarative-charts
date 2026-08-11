@@ -10,6 +10,9 @@ dist/
 # would only add a 1.2 MB single-line diff to the history.
 custom-elements.json
 
+# Vite's dependency-resolution cache
+.vite/
+
 # Test coverage
 coverage/
 
