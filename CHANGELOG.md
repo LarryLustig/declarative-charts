@@ -32,6 +32,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   nothing is "dropped" between zero and zero. It now asserts the property rather than the delta,
   and the package smoke test checks both artifacts by name
 
+### Fixed
+
+- **`npm ci` failed on Linux from a Windows-generated lockfile**, three CI runs in a row.
+  `@oxc-resolver` — pulled in by the custom-elements manifest generator — ships nineteen
+  platform-specific optional bindings, and its wasm fallback shares `@emnapi` packages with
+  `@napi-rs/wasm-runtime` under different ranges. npm hoisted them differently per platform:
+  nested at 1.11.2 on Windows, hoisted at 1.11.3 on Linux, so the lockfile described a tree the
+  runner could not install
+
+  `overrides` now pins one version of each, which resolves identically everywhere. None of it is
+  used at runtime — the whole tree exists to generate `custom-elements.json`
+
 ### Changed
 
 - `engines.node` is `>=20.19.0`; Vite 8 requires `^20.19.0 || >=22.12.0` and is now the binding
