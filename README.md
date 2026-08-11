@@ -1,7 +1,6 @@
 # Declarative Chart Library
 
 [![CI](https://github.com/LarryLustig/declarative-charts/actions/workflows/ci.yml/badge.svg)](https://github.com/LarryLustig/declarative-charts/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/declarative-charts)](https://www.npmjs.com/package/declarative-charts)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 **Charts your server can render. No JSON endpoint, no build step, no chart code.**

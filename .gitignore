@@ -24,6 +24,10 @@ test/visual/test-results/
 test/visual/report/
 playwright-report/
 
+# Per-machine Claude Code settings. The .local.json suffix is the convention
+# for "this machine only"; a shared .claude/settings.json would be committed.
+.claude/settings.local.json
+
 # Editor directories
 .vscode/*
 !.vscode/extensions.json
