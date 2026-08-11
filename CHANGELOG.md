@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **The example gallery did not fit a phone.** `.grid` used
+  `repeat(auto-fit, minmax(500px, 1fr))` — a hard 500px minimum column — and the stylesheet had
+  no media queries at all, so on a 390px screen the layout could not shrink and the browser
+  zoomed the whole page out to fit. `minmax(min(500px, 100%), 1fr)` lets the track collapse to
+  one column while leaving the desktop layout untouched
+
+  The charts were never the problem: the SVG is `width: 100%; height: auto` and scales already
+
+- **Wide tables forced the same zoom-out.** A table's intrinsic minimum is the sum of its
+  columns', which `width: 100%` cannot go below, so `formatting.html` pushed the viewport to
+  480px. The six `.example-table`s are wrapped in an `overflow-x: auto` scroller now, so the page
+  stays at device width and the table scrolls on its own
+
+  Verified across all 37 browsable pages in both orientations: every one now lays out at device
+  width with no horizontal overflow
+
 ### Added
 
 - **The README shows charts, not just markup.** A chart library whose front page never shows its
