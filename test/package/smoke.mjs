@@ -78,6 +78,15 @@ check(
 );
 check(!/YOUR_USERNAME|your\.email@example\.com|Your Name/.test(JSON.stringify(pkg)),
   'no placeholder metadata');
+// No TypeScript is published, so this looks like a redundant entry. It is not:
+// Rollup consults `sideEffects` when building the example gallery from src/,
+// and without "*.ts" it dropped every customElements.define and produced 37
+// pages of inert markup that built without complaint.
+check(
+  Array.isArray(pkg.sideEffects) && pkg.sideEffects.includes('*.ts'),
+  'sideEffects covers *.ts, so a build from source keeps the registrations',
+  JSON.stringify(pkg.sideEffects)
+);
 
 // The LICENSE shipped for a long time reading "Copyright (c) 2024 Larry Ruane"
 // — a real person, and not this project's author. A placeholder check cannot

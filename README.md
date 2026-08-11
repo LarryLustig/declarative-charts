@@ -319,10 +319,14 @@ Figures from `npm run build`, which prints them on every build.
 
 ## Documentation
 
+- **[Live example gallery](https://larrylustig.github.io/declarative-charts/)** - 37 pages, every feature, with the markup beside each chart
 - **[API Reference](API.md)** - Complete attribute and element documentation
-- **[Examples](examples/)** - Live examples for all features
 - **[Changelog](CHANGELOG.md)** - Version history
-- **[Roadmap](ROADMAP.md)** - Planned features
+- **[Roadmap](ROADMAP.md)** - Planned features and explicitly declined ones
+- **[Security policy](SECURITY.md)** - Threat model and private reporting
+
+The gallery is built from `examples/` on every push to `main`. To run it
+locally, `npm run dev` and open `localhost:5173`.
 
 ### Key Examples
 

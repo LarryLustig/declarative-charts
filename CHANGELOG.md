@@ -58,6 +58,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   not on the string, because a string containing `&lt;script&gt;` proves nothing about what the
   parser then does with it
 
+### Added
+
+- **The example gallery is built and published.** All 37 pages load the library with
+  `<script type="module" src="../src/index.ts">`, which only resolves under the dev server — from
+  a clone or a file host they rendered nothing. `npm run build:site` compiles them to `site/`,
+  and a GitHub Pages workflow deploys it on every push to `main`
+
+  Entry points are discovered from the directory rather than listed, because a page added without
+  a matching config line would be a page that silently never ships
+
+### Fixed
+
+- **`sideEffects` did not cover `.ts`, and the gallery built to nothing.** The field listed
+  `["*.js", "*.cjs"]` — correct for the published package, which contains no TypeScript. Rollup
+  also consults it when building from `src/`, concluded the source was side-effect-free, and
+  dropped every `customElements.define`: a 711-byte polyfill and 37 pages of inert markup, built
+  successfully with no warning
+
+  This is the same failure the package smoke test was written for, arriving by a route that test
+  cannot see, since it checks published artifacts rather than a build from source. The site build
+  now asserts that some emitted chunk contains `customElements.define` and fails with that
+  diagnosis; the smoke test asserts `sideEffects` still lists `*.ts`; and CI builds the gallery so
+  it breaks on a pull request rather than at deploy
+
 ### Changed
 
 - **README leads with what this library is.** The clearest statement of purpose in the project

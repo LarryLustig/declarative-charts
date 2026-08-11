@@ -24,10 +24,11 @@
       "import": "./dist/declarative-charts.standalone.js"
     }
   },
-  "//sideEffects": "Defining custom elements IS the side effect. Marking this package side-effect-free lets bundlers drop `import 'declarative-charts'` entirely, registering nothing and rendering a blank page with no error.",
+  "//sideEffects": "Defining custom elements IS the side effect. Marking this package side-effect-free lets bundlers drop `import 'declarative-charts'` entirely, registering nothing and rendering a blank page with no error. `*.ts` matters even though no TypeScript is published: Rollup consults this field when building the example gallery from src/, and without it the whole library was tree-shaken out of the site.",
   "sideEffects": [
     "*.js",
-    "*.cjs"
+    "*.cjs",
+    "*.ts"
   ],
   "files": [
     "dist",
@@ -39,6 +40,8 @@
     "dev": "vite",
     "build": "tsc && vite build && vite build --config vite.config.standalone.ts && node build/minify-standalone.mjs && tsc -p tsconfig.build.json && npm run analyze",
     "preview": "vite preview",
+    "build:site": "vite build --config vite.config.site.ts",
+    "preview:site": "vite preview --outDir site",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",

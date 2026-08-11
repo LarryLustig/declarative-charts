@@ -71,6 +71,12 @@ jobs:
       - name: Example pages
         run: npm run test:examples
 
+      # Builds the gallery and asserts the library survived tree-shaking. Runs
+      # here as well as in the Pages workflow so a broken build fails on the
+      # pull request rather than at deploy time.
+      - name: Gallery builds
+        run: npm run build:site
+
       - if: failure()
         uses: actions/upload-artifact@v4
         with:

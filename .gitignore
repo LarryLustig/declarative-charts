@@ -10,6 +10,9 @@ dist/
 # would only add a 1.2 MB single-line diff to the history.
 custom-elements.json
 
+# Built example gallery (npm run build:site)
+site/
+
 # Vite's dependency-resolution cache
 .vite/
 
