@@ -79,6 +79,24 @@ check(
 check(!/YOUR_USERNAME|your\.email@example\.com|Your Name/.test(JSON.stringify(pkg)),
   'no placeholder metadata');
 
+// The LICENSE shipped for a long time reading "Copyright (c) 2024 Larry Ruane"
+// — a real person, and not this project's author. A placeholder check cannot
+// catch that, because a plausible name looks like real metadata. Tie the two
+// together instead: whoever package.json says wrote this must be who the
+// licence grant comes from.
+{
+  const licence = fs.readFileSync(path.join(ROOT, 'LICENSE'), 'utf8');
+  const holder = licence.match(/Copyright \(c\) \d{4}(?:\s*[-–]\s*\d{4})? (.+)/)?.[1]?.trim();
+  const author = (pkg.author ?? '').replace(/\s*<.*/, '').trim();
+
+  check(Boolean(holder), 'LICENSE states a copyright holder');
+  check(
+    holder === author,
+    'LICENSE copyright holder matches package.json author',
+    `LICENSE says "${holder}", package.json says "${author}"`
+  );
+}
+
 // An HTML-first library lives or dies by editor autocomplete on its tags.
 const manifestPath = path.join(ROOT, 'custom-elements.json');
 check(pkg.customElements === 'custom-elements.json',
