@@ -2,7 +2,7 @@
 
 ## The short version
 
-Be decent. Assume the other person is acting in good faith. Criticise code,
+Be kind to all people, at all times. Assume the other person is acting in good faith. Criticise code,
 not people.
 
 ## Scope
