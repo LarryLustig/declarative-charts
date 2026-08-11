@@ -23,7 +23,7 @@ import {
   getHighContrastPattern
 } from './patterns.js';
 import { NumberFormatter } from './format.js';
-import { type ShapeBounds } from './chart-utils.js';
+import { type ShapeBounds, isEventHandlerAttribute } from './chart-utils.js';
 import {
   animateChartEntry,
   parseAnimateAttribute,
@@ -3030,6 +3030,8 @@ export abstract class BaseChart extends LitElement {
     const svg = this.shadowRoot?.querySelector('svg');
     if (!svg) return;
 
+    const blocked: string[] = [];
+
     shapes.forEach((shape, index) => {
       // `paint` first, so an author's own passthrough attribute still wins over
       // one inherited from a palette entry.
@@ -3039,9 +3041,29 @@ export abstract class BaseChart extends LitElement {
       const element = svg.querySelector(`[data-shape-index="${index}"]`);
       if (!element) return;
       Object.entries(attrs).forEach(([key, value]) => {
+        // Passthrough exists so that `hx-*`, `data-*`, Alpine's `x-on:` and
+        // Stimulus's `data-action` reach the shape. An inline `on*` handler
+        // needs none of that mechanism and the library already emits
+        // `dc-click`, `dc-mouseenter` and `dc-mouseleave`, so blocking it costs
+        // nothing a consumer cannot get another way — while closing the case
+        // where attribute *names*, not just values, come from data.
+        //
+        // Dropped loudly rather than silently: a handler that quietly stops
+        // firing is exactly the failure mode this library's diagnostics exist
+        // to prevent.
+        if (isEventHandlerAttribute(key, element)) {
+          blocked.push(key);
+          return;
+        }
         element.setAttribute(key, value);
       });
     });
+
+    if (blocked.length > 0) {
+      this.logError(ErrorCode.PASSTHROUGH_EVENT_HANDLER_BLOCKED, {
+        names: [...new Set(blocked)].join(', ')
+      }, [...new Set(blocked)]);
+    }
 
     // Notify htmx about new elements (if htmx is loaded)
     if (typeof (window as any).htmx !== 'undefined') {

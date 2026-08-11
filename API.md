@@ -2820,6 +2820,38 @@ The library automatically:
 2. Applies these attributes to the corresponding SVG elements after rendering
 3. Notifies htmx (if loaded) to process the new elements
 
+### One exception: inline `on*` handlers
+
+Attributes that would install an inline event handler — `onclick`, `onerror`,
+`onmouseover` and the rest — are **not** copied onto the shape, and the omission
+is reported as `DC115`.
+
+Use the chart's own events instead; they carry a typed `detail` and identify the
+element that was interacted with:
+
+```html
+<dc-chart id="sales" width="600" height="400">
+  <dc-bar value="30" label="Q1"></dc-bar>
+</dc-chart>
+
+<script type="module">
+  document.querySelector('#sales').addEventListener('dc-click', e => {
+    console.log(e.detail.label, e.detail.value);
+  });
+</script>
+```
+
+Nothing else is affected. `hx-*`, `data-*`, `hx-on:click`, Alpine's `x-on:click`
+and Stimulus's `data-action` all carry a prefix and pass through as before — the
+check asks the platform whether an attribute *is* a handler on the target
+element, rather than matching a name pattern.
+
+The reason is narrow: passthrough copies attributes the library does not
+recognise, so if attribute **names** in your template ever come from data, an
+inline handler would be copied along with everything else. Inline handlers need
+none of what passthrough provides, so declining them costs nothing you cannot
+get from `dc-click`.
+
 ### htmx Integration
 
 ```html
@@ -2931,6 +2963,7 @@ you where to look before you read the message.
 | `DC112` | A radar chart has fewer than three axes |
 | `DC113` | A `<dc-reference>` set neither `value` nor `min`/`max` and drew nothing |
 | `DC114` | A reference line falls outside the axis range and was not drawn |
+| `DC115` | An inline `on*` handler was not copied onto the shape — listen for `dc-click` instead |
 | `DC201` | Palette not found — check the name against [Palettes](#palettes-and-pattern-fills) |
 | `DC202` | Pattern is not a valid type or ID reference |
 | `DC203` | `zero-fill` referenced an element that does not exist |

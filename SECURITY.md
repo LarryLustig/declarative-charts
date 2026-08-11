@@ -47,8 +47,10 @@ colour can run script" is.
 - **`href` on data elements becomes a real link,** and `javascript:` URLs are
   not filtered. Same rule as any `<a href>` you render.
 - **Unrecognised attributes are copied verbatim onto the generated SVG shape.**
-  That is the mechanism `hx-*`, `data-*`, Alpine and Stimulus bindings rely on,
-  and it will equally copy an inline event handler.
+  That is the mechanism `hx-*`, `data-*`, Alpine and Stimulus bindings rely on.
+  Inline `on*` handlers are the one exception and are declined, reported as
+  `DC115` — they need nothing passthrough provides, since the library emits
+  `dc-click` and friends. Everything else is copied as written.
 
 In each of those, the library is doing what the markup asked for, visibly. The
 escaping is the template author's, as it is for the rest of the page.

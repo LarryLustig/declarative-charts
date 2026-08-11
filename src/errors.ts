@@ -254,6 +254,16 @@ export const ErrorCode = {
   },
 
   /**
+   * An inline event-handler attribute was not passed through to the SVG shape
+   */
+  PASSTHROUGH_EVENT_HANDLER_BLOCKED: {
+    code: 'DC115',
+    level: 'warning',
+    path: 'passthrough.eventHandler',
+    message: 'Inline handler {names} was not copied onto the shape. Listen for dc-click, dc-mouseenter or dc-mouseleave instead'
+  },
+
+  /**
    * Palette not found
    */
   PALETTE_NOT_FOUND: {

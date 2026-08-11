@@ -195,6 +195,31 @@ export function calculateLabelInterval(
   return Math.max(1, interval);
 }
 
+/**
+ * Whether an attribute would install an inline event handler on `target`.
+ *
+ * Asked of the platform rather than matched against a pattern. `/^on./` looked
+ * sufficient and is not: it matches `only`. An allowlist is worse — the set of
+ * handlers is open-ended, with `onbeforetoggle` and `onscrollend` among the
+ * recent additions, so it would need revising whenever the platform grows one.
+ *
+ * Testing `name in target` is exact, and exact in a useful direction: it matches
+ * precisely those attributes **this engine** would turn into a handler. One it
+ * does not know is one it would not fire either, so letting that through costs
+ * nothing.
+ *
+ * The `on` prefix is still required, because plenty of ordinary IDL properties
+ * (`id`, `className`) share a name with an attribute and must pass through.
+ *
+ * None of the integrations passthrough exists to serve are caught: `hx-on:click`
+ * and Alpine's `x-on:click` carry a prefix, and `data-action` is a `data-`
+ * attribute.
+ */
+export function isEventHandlerAttribute(name: string, target: Element): boolean {
+  const lower = name.toLowerCase();
+  return lower.startsWith('on') && lower in target;
+}
+
 // ============================================================================
 // Popup Content
 // ============================================================================

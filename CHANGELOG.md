@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+- **Inline `on*` handlers are no longer passed through.** Passthrough copies any attribute the
+  library does not recognise onto the generated SVG shape — the mechanism `hx-*`, `data-*`,
+  Alpine and Stimulus rely on. An inline handler needs none of it, and the library already emits
+  `dc-click`, `dc-mouseenter` and `dc-mouseleave`, so declining it costs nothing a consumer
+  cannot get another way while closing the case where attribute *names* come from data
+
+  Reported as `DC115` rather than dropped silently: a handler that quietly stops firing is the
+  failure mode these diagnostics exist to prevent
+
+  The check asks the platform — `name.startsWith('on') && name in target` — rather than matching
+  a pattern. The first attempt was `/^on./` and it caught `only`. An allowlist would be worse,
+  since the set of handlers grows with the platform. Asking the element is exact in a useful
+  direction: it matches precisely what *this engine* would turn into a handler, and one the
+  engine does not know is one it would not fire
+
 - **Escape auto-popup content.** Popup content is bound with `.innerHTML`, deliberately — a
   `<dc-popup>` holds markup the author wrote. The **auto**-generated content is different: the
   library builds it from element attributes, and those went in raw, so
