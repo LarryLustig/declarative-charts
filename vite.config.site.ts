@@ -1,5 +1,5 @@
 import { defineConfig, type Plugin } from 'vite'
-import { copyFileSync, mkdirSync, readdirSync, readFileSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 /**
@@ -47,6 +47,16 @@ function copyExamplesScript(): Plugin {
         resolve(__dirname, 'examples', 'examples.js'),
         resolve(out, 'examples.js')
       )
+
+      // README images are served from here. The README references them by
+      // absolute URL so they also render on npmjs.com, where relative paths do
+      // not resolve — which means Pages has to carry them.
+      const img = resolve(__dirname, 'docs', 'img')
+      if (existsSync(img)) {
+        const dest = resolve(__dirname, 'site', 'img')
+        mkdirSync(dest, { recursive: true })
+        for (const f of readdirSync(img)) copyFileSync(resolve(img, f), resolve(dest, f))
+      }
     }
   }
 }

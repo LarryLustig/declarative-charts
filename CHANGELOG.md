@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **The README shows charts, not just markup.** A chart library whose front page never shows its
+  output asks the reader to take the picture on faith, and the picture is the product. Two
+  rendered SVGs now sit beside the markup that produces them
+
+  GitHub strips inline `<svg>` from Markdown, so the only route is an `<img>` at a committed
+  file. They are referenced by absolute URL and served from Pages, because npmjs.com does not
+  resolve relative image paths and that page is where people decide whether to install
+
+  `npm run build:images` generates them through the library's **own** `prepareSvgForExport()` —
+  the call `downloadSvg()` makes — rather than a parallel serializer, so a break in that
+  documented feature breaks the images too
+
+- **`test/visual/readme-images.spec.ts`** re-renders and compares, so the images cannot go stale
+  the way the CLAUDE.md coverage table did. It also checks they are self-contained: an
+  `<img>`-loaded SVG gets no external CSS, no script and no network, so a missing `font-family`
+  would silently render every label in the viewer's default serif. Local-only alongside the
+  screenshots, for the same reason — text positions come from `measureText`, which is
+  font-dependent — and bound into `prepublishOnly`
+
 ### Security
 
 - **Upgraded Vite 5 → 8 and esbuild 0.21 → 0.28**, clearing three advisories that `npm audit`

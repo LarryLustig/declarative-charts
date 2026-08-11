@@ -41,6 +41,7 @@
     "build": "tsc && vite build && vite build --config vite.config.standalone.ts && node build/minify-standalone.mjs && tsc -p tsconfig.build.json && npm run analyze",
     "preview": "vite preview",
     "build:site": "vite build --config vite.config.site.ts",
+    "build:images": "node build/render-readme-images.mjs",
     "preview:site": "vite preview --outDir site",
     "test": "vitest",
     "test:run": "vitest run",

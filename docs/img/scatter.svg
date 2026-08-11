@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 600 400" aria-label="scatter plot: Dose Response" aria-describedby="dc-desc-2" tabindex="0" part="chart" width="600" height="400">
+        
+        <desc id="dc-desc-2">2 scatter series with 11 points, x from 0 to 50. Control: 6 points, y from 12 to 52, strong positive correlation; Treated: 5 points, y from 28 to 66, strong positive correlation</desc>
+        
+      <g transform="translate(228.84765625, 10)">
+        
+        <text part="title" x="71.15234375" y="16" text-anchor="middle" font-size="20" font-weight="bold" fill="#333" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif" font-style="" text-decoration="" letter-spacing="" opacity="">Dose Response</text>
+      
+      </g>
+    
+        
+      
+
+      
+      
+        
+            <line part="grid-line" x1="53.659375" y1="303.2" x2="570" y2="303.2" stroke="#ddd" stroke-width="1" stroke-dasharray=""/>
+          
+            <line part="grid-line" x1="53.659375" y1="242.14999999999998" x2="570" y2="242.14999999999998" stroke="#ddd" stroke-width="1" stroke-dasharray=""/>
+          
+            <line part="grid-line" x1="53.659375" y1="181.1" x2="570" y2="181.1" stroke="#ddd" stroke-width="1" stroke-dasharray=""/>
+          
+            <line part="grid-line" x1="53.659375" y1="120.05000000000001" x2="570" y2="120.05000000000001" stroke="#ddd" stroke-width="1" stroke-dasharray=""/>
+          
+            <line part="grid-line" x1="53.659375" y1="59" x2="570" y2="59" stroke="#ddd" stroke-width="1" stroke-dasharray=""/>
+          
+      
+
+      
+      
+      
+            <rect class="reference-band" x="53.659375" y="120.05000000000001" width="516.340625" height="61.04999999999998" fill="#16a34a" fill-opacity="0.12" part="reference-band"/>
+    
+
+      
+      
+
+      
+      
+
+      
+      
+      
+        <g part="scatter-series">
+          
+              <g class="scatter-marker" data-shape-index="0" opacity="1">
+                <g class="point-marker" part="point">
+          <circle cx="105.29343750000001" cy="266.57" r="4" fill="#2563eb" style="cursor: default"/>
+        </g>
+              </g>
+              <g class="scatter-marker" data-shape-index="0" opacity="1">
+                <g class="point-marker" part="point">
+          <circle cx="177.581125" cy="245.2025" r="4" fill="#2563eb" style="cursor: default"/>
+        </g>
+              </g>
+              <g class="scatter-marker" data-shape-index="0" opacity="1">
+                <g class="point-marker" part="point">
+          <circle cx="239.54200000000003" cy="208.5725" r="4" fill="#2563eb" style="cursor: default"/>
+        </g>
+              </g>
+              <g class="scatter-marker" data-shape-index="0" opacity="1">
+                <g class="point-marker" part="point">
+          <circle cx="322.15650000000005" cy="217.73000000000002" r="4" fill="#2563eb" style="cursor: default"/>
+        </g>
+              </g>
+              <g class="scatter-marker" data-shape-index="0" opacity="1">
+                <g class="point-marker" part="point">
+          <circle cx="404.7710000000001" cy="162.785" r="4" fill="#2563eb" style="cursor: default"/>
+        </g>
+              </g>
+              <g class="scatter-marker" data-shape-index="0" opacity="1">
+                <g class="point-marker" part="point">
+          <circle cx="477.0586875" cy="144.47" r="4" fill="#2563eb" style="cursor: default"/>
+        </g>
+              </g>
+        </g>
+        <g part="scatter-series">
+          
+              <g class="scatter-marker" data-shape-index="1" opacity="1">
+                <g class="point-marker" part="point">
+          <polygon points="115.62025,209.23000000000002 110.62025,222.73000000000002 120.62025,222.73000000000002" fill="#dc2626" style="cursor: default"/>
+        </g>
+              </g>
+              <g class="scatter-marker" data-shape-index="1" opacity="1">
+                <g class="point-marker" part="point">
+          <polygon points="208.56156249999998,181.7575 203.56156249999998,195.2575 213.56156249999998,195.2575" fill="#dc2626" style="cursor: default"/>
+        </g>
+              </g>
+              <g class="scatter-marker" data-shape-index="1" opacity="1">
+                <g class="point-marker" part="point">
+          <polygon points="291.1760625,145.1275 286.1760625,158.6275 296.1760625,158.6275" fill="#dc2626" style="cursor: default"/>
+        </g>
+              </g>
+              <g class="scatter-marker" data-shape-index="1" opacity="1">
+                <g class="point-marker" part="point">
+          <polygon points="373.7905625,126.8125 368.7905625,140.3125 378.7905625,140.3125" fill="#dc2626" style="cursor: default"/>
+        </g>
+              </g>
+              <g class="scatter-marker" data-shape-index="1" opacity="1">
+                <g class="point-marker" part="point">
+          <polygon points="456.40506250000004,93.23500000000001 451.40506250000004,106.73500000000001 461.40506250000004,106.73500000000001" fill="#dc2626" style="cursor: default"/>
+        </g>
+              </g>
+        </g>
+    
+
+      
+      
+
+      
+      
+
+      
+      
+
+      
+      
+          <line part="axis-line" stroke="#333" x1="53.659375" y1="59" x2="53.659375" y2="304.2" stroke-width="2"/>
+          <line part="axis-line" stroke="#333" x1="52.659375" y1="303.2" x2="570" y2="303.2" stroke-width="2"/>
+        
+
+      
+      
+          
+              <text part="axis-label" text-anchor="end" fill="#666" x="43.659375" y="307.2" font-size="11" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif">
+                0
+              </text>
+            
+              <text part="axis-label" text-anchor="end" fill="#666" x="43.659375" y="246.14999999999998" font-size="11" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif">
+                20
+              </text>
+            
+              <text part="axis-label" text-anchor="end" fill="#666" x="43.659375" y="185.1" font-size="11" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif">
+                40
+              </text>
+            
+              <text part="axis-label" text-anchor="end" fill="#666" x="43.659375" y="124.05000000000001" font-size="11" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif">
+                60
+              </text>
+            
+              <text part="axis-label" text-anchor="end" fill="#666" x="43.659375" y="63" font-size="11" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif">
+                80
+              </text>
+            
+        
+
+      
+      
+          
+              <text part="axis-label" text-anchor="middle" fill="#666" x="53.659375" y="323.2" font-size="11" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif">
+                0
+              </text>
+            
+              <text part="axis-label" text-anchor="middle" fill="#666" x="156.9275" y="323.2" font-size="11" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif">
+                10
+              </text>
+            
+              <text part="axis-label" text-anchor="middle" fill="#666" x="260.195625" y="323.2" font-size="11" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif">
+                20
+              </text>
+            
+              <text part="axis-label" text-anchor="middle" fill="#666" x="363.46375" y="323.2" font-size="11" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif">
+                30
+              </text>
+            
+              <text part="axis-label" text-anchor="middle" fill="#666" x="466.73187500000006" y="323.2" font-size="11" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif">
+                40
+              </text>
+            
+              <text part="axis-label" text-anchor="middle" fill="#666" x="570" y="323.2" font-size="11" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif">
+                50
+              </text>
+            
+        
+
+      
+      
+      
+      
+            <text class="reference-label" x="566" y="116.05000000000001" text-anchor="end" font-size="11" fill="#16a34a" part="reference-label" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif">Target range</text>
+    
+
+      
+      
+          <text part="axis-title" text-anchor="middle" x="15" y="181.1" font-size="14" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif" font-weight="normal" fill="#333" transform="rotate(-90, 15, 181.1)">
+            Response
+          </text>
+        
+      
+          <text part="axis-title" text-anchor="middle" x="311.82968750000003" y="392" font-size="14" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif" font-weight="normal" fill="#333">
+            Dose (mg)
+          </text>
+        
+      
+      
+
+      
+      
+      <g transform="translate(220.01035156250003, 365)">
+        
+        
+        <rect part="legend-background" x="0" y="0" fill="white" stroke="#ddd" stroke-width="1" rx="4" width="183.638671875" height="45"/>
+
+        
+
+        
+        
+            
+            <g part="legend-swatch" transform="translate(10, 10)">
+              
+          <circle cx="9" cy="9" r="8" fill="#2563eb" stroke="white" stroke-width="1"/>
+        
+            </g>
+
+            
+              
+              <text part="legend-label" fill="#333" x="35" y="23" font-size="13" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif">
+                Control
+              </text>
+            
+
+            
+          
+            
+            <g part="legend-swatch" transform="translate(99.3193359375, 10)">
+              
+          <circle cx="9" cy="9" r="8" fill="#dc2626" stroke="white" stroke-width="1"/>
+        
+            </g>
+
+            
+              
+              <text part="legend-label" fill="#333" x="124.3193359375" y="23" font-size="13" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif">
+                Treated
+              </text>
+            
+
+            
+          
+      
+      </g>
+    
+
+      
+    
+        
+      </svg>

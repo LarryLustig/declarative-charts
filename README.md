@@ -3,13 +3,14 @@
 [![CI](https://github.com/LarryLustig/declarative-charts/actions/workflows/ci.yml/badge.svg)](https://github.com/LarryLustig/declarative-charts/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**Charts your server can render. No JSON endpoint, no build step, no chart code.**
+**Write (and read!) charts in plain HTML.**
 
-Most chart libraries want your data as JavaScript. You add an API endpoint,
-serialise your rows to JSON, ship a config object to the browser, and the shape
-of your chart ends up in a different language from the rest of your page.
+Most chart libraries want an empty `<div>` and a call into an opaque JavaScript
+library. The data comes either from an extra endpoint or hard-coded into a
+config object, so a simple chart ends up spread across HTML, JavaScript, and
+often a server route as well.
 
-This one takes HTML:
+This library lets you write charts declaratively in HTML:
 
 ```html
 <dc-chart width="600" height="400">
@@ -19,6 +20,12 @@ This one takes HTML:
   <dc-bar value="5100" label="East"></dc-bar>
 </dc-chart>
 ```
+
+<img src="https://larrylustig.github.io/declarative-charts/img/bar.svg" width="600"
+     alt="Bar chart titled Revenue by Region with three bars: North 4,200, South 3,800, East 5,100.">
+
+That image is the output of the markup above, rendered by the library and
+exported with its own `downloadSvg()`.
 
 Which means your existing template loop already knows how to write it:
 
@@ -43,7 +50,7 @@ Which means your existing template loop already knows how to write it:
 ```
 
 No endpoint to build, no serialisation to keep in step with your models, and the
-chart is in your page's source where you can read it.
+chart is in your page's source where you can read (and understand) it.
 
 ### It updates the way the rest of your page does
 
@@ -61,8 +68,10 @@ JavaScript to write:
 </dc-chart>
 ```
 
-Every element also takes `hx-*` and other unknown attributes and passes them
-through to the SVG shape, so a bar can be a drop target or trigger a request.
+Every element passes attributes it does not recognise — `data-*`, htmx's
+`hx-*`, Alpine's `x-on:`, anything — through to the SVG shape, so a bar can be a
+drop target or trigger a request. (Inline `on*` handlers are the one exception;
+see [API.md](API.md).)
 
 ## Where this sits
 
@@ -104,21 +113,27 @@ it** — axes, scales, legends, text fitting, interaction, accessibility — and
 `value="40000"` is the actual number, un-normalised, so your template does not
 need to know the series maximum before it can emit a row.
 
-### What this is not
+### More than bars
 
-**It is not "charts without JavaScript". It is charts without _writing_
-JavaScript.**
+<img src="https://larrylustig.github.io/declarative-charts/img/scatter.svg" width="600"
+     alt="Scatter plot titled Dose Response with two series, Control and Treated, over a shaded target range band between 40 and 60.">
 
-Charts.css genuinely renders with JavaScript disabled. This library does not —
-it needs Lit and it renders SVG at runtime, the same as everything else that
-draws pixels. The claim is about the *authoring* model: your template emits
-markup, and there is no serialisation step and no data-binding layer.
+```html
+<dc-chart width="600" height="400">
+  <dc-axis position="bottom"><dc-title>Dose (mg)</dc-title></dc-axis>
+  <dc-reference min="40" max="60" fill="#16a34a" label="Target range"></dc-reference>
+  <dc-scatter label="Control" fill="#2563eb">
+    <dc-point x="5" value="12"></dc-point>
+    …
+  </dc-scatter>
+  <dc-scatter label="Treated" fill="#dc2626" shape="triangle">…</dc-scatter>
+  <dc-legend position="bottom"></dc-legend>
+</dc-chart>
+```
 
-**It does not depend on htmx.** htmx works well with it, and the README shows
-that above, but the mechanism is general: any attribute the library does not
-recognise is copied onto the generated SVG shape. That serves `hx-*` equally
-well as `data-*`, Alpine's `x-on:`, Livewire's `wire:`, Stimulus's
-`data-action`, or nothing at all.
+Bar, line, area, bubble, scatter, pie, funnel, stage and radar, with axes,
+legends, patterns, annotations and keyboard navigation. The
+[gallery](https://larrylustig.github.io/declarative-charts/) has all of it.
 
 ### Where it fits, and where it does not
 
@@ -331,18 +346,18 @@ locally, `npm run dev` and open `localhost:5173`.
 
 | Feature | Example |
 |---------|---------|
-| Bar charts | [barcharts.html](examples/barcharts.html) |
-| Line charts | [linecharts.html](examples/linecharts.html) |
-| Pie charts | [piecharts.html](examples/piecharts.html) |
-| Funnel charts | [funnelcharts.html](examples/funnelcharts.html) |
-| Colors & gradients | [colors.html](examples/colors.html) |
-| Patterns & palettes | [palettes.html](examples/palettes.html), [patterns.html](examples/patterns.html) |
-| Number formatting | [formatting.html](examples/formatting.html) |
-| Legends & titles | [legends.html](examples/legends.html), [titles.html](examples/titles.html) |
-| Axes configuration | [axes.html](examples/axes.html) |
-| Popups & interactivity | [popups.html](examples/popups.html), [interactive.html](examples/interactive.html) |
-| Accessibility | [accessibility.html](examples/accessibility.html) |
-| htmx integration | [htmx-integration.html](examples/htmx-integration.html) |
+| Bar charts | [barcharts.html](https://larrylustig.github.io/declarative-charts/examples/barcharts.html) |
+| Line charts | [linecharts.html](https://larrylustig.github.io/declarative-charts/examples/linecharts.html) |
+| Pie charts | [piecharts.html](https://larrylustig.github.io/declarative-charts/examples/piecharts.html) |
+| Funnel charts | [funnelcharts.html](https://larrylustig.github.io/declarative-charts/examples/funnelcharts.html) |
+| Colors & gradients | [colors.html](https://larrylustig.github.io/declarative-charts/examples/colors.html) |
+| Patterns & palettes | [palettes.html](https://larrylustig.github.io/declarative-charts/examples/palettes.html), [patterns.html](https://larrylustig.github.io/declarative-charts/examples/patterns.html) |
+| Number formatting | [formatting.html](https://larrylustig.github.io/declarative-charts/examples/formatting.html) |
+| Legends & titles | [legends.html](https://larrylustig.github.io/declarative-charts/examples/legends.html), [titles.html](https://larrylustig.github.io/declarative-charts/examples/titles.html) |
+| Axes configuration | [axes.html](https://larrylustig.github.io/declarative-charts/examples/axes.html) |
+| Popups & interactivity | [popups.html](https://larrylustig.github.io/declarative-charts/examples/popups.html), [interactive.html](https://larrylustig.github.io/declarative-charts/examples/interactive.html) |
+| Accessibility | [accessibility.html](https://larrylustig.github.io/declarative-charts/examples/accessibility.html) |
+| htmx integration | [htmx-integration.html](https://larrylustig.github.io/declarative-charts/examples/htmx-integration.html) |
 
 ## Development
 
