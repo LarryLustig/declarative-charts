@@ -1,0 +1,35 @@
+# Line endings
+#
+# The repository was 121 CRLF files against 62 LF before this existed, because
+# it has only ever been committed from Windows with core.autocrlf=true. That is
+# invisible until a second platform touches it, at which point contributors get
+# whole-file diffs on files they did not edit.
+#
+# `text=auto` normalises to LF in the repository; `eol=lf` checks out LF in the
+# working tree too, so every platform sees the same bytes. Nothing here needs
+# CRLF — there are no .bat, .cmd or .ps1 files, and Node, Vite and Playwright
+# are all indifferent.
+* text=auto eol=lf
+
+# Binary — never normalise these. The visual regression baselines in
+# test/visual/*-snapshots/ are the reason this matters: a single byte of
+# "normalisation" would corrupt 30 reference screenshots and fail every visual
+# test at once.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+
+# Committed for reproducible installs, but a lockfile diff is never read by a
+# human. `-diff` collapses it to "Binary files differ" in review.
+package-lock.json -diff
+
+# Language statistics should describe the library, not its examples. Without
+# this, 40 HTML example pages compete with 127 TypeScript sources and GitHub
+# labels the repository HTML.
+examples/** linguist-documentation
