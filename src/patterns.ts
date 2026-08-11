@@ -86,6 +86,34 @@ export interface ResolvedFillAndPattern {
 }
 
 /**
+ * Escape a value for interpolation into a double-quoted SVG attribute.
+ *
+ * The pattern generators below build **strings**, and `BaseChart.renderDefs()`
+ * hands the result to lit's `unsafeSVG` — which parses it as markup, by design,
+ * because a `<pattern>` cannot be expressed as a lit template here. That makes
+ * every interpolated value a script-injection vector unless it is escaped.
+ *
+ * `pattern-stroke` and `pattern-fill` come straight off an author's attribute,
+ * and this library's whole premise is that markup is generated from server data.
+ * A colour taken from a database row was enough to run script:
+ *
+ *     pattern-stroke='red"/><image href="x" onerror="…"/><line stroke="'
+ *
+ * Both `<animate onbegin>` and `<image onerror>` fired in Chromium before this
+ * existed. `pattern-scale` is declared `type: Number` and cannot carry a
+ * payload, but it is escaped on the same path for the sake of one rule rather
+ * than two.
+ */
+export function escapeSvgAttribute(value: string): string {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
  * Type for pattern SVG generator functions.
  */
 type PatternGenerator = (

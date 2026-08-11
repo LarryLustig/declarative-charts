@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- **Escape pattern attribute values.** `pattern-stroke` and `pattern-fill` were interpolated
+  unescaped into the SVG **string** that `BaseChart.renderDefs()` hands to lit's `unsafeSVG`,
+  which parses markup by design. A value of
+  `red"/><image href="x" onerror="…"/><line stroke="` executed script — verified in Chromium,
+  where both `<animate onbegin>` and `<image onerror>` fired
+
+  It matters for this library in particular: the premise is that markup is generated from server
+  data, so an attribute that looks like it takes a colour is one a developer would reasonably
+  populate from a database row
+
+  Escaped at the single call site rather than inside each of the eight pattern generators — one
+  rule with one place to forget it instead of eight. `pattern-scale` is `type: Number` and could
+  never carry a payload. `test/component/pattern-injection.test.ts` asserts on the **parsed DOM**,
+  not on the string, because a string containing `&lt;script&gt;` proves nothing about what the
+  parser then does with it
+
 ### Changed
 
 - **One name: `declarative-charts`.** The project was calling itself three things — the npm

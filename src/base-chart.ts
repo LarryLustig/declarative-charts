@@ -17,6 +17,7 @@ import {
   ResolvedPattern,
   ResolvedFillAndPattern,
   PATTERN_DEFINITIONS,
+  escapeSvgAttribute,
   isPatternType,
   generatePatternId,
   getHighContrastPattern
@@ -1340,7 +1341,16 @@ export abstract class BaseChart extends LitElement {
     for (const pattern of this.usedPatterns.values()) {
       const generator = PATTERN_DEFINITIONS[pattern.type];
       if (generator) {
-        patternSvgs.push(generator(pattern.id, pattern.stroke, pattern.fill, pattern.scale));
+        // Escaped here rather than inside each of the eight generators: this is
+        // the only place they are called, and the alternative is eight copies of
+        // one rule with seven chances to forget it. The result goes to
+        // `unsafeSVG` below, which parses markup by design.
+        patternSvgs.push(generator(
+          escapeSvgAttribute(pattern.id),
+          escapeSvgAttribute(pattern.stroke),
+          escapeSvgAttribute(pattern.fill),
+          pattern.scale
+        ));
       }
     }
 
