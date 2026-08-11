@@ -1,6 +1,6 @@
 {
   "name": "declarative-charts",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Create beautiful charts using declarative HTML elements. Bar, line, pie, funnel charts with accessibility, palettes, and responsive design.",
   "type": "module",
   "//engines": "Node 20 is the floor for the dev toolchain (vitest requires ^20 || ^22 || >=24, happy-dom >=20). Consumers need less - the artifacts are ES2020 with no Node APIs - but Node 18 reached end of life in April 2025, so there is nothing below 20 worth promising support for.",

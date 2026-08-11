@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-11
+
+**First published release.** `0.1.0` was never put on npm — it is the state the
+project was in when the review in `docs/review.md` was written, and that review
+opened with "nobody has ever run this code." Everything below is the work
+between that finding and a package someone can actually install.
+
 ### Security
 
 - **Inline `on*` handlers are no longer passed through.** Passthrough copies any attribute the
@@ -1347,7 +1354,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **dc-fill Custom Element Registration** - The `<dc-fill>` element was not being registered due to tree-shaking removing the module (only type-only imports existed). Added side-effect import in library entry point to ensure the element is always available.
 
-## [0.1.0] - Initial Development
+## [0.1.0] - Initial Development — never published
 
 - Project setup with Vite, Lit, and TypeScript
 - Basic component architecture established
