@@ -30,11 +30,21 @@ exported with its own `downloadSvg()`.
 Which means your existing template loop already knows how to write it:
 
 ```html
-<!-- Django -->
+<!-- Jinja2 / Flask -->
 <dc-chart width="600" height="400">
   <dc-title>Revenue by Region</dc-title>
   {% for region in regions %}
     <dc-bar value="{{ region.revenue }}" label="{{ region.name }}"></dc-bar>
+  {% endfor %}
+</dc-chart>
+```
+
+```html
+<!-- Django - the same loop, with a Django filter doing the rounding -->
+<dc-chart width="600" height="400">
+  <dc-title>Revenue by Region</dc-title>
+  {% for region in regions %}
+    <dc-bar value="{{ region.revenue|floatformat:0 }}" label="{{ region.name }}"></dc-bar>
   {% endfor %}
 </dc-chart>
 ```
@@ -54,19 +64,38 @@ chart is in your page's source where you can read (and understand) it.
 
 ### It updates the way the rest of your page does
 
-Charts watch their own children, so anything that changes the markup redraws the
-chart — including an htmx swap. There is no `requestUpdate()` to remember and no
-JavaScript to write:
+A chart watches its own children, so **changing the markup is the API**. There
+is no `redraw()`, no `setData()`, and no `requestUpdate()` to remember.
+
+Swap the whole thing — here a server-rendered fragment, fetched and dropped in:
 
 ```html
-<div hx-get="/reports/q3" hx-trigger="click" hx-target="#sales">
-  Load Q3
-</div>
-
-<dc-chart id="sales" width="600" height="400">
-  <!-- htmx replaces these <dc-bar> elements; the chart redraws itself -->
-</dc-chart>
+<dc-chart id="sales" width="600" height="400"></dc-chart>
 ```
+
+```js
+const chart = document.querySelector('#sales');
+chart.innerHTML = await (await fetch('/reports/q3')).text();
+// Nothing further. The chart notices and redraws.
+```
+
+Or change one part of it. Each of these is the entire update:
+
+```js
+// Add a bar
+chart.insertAdjacentHTML('beforeend', '<dc-bar value="5100" label="East"></dc-bar>');
+
+// Revise a value
+chart.querySelector('dc-bar[label="North"]').setAttribute('value', '4800');
+
+// Hide a series - the legend drops it too
+chart.querySelector('dc-line[label="2023"]').hidden = true;
+```
+
+Because it is a `MutationObserver` over ordinary DOM rather than a framework
+binding, nothing above is specific to how you got there. The same three lines
+work from an event handler, from htmx or Turbo swapping the children out, from
+Alpine, or from a `<template>` you cloned — the chart never learns which.
 
 Every element passes attributes it does not recognise — `data-*`, htmx's
 `hx-*`, Alpine's `x-on:`, anything — through to the SVG shape, so a bar can be a

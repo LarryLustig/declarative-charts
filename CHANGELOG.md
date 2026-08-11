@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **README: a Jinja2 example, and updates shown without a framework.** Jinja2 leads the template
+  examples; the Django one now uses a Django filter rather than repeating a byte-identical loop
+
+  The dynamic-update section led with an htmx swap, which made a general mechanism look like an
+  integration. It now shows plain `fetch` + `innerHTML`, plus three one-line partial updates —
+  append a bar, revise a value, and hide a series (which drops it from the legend too). All four
+  were verified in a browser before being written down, including that the redraw is
+  asynchronous: the first draft claimed the chart "has already redrawn" after the assignment, and
+  it has not — the `MutationObserver` fires a tick later
+
 ### Fixed
 
 - **The example gallery did not fit a phone.** `.grid` used
