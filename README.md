@@ -171,17 +171,14 @@ template** — a few dozen bars, a handful of series. One element per datapoint
 has real costs at scale: DOM weight, verbosity, and markup that gets unwieldy
 past a few hundred points.
 
-Rendering scales close to linearly — on one laptop, 1,000 bars paint in about
-230 ms and 10,000 in about 1.5 s. **But for bar charts the binding limit is not
-speed, it is geometry.** Bar width bottoms out at one unit, so a 900-unit-wide
-chart runs out of room at roughly 800 bars and draws the rest off its own right
-edge, where they cannot be seen. Lines and scatters have no such floor.
+Rendering scales close to linearly. On one laptop, a line chart paints 1,000
+points in about 170 ms, 5,000 in about 580 ms, and 10,000 in about 1.2 s. A few
+thousand points is comfortable; very large series are where you start to notice
+the page working.
 
 [Measure it on your own device](https://larrylustig.github.io/declarative-charts/examples/large-datasets.html)
-— that page is the honest answer, since a phone is several times slower than a
-laptop. If your series runs to thousands of points and has to be interactive, a
-canvas-based library is the better tool; this one draws real DOM elements on
-purpose, and that is the trade.
+— that page is the honest answer, since a phone is slower than a laptop and the
+difference matters more than any figure published here.
 
 A fuller version of this analysis, with the competitive matrix and its caveats,
 is in [docs/review.md](docs/review.md).

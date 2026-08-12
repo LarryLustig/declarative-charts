@@ -359,10 +359,11 @@ describe('createErrorLog', () => {
 describe('Error code count', () => {
   it('has expected number of error codes', () => {
     const count = Object.keys(ErrorCode).length;
-    // 6 data + 15 config + 4 reference + 3 style + 1 info = 29
+    // 6 data + 16 config + 4 reference + 3 style + 1 info = 30
     // (DC111/DC112 arrived with the radar chart, DC113/DC114 with <dc-reference>,
-    //  DC115 when inline event handlers stopped being passed through)
-    expect(count).toBe(29);
+    //  DC115 when inline event handlers stopped being passed through, DC116 when
+    //  bars that do not fit the plot stopped being silent)
+    expect(count).toBe(30);
   });
 
   it('data errors count', () => {
@@ -378,7 +379,7 @@ describe('Error code count', () => {
       const num = parseInt(e.code.slice(2), 10);
       return num >= 100 && num <= 199;
     });
-    expect(configErrors.length).toBe(15);
+    expect(configErrors.length).toBe(16);
   });
 
   it('reference errors count', () => {

@@ -28,6 +28,8 @@
         .perf-controls select { padding: 8px; font-size: 15px; }
         #results td:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
         #status { color: #666; min-height: 1.4em; }
+        .chart-scroller { overflow-x: auto; border: 1px solid #ddd; border-radius: 8px; }
+        .chart-scroller dc-chart { width: 3000px; border: none; box-shadow: none; border-radius: 0; }
     </style>
 </head>
 <body>
@@ -116,34 +118,30 @@ chart.addEventListener('dc-render', e =&gt; {
         navigation are a few milliseconds at ten thousand points, because they are hit-testing an
         already-drawn tree rather than rebuilding it.</p>
 
-        <p><strong>For bars, the real ceiling is geometric, and it arrives long before the
-        timing becomes a problem.</strong> Bar width has a floor of one unit. Once the data no
-        longer fits at that width the surplus is still drawn — off the right-hand edge of the
-        plot, where nobody can see it.</p>
+        <p><strong>A bar chart runs out of room before it runs out of speed.</strong> A bar has
+        to be at least one unit wide, so a 900-unit-wide plot holds about 800 of them and no
+        more. Past that the surplus is drawn beyond the right edge, where it cannot be seen —
+        which is what you would expect when you ask for more bars than there are pixels.</p>
 
-        <p>In a 900-unit-wide chart that happens at about 800 bars. At 2,000 bars, 1,190 of them
-        are off the plot; at 5,000 bars, 4,190 are. Render 5,000 bars above and count the axis
-        labels: the chart stops at roughly 840 and the other 83% of your data is somewhere to the
-        right of the picture. The library warns (<code>DC107</code>), but it emits the same
-        warning at 400 bars, where nothing is wrong.</p>
+        <p>It is worth knowing only because it is otherwise silent, so the library says so:
+        <code>DC116</code> reports exactly how many bars fell outside the plot. Widen the chart or
+        show fewer. Lines and scatters have no such floor — a point is a coordinate rather than a
+        rectangle that has to fit — which is why the timings above use a line.</p>
 
-        <p>So for bars, read the ceiling as <em>the width of your plot in units</em>, not as a
-        speed limit. Lines and scatters have no such floor — a point is a coordinate, not a
-        rectangle that has to fit — so they degrade smoothly and stay honest at any count.</p>
-
-        <p>For reference, one developer laptop (Chromium, 2026) pressing the buttons above:</p>
+        <p>For reference, one developer laptop (Chromium, 2026) pressing the buttons above.
+        These are line charts, because a line draws every point it is given at any of these
+        counts — see the note on bar charts below:</p>
 
         <div class="table-scroll">
             <table class="example-table">
                 <thead><tr>
-                    <th>Points</th><th>Bars, to painted</th><th>SVG elements</th>
-                    <th>Line, to painted</th><th>SVG elements</th>
+                    <th>Points</th><th>To painted</th><th>SVG elements</th>
                 </tr></thead>
                 <tbody>
-                    <tr><td>100</td><td>67 ms</td><td>145</td><td>132 ms</td><td>250</td></tr>
-                    <tr><td>1,000</td><td>233 ms</td><td>1,041</td><td>166 ms</td><td>2,042</td></tr>
-                    <tr><td>5,000</td><td>882 ms</td><td>5,035</td><td>581 ms</td><td>10,036</td></tr>
-                    <tr><td>10,000</td><td>1,562 ms</td><td>10,035</td><td>1,166 ms</td><td>20,036</td></tr>
+                    <tr><td>100</td><td>132 ms</td><td>250</td></tr>
+                    <tr><td>1,000</td><td>166 ms</td><td>2,042</td></tr>
+                    <tr><td>5,000</td><td>581 ms</td><td>10,036</td></tr>
+                    <tr><td>10,000</td><td>1,166 ms</td><td>20,036</td></tr>
                 </tbody>
             </table>
         </div>
@@ -154,10 +152,50 @@ chart.addEventListener('dc-render', e =&gt; {
         parse; this page hands an already-open page a new string of children, which is what a live
         update actually costs.</p>
 
-        <p>So: a few hundred points is comfortable, a thousand is unremarkable, five thousand is a
-        page you notice loading, and ten thousand is a second or so you have chosen to spend. If
-        your series is larger than that and has to be interactive, a canvas-based library is the
-        better tool — this one draws real DOM elements on purpose, and that is the trade.</p>
+        <p>So: a few hundred points is comfortable, a thousand is unremarkable, five thousand is
+        a page you notice loading, and ten thousand is a second or so you have chosen to spend.
+        Beyond that the cost keeps climbing in the same straight line, and at some point a
+        canvas-based library becomes the better tool — this one draws real DOM elements on
+        purpose, and that is the trade.</p>
+    </div>
+
+    <div class="example">
+        <h2>Drawing more bars than fit: scroll instead</h2>
+
+        <p>If a bar chart needs more bars than the plot has units, the answer does not have to be
+        fewer bars. Give the chart the width the data actually needs and put it in a horizontally
+        scrolling box. This needs nothing from the library beyond an explicit width — the
+        <code>&lt;svg&gt;</code> is already <code>width: 100%</code> of its host, so a host wider
+        than the page simply overflows, and the wrapper scrolls it.</p>
+
+        <pre><code>&lt;style&gt;
+  .chart-scroller { overflow-x: auto; }
+  /* The chart's own width attribute is viewBox units; this is CSS pixels.
+     Set both, to the same number, and one unit is one pixel. */
+  .chart-scroller dc-chart { width: 3000px; }
+&lt;/style&gt;
+
+&lt;div class="chart-scroller"&gt;
+  &lt;!-- gutter="1": the default 10-unit gap between bars costs more than the
+       bars themselves at this count, and the layout would compress it away --&gt;
+  &lt;dc-chart width="3000" height="300" gutter="1"&gt;
+    &lt;!-- 600 bars, comfortably --&gt;
+  &lt;/dc-chart&gt;
+&lt;/div&gt;</code></pre>
+
+        <div class="chart-scroller">
+            <dc-chart id="scroller" width="3000" height="300" gutter="1" show-value="false"></dc-chart>
+        </div>
+
+        <p><strong>One thing to know before you reach for this:</strong> the value axis scrolls
+        away with everything else. Scroll the chart above to the right and the numbers down the
+        left-hand side are gone — the grid lines still give you the shape, but not the magnitude.
+        SVG has no equivalent of a sticky table header, so freezing the axis means drawing it as a
+        second, separate element pinned over the scroller. That is a page-level decision, not
+        something the chart can do for you.</p>
+
+        <p>It works well for a dense series someone is meant to pan through, and badly for a chart
+        someone is meant to read at a glance.</p>
     </div>
 
     <div class="example">
@@ -258,6 +296,12 @@ chart.addEventListener('dc-render', e =&gt; {
             rows.replaceChildren();
             status.textContent = 'Pick a size to render.';
         });
+
+        // The scrolling example: enough bars to need the width.
+        document.querySelector('#scroller').innerHTML =
+            Array.from({ length: 600 }, (_, i) =>
+                `<dc-bar value="${(50 + 40 * Math.sin(i / 45)).toFixed(1)}" label="${i}"></dc-bar>`
+            ).join('');
 
         // The second example: dc-render reporting what it drew.
         const watched = document.querySelector('#watched');

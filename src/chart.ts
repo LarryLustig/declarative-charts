@@ -1625,6 +1625,33 @@ export class Chart extends AxisChart {
       : 0;
     const finalUnitSizes = unitSizes.map(s => s === -1 ? defaultUnitSize : s);
 
+    // Compressing the gutters buys room only until the bars themselves hit
+    // MIN_UNIT_SIZE. Past that the layout keeps allocating a unit per bar and
+    // the surplus is drawn beyond the plot, where it renders correctly and is
+    // invisible — the exact silent failure this library's diagnostics exist to
+    // prevent. DC107 above reports the compression; it fires at counts where
+    // nothing is wrong, so it cannot carry this meaning too.
+    const consumed = finalUnitSizes.reduce((sum, size) => sum + size, 0) + totalGutterSpace;
+    if (consumed > availableSpace + 0.5) {
+      // Walked rather than estimated from the ratio: sizes are per-unit and a
+      // custom `bar-width` makes them uneven, so a ratio is off by a few and the
+      // message states an exact figure. The loop only runs once the overflow is
+      // already established, never on a chart that fits.
+      let cursor = 0;
+      let visible = 0;
+      structure.forEach((unit, i) => {
+        if (cursor <= availableSpace) visible++;
+        cursor += finalUnitSizes[i] + this.unitGutter(unit, gutterScale);
+      });
+      this.logError(ErrorCode.BARS_EXCEED_PLOT, {
+        offPlot: structure.length - visible,
+        count: structure.length,
+        minSize: Chart.MIN_UNIT_SIZE,
+        needed: Math.round(consumed),
+        available: Math.round(availableSpace)
+      }, { offPlot: structure.length - visible, total: structure.length });
+    }
+
     return {
       unitSizes: finalUnitSizes,
       totalGutterSpace,

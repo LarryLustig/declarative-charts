@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`DC116`** — bars that do not fit the plot are no longer silent. Bar width has a floor of one
+  unit, so past roughly 800 bars in a 900-unit plot the surplus is drawn beyond the right edge
+  where it cannot be seen. `DC107` already reported the gutter compression, but it fires from a
+  hundred bars upward where nothing is wrong, so it could not carry this meaning too
+
+  The count is exact — walked, not estimated from a ratio, because the message states a number
+  and a ratio was off by three or four
+
+- **A scrolling recipe on the large-datasets page.** Giving a chart the width its data needs and
+  wrapping it in `overflow-x: auto` needs nothing from the library: the `<svg>` is already
+  `width: 100%` of its host, so a host wider than the page overflows and the wrapper scrolls it.
+  Verified at 1,000 bars in a 4,000-unit chart with none off-plot
+
+  Documented with its limitation: the value axis scrolls away with everything else, and SVG has
+  no sticky-header equivalent, so freezing it means a second element pinned over the scroller
+
+### Added
+
 - **`examples/large-datasets.html`** — renders 100 / 1,000 / 5,000 / 10,000 points on demand and
   times it on *your* device, which is the only number that answers "is this fast enough for me".
   Instrumented with `dc-render`, so it doubles as a worked example of that event

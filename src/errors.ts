@@ -178,6 +178,17 @@ export const ErrorCode = {
     message: '{count} bars exceed the available {available} units; gutters compressed to {gutterScale}x to keep bars at least {minSize} unit(s) wide'
   },
 
+  /**
+   * Bars clamped to the minimum width still do not fit, so some are drawn
+   * beyond the plot and cannot be seen
+   */
+  BARS_EXCEED_PLOT: {
+    code: 'DC116',
+    level: 'warning',
+    path: 'bars.overflow',
+    message: '{offPlot} of {count} bars are drawn past the right edge of the plot and cannot be seen. At the {minSize}-unit minimum width they need {needed} units but the plot is {available}. Widen the chart, or show fewer bars'
+  },
+
   // ===========================================================================
   // DC200-DC299: Reference Errors
   // ===========================================================================

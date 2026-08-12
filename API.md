@@ -2964,6 +2964,7 @@ you where to look before you read the message.
 | `DC113` | A `<dc-reference>` set neither `value` nor `min`/`max` and drew nothing |
 | `DC114` | A reference line falls outside the axis range and was not drawn |
 | `DC115` | An inline `on*` handler was not copied onto the shape — listen for `dc-click` instead |
+| `DC116` | Bars do not fit the plot even at minimum width; some are drawn where they cannot be seen |
 | `DC201` | Palette not found — check the name against [Palettes](#palettes-and-pattern-fills) |
 | `DC202` | Pattern is not a valid type or ID reference |
 | `DC203` | `zero-fill` referenced an element that does not exist |
