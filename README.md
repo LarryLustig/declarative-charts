@@ -169,11 +169,19 @@ legends, patterns, annotations and keyboard navigation. The
 The sweet spot is **small-to-medium categorical data emitted by a server
 template** — a few dozen bars, a handful of series. One element per datapoint
 has real costs at scale: DOM weight, verbosity, and markup that gets unwieldy
-past a few hundred points. Rendering scales close to linearly — 1,000 bars take
-about 620 ms from markup to painted pixels and 180 ms to re-render, measured
-with `npm run bench` — so the ceiling is practical rather than architectural. But
-if you have a 5,000-point time series, a canvas-based library is the better tool
-and this is the wrong one.
+past a few hundred points.
+
+Rendering scales close to linearly — on one laptop, 1,000 bars paint in about
+230 ms and 10,000 in about 1.5 s. **But for bar charts the binding limit is not
+speed, it is geometry.** Bar width bottoms out at one unit, so a 900-unit-wide
+chart runs out of room at roughly 800 bars and draws the rest off its own right
+edge, where they cannot be seen. Lines and scatters have no such floor.
+
+[Measure it on your own device](https://larrylustig.github.io/declarative-charts/examples/large-datasets.html)
+— that page is the honest answer, since a phone is several times slower than a
+laptop. If your series runs to thousands of points and has to be interactive, a
+canvas-based library is the better tool; this one draws real DOM elements on
+purpose, and that is the trade.
 
 A fuller version of this analysis, with the competitive matrix and its caveats,
 is in [docs/review.md](docs/review.md).

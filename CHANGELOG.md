@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`examples/large-datasets.html`** — renders 100 / 1,000 / 5,000 / 10,000 points on demand and
+  times it on *your* device, which is the only number that answers "is this fast enough for me".
+  Instrumented with `dc-render`, so it doubles as a worked example of that event
+
+  Measured on one laptop, painted: bars 67 ms / 233 ms / 882 ms / 1,562 ms; lines 132 ms / 166 ms
+  / 581 ms / 1,166 ms. Element cost per datapoint is 1 for a bar, 2 for a line, 3 for a scatter —
+  so ten thousand scatter points is thirty thousand SVG elements
+
+### Changed
+
+- **The README's performance claim is corrected and no longer the main point.** It quoted
+  `npm run bench` figures (620 ms for 1,000 bars) beside a page that measures 233 ms for what
+  looks like the same thing; the harness loads markup as a fresh HTML document and counts the
+  parse, while the page updates an open one. Both are now labelled
+
+  More importantly, **for bar charts the binding limit is geometric, not speed**. Bar width floors
+  at one unit, so a 900-unit chart runs out of room at about 800 bars and draws the surplus off
+  its own right edge: at 2,000 bars 1,190 are off the plot, at 5,000 bars 4,190 are. That ceiling
+  arrives long before any timing becomes uncomfortable, and the README now leads with it
+
 ### Changed
 
 - **README: a Jinja2 example, and updates shown without a framework.** Jinja2 leads the template

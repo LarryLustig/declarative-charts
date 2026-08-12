@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Large Datasets - Declarative Chart Library</title>
+    <link rel="stylesheet" href="examples.css">
+    <style>
+        /* Page-local because nothing else needs a control strip. */
+        .perf-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .perf-controls button {
+            padding: 8px 16px;
+            border: 1px solid #2196F3;
+            background: white;
+            color: #2196F3;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+        .perf-controls button:hover { background: #2196F3; color: white; }
+        .perf-controls button[disabled] { opacity: .5; cursor: progress; }
+        .perf-controls select { padding: 8px; font-size: 15px; }
+        #results td:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+        #status { color: #666; min-height: 1.4em; }
+    </style>
+</head>
+<body>
+    <h1>Large Datasets</h1>
+    <p>One element per datapoint has a cost. This page measures it, on your device.</p>
+
+    <nav></nav>
+
+    <div class="example">
+        <h2>Measure it yourself</h2>
+        <p>The numbers below are the ones that matter, because they come from the machine you are
+        reading this on. A phone will be several times slower than a laptop, and that difference
+        decides whether this library suits your case far more than any figure we could publish.</p>
+
+        <p>Nothing renders until you press a button — a ten-thousand-bar chart is not something to
+        do on page load.</p>
+
+        <div class="perf-controls">
+            <label>Chart type
+                <select id="type">
+                    <option value="bar">Bars</option>
+                    <option value="line">Line</option>
+                    <option value="scatter">Scatter</option>
+                </select>
+            </label>
+            <button data-n="100">100</button>
+            <button data-n="1000">1,000</button>
+            <button data-n="5000">5,000</button>
+            <button data-n="10000">10,000</button>
+            <button id="clear">Clear</button>
+        </div>
+
+        <p id="status">Pick a size to render.</p>
+
+        <div class="table-scroll">
+            <table class="example-table" id="results">
+                <thead>
+                    <tr>
+                        <th>Type</th><th>Points</th><th>Build markup</th><th>To rendered</th>
+                        <th>To painted</th><th>SVG elements</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <dc-chart id="demo" width="900" height="400" show-value="false" logging="error"></dc-chart>
+    </div>
+
+    <div class="example">
+        <h2>How the timing is taken</h2>
+        <p>The chart tells you when it has drawn. <code>dc-render</code> fires after every render
+        and carries the number of data elements it drew, so no polling or guessing is needed:</p>
+
+        <pre><code>const chart = document.querySelector('#demo');
+
+// Time spent building the markup string
+const t0 = performance.now();
+chart.innerHTML = buildMarkup(count);
+const built = performance.now() - t0;
+
+// The chart redraws itself; dc-render says when
+chart.addEventListener('dc-render', e =&gt; {
+  console.log(`drew ${e.detail.count} elements in ${performance.now() - t0}ms`);
+}, { once: true });</code></pre>
+
+        <p>"To painted" is measured a further two animation frames later, which is the first moment
+        the browser has actually put pixels on screen. It is always the larger number and the more
+        honest one.</p>
+    </div>
+
+    <div class="example">
+        <h2>Reading the results</h2>
+
+        <p><strong>Cost is roughly linear in element count.</strong> Ten times the data takes
+        something like ten times as long, because every datapoint is a DOM element that has to be
+        parsed, laid out and painted. There is no cliff — but there is no free lunch either.</p>
+
+        <p><strong>Element count is the thing to watch, and it varies by chart type.</strong> A
+        bar is one element per datapoint; a line is two, because each point draws a marker as well
+        as feeding the path; a scatter is three. Ten thousand scatter points is thirty thousand
+        SVG elements in your document, and that is a memory and layout cost that outlives the
+        render.</p>
+
+        <p><strong>Interaction stays fast even when rendering does not.</strong> Hover and keyboard
+        navigation are a few milliseconds at ten thousand points, because they are hit-testing an
+        already-drawn tree rather than rebuilding it.</p>
+
+        <p><strong>For bars, the real ceiling is geometric, and it arrives long before the
+        timing becomes a problem.</strong> Bar width has a floor of one unit. Once the data no
+        longer fits at that width the surplus is still drawn — off the right-hand edge of the
+        plot, where nobody can see it.</p>
+
+        <p>In a 900-unit-wide chart that happens at about 800 bars. At 2,000 bars, 1,190 of them
+        are off the plot; at 5,000 bars, 4,190 are. Render 5,000 bars above and count the axis
+        labels: the chart stops at roughly 840 and the other 83% of your data is somewhere to the
+        right of the picture. The library warns (<code>DC107</code>), but it emits the same
+        warning at 400 bars, where nothing is wrong.</p>
+
+        <p>So for bars, read the ceiling as <em>the width of your plot in units</em>, not as a
+        speed limit. Lines and scatters have no such floor — a point is a coordinate, not a
+        rectangle that has to fit — so they degrade smoothly and stay honest at any count.</p>
+
+        <p>For reference, one developer laptop (Chromium, 2026) pressing the buttons above:</p>
+
+        <div class="table-scroll">
+            <table class="example-table">
+                <thead><tr>
+                    <th>Points</th><th>Bars, to painted</th><th>SVG elements</th>
+                    <th>Line, to painted</th><th>SVG elements</th>
+                </tr></thead>
+                <tbody>
+                    <tr><td>100</td><td>67 ms</td><td>145</td><td>132 ms</td><td>250</td></tr>
+                    <tr><td>1,000</td><td>233 ms</td><td>1,041</td><td>166 ms</td><td>2,042</td></tr>
+                    <tr><td>5,000</td><td>882 ms</td><td>5,035</td><td>581 ms</td><td>10,036</td></tr>
+                    <tr><td>10,000</td><td>1,562 ms</td><td>10,035</td><td>1,166 ms</td><td>20,036</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p>Those are measured by this page, so pressing the buttons yourself produces the
+        comparable figure. A separate harness (<code>npm run bench</code>) reports larger numbers
+        for the same counts because it loads the markup as a fresh HTML document and counts the
+        parse; this page hands an already-open page a new string of children, which is what a live
+        update actually costs.</p>
+
+        <p>So: a few hundred points is comfortable, a thousand is unremarkable, five thousand is a
+        page you notice loading, and ten thousand is a second or so you have chosen to spend. If
+        your series is larger than that and has to be interactive, a canvas-based library is the
+        better tool — this one draws real DOM elements on purpose, and that is the trade.</p>
+    </div>
+
+    <div class="example">
+        <h2>Reacting to a render</h2>
+        <p><code>dc-render</code> is not only for benchmarks. It fires whenever a chart finishes
+        drawing, including after the markup changes, which makes it the hook for anything that has
+        to stay in step with the chart.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Reporting what was drawn</h3>
+                <pre><code>&lt;dc-chart id="watched" width="500" height="350"&gt;
+  &lt;dc-bar value="30" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="70" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="50" label="Q3"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart id="watched" width="500" height="350">
+                    <dc-bar value="30" label="Q1"></dc-bar>
+                    <dc-bar value="70" label="Q2"></dc-bar>
+                    <dc-bar value="50" label="Q3"></dc-bar>
+                </dc-chart>
+                <p id="watched-out">…</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../src/index.ts"></script>
+    <script src="examples.js"></script>
+    <script>
+        const chart = document.querySelector('#demo');
+        const status = document.querySelector('#status');
+        const rows = document.querySelector('#results tbody');
+        const typeSel = document.querySelector('#type');
+
+        /** Build the markup string for `n` datapoints of the chosen type. */
+        function buildMarkup(n, type) {
+            const parts = [];
+            // A shape worth looking at rather than noise: a slow wave with jitter.
+            const value = i => (50 + 40 * Math.sin(i / (n / 12)) + Math.random() * 12).toFixed(1);
+
+            if (type === 'bar') {
+                for (let i = 0; i < n; i++) parts.push(`<dc-bar value="${value(i)}" label="${i}"></dc-bar>`);
+                return parts.join('');
+            }
+            if (type === 'line') {
+                for (let i = 0; i < n; i++) parts.push(`<dc-point value="${value(i)}" label="${i}"></dc-point>`);
+                return `<dc-line label="Series">${parts.join('')}</dc-line>`;
+            }
+            for (let i = 0; i < n; i++) parts.push(`<dc-point x="${i}" value="${value(i)}"></dc-point>`);
+            return `<dc-scatter label="Series" size="2">${parts.join('')}</dc-scatter>`;
+        }
+
+        /** Two frames is the first moment the browser has actually painted. */
+        const painted = () => new Promise(r =>
+            requestAnimationFrame(() => requestAnimationFrame(r)));
+
+        async function run(n, type) {
+            document.querySelectorAll('.perf-controls button').forEach(b => b.disabled = true);
+            status.textContent = `Rendering ${n.toLocaleString()} ${type} points…`;
+            // Let the browser paint the status line before the work starts.
+            await painted();
+
+            const t0 = performance.now();
+            const markup = buildMarkup(n, type);
+            const built = performance.now() - t0;
+
+            const rendered = new Promise(resolve =>
+                chart.addEventListener('dc-render', resolve, { once: true }));
+
+            const t1 = performance.now();
+            chart.innerHTML = markup;
+            const ev = await rendered;
+            const toRendered = performance.now() - t1;
+
+            await painted();
+            const toPainted = performance.now() - t1;
+            const els = chart.shadowRoot.querySelectorAll('svg *').length;
+
+            const tr = document.createElement('tr');
+            for (const cell of [type, n.toLocaleString(), `${built.toFixed(0)} ms`,
+                                `${toRendered.toFixed(0)} ms`, `${toPainted.toFixed(0)} ms`,
+                                els.toLocaleString()]) {
+                const td = document.createElement('td');
+                td.textContent = cell;
+                tr.appendChild(td);
+            }
+            rows.prepend(tr);
+
+            status.textContent = `Drew ${ev.detail.count.toLocaleString()} data elements.`;
+            document.querySelectorAll('.perf-controls button').forEach(b => b.disabled = false);
+        }
+
+        document.querySelectorAll('.perf-controls button[data-n]').forEach(btn =>
+            btn.addEventListener('click', () => run(Number(btn.dataset.n), typeSel.value)));
+
+        document.querySelector('#clear').addEventListener('click', () => {
+            chart.innerHTML = '';
+            rows.replaceChildren();
+            status.textContent = 'Pick a size to render.';
+        });
+
+        // The second example: dc-render reporting what it drew.
+        const watched = document.querySelector('#watched');
+        watched.addEventListener('dc-render', e => {
+            document.querySelector('#watched-out').textContent =
+                `dc-render: ${e.detail.count} data elements drawn.`;
+        });
+    </script>
+</body>
+</html>

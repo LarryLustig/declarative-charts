@@ -33,7 +33,9 @@ const STARTS_EMPTY = new Set([
   'loaded-content.html',
   'htmx-integration.html',
   // Its whole subject is what a chart shows when it has nothing to show.
-  'empty-loading.html'
+  'empty-loading.html',
+  // Renders on demand: a ten-thousand-bar chart is not something to do on load.
+  'large-datasets.html'
 ]);
 
 test.describe('example pages', () => {

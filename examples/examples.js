@@ -84,6 +84,7 @@ const NAV_CONFIG = {
             dropdown: [
                 { href: 'defaults.html', label: 'Default Configuration' },
                 { href: 'logging.html', label: 'Logging' },
+                { href: 'large-datasets.html', label: 'Large Datasets' },
                 { href: 'htmx-integration.html', label: 'htmx Integration' },
                 { href: 'accessibility.html', label: 'Accessibility' },
             ]
