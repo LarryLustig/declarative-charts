@@ -3,15 +3,15 @@ import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync } from '
 import { resolve } from 'node:path'
 
 /**
- * The example gallery, built as a static site.
+ * The example pages, built as a static site.
  *
  * Every example page loads the library with
  * `<script type="module" src="../src/index.ts">`, which only resolves under the
  * dev server. From a plain clone or a file host they render nothing — four
  * pages once pointed at `dist/` instead, which is gitignored, and were blank on
  * a fresh checkout. Running them through Vite compiles the TypeScript and
- * rewrites the reference, so the published gallery is the same pages the
- * examples tests already check.
+ * rewrites the reference, so what is published is the same pages the examples
+ * tests already check.
  *
  * Every `.html` under `examples/` is an entry point, discovered rather than
  * listed: a page added without a corresponding line in a config would be a page
@@ -68,7 +68,7 @@ function copyExamplesScript(): Plugin {
  * `"sideEffects": ["*.js", "*.cjs"]` — correct for the published package, which
  * contains no TypeScript — and Rollup consults that field when building from
  * `src/` too. Concluding the `.ts` files were side-effect-free, it dropped every
- * `customElements.define`, and the whole gallery built successfully into a
+ * `customElements.define`, and every page built successfully into a
  * 711-byte polyfill and 37 pages of inert markup.
  *
  * Nothing complained. The pages were valid HTML with unupgraded custom elements,

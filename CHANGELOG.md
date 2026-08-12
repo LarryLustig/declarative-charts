@@ -61,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **The example gallery did not fit a phone.** `.grid` used
+- **The example pages did not fit a phone.** `.grid` used
   `repeat(auto-fit, minmax(500px, 1fr))` — a hard 500px minimum column — and the stylesheet had
   no media queries at all, so on a 390px screen the layout could not shrink and the browser
   zoomed the whole page out to fit. `minmax(min(500px, 100%), 1fr)` lets the track collapse to

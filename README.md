@@ -162,7 +162,7 @@ need to know the series maximum before it can emit a row.
 
 Bar, line, area, bubble, scatter, pie, funnel, stage and radar, with axes,
 legends, patterns, annotations and keyboard navigation. The
-[gallery](https://larrylustig.github.io/declarative-charts/) has all of it.
+[examples](https://larrylustig.github.io/declarative-charts/) have all of it.
 
 ### Where it fits, and where it does not
 
@@ -367,14 +367,14 @@ Figures from `npm run build`, which prints them on every build.
 
 ## Documentation
 
-- **[Live example gallery](https://larrylustig.github.io/declarative-charts/)** - 37 pages, every feature, with the markup beside each chart
+- **[Live examples](https://larrylustig.github.io/declarative-charts/)** - 37 pages, every feature, with the markup beside each chart
 - **[API Reference](API.md)** - Complete attribute and element documentation
 - **[Changelog](CHANGELOG.md)** - Version history
 - **[Roadmap](ROADMAP.md)** - Planned features and explicitly declined ones
 - **[Security policy](SECURITY.md)** - Threat model and private reporting
 
-The gallery is built from `examples/` on every push to `main`. To run it
-locally, `npm run dev` and open `localhost:5173`.
+Those pages are built from `examples/` and published on every push to `main`.
+To run them locally, `npm run dev` and open `localhost:5173`.
 
 ### Key Examples
 
