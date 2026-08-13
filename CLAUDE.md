@@ -216,9 +216,11 @@ Helpers live in each directory's `setup.ts`.
   mutation tests will pass against broken behaviour.
 - **Do not call `requestUpdate()` in tests** after changing markup. The chart
   observes its own children; adding one masks a regression in that observer.
-- **Visual baselines: `maxDiffPixelRatio` is 0.01**, which has twice hidden real
-  render changes. When a change should alter a chart, regenerate at zero
-  tolerance and compare deliberately.
+- **Visual baselines allow 100 differing pixels**, absolute rather than a ratio.
+  The old `maxDiffPixelRatio: 0.01` permitted 11,445 on a typical baseline and
+  hid real changes three times. If an upgrade makes this noisy, raise it
+  deliberately and record why in `playwright.config.ts` — do not go back to a
+  ratio, which gives the largest charts the largest blind spot.
 - **The Playwright suite is split.** `charts.spec.ts` compares screenshots and
   runs locally only — the baselines are `-chromium-win32` and no CI runner
   reproduces them. It is bound into `prepublishOnly` so a release cannot skip

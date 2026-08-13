@@ -83,14 +83,38 @@ export default defineConfig({
   // Snapshot configuration
   expect: {
     toHaveScreenshot: {
-      // Allow small pixel differences (anti-aliasing, font rendering)
-      maxDiffPixelRatio: 0.01,
+      /*
+       * An absolute allowance, not a ratio.
+       *
+       * This was `maxDiffPixelRatio: 0.01`, which sounds small and is not: 1% of
+       * a 1240x923 baseline is 11,445 pixels — a whole axis label, a moved
+       * legend, a bar that changed height. It hid real changes twice. A
+       * reference line's label was repositioned and the baseline did not
+       * regenerate, so the fix looked like it had failed; and 13 of 30 baselines
+       * turned out to be stale, including one where every y-axis tick had drifted
+       * from 12/24/36/48 to 10/20/30/40/50 at 0.986% of pixels.
+       *
+       * Measured against a deliberate 2-unit nudge to every category label, which
+       * changed nine charts by 339 to 10,505 pixels:
+       *
+       *   ratio 0.01   allows 11,445   caught 0 of 9
+       *   ratio 0.001  allows  1,144   caught 2 of 9
+       *   100 pixels   allows    100   caught 9 of 9
+       *
+       * A ratio is the wrong shape here: it hands the largest images the largest
+       * blind spot, and those are the charts with the most to get wrong. 100
+       * absolute pixels still absorbs an antialiasing fringe, and four
+       * consecutive runs pass with no code change.
+       *
+       * If a Playwright or Chromium upgrade makes this noisy, raise it
+       * deliberately and say so here — do not reach for a ratio again.
+       */
+      maxDiffPixels: 100,
       // Animation threshold
       animations: 'disabled',
     },
     toMatchSnapshot: {
-      // Threshold for image comparison
-      maxDiffPixelRatio: 0.01,
+      maxDiffPixels: 100,
     },
   },
 

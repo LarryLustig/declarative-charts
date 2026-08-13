@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Visual baselines now allow 100 differing pixels, absolute, instead of 1% of the image.** A
+  ratio sounds small and is not: 1% of a 1240x923 baseline is 11,445 pixels — a whole axis label
+  or a moved legend. It hid real changes three times, including one where every y-axis tick
+  drifted from 12/24/36/48 to 10/20/30/40/50 at 0.986% of pixels, just under the threshold
+
+  Chosen by measurement rather than instinct. Against a deliberate 2-unit nudge to every category
+  label, which changed nine charts by 339 to 10,505 pixels: the old `0.01` caught none of them,
+  `0.001` caught two, and 100 absolute pixels caught all nine. A ratio is the wrong shape —
+  it gives the largest images the largest blind spot, and those are the charts with the most to
+  get wrong. Four consecutive runs pass on unchanged code
+
 ### Added
 
 - **`DC116`** — bars that do not fit the plot are no longer silent. Bar width has a floor of one

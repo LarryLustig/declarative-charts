@@ -363,10 +363,12 @@ trying the library for the first time.
 Not features — things that are wrong or thin, recorded so they are not
 rediscovered:
 
-- **Visual tolerance is loose.** `maxDiffPixelRatio: 0.01` let a full change of
-  axis label text (ISO dates → `Jan 3`) pass as identical. The baseline had to
-  be deleted to force regeneration. Tightening it risks font-rendering
-  flakiness; worth a deliberate decision either way.
+- ~~**Visual tolerance is loose.**~~ Fixed: `maxDiffPixelRatio: 0.01` allowed
+  11,445 pixels to differ on a typical baseline and hid three separate real
+  changes. Replaced with `maxDiffPixels: 100`, an absolute allowance — a ratio
+  gives the largest images the largest blind spot. Measured against a deliberate
+  label nudge: the old setting caught 0 of 9 affected charts, the new one 9 of 9,
+  with four consecutive clean runs on unchanged code.
 - **`stage-chart.ts` at 88%** is the thinnest real coverage left, mostly in
   `calculateTextFit`.
 - **Outreach has not happened.** docs/review.md §8 argues discovery is the binding
