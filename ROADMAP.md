@@ -315,6 +315,46 @@ Not on the 1.0 list. Each would be a reasonable next thing; none blocks release.
 | Popup/tooltip customisation | `<dc-popup>` takes arbitrary HTML already. The gap is positioning and styling, which `::part` may cover |
 | Label font size per element | `font-size` works on text elements; a per-datum override is a small addition, not a release blocker |
 | More chart types | See above |
+| Subpath entry points | Would cut the CDN bundle by 20-30%. Waiting for usage to say which combinations people actually want — see below |
+
+### Subpath entry points
+
+`import 'declarative-charts'` registers every element, so a page that draws bar
+charts still ships pie, funnel, stage and radar. Measured, brotli-compressed:
+
+| What is imported | Transferred | Saving |
+|---|---|---|
+| everything (today) | 61 kB | — |
+| `<dc-chart>` family only | 48 kB | 21% |
+| bar charts only | 43 kB | 30% |
+
+**A bundler cannot recover this on its own.** `sideEffects` lists `*.js`,
+`*.cjs` and `*.ts`, which is required: registration happens as a side effect of
+import, and marking the package side-effect-free lets a bundler delete the whole
+library — that defect shipped once and `test/package/smoke.mjs` exists because
+of it. Registration-by-import and tree-shaking are in direct tension, and the
+side effect has to win.
+
+So the saving needs explicit opt-in, something like:
+
+```js
+import 'declarative-charts/elements/bar';
+import 'declarative-charts/elements/line';
+```
+
+**Why it waits.** It is additive, so nothing breaks by doing it later; and the
+right split is a question about how people actually use the library, which
+nobody can answer yet. Guessing now means either a granularity nobody wants
+(nine separate imports) or one that saves nothing (`/axis` and `/radial`).
+
+The costs are real but ordinary: a `dist/elements/*` entry per element, an
+`exports` map to match, per-subpath cases in the package smoke test — that file
+is the only thing that exercises the published artifacts — and documentation for
+two ways to install rather than one.
+
+**What would settle it:** an issue asking for it, or evidence that 61 kB is
+losing adopters. Until then the single import is one fewer decision for someone
+trying the library for the first time.
 
 ---
 
