@@ -42,6 +42,9 @@ interface SegmentData {
   label: string;
   href?: string;
   target?: string;
+  /** URL for this entry in the legend, from `legend-href`. */
+  legendHref?: string;
+  legendTarget?: string;
   popup?: { content: string; trigger: string };
   autoPopup?: boolean;
   showValue: ShowCondition;
@@ -62,6 +65,9 @@ interface BarData {
   label: string;
   href?: string;
   target?: string;
+  /** URL for this entry in the legend, from `legend-href`. */
+  legendHref?: string;
+  legendTarget?: string;
   popup?: { content: string; trigger: string };
   autoPopup?: boolean;
   showValue: ShowCondition;
@@ -127,6 +133,9 @@ interface ScatterData {
   element: ChartScatter;
   passthroughAttrs?: Record<string, string>;
   paint?: Record<string, string>;
+  /** URL for this entry in the legend, from `legend-href`. */
+  legendHref?: string;
+  legendTarget?: string;
   points: ScatterPoint[];
 }
 
@@ -174,6 +183,9 @@ interface LineData {
   curveFit: CurveFit;
   href?: string;
   target?: string;
+  /** URL for this entry in the legend, from `legend-href`. */
+  legendHref?: string;
+  legendTarget?: string;
   popup?: { content: string; trigger: string };
   autoPopup?: boolean;
   element?: ChartLine;
@@ -211,6 +223,9 @@ interface AreaData {
   // Common properties
   href?: string;
   target?: string;
+  /** URL for this entry in the legend, from `legend-href`. */
+  legendHref?: string;
+  legendTarget?: string;
   popup?: { content: string; trigger: string };
   autoPopup?: boolean;
   element?: ChartArea;
@@ -240,6 +255,9 @@ interface BubbleData {
   stroke?: string;
   href?: string;
   target?: string;
+  /** URL for this entry in the legend, from `legend-href`. */
+  legendHref?: string;
+  legendTarget?: string;
   popup?: { content: string; trigger: string };
   autoPopup?: boolean;
   showValue: ShowCondition;
@@ -496,6 +514,8 @@ export class Chart extends AxisChart {
           new Set(['label', 'fill', 'fill-opacity', 'shape', 'size'])
         ),
         paint: this.getPalettePaint(el),
+        legendHref: el.legendHref || undefined,
+        legendTarget: el.legendTarget || undefined,
         points: points
           .filter(pt => Number.isFinite(pt.value))
           .map(pt => ({
@@ -753,6 +773,8 @@ export class Chart extends AxisChart {
       strokeWidth: segment.strokeWidth,
       label: segment.label,
       href: segment.href || undefined,
+      legendHref: segment.legendHref || undefined,
+      legendTarget: segment.legendTarget || undefined,
       target: segment.target || undefined,
       popup: popupEl ? { content: popupEl.content, trigger: popupEl.trigger } : undefined,
       autoPopup: segment.autoPopup,
@@ -818,6 +840,8 @@ export class Chart extends AxisChart {
       strokeWidth: bar.strokeWidth,
       label: bar.label,
       href: bar.href || undefined,
+      legendHref: bar.legendHref || undefined,
+      legendTarget: bar.legendTarget || undefined,
       target: bar.target || undefined,
       popup: popupEl ? { content: popupEl.content, trigger: popupEl.trigger } : undefined,
       autoPopup: bar.autoPopup,
@@ -1189,6 +1213,8 @@ export class Chart extends AxisChart {
         missing: linePolicy,
         curveFit: lineCurveFit,
         href: line.href || undefined,
+        legendHref: line.legendHref || undefined,
+        legendTarget: line.legendTarget || undefined,
         target: line.target || undefined,
         popup: linePopupEl ? { content: linePopupEl.content, trigger: linePopupEl.trigger } : undefined,
         autoPopup: line.autoPopup,
@@ -1297,6 +1323,8 @@ export class Chart extends AxisChart {
         curveFit: areaCurveFit,
         missing: areaPolicy,
         href: area.href || undefined,
+        legendHref: area.legendHref || undefined,
+        legendTarget: area.legendTarget || undefined,
         target: area.target || undefined,
         popup: areaPopupEl ? { content: areaPopupEl.content, trigger: areaPopupEl.trigger } : undefined,
         autoPopup: area.autoPopup,
@@ -1428,6 +1456,8 @@ export class Chart extends AxisChart {
         originalFill: undefined as string | undefined,  // Will be set after pattern resolution
         stroke: bubble.stroke || undefined,
         href: bubble.href || undefined,
+        legendHref: bubble.legendHref || undefined,
+        legendTarget: bubble.legendTarget || undefined,
         target: bubble.target || undefined,
         popup: popupEl ? { content: popupEl.content, trigger: popupEl.trigger } : undefined,
         autoPopup: bubble.autoPopup,
@@ -4405,6 +4435,50 @@ export class Chart extends AxisChart {
   // Legend Items
   // ============================================================================
 
+  /**
+   * Resolve one legend link per stacked-segment label.
+   *
+   * A stacked chart's legend has one entry per segment *label*, but the label
+   * appears once per bar - so several elements can claim the same entry. First
+   * non-empty wins, and a genuine disagreement is reported rather than settled
+   * silently, because the reader cannot tell which destination they got.
+   */
+  private resolveSegmentLegendLinks(
+    bars: FlattenedBar[]
+  ): Map<string, { href?: string; target?: string }> {
+    // Cached per render because `getLegendItems()` is called more than once in
+    // a cycle - the padding pass sizes the legend before the render draws it -
+    // and an uncached conflict warning fired once per call.
+    return this.cachePerRender('segmentLegendLinks', () => this.computeSegmentLegendLinks(bars));
+  }
+
+  private computeSegmentLegendLinks(
+    bars: FlattenedBar[]
+  ): Map<string, { href?: string; target?: string }> {
+    const links = new Map<string, { href?: string; target?: string }>();
+    const reported = new Set<string>();
+    bars.forEach(bar => {
+      bar.segments?.forEach(segment => {
+        if (!segment.legendHref) return;
+        const existing = links.get(segment.label);
+        if (!existing) {
+          links.set(segment.label, {
+            href: segment.legendHref,
+            target: segment.legendTarget
+          });
+        } else if (existing.href !== segment.legendHref && !reported.has(segment.label)) {
+          reported.add(segment.label);
+          this.logError(ErrorCode.LEGEND_HREF_CONFLICT, {
+            label: segment.label,
+            first: existing.href ?? '',
+            second: segment.legendHref
+          });
+        }
+      });
+    });
+    return links;
+  }
+
   protected override getLegendItems(): LegendItem[] {
     // Build segment color map if needed
     if (this.segmentColorMap.size === 0) {
@@ -4430,12 +4504,16 @@ export class Chart extends AxisChart {
       });
 
       const legendItems: LegendItem[] = [];
+      const segmentLinks = this.resolveSegmentLegendLinks(bars);
       this.segmentColorMap.forEach((color, label) => {
+        const link = segmentLinks.get(label);
         legendItems.push({
           label,
           color,
           value: segmentTotals.get(label) || 0,
-          shape: 'square'  // Segments are bar pieces
+          shape: 'square',  // Segments are bar pieces
+          href: link?.href,
+          target: link?.target
         });
       });
 
@@ -4446,7 +4524,9 @@ export class Chart extends AxisChart {
           label: line.label,
           color: line.stroke,
           dimensionless: true,
-          shape: 'line'
+          shape: 'line',
+          href: line.legendHref,
+          target: line.legendTarget
         } as DimensionlessLegendItem);
       });
 
@@ -4456,7 +4536,9 @@ export class Chart extends AxisChart {
           label: area.label,
           color: area.originalFill || area.fill,
           dimensionless: true,
-          shape: 'square'  // Areas use square shape (filled regions)
+          shape: 'square',  // Areas use square shape (filled regions)
+          href: area.legendHref,
+          target: area.legendTarget
         } as DimensionlessLegendItem);
       });
 
@@ -4473,7 +4555,9 @@ export class Chart extends AxisChart {
         label: bar.label,
         color: bar.originalFill || bar.fill,
         value: bar.value,
-        shape: 'square'
+        shape: 'square',
+        href: bar.legendHref,
+        target: bar.legendTarget
       });
     });
 
@@ -4485,7 +4569,9 @@ export class Chart extends AxisChart {
         label: area.label,
         color: area.originalFill || area.fill,
         dimensionless: true,
-        shape: 'square'  // Areas use square shape (filled regions)
+        shape: 'square',  // Areas use square shape (filled regions)
+        href: area.legendHref,
+        target: area.legendTarget
       } as DimensionlessLegendItem);
     });
 
@@ -4496,7 +4582,9 @@ export class Chart extends AxisChart {
         label: line.label,
         color: line.stroke,
         dimensionless: true,
-        shape: 'line'
+        shape: 'line',
+        href: line.legendHref,
+        target: line.legendTarget
       } as DimensionlessLegendItem);
     });
 
@@ -4507,7 +4595,9 @@ export class Chart extends AxisChart {
         label: bubble.label,
         color: bubble.originalFill || bubble.fill || '#4CAF50',
         value: bubble.value,
-        shape: 'circle'
+        shape: 'circle',
+        href: bubble.legendHref,
+        target: bubble.legendTarget
       });
     });
 
@@ -4519,7 +4609,9 @@ export class Chart extends AxisChart {
         label: series.label,
         color: series.originalFill || series.fill,
         dimensionless: true,
-        shape: 'circle'
+        shape: 'circle',
+        href: series.legendHref,
+        target: series.legendTarget
       } as DimensionlessLegendItem);
     });
 

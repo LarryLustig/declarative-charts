@@ -196,6 +196,21 @@ export const ErrorCode = {
    * so an unknown value cannot simply be an error. This fires only for values
    * that read as a word - the misspellings - which used to be drawn as text.
    */
+  /**
+   * Two elements sharing one legend entry disagree about where it should link.
+   *
+   * A stacked chart's legend has one entry per segment *label*, but that label
+   * appears once per bar, so several elements can claim the same entry. First
+   * non-empty wins; a real disagreement is reported because the reader cannot
+   * tell which of the two destinations they were given.
+   */
+  LEGEND_HREF_CONFLICT: {
+    code: 'DC118',
+    level: 'warning',
+    path: 'legend.href',
+    message: 'Legend entry "{label}" is claimed by more than one legend-href ("{first}" and "{second}"); using the first'
+  },
+
   POINT_SHAPE_INVALID: {
     code: 'DC117',
     level: 'warning',

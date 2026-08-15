@@ -102,6 +102,8 @@ export class FunnelChart extends BaseChart {
     labelOffsetY?: number;
     labelOffsetR?: number;
     labelFill?: string;
+    legendHref?: string;
+    legendTarget?: string;
   }> {
     const stageElements = Array.from(
       this.querySelectorAll(':scope > dc-funnel-stage')
@@ -129,6 +131,8 @@ export class FunnelChart extends BaseChart {
         element: stage,
         value: stage.value,
         label: stage.label,
+        legendHref: stage.legendHref,
+        legendTarget: stage.legendTarget,
         fill: effectiveFill || undefined,
         stroke: stage.stroke || undefined,
         strokeWidth: stage.strokeWidth,
@@ -956,7 +960,9 @@ export class FunnelChart extends BaseChart {
       label: stage.label,
       color: resolvedFills[index].originalFill,  // Use originalFill for legend (not pattern URL)
       value: stage.value,
-      shape: 'square' as const  // Funnel stages use squares in legend
+      shape: 'square' as const,  // Funnel stages use squares in legend
+      href: stage.legendHref,
+      target: stage.legendTarget
     }));
   }
 

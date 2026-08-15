@@ -666,7 +666,9 @@ export class PieChart extends BaseChart {
       label: slice.label,
       color: fillColors[index],
       value: slice.value,
-      shape: 'square' as const  // Pie slices use squares in legend
+      shape: 'square' as const,  // Pie slices use squares in legend
+      href: slice.element?.legendHref,
+      target: slice.element?.legendTarget
     }));
   }
 

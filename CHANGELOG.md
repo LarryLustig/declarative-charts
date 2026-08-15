@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **A legend entry can be a link.** Reported by a consumer; the legend rendered no interactive
+  element of any kind before this. Two spellings, because a legend has two sources
+
+  **`legend-href`** goes on the element the entry describes — `<dc-bar>`, `<dc-bar-segment>`,
+  `<dc-line>`, `<dc-area>`, `<dc-bubble>`, `<dc-scatter>`, `<dc-pie-slice>`, `<dc-funnel-stage>`,
+  `<dc-stage>`, `<dc-radar-series>` — with `legend-target` beside it. This is the one that covers
+  the legend the chart derives from your data, which `<dc-legend-item href>` cannot: declaring any
+  custom item replaces the derived legend wholesale, so linking one series that way means
+  hand-writing them all
+
+  **`href` on `<dc-legend-item>`** covers the legend you write yourself — a threshold key, which has
+  no single element to hang off
+
+  **Deliberately not inherited from `href`.** A chart whose bars link somewhere did not thereby ask
+  its legend to navigate too, and the two often want different destinations — the bar to a record,
+  the legend to a definition. A legend that silently starts navigating is worse than one that never
+  does
+
+  Rendered as a real SVG `<a>`, so middle-click, open-in-new-tab and copy-address all work and the
+  entry is keyboard reachable — none of which a click handler would have given. The whole entry is
+  wrapped, swatch and value included, because a link covering only the words is a smaller target
+  than it looks. New `::part(legend-link)` for styling
+
+- **`DC118`** — when several elements claim one legend entry and disagree about where it links. A
+  stacked chart has one entry per segment *label*, but that label appears once per bar, so more than
+  one element can claim it. First non-empty wins; a real disagreement is named rather than settled
+  silently, because the reader cannot tell which of two destinations they were given
+
+  Reported once per render. `getLegendItems()` runs more than once in a cycle — the padding pass
+  sizes the legend before the render draws it — and an uncached warning fired three times for one
+  mistake
+
+
 ### Changed
 
 - **Every chart now renders its legend from `getLegendItems()`.** `<dc-chart>` and `<dc-radar-chart>`

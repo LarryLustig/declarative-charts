@@ -32,6 +32,17 @@ export interface BaseLegendItem {
   strokeDasharray?: string;
   /** Pattern type for a patterned fill, resolved by the chart into a `url(#id)`. */
   pattern?: string;
+  /**
+   * URL this entry links to, from `legend-href` on the element the entry
+   * describes or `href` on a `<dc-legend-item>`.
+   *
+   * Never inherited from the element's own `href`. A chart whose bars link
+   * somewhere did not ask for its legend to become clickable too, and a legend
+   * that silently starts navigating is worse than one that never does.
+   */
+  href?: string;
+  /** Link target, as on any other element that takes an `href`. */
+  target?: string;
 }
 
 /**
@@ -265,6 +276,8 @@ export class ChartLegend extends LitElement {
         const shape = item.getEffectiveShape();
         const strokeDasharray = resolveDasharray(item.strokeDasharray);
         const pattern = item.pattern;
+        const href = item.href || undefined;
+        const target = item.target || undefined;
 
         // If value is provided, return ValuedLegendItem; otherwise DimensionlessLegendItem
         if (item.value !== undefined) {
@@ -274,6 +287,8 @@ export class ChartLegend extends LitElement {
             shape,
             strokeDasharray,
             pattern,
+            href,
+            target,
             value: item.value,
           } as ValuedLegendItem;
         } else {
@@ -283,6 +298,8 @@ export class ChartLegend extends LitElement {
             shape,
             strokeDasharray,
             pattern,
+            href,
+            target,
             dimensionless: true,
           } as DimensionlessLegendItem;
         }
@@ -892,7 +909,7 @@ export class ChartLegend extends LitElement {
           const labelX = itemX + colorBoxWidth + colorBoxGap;
           const valueX = labelX + labelWidth + (labelWidth > 0 ? labelValueGap : 0);
 
-          return svg`
+          return ChartLegend.linked(item, svg`
             <!-- Shape indicator -->
             <g part="legend-swatch" transform="translate(${itemX}, ${itemY})">
               ${ChartSwatch.renderShape(item.resolvedShape, 18, item.color, 'white', item.strokeDasharray)}
@@ -923,7 +940,7 @@ export class ChartLegend extends LitElement {
                 ${item.displayValue}
               </text>
             ` : ''}
-          `;
+          `);
         })}
       `
     };
@@ -1107,7 +1124,7 @@ export class ChartLegend extends LitElement {
         ${renderTitle()}
 
         <!-- Wrapped legend items -->
-        ${positionedItems.map(item => svg`
+        ${positionedItems.map(item => ChartLegend.linked(item, svg`
           <!-- Shape indicator -->
           <g part="legend-swatch" transform="translate(${contentX + item.x}, ${contentY + item.y})">
             ${ChartSwatch.renderShape(item.resolvedShape, 12, item.color, 'white', item.strokeDasharray)}
@@ -1123,9 +1140,33 @@ export class ChartLegend extends LitElement {
           >
             ${item.text}
           </text>
-        `)}
+        `))}
       `
     };
+  }
+
+  /**
+   * Wrap a rendered entry in an SVG link, when it has somewhere to go.
+   *
+   * A real `<a>` rather than a click handler, so the entry behaves like a link
+   * in every way a reader expects: middle-click, open in a new tab, copy the
+   * address, and reachable by keyboard without the chart having to reimplement
+   * any of it.
+   *
+   * The whole entry is wrapped - swatch, label and value - because a link that
+   * only covers the words is a smaller target than it looks.
+   */
+  private static linked(
+    item: { href?: string; target?: string },
+    content: SVGTemplateResult
+  ): SVGTemplateResult {
+    if (!item.href) return content;
+    return svg`<a
+      part="legend-link"
+      href="${item.href}"
+      target="${item.target || '_self'}"
+      style="cursor: pointer"
+    >${content}</a>`;
   }
 
   // Don't render anything - the parent chart will render the legend

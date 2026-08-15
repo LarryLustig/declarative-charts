@@ -23,6 +23,8 @@ export type CurveFit = 'linear' | 'smooth' | 'monotone' | 'step';
  * @attr {boolean} show-percent - Whether to display percentages for points on this line by default (inherits from chart)
  * @attr {string} point-shape - Default shape for points on this line: "circle", "square", "triangle", "diamond", "star", "cross", "plus", or unicode character (default: "circle")
  * @attr {string} curve-fit - Curve fitting method: "linear" (straight segments), "smooth" (Catmull-Rom spline), "monotone" (monotonic interpolation), "step" (step-after). Overrides chart-level setting.
+ * @attr {string} legend-href - Makes this line's legend entry a link to the given URL
+ * @attr {string} legend-target - Link target for `legend-href` (e.g. "_blank")
  *
  * @slot - Child elements: dc-point elements
  *
@@ -84,6 +86,21 @@ export class ChartLine extends BaseChartElement {
 
   @property({ type: String, attribute: 'curve-fit' })
   curveFit?: CurveFit;
+
+  /**
+   * Makes this line's legend entry a link to the given URL.
+   *
+   * Deliberately separate from `href`: a chart whose marks link somewhere did
+   * not thereby ask its legend to navigate too, and the two often want
+   * different destinations. Set it to opt in.
+   */
+  @property({ type: String, attribute: 'legend-href' })
+  legendHref?: string;
+
+  /** Link target for {@link legendHref}, as on any other element with an `href`. */
+  @property({ type: String, attribute: 'legend-target' })
+  legendTarget?: string;
+
 }
 
 declare global {

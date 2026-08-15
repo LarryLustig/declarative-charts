@@ -33,6 +33,8 @@ export type CurveFit = 'linear' | 'smooth' | 'monotone' | 'step';
  * @attr {boolean|string} show-percent - Whether to display percentages on points (inherited)
  * @attr {string} href - Optional URL to navigate to when area is clicked (inherited)
  * @attr {string} target - Optional target for the link (inherited)
+ * @attr {string} legend-href - Makes this area's legend entry a link to the given URL
+ * @attr {string} legend-target - Link target for `legend-href` (e.g. "_blank")
  *
  * @slot - Child elements: dc-point elements
  *
@@ -131,6 +133,21 @@ export class ChartArea extends BaseFilledShape {
     'fill-opacity',
     'curve-fit'
   ]);
+
+  /**
+   * Makes this area's legend entry a link to the given URL.
+   *
+   * Deliberately separate from `href`: a chart whose marks link somewhere did
+   * not thereby ask its legend to navigate too, and the two often want
+   * different destinations. Set it to opt in.
+   */
+  @property({ type: String, attribute: 'legend-href' })
+  legendHref?: string;
+
+  /** Link target for {@link legendHref}, as on any other element with an `href`. */
+  @property({ type: String, attribute: 'legend-target' })
+  legendTarget?: string;
+
 }
 
 declare global {

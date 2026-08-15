@@ -18,6 +18,8 @@ import { showConditionConverter, type ShowCondition } from './base-chart.js';  /
  * @attr {string} target - Optional target for the link (e.g., "_blank", inherited from BaseChartElement)
  * @attr {boolean} show-value - Whether to display the numeric value on the chart (default: true, can be overridden by chart-level setting)
  * @attr {boolean} show-percent - Whether to display the percentage on the chart (inherits from chart)
+ * @attr {string} legend-href - Makes this bar's legend entry a link to the given URL
+ * @attr {string} legend-target - Link target for `legend-href` (e.g. "_blank")
  *
  * @example
  * <dc-bar value="25" fill="red" label="January"></dc-bar>
@@ -57,6 +59,21 @@ export class ChartBar extends BaseFilledShape {
    */
   @property({ type: String, attribute: 'bar-width' })
   barWidth?: string;
+
+  /**
+   * Makes this bar's legend entry a link to the given URL.
+   *
+   * Deliberately separate from `href`: a chart whose marks link somewhere did
+   * not thereby ask its legend to navigate too, and the two often want
+   * different destinations. Set it to opt in.
+   */
+  @property({ type: String, attribute: 'legend-href' })
+  legendHref?: string;
+
+  /** Link target for {@link legendHref}, as on any other element with an `href`. */
+  @property({ type: String, attribute: 'legend-target' })
+  legendTarget?: string;
+
 }
 
 declare global {

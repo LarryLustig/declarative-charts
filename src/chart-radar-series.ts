@@ -18,6 +18,8 @@ import { BaseFilledShape } from './base-filled-shape.js';
  * @attr {number} stroke-width - Outline width
  * @attr {string} stroke-dasharray - Outline dash pattern
  * @attr {string} missing - How to treat an axis with no value: "gap", "skip" or "zero"
+ * @attr {string} legend-href - Makes this series's legend entry a link to the given URL
+ * @attr {string} legend-target - Link target for `legend-href` (e.g. "_blank")
  *
  * @example
  * <dc-radar-series label="Model A" fill="#2563eb">
@@ -56,6 +58,21 @@ export class ChartRadarSeries extends BaseFilledShape {
    */
   @property({ type: String })
   missing: 'gap' | 'skip' | 'zero' = 'gap';
+
+  /**
+   * Makes this series's legend entry a link to the given URL.
+   *
+   * Deliberately separate from `href`: a chart whose marks link somewhere did
+   * not thereby ask its legend to navigate too, and the two often want
+   * different destinations. Set it to opt in.
+   */
+  @property({ type: String, attribute: 'legend-href' })
+  legendHref?: string;
+
+  /** Link target for {@link legendHref}, as on any other element with an `href`. */
+  @property({ type: String, attribute: 'legend-target' })
+  legendTarget?: string;
+
 }
 
 declare global {

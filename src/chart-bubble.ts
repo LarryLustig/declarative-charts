@@ -16,6 +16,8 @@ import { showConditionConverter, type ShowCondition } from './base-chart.js';  /
  * @attr {string} target - Optional target for the link (e.g., "_blank", inherited from BaseChartElement)
  * @attr {boolean} show-value - Whether to display the numeric value for this bubble (default: true)
  * @attr {boolean} show-percent - Whether to display the percentage for this bubble (inherits from chart)
+ * @attr {string} legend-href - Makes this bubble's legend entry a link to the given URL
+ * @attr {string} legend-target - Link target for `legend-href` (e.g. "_blank")
  *
  * @example
  * <dc-bubble label="Q1" value="30" size-value="100"></dc-bubble>
@@ -45,6 +47,21 @@ export class ChartBubble extends BaseFilledShape {
   override showValue: ShowCondition = true;
 
   // showPercent is inherited from BaseChartElement
+
+  /**
+   * Makes this bubble's legend entry a link to the given URL.
+   *
+   * Deliberately separate from `href`: a chart whose marks link somewhere did
+   * not thereby ask its legend to navigate too, and the two often want
+   * different destinations. Set it to opt in.
+   */
+  @property({ type: String, attribute: 'legend-href' })
+  legendHref?: string;
+
+  /** Link target for {@link legendHref}, as on any other element with an `href`. */
+  @property({ type: String, attribute: 'legend-target' })
+  legendTarget?: string;
+
 }
 
 declare global {

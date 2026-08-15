@@ -1,4 +1,4 @@
-import { customElement } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { BaseFilledShape } from './base-filled-shape.js';
 
 /**
@@ -22,6 +22,8 @@ import { BaseFilledShape } from './base-filled-shape.js';
  * @attr {boolean} show-percent - Whether to display the percentage on the segment (inherited from parent bar if not specified)
  * @attr {string} href - Optional URL to navigate to when segment is clicked
  * @attr {string} target - Optional target for the link (e.g., "_blank")
+ * @attr {string} legend-href - Makes this segment's legend entry a link to the given URL
+ * @attr {string} legend-target - Link target for `legend-href` (e.g. "_blank")
  *
  * @example
  * <dc-bar label="Q1 Sales">
@@ -47,6 +49,21 @@ import { BaseFilledShape } from './base-filled-shape.js';
 export class ChartBarSegment extends BaseFilledShape {
   // value is inherited from BaseFilledShape
   // showValue and showPercent are inherited from BaseChartElement
+
+  /**
+   * Makes this segment's legend entry a link to the given URL.
+   *
+   * Deliberately separate from `href`: a chart whose marks link somewhere did
+   * not thereby ask its legend to navigate too, and the two often want
+   * different destinations. Set it to opt in.
+   */
+  @property({ type: String, attribute: 'legend-href' })
+  legendHref?: string;
+
+  /** Link target for {@link legendHref}, as on any other element with an `href`. */
+  @property({ type: String, attribute: 'legend-target' })
+  legendTarget?: string;
+
 }
 
 declare global {

@@ -509,6 +509,60 @@
     </div>
 
     <div class="example">
+        <h2>Legend Entries as Links</h2>
+        <p>An entry can be a link. Which attribute you use depends on where the entry comes from &mdash; and the difference matters, because <code>&lt;dc-legend-item&gt;</code> children <em>replace</em> the legend the chart derives from your data.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Derived Legend: legend-href</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-legend&gt;&lt;/dc-legend&gt;
+  &lt;dc-bar value="95" label="Q1" legend-href="#q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="80" label="Q2" legend-href="#q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="120" label="Q3" legend-href="#q3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="105" label="Q4"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-legend></dc-legend>
+                    <dc-bar value="95" label="Q1" legend-href="#q1"></dc-bar>
+                    <dc-bar value="80" label="Q2" legend-href="#q2"></dc-bar>
+                    <dc-bar value="120" label="Q3" legend-href="#q3"></dc-bar>
+                    <dc-bar value="105" label="Q4"></dc-bar>
+                </dc-chart>
+                <p>Put it on the element the entry describes. The chart keeps deriving the legend; Q4 has no <code>legend-href</code> and is simply not a link.</p>
+            </div>
+
+            <div>
+                <h3>Hand-Written Legend: href</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-legend&gt;
+    &lt;dc-legend-item fill="#16a34a" label="Above Target"
+                    href="#above"&gt;&lt;/dc-legend-item&gt;
+    &lt;dc-legend-item fill="#f59e0b" label="Near Target"
+                    href="#near"&gt;&lt;/dc-legend-item&gt;
+  &lt;/dc-legend&gt;
+  &lt;dc-bar value="95" label="Q1" fill="#16a34a"&gt;&lt;/dc-bar&gt;
+  &lt;!-- three more bars --&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-legend>
+                        <dc-legend-item fill="#16a34a" label="Above Target" href="#above"></dc-legend-item>
+                        <dc-legend-item fill="#f59e0b" label="Near Target" href="#near"></dc-legend-item>
+                    </dc-legend>
+                    <dc-bar value="95" label="Q1" fill="#16a34a"></dc-bar>
+                    <dc-bar value="80" label="Q2" fill="#f59e0b"></dc-bar>
+                    <dc-bar value="120" label="Q3" fill="#16a34a"></dc-bar>
+                    <dc-bar value="105" label="Q4" fill="#16a34a"></dc-bar>
+                </dc-chart>
+                <p>Use <code>href</code> when you are writing the entries anyway &mdash; here a threshold key, which has no single element to hang off.</p>
+            </div>
+        </div>
+
+        <p><strong><code>legend-href</code> is separate from <code>href</code> on purpose.</strong> A chart whose bars link somewhere did not thereby ask its legend to navigate too, and the two often want different destinations &mdash; the bar to a record, the legend to a definition. Nothing is inherited in either direction.</p>
+        <p>The entry becomes a real SVG <code>&lt;a&gt;</code>, so middle-click and open-in-new-tab work, and the whole entry is the target rather than just the words. Style it with <code>::part(legend-link)</code>, and use <code>legend-target</code> for a link target.</p>
+    </div>
+
+    <div class="example">
         <h2>Constraining Legend Width</h2>
         <p><code>max-width</code> caps how wide the legend may grow, in viewBox units. Useful when labels are long and would otherwise take space from the plot.</p>
 

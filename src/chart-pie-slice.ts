@@ -1,4 +1,4 @@
-import { customElement } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { BaseFilledShape } from './base-filled-shape.js';
 
 /**
@@ -16,6 +16,8 @@ import { BaseFilledShape } from './base-filled-shape.js';
  * @attr {boolean|string} show-value - Whether to show the value on this slice (inherits from chart). Can be true/false or a threshold like "5%" or "100"
  * @attr {boolean|string} show-label - Whether to show the label on this slice (inherits from chart). Can be true/false or a threshold like "5%" or "100"
  * @attr {boolean|string} show-percent - Whether to show the percentage on this slice (inherits from chart). Can be true/false or a threshold like "5%" or "100"
+ * @attr {string} legend-href - Makes this slice's legend entry a link to the given URL
+ * @attr {string} legend-target - Link target for `legend-href` (e.g. "_blank")
  *
  * @example
  * <dc-pie-slice value="30" label="Category A"></dc-pie-slice>
@@ -42,6 +44,21 @@ import { BaseFilledShape } from './base-filled-shape.js';
 export class ChartPieSlice extends BaseFilledShape {
   // value and showLabel are inherited from BaseFilledShape
   // showValue and showPercent are inherited from BaseChartElement
+
+  /**
+   * Makes this slice's legend entry a link to the given URL.
+   *
+   * Deliberately separate from `href`: a chart whose marks link somewhere did
+   * not thereby ask its legend to navigate too, and the two often want
+   * different destinations. Set it to opt in.
+   */
+  @property({ type: String, attribute: 'legend-href' })
+  legendHref?: string;
+
+  /** Link target for {@link legendHref}, as on any other element with an `href`. */
+  @property({ type: String, attribute: 'legend-target' })
+  legendTarget?: string;
+
 }
 
 declare global {

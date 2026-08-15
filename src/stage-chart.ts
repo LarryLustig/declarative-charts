@@ -176,6 +176,8 @@ export class StageChart extends BaseChart {
     labelOffsetY?: number;
     labelOffsetR?: number;
     labelFill?: string;
+    legendHref?: string;
+    legendTarget?: string;
   }> {
     // `hidden` is honoured on every other data element and API.md lists
     // <dc-stage> as supporting it; the filter was simply missing.
@@ -199,6 +201,8 @@ export class StageChart extends BaseChart {
         element: stage,
         value: stage.value,
         label: stage.label,
+        legendHref: stage.legendHref,
+        legendTarget: stage.legendTarget,
         fill: effectiveFill || undefined,
         stroke: stage.stroke || undefined,
         strokeWidth: stage.strokeWidth,
@@ -1510,7 +1514,9 @@ export class StageChart extends BaseChart {
         label: stage.label,
         color: resolvedFills[index].originalFill,
         value: stage.value,
-        shape: 'square' as const
+        shape: 'square' as const,
+        href: stage.legendHref,
+        target: stage.legendTarget
       }));
   }
 

@@ -168,7 +168,11 @@ export abstract class BaseChartElement extends LitElement {
     'label-offset-x',
     'label-offset-y',
     'label-offset-r',
-    'label-fill'
+    'label-fill',
+    // Read by the chart when it builds the legend, never by the mark. Listed
+    // here so they are not copied onto the SVG shape as passthrough.
+    'legend-href',
+    'legend-target'
   ]);
 
   /**

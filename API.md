@@ -669,6 +669,7 @@ express states the library has no attribute for — hover, transitions, filters.
 | `legend-label` | A legend item's label |
 | `legend-value` | A legend item's value |
 | `legend-swatch` | A legend item's colour swatch |
+| `legend-link` | The `<a>` around a linked legend entry |
 | `legend-background` | The legend's background panel |
 | `axis-line` | An axis line |
 | `axis-label` | An axis tick label |
@@ -1584,6 +1585,8 @@ Defines a single bar in a bar chart. Can contain `<dc-bar-segment>` children for
 **Child Elements:**
 - `<dc-bar-segment>` - Optional segments for stacked bars
 - `<dc-popup>` - Optional popup content
+- `legend-href` (string) - Makes this bar's legend entry a link — see [Linking from the legend](#linking-from-the-legend)
+- `legend-target` (string) - Link target for `legend-href` (e.g. `_blank`)
 
 ### `<dc-bar-group>`
 
@@ -1609,6 +1612,8 @@ Defines a segment within a bar for creating stacked bar charts.
 - `show-percent` (boolean|string) - Whether to display the percentage on the segment
 - `href` (string) - Optional URL to navigate to when segment is clicked
 - `target` (string) - Optional target for the link
+- `legend-href` (string) - Makes this segment's legend entry a link — see [Linking from the legend](#linking-from-the-legend)
+- `legend-target` (string) - Link target for `legend-href` (e.g. `_blank`)
 
 **Stacking Direction:**
 - Vertical bars: Segments stack bottom-to-top
@@ -1631,6 +1636,8 @@ Defines a single line in a line chart. Contains multiple `<dc-point>` elements.
 
 **Child Elements:**
 - `<dc-point>` - Individual points (one or more)
+- `legend-href` (string) - Makes this line's legend entry a link — see [Linking from the legend](#linking-from-the-legend)
+- `legend-target` (string) - Link target for `legend-href` (e.g. `_blank`)
 
 For unconnected points positioned by a numeric x rather than by category, see
 [`<dc-scatter>`](#dc-scatter).
@@ -1658,6 +1665,8 @@ Areas are filled regions bounded by data points above and the zero line (or char
 
 **Child Elements:**
 - `<dc-point>` - Individual points (one or more)
+- `legend-href` (string) - Makes this area's legend entry a link — see [Linking from the legend](#linking-from-the-legend)
+- `legend-target` (string) - Link target for `legend-href` (e.g. `_blank`)
 
 **Examples:**
 
@@ -1788,6 +1797,8 @@ a group needs a name for the legend and a colour of its own.
 
 **Child Elements:**
 - `<dc-point>` - One per reading; `x` and `value` are its two coordinates
+- `legend-href` (string) - Makes this series's legend entry a link — see [Linking from the legend](#linking-from-the-legend)
+- `legend-target` (string) - Link target for `legend-href` (e.g. `_blank`)
 
 **Example:**
 
@@ -1840,6 +1851,8 @@ Defines a bubble in a bubble chart.
 - `show-value` (boolean|string) - Whether to display the value on the bubble (default: true)
 - `label` (string) - Label for the bubble
 - `fill` (string) - CSS color for the bubble
+- `legend-href` (string) - Makes this bubble's legend entry a link — see [Linking from the legend](#linking-from-the-legend)
+- `legend-target` (string) - Link target for `legend-href` (e.g. `_blank`)
 
 ### `<dc-pie-chart>`
 
@@ -1890,6 +1903,8 @@ Defines a single slice in a pie chart.
 - `show-value` (boolean|string) - Whether to show the value on this slice
 - `show-label` (boolean|string) - Whether to show the label on this slice
 - `show-percent` (boolean|string) - Whether to show the percentage on this slice
+- `legend-href` (string) - Makes this slice's legend entry a link — see [Linking from the legend](#linking-from-the-legend)
+- `legend-target` (string) - Link target for `legend-href` (e.g. `_blank`)
 
 ### `<dc-funnel-chart>`
 
@@ -1952,6 +1967,8 @@ Defines a single stage in a funnel chart.
 - `show-value` (boolean|string) - Whether to show the value on this stage
 - `show-label` (boolean|string) - Whether to show the label on this stage
 - `show-percent` (boolean|string) - Whether to show the percentage on this stage
+- `legend-href` (string) - Makes this stage's legend entry a link — see [Linking from the legend](#linking-from-the-legend)
+- `legend-target` (string) - Link target for `legend-href` (e.g. `_blank`)
 
 ### `<dc-stage-chart>`
 
@@ -2107,6 +2124,8 @@ Defines a single stage in a stage chart.
 - `show-value` (boolean|string) - Whether to show the value on this stage
 - `show-label` (boolean|string) - Whether to show the label on this stage
 - `show-percent` (boolean|string) - Whether to show the percentage on this stage
+- `legend-href` (string) - Makes this stage's legend entry a link — see [Linking from the legend](#linking-from-the-legend)
+- `legend-target` (string) - Link target for `legend-href` (e.g. `_blank`)
 
 ### `<dc-radar-chart>`
 
@@ -2194,6 +2213,8 @@ radar than it does on a line.
 
 **Child Elements:**
 - `<dc-point>` - One per axis; `label` names the axis it belongs to
+- `legend-href` (string) - Makes this series's legend entry a link — see [Linking from the legend](#linking-from-the-legend)
+- `legend-target` (string) - Link target for `legend-href` (e.g. `_blank`)
 
 ### `<dc-reference>`
 
@@ -2435,6 +2456,8 @@ This is useful for semantic coloring scenarios where multiple data elements shar
 - `shape` (string) - Shape indicator: "square" (default), "circle", "line"
 - `pattern` (string) - Pattern type — one of the eight in [Palettes and Pattern Fills](#palettes-and-pattern-fills)
 - `value` (number) - Value for aggregated legends (enables value/percent display)
+- `href` (string) - Makes this entry a link — see [Linking from the legend](#linking-from-the-legend)
+- `target` (string) - Link target for `href` (e.g. `_blank`)
 
 **Behavior:**
 - When `<dc-legend-item>` children are present, they completely replace auto-generated legend items
@@ -2475,6 +2498,56 @@ Line legend with different stroke styles:
   <dc-legend-item stroke="#F44336" stroke-dasharray="dashed" label="Target" shape="line"></dc-legend-item>
 </dc-legend>
 ```
+
+#### Linking from the legend
+
+A legend entry can be a link. Which attribute you reach for depends on where the
+entry comes from.
+
+**For the legend the chart derives from your data, put `legend-href` on the
+element the entry describes:**
+
+```html
+<dc-chart width="600" height="400">
+  <dc-bar value="95" label="Q1" legend-href="/quarters/q1"></dc-bar>
+  <dc-bar value="80" label="Q2" legend-href="/quarters/q2"></dc-bar>
+  <dc-legend></dc-legend>
+</dc-chart>
+```
+
+It is available on every element that produces a legend entry — `<dc-bar>`,
+`<dc-bar-segment>`, `<dc-line>`, `<dc-area>`, `<dc-bubble>`, `<dc-scatter>`,
+`<dc-pie-slice>`, `<dc-funnel-stage>`, `<dc-stage>` and `<dc-radar-series>` —
+along with `legend-target` for the link target.
+
+**For a legend you write yourself, put `href` on the item:**
+
+```html
+<dc-legend>
+  <dc-legend-item fill="#16a34a" label="Above Target" href="/reports/above"></dc-legend-item>
+  <dc-legend-item fill="#f59e0b" label="Near Target" href="/reports/near"></dc-legend-item>
+</dc-legend>
+```
+
+Note the difference in reach. `<dc-legend-item>` children **replace** the
+derived legend entirely, so linking one series that way means hand-writing them
+all. `legend-href` leaves the derived legend intact, which is why it exists.
+
+**`legend-href` is separate from `href`, deliberately.** A chart whose bars link
+somewhere did not thereby ask its legend to navigate too, and the two often want
+different destinations — the bar to a record, the legend to a definition. Nothing
+is inherited in either direction; set `legend-href` to opt in.
+
+**What the link is.** A real SVG `<a>`, so middle-click, open-in-new-tab and copy
+address all work, and the entry is reachable by keyboard. The whole entry is
+wrapped — swatch, label and value — because a link covering only the words is a
+smaller target than it looks. Style it with `::part(legend-link)`.
+
+**When several elements share one entry.** A stacked chart's legend has one entry
+per segment *label*, but that label appears once per bar, so more than one element
+can claim it. The first non-empty `legend-href` wins; if two disagree the chart
+reports `DC118` and names the entry, rather than settling it silently where the
+reader could not tell which destination they were given.
 
 ### `<dc-title>`
 
@@ -3124,6 +3197,7 @@ you where to look before you read the message.
 | `DC115` | An inline `on*` handler was not copied onto the shape — listen for `dc-click` instead |
 | `DC116` | Bars do not fit the plot even at minimum width; some are drawn where they cannot be seen |
 | `DC117` | Unrecognised `shape` or `point-shape`; no marker drawn — see [`<dc-point>`](#dc-point) |
+| `DC118` | Two elements sharing one legend entry give different `legend-href`; the first is used |
 | `DC201` | Palette not found — check the name against [Palettes](#palettes-and-pattern-fills) |
 | `DC202` | Pattern is not a valid type or ID reference |
 | `DC203` | `zero-fill` referenced an element that does not exist |

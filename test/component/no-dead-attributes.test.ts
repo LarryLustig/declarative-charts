@@ -266,6 +266,9 @@ const VALUE: Record<string, string> = {
   pattern: 'crosshatch', 'pattern-fill': '#abcdef', 'pattern-stroke': '#fedcba',
   'pattern-scale': '3', 'label-fill': '#ff00ff',
 
+  // legend links
+  'legend-href': '/report', 'legend-target': '_blank',
+
   // labels, values and text
   label: 'Renamed', value: '55', 'show-value': 'false', 'show-label': 'false',
   'show-percent': 'true', 'value-format': 'currency USD', 'percent-format': 'percent 3',
@@ -316,6 +319,41 @@ const CONTEXT_FOR_ELEMENT: Record<string, (attrs: string) => string> = {
   // vertical chart, where a category-label tilt correctly does nothing.
   'dc-axis:label-rotate': a =>
     `<dc-chart width="600" height="400"><dc-axis ${a} position="bottom"></dc-axis>${BARS}</dc-chart>`,
+
+  // --- legend-href draws nothing without a legend to draw it in -------------
+  // The default contexts have no <dc-legend>, so the entry these attributes
+  // link has nowhere to appear. Each of these is that element's usual context
+  // with a legend added.
+  'dc-bar:legend-href': a =>
+    `<dc-chart width="600" height="400"><dc-legend></dc-legend><dc-bar ${a} value="30" label="Alpha"></dc-bar><dc-bar value="70" label="Beta"></dc-bar></dc-chart>`,
+  'dc-bar-segment:legend-href': a =>
+    `<dc-chart width="600" height="400"><dc-legend></dc-legend><dc-bar label="Alpha"><dc-bar-segment ${a} value="30" label="S1"></dc-bar-segment><dc-bar-segment value="20" label="S2"></dc-bar-segment></dc-bar></dc-chart>`,
+  'dc-line:legend-href': a =>
+    `<dc-chart width="600" height="400"><dc-legend></dc-legend><dc-line ${a} label="L">${POINTS}</dc-line></dc-chart>`,
+  'dc-area:legend-href': a =>
+    `<dc-chart width="600" height="400"><dc-legend></dc-legend><dc-area ${a} label="A">${POINTS}</dc-area></dc-chart>`,
+  'dc-bubble:legend-href': a =>
+    `<dc-chart width="600" height="400"><dc-legend></dc-legend><dc-bubble ${a} value="30" size-value="100" label="A"></dc-bubble></dc-chart>`,
+  'dc-scatter:legend-href': a =>
+    `<dc-chart width="600" height="400"><dc-legend></dc-legend><dc-scatter ${a} label="S"><dc-point x="10" value="30"></dc-point><dc-point x="40" value="70"></dc-point></dc-scatter></dc-chart>`,
+  'dc-pie-slice:legend-href': a =>
+    `<dc-pie-chart width="600" height="400"><dc-legend></dc-legend><dc-pie-slice ${a} value="30" label="A"></dc-pie-slice><dc-pie-slice value="70" label="B"></dc-pie-slice></dc-pie-chart>`,
+  'dc-funnel-stage:legend-href': a =>
+    `<dc-funnel-chart width="600" height="400"><dc-legend></dc-legend><dc-funnel-stage ${a} value="100" label="A"></dc-funnel-stage><dc-funnel-stage value="50" label="B"></dc-funnel-stage></dc-funnel-chart>`,
+  'dc-stage:legend-href': a =>
+    `<dc-stage-chart width="600" height="500"><dc-legend></dc-legend><dc-stage ${a} value="100" label="A"></dc-stage><dc-stage value="50" label="B"></dc-stage></dc-stage-chart>`,
+  'dc-radar-series:legend-href': a =>
+    `<dc-radar-chart width="500" height="500" max-value="100">
+       <dc-legend></dc-legend>
+       <dc-radar-axis label="Speed"></dc-radar-axis>
+       <dc-radar-axis label="Power"></dc-radar-axis>
+       <dc-radar-axis label="Range"></dc-radar-axis>
+       <dc-radar-series ${a} label="A">
+         <dc-point value="80" label="Speed"></dc-point>
+         <dc-point value="60" label="Power"></dc-point>
+         <dc-point value="90" label="Range"></dc-point>
+       </dc-radar-series>
+     </dc-radar-chart>`,
 
   // --- <dc-point> attributes only a scatter reads ---------------------------
   'dc-point:x': a => SCATTER_POINT(a),
@@ -514,6 +552,7 @@ const NO_VISUAL_EFFECT: Record<string, string> = {
   logging: 'controls what is captured for <dc-log-console>, not what is drawn',
   'console-log': 'controls console echo only',
   target: 'passed to the <a> wrapper; only meaningful with href, which is tested',
+  'legend-target': 'passed to the <a> around a legend entry; only meaningful with legend-href, which is tested',
   chart: 'selector for <dc-log-console>, which renders no chart of its own',
   'zero-fill': 'references a <dc-fill> by id; with no such element the chart is unchanged',
   hidden: 'tested directly in the element suites; on <dc-grid> it removes grid lines'

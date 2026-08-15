@@ -637,7 +637,9 @@ export class RadarChart extends BaseChart {
       label: el.label,
       color: el.stroke || colors[i],
       shape: 'square' as const,
-      dimensionless: true as const
+      dimensionless: true as const,
+      href: el.legendHref,
+      target: el.legendTarget
     }));
   }
 

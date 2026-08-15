@@ -21,6 +21,8 @@ import type { LegendShape } from './chart-legend.js';
  * @attr {string} shape - Shape indicator: "square" (default), "circle", "line"
  * @attr {string} pattern - Pattern type for patterned fills
  * @attr {number} value - Value for aggregated legends (enables value/percent display)
+ * @attr {string} href - Makes this entry a link to the given URL
+ * @attr {string} target - Link target for `href` (e.g. "_blank")
  *
  * @example
  * <!-- Semantic coloring - same color, different meaning -->
@@ -99,6 +101,20 @@ export class ChartLegendItem extends LitElement {
    */
   @property({ type: Number })
   value?: number;
+
+  /**
+   * Makes this entry a link.
+   *
+   * The whole entry becomes the target - swatch, label and value - because a
+   * link covering only the words is a smaller hit area than it looks. Rendered
+   * as a real SVG `<a>`, so middle-click and open-in-new-tab work.
+   */
+  @property({ type: String })
+  href?: string;
+
+  /** Link target for {@link href}, as on any other element that takes one. */
+  @property({ type: String })
+  target?: string;
 
   static styles = css`
     :host {
