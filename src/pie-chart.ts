@@ -549,13 +549,7 @@ export class PieChart extends BaseChart {
       })}
 
       <!-- Legend -->
-      ${this.renderLegend(
-        slices.map((slice) => ({
-          label: slice.label,
-          color: slice.originalColor,
-          value: slice.value
-        }))
-      )}
+      ${this.renderLegend(this.getLegendItems())}
     `;
   }
 

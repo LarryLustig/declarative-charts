@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Every chart now renders its legend from `getLegendItems()`.** `<dc-chart>` and `<dc-radar-chart>`
+  did; pie, funnel and stage built a second list inline in `render()` and used `getLegendItems()`
+  only to size the padding. Two constructions of the same list, from different data, with nothing
+  holding them together
+
+  The duplication was latent rather than active - all 30 screenshot baselines pass unchanged, so
+  the two paths did agree today. What it cost was the next change: anything added to
+  `getLegendItems()` reached the padding pass and never the picture
+
+  `getLegendItems()` still must not call the layout, which is what created the split - the legend is
+  sized inside `getChartPadding()`, so calling `calculateSliceLayout()` from it recurses. Rendering
+  *from* it is fine, and is what the other two charts already did
+
+
 ### Added
 
 - **`shape="none"` and `point-shape="none"` draw no marker.** Reported by a consumer, and there was

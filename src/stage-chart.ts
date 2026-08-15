@@ -1252,13 +1252,7 @@ export class StageChart extends BaseChart {
       })}
 
       <!-- Legend -->
-      ${this.renderLegend(
-        stages.filter(s => !s.isHidden).map((stage) => ({
-          label: stage.label,
-          color: stage.originalColor,
-          value: stage.value
-        }))
-      )}
+      ${this.renderLegend(this.getLegendItems())}
 
       ${this.renderFocusIndicator()}
     `;

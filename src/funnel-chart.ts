@@ -822,13 +822,7 @@ export class FunnelChart extends BaseChart {
       })}
 
       <!-- Legend -->
-      ${this.renderLegend(
-        stages.map((stage) => ({
-          label: stage.label,
-          color: stage.originalColor,  // Use originalColor (fillColor may be pattern URL)
-          value: stage.value
-        }))
-      )}
+      ${this.renderLegend(this.getLegendItems())}
 
       ${this.renderFocusIndicator()}
     `;
