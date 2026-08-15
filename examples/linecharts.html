@@ -219,6 +219,33 @@
                 </dc-chart>
                 <p><code>point-shape="none"</code> draws the line and nothing else. At any density the markers stop describing the data and start hiding it &mdash; and with none drawn, there is nothing per point to hover or click, so the popup and <code>href</code> move to the line.</p>
             </div>
+
+            <div>
+                <h3>Invisible Markers, Live Popups</h3>
+                <pre><code>&lt;dc-chart width="500" height="350" auto-popup&gt;
+  &lt;dc-title&gt;Hover Any Point&lt;/dc-title&gt;
+  &lt;dc-line stroke="#7c3aed" label="Revenue" point-shape="circle"&gt;
+    &lt;dc-point value="18" label="Jan" fill="transparent"&gt;&lt;/dc-point&gt;
+    &lt;!-- 9 more, all fill="transparent" --&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart id="invisible-markers" width="500" height="350" auto-popup>
+                    <dc-title>Hover Any Point</dc-title>
+                    <dc-line stroke="#7c3aed" label="Revenue" point-shape="circle">
+                        <dc-point value="18" label="Jan" fill="transparent"></dc-point>
+                        <dc-point value="26" label="Feb" fill="transparent"></dc-point>
+                        <dc-point value="22" label="Mar" fill="transparent"></dc-point>
+                        <dc-point value="34" label="Apr" fill="transparent"></dc-point>
+                        <dc-point value="29" label="May" fill="transparent"></dc-point>
+                        <dc-point value="41" label="Jun" fill="transparent"></dc-point>
+                        <dc-point value="37" label="Jul" fill="transparent"></dc-point>
+                        <dc-point value="48" label="Aug" fill="transparent"></dc-point>
+                        <dc-point value="44" label="Sep" fill="transparent"></dc-point>
+                        <dc-point value="52" label="Oct" fill="transparent"></dc-point>
+                    </dc-line>
+                </dc-chart>
+                <p>When you want the markers invisible but still <em>live</em>, keep the shape and make the fill transparent. It must be <code>fill="transparent"</code> and not <code>fill="none"</code>: SVG hit-testing counts painted area only, so <code>none</code> lets the hover fall through to the line and you get the line's popup instead of the point's. The two look identical on screen, which is what makes it worth knowing.</p>
+            </div>
         </div>
     </div>
 

@@ -23,6 +23,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   point — invisible, but a node with handlers attached — and was the only way to suppress a marker
   before this existed
 
+- **The recipe for an invisible marker that is still live.** `shape="none"` removes the hit target
+  with the marker, so the documented alternative is a circle with a transparent fill — in API.md,
+  and demonstrated on `linecharts.html` with a hoverable chart whose markers cannot be seen
+
+  It has to be **`fill="transparent"`, not `fill="none"`**, and the two are indistinguishable on
+  screen. SVG's default `pointer-events: visiblePainted` counts painted area only, so `none` paints
+  nothing, the hover falls through to the line, and you silently get the line's popup where you
+  wanted the point's. Measured rather than reasoned: hovering the same marker yields
+  `Bravo / Value: 30.00` with a transparent fill and `TheLine / Points: 3` with `none`
+
+  Guarded in `examples.spec.ts`, which needs a real browser — happy-dom does no hit-testing, and
+  dispatching the event straight at the element is the very step that would pass whether or not a
+  browser would ever deliver it there. The check asserts both directions and that the page still
+  authors the spelling that works
+
 - **`<dc-point>` now documents the marker vocabulary in full**, in a *Marker shapes* table naming
   all eight values, what a single character does, what happens to anything else, and that `none`
   leaves no target for per-point popups, `href` or `dc-click`. The `point-shape` bullets on

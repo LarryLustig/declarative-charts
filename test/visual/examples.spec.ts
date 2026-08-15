@@ -111,6 +111,82 @@ test.describe('example pages', () => {
   });
 
   /**
+   * The transparent-marker recipe documented in API.md under "Marker shapes"
+   * and demonstrated on `linecharts.html`.
+   *
+   * `shape="none"` removes the hit target along with the marker, so the
+   * documented way to keep per-point popups without a visible marker is a
+   * circle with a transparent fill. That rests on an SVG detail worth guarding:
+   * the default `pointer-events: visiblePainted` counts painted area only, so
+   * `fill="none"` - which looks identical on screen - lets the hover fall
+   * through to the line and silently yields the line's popup instead of the
+   * point's.
+   *
+   * Only a real browser can check it. happy-dom does no hit-testing, and
+   * dispatching the event directly on the element is exactly the step that
+   * would pass whether or not the browser would ever deliver it there.
+   */
+  test('an invisible marker keeps its own popup, and fill=none would not', async ({ page }) => {
+    await page.goto('/examples/linecharts.html', { waitUntil: 'networkidle' });
+
+    // The page must teach the spelling that works. The hover checks below set
+    // the fill themselves, so without this they would pass against a demo that
+    // had drifted to the broken one.
+    const authored = await page.evaluate(() =>
+      [...document.querySelectorAll('#invisible-markers dc-point')]
+        .map(p => p.getAttribute('fill')));
+    expect(new Set(authored), 'the demo should author fill="transparent"')
+      .toEqual(new Set(['transparent']));
+
+    /** Hover the middle marker of the demo chart and return the popup text. */
+    const popupAfterHover = async (fill: string) => {
+      await page.evaluate((f: string) => {
+        const chart = document.querySelector('#invisible-markers')!;
+        chart.querySelectorAll('dc-point').forEach(p => p.setAttribute('fill', f));
+      }, fill);
+      // The chart re-renders from its own MutationObserver; wait for that
+      // rather than a fixed sleep.
+      await page.waitForFunction(() => {
+        const c = document.querySelector('#invisible-markers') as HTMLElement & { updateComplete?: Promise<boolean> };
+        return !!c.shadowRoot?.querySelector('g.point-marker > *');
+      });
+
+      // The demo sits far down the page, so its markers are below the viewport
+      // and a mouse move to their document coordinates would land nowhere.
+      await page.locator('#invisible-markers').scrollIntoViewIfNeeded();
+
+      const at = await page.evaluate(() => {
+        const c = document.querySelector('#invisible-markers') as HTMLElement;
+        const marks = c.shadowRoot!.querySelectorAll('g.point-marker > *');
+        // Not the first: the first point sits on the value axis, whose line
+        // covers its centre and would make this measure the wrong thing.
+        const r = marks[4].getBoundingClientRect();
+        return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+      });
+
+      await page.mouse.move(5, 5);
+      await page.mouse.move(at.x, at.y);
+      await page.waitForFunction(() => {
+        const c = document.querySelector('#invisible-markers') as HTMLElement;
+        return !!c.shadowRoot!.querySelector('.popup.visible');
+      });
+      return page.evaluate(() => {
+        const c = document.querySelector('#invisible-markers') as HTMLElement;
+        return (c.shadowRoot!.querySelector('.popup.visible')!.textContent ?? '')
+          .replace(/\s+/g, ' ').trim();
+      });
+    };
+
+    const transparent = await popupAfterHover('transparent');
+    expect(transparent, 'a transparent marker did not surface its own point').toContain('May');
+
+    const none = await popupAfterHover('none');
+    expect(none, 'fill="none" became hit-testable, so the warning in API.md is stale')
+      .not.toContain('May');
+    expect(none, 'expected the line popup to take over').toContain('Revenue');
+  });
+
+  /**
    * The no-JavaScript fallback documented in API.md ("When JavaScript Does Not
    * Run") and demonstrated on `empty-loading.html`.
    *

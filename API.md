@@ -1745,8 +1745,29 @@ printed the word "none" at every point.
 
 **`none` and interaction.** A point with no marker has nothing to hover or
 click, so per-point `<dc-popup>`, `auto-popup`, `href` and `dc-click` have no
-target. The line itself stays interactive, and value labels are unaffected —
-those do not come from the marker. An empty `shape=""` means `none`.
+target. The line itself stays interactive — hovering picks up the line's popup
+instead — and value labels are unaffected, since those do not come from the
+marker. An empty `shape=""` means `none`.
+
+**To keep per-point interaction without a visible marker,** draw a circle and
+make its fill transparent:
+
+```html
+<!-- invisible, still hoverable and clickable -->
+<dc-point value="30" label="Q2" shape="circle" fill="transparent"></dc-point>
+```
+
+⚠️ **`fill="transparent"`, not `fill="none"`.** The two look identical — both
+draw nothing you can see — but they differ in hit-testing. SVG's default
+`pointer-events: visiblePainted` only counts *painted* area, and `fill="none"`
+paints none, so the hover falls through to whatever is behind. On a line chart
+that is the line, and you silently get the line's popup where you wanted the
+point's. A transparent fill is painted, just invisibly, so it receives events
+normally. `fill="rgba(0,0,0,0)"` works for the same reason.
+
+Use `none` when you want the markers gone; use a transparent circle when you
+want them invisible but live. Note the second keeps one SVG node per point, so
+it saves nothing on a dense series — `none` is the one that reduces the DOM.
 
 ### `<dc-scatter>`
 
