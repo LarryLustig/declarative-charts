@@ -180,7 +180,7 @@ export class StageChart extends BaseChart {
     // `hidden` is honoured on every other data element and API.md lists
     // <dc-stage> as supporting it; the filter was simply missing.
     const stageElements = Array.from(
-      this.querySelectorAll('dc-stage')
+      this.querySelectorAll(':scope > dc-stage')
     ).filter(el => !el.hasAttribute('hidden')) as ChartStage[];
 
     const knownAttrs = new Set(['value', 'show-value', 'show-label', 'show-percent', 'shape', 'corner-radius']);

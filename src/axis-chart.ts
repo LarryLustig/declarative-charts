@@ -1039,7 +1039,7 @@ export abstract class AxisChart extends BaseChart {
   }
 
   private extractReferences(): ReferenceData[] {
-    const elements = Array.from(this.querySelectorAll('dc-reference'))
+    const elements = Array.from(this.querySelectorAll(':scope > dc-reference'))
       .filter(el => !el.hasAttribute('hidden')) as ChartReference[];
     if (elements.length === 0) return [];
 

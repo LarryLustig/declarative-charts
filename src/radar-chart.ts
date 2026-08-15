@@ -140,12 +140,12 @@ export class RadarChart extends BaseChart {
 
   /** The declared `<dc-radar-axis>` children, excluding hidden ones. */
   private getAxisElements(): ChartRadarAxis[] {
-    return Array.from(this.querySelectorAll('dc-radar-axis'))
+    return Array.from(this.querySelectorAll(':scope > dc-radar-axis'))
       .filter(el => !el.hasAttribute('hidden')) as ChartRadarAxis[];
   }
 
   private getSeriesElements(): ChartRadarSeries[] {
-    return Array.from(this.querySelectorAll('dc-radar-series'))
+    return Array.from(this.querySelectorAll(':scope > dc-radar-series'))
       .filter(el => !el.hasAttribute('hidden')) as ChartRadarSeries[];
   }
 
@@ -163,7 +163,7 @@ export class RadarChart extends BaseChart {
 
     const seen: string[] = [];
     for (const series of this.getSeriesElements()) {
-      for (const point of Array.from(series.querySelectorAll('dc-point')) as ChartPoint[]) {
+      for (const point of Array.from(series.querySelectorAll(':scope > dc-point')) as ChartPoint[]) {
         if (point.label && !seen.includes(point.label)) seen.push(point.label);
       }
     }
@@ -215,7 +215,7 @@ export class RadarChart extends BaseChart {
   private valuesForAxis(label: string): number[] {
     const out: number[] = [];
     for (const series of this.getSeriesElements()) {
-      for (const point of Array.from(series.querySelectorAll('dc-point')) as ChartPoint[]) {
+      for (const point of Array.from(series.querySelectorAll(':scope > dc-point')) as ChartPoint[]) {
         if (point.label === label && Number.isFinite(point.value)) out.push(point.value);
       }
     }
@@ -261,7 +261,7 @@ export class RadarChart extends BaseChart {
     const resolved = this.resolveFillsWithPatterns(elements);
 
     const series: RadarSeriesData[] = seriesElements.map((el, i) => {
-      const points = Array.from(el.querySelectorAll('dc-point')) as ChartPoint[];
+      const points = Array.from(el.querySelectorAll(':scope > dc-point')) as ChartPoint[];
       const byLabel = new Map<string, ChartPoint>();
       for (const p of points) {
         if (p.label) byLabel.set(p.label, p);

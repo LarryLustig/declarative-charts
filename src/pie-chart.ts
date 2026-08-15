@@ -94,7 +94,7 @@ export class PieChart extends BaseChart {
     labelFill?: string;
   }> {
     const sliceElements = Array.from(
-      this.querySelectorAll('dc-pie-slice')
+      this.querySelectorAll(':scope > dc-pie-slice')
     ) as ChartPieSlice[];
 
     return sliceElements.map(slice => {

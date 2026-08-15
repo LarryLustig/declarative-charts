@@ -427,12 +427,12 @@ export class Chart extends AxisChart {
     Array.from(this.children).forEach(child => {
       let barElements: ChartBar[] = [];
       if (child.tagName === 'DC-BAR-GROUP') {
-        barElements = Array.from(child.querySelectorAll('dc-bar')) as ChartBar[];
+        barElements = Array.from(child.querySelectorAll(':scope > dc-bar')) as ChartBar[];
       } else if (child.tagName === 'DC-BAR') {
         barElements = [child as ChartBar];
       }
       barElements.forEach(bar => {
-        const segments = Array.from(bar.querySelectorAll('dc-bar-segment')) as ChartBarSegment[];
+        const segments = Array.from(bar.querySelectorAll(':scope > dc-bar-segment')) as ChartBarSegment[];
         segments.forEach(segment => {
           if (segment.label && !uniqueLabels.includes(segment.label)) {
             uniqueLabels.push(segment.label);
@@ -466,7 +466,7 @@ export class Chart extends AxisChart {
   }
 
   private extractScatterSeries(): ScatterData[] {
-    const elements = Array.from(this.querySelectorAll('dc-scatter'))
+    const elements = Array.from(this.querySelectorAll(':scope > dc-scatter'))
       .filter(el => !el.hasAttribute('hidden')) as ChartScatter[];
     if (elements.length === 0) return [];
 
@@ -482,7 +482,7 @@ export class Chart extends AxisChart {
     );
 
     return elements.map((el, index) => {
-      const points = Array.from(el.querySelectorAll('dc-point')) as ChartPoint[];
+      const points = Array.from(el.querySelectorAll(':scope > dc-point')) as ChartPoint[];
       return {
         label: el.label,
         fill: resolved[index].fill,
@@ -521,10 +521,30 @@ export class Chart extends AxisChart {
    * the failure this project keeps finding. Declaring the axis type still
    * works, and is worth doing for the axis title.
    */
+  /**
+   * Every `<dc-point>` the chart treats as data.
+   *
+   * Gathered through the series that own them rather than by a chart-wide
+   * descendant search, so the axis domain is computed from exactly the points
+   * that get drawn. The flat search also reached into markup the chart does not
+   * read - a fallback table, say - and let a point that is never rendered widen
+   * the axis.
+   *
+   * Points of a `hidden` series are still included, as they were before: only
+   * the scope changed here, not which series count.
+   */
+  private getDataPoints(): ChartPoint[] {
+    return Array.from(
+      this.querySelectorAll(
+        ':scope > dc-point, :scope > dc-line > dc-point, ' +
+          ':scope > dc-area > dc-point, :scope > dc-scatter > dc-point'
+      )
+    ) as ChartPoint[];
+  }
+
   protected hasNumericX(): boolean {
     return this.cachePerRender('hasNumericX', () => {
-      const points = Array.from(this.querySelectorAll('dc-point')) as ChartPoint[];
-      return points.some(pt => pt.hasX);
+      return this.getDataPoints().some(pt => pt.hasX);
     });
   }
 
@@ -533,7 +553,7 @@ export class Chart extends AxisChart {
     return this.cachePerRender('xRange', () => {
       if (!this.hasNumericX()) return null;
 
-      const xs = (Array.from(this.querySelectorAll('dc-point')) as ChartPoint[])
+      const xs = this.getDataPoints()
         .filter(pt => pt.hasX && Number.isFinite(pt.value))
         .map(pt => pt.x);
       if (xs.length === 0) return null;
@@ -781,7 +801,7 @@ export class Chart extends AxisChart {
     ]);
     const passthroughAttrs = bar.getPassthroughAttributes(knownAttrs);
 
-    const segmentElements = Array.from(bar.querySelectorAll('dc-bar-segment')) as ChartBarSegment[];
+    const segmentElements = Array.from(bar.querySelectorAll(':scope > dc-bar-segment')) as ChartBarSegment[];
     let segments: SegmentData[] | undefined;
     let totalValue = bar.value;
 
@@ -838,7 +858,7 @@ export class Chart extends AxisChart {
       if (child.tagName === 'DC-BAR-GROUP') {
         const groupEl = child as ChartBarGroup;
         // Filter out hidden bars within the group
-        const barElements = Array.from(groupEl.querySelectorAll('dc-bar'))
+        const barElements = Array.from(groupEl.querySelectorAll(':scope > dc-bar'))
           .filter(el => !el.hasAttribute('hidden')) as ChartBar[];
         if (barElements.length === 0) return;
         const groupBars = barElements.map(bar => this.extractBarData(bar, groupEl.barWidth, groupEl.gutter));
@@ -1129,11 +1149,11 @@ export class Chart extends AxisChart {
   // ============================================================================
 
   private getLines(): LineData[] {
-    const lineElements = Array.from(this.querySelectorAll('dc-line'))
+    const lineElements = Array.from(this.querySelectorAll(':scope > dc-line'))
       .filter(el => !el.hasAttribute('hidden')) as ChartLine[];
 
     const linesData = lineElements.map((line, lineIndex) => {
-      const pointElements = Array.from(line.querySelectorAll('dc-point')) as ChartPoint[];
+      const pointElements = Array.from(line.querySelectorAll(':scope > dc-point')) as ChartPoint[];
 
       // Warn if line has no points
       if (pointElements.length === 0) {
@@ -1233,13 +1253,13 @@ export class Chart extends AxisChart {
   // ============================================================================
 
   private getAreas(): AreaData[] {
-    const areaElements = Array.from(this.querySelectorAll('dc-area'))
+    const areaElements = Array.from(this.querySelectorAll(':scope > dc-area'))
       .filter(el => !el.hasAttribute('hidden')) as ChartArea[];
 
     if (areaElements.length === 0) return [];
 
     const areasData = areaElements.map((area, areaIndex) => {
-      const pointElements = Array.from(area.querySelectorAll('dc-point')) as ChartPoint[];
+      const pointElements = Array.from(area.querySelectorAll(':scope > dc-point')) as ChartPoint[];
 
       // Warn if area has no points
       if (pointElements.length === 0) {
@@ -1388,7 +1408,7 @@ export class Chart extends AxisChart {
   // ============================================================================
 
   private getBubbles(): BubbleData[] {
-    const bubbleElements = Array.from(this.querySelectorAll('dc-bubble'))
+    const bubbleElements = Array.from(this.querySelectorAll(':scope > dc-bubble'))
       .filter(el => !el.hasAttribute('hidden')) as ChartBubble[];
 
     const bubblesData = bubbleElements.map(bubble => {

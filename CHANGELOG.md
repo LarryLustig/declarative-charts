@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Every chart now reads its data from its direct children.** Only bars did. Lines, areas,
+  bubbles, scatter series, references, pie slices, funnel stages, stages, radar axes and radar
+  series were gathered with a descendant `querySelectorAll`, so anything matching *anywhere* below
+  the chart became data — however deeply it was wrapped, and whatever the wrapper meant
+
+  The visible bug was in the axis. `getXRange()` and `hasNumericX()` searched the whole subtree for
+  `<dc-point>`, so a point the chart never drew could still set the scale of the chart above it: a
+  single `x="9999"` nested two levels down moved the axis from 1–2 to 0–2,000 while contributing no
+  mark. Points are now gathered through the series that own them, which also guarantees the domain
+  is computed from exactly the points that get rendered
+
+  Found while documenting the no-JavaScript fallback, where the asymmetry meant a nested `<dc-bar>`
+  was ignored and a nested `<dc-line>` was drawn twice. Verified as a no-op for valid markup: all
+  2,924 unit, component and integration tests pass, and so do all 30 screenshot baselines, which at
+  100 differing pixels absolute would have caught a shifted axis
+
+  Guarded by `test/component/fallback-content.test.ts`, which pins that a series nested below the
+  chart is neither drawn nor able to reach the axis. Mutation-tested: restoring the flat search
+  puts the buried point back on the scale
+
 ### Changed
 
 - **Visual baselines now allow 100 differing pixels, absolute, instead of 1% of the image.** A

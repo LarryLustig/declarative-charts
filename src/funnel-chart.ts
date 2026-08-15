@@ -104,7 +104,7 @@ export class FunnelChart extends BaseChart {
     labelFill?: string;
   }> {
     const stageElements = Array.from(
-      this.querySelectorAll('dc-funnel-stage')
+      this.querySelectorAll(':scope > dc-funnel-stage')
     ) as ChartFunnelStage[];
 
     // Known attributes that are handled by the component (base attrs handled by BaseShape)
