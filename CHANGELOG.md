@@ -23,7 +23,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   point — invisible, but a node with handlers attached — and was the only way to suppress a marker
   before this existed
 
+- **`<dc-point>` now documents the marker vocabulary in full**, in a *Marker shapes* table naming
+  all eight values, what a single character does, what happens to anything else, and that `none`
+  leaves no target for per-point popups, `href` or `dc-click`. The `point-shape` bullets on
+  `<dc-chart>` and `<dc-line>` and the `shape` bullet on `<dc-scatter>` now point at it instead of
+  each carrying a different, partial list — one of them omitted `star`
+
 ### Fixed
+
+- **Enumerated attributes that never named their values.** An attribute taking a closed set is only
+  usable if the set is written down, and three had drifted: `<dc-legend-item stroke-dasharray>`
+  named two of the five named patterns, `<dc-radar-series>` and `<dc-reference>` named none, and
+  three `pattern` bullets said "Pattern type" or `"diagonal-lines", "dots", etc.` without saying
+  which eight
+
+  Every `stroke-dasharray` bullet now carries the full set, and every `pattern` bullet links to the
+  list of eight. Guarded by `api-docs.test.ts`, derived from `PATTERN_TYPES`, `NAMED_DASH_PATTERNS`
+  and `MARKER_SHAPES` rather than a copy of them, so adding a pattern or a dash name fails the
+  build until API.md catches up. The audit found no other enumerated attribute missing its values
 
 - **A misspelled shape is no longer drawn as a word.** `shape="none"` rendered the literal text
   "none" at every point, which is how the gap above was reported. Any unrecognised value did:

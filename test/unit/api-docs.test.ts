@@ -2,6 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { SVG_TEXT_STYLE_ATTRS } from '../../src/chart-title';
+import { PATTERN_TYPES } from '../../src/patterns';
+import { NAMED_DASH_PATTERNS } from '../../src/chart-fill';
+import { MARKER_SHAPES } from '../../src/chart-utils';
 
 /**
  * Keeps `API.md` honest about which attributes exist.
@@ -119,8 +122,9 @@ for (const sec of api.matchAll(/^### `<([a-z-]+)>`([\s\S]*?)(?=^### |^## |(?![\s
  */
 const NOT_ATTRIBUTES = new Set([
   'id', 'class', 'style', 'title', 'slot', 'part',
-  'hover', 'click',                                   // <dc-popup trigger> values
-  'solid', 'dashed', 'dotted', 'dash-dot', 'long-dash' // stroke-dasharray values
+  'hover', 'click',                        // <dc-popup trigger> values
+  ...Object.keys(NAMED_DASH_PATTERNS),     // stroke-dasharray values
+  ...MARKER_SHAPES                         // shape / point-shape values
 ]);
 
 /**
@@ -216,5 +220,50 @@ describe('API.md matches the implemented attributes', () => {
       }
     }
     expect(phantom, `@attr with no @property: ${phantom.join(', ')}`).toEqual([]);
+  });
+
+  /**
+   * An attribute that takes a closed set of values is only usable if the set is
+   * written down. Three had drifted: `<dc-legend-item stroke-dasharray>` named
+   * two of the five named patterns, `<dc-radar-series>` and `<dc-reference>`
+   * named none, and three `pattern` bullets said "Pattern type" or
+   * "…, etc." without saying which.
+   *
+   * Derived from the exported constants rather than a copy of them, so adding a
+   * pattern or a dash name fails here until API.md catches up.
+   */
+  describe('enumerated attributes name their values', () => {
+    const cases: Array<[string, readonly string[]]> = [
+      ['pattern types', PATTERN_TYPES],
+      ['dash names', Object.keys(NAMED_DASH_PATTERNS)],
+      ['marker shapes', MARKER_SHAPES]
+    ];
+
+    for (const [what, values] of cases) {
+      it(`documents every one of the ${what}`, () => {
+        const missing = values.filter(v => !api.includes(`\`${v}\``));
+        expect(missing, `not named in API.md as code: ${missing.join(', ')}`).toEqual([]);
+      });
+    }
+
+    /**
+     * Naming them somewhere is not enough - the bullet a reader is looking at
+     * has to name them, or point at the list that does.
+     */
+    it('gives every stroke-dasharray bullet the full set', () => {
+      const names = Object.keys(NAMED_DASH_PATTERNS);
+      const thin = norm(api).split('\n')
+        .filter(l => /^-\s*`stroke-dasharray`/.test(l))
+        .filter(l => !names.every(n => l.includes(`\`${n}\``)));
+      expect(thin, `stroke-dasharray bullets missing values:\n${thin.join('\n')}`).toEqual([]);
+    });
+
+    it('gives every pattern bullet the values or a link to them', () => {
+      const thin = norm(api).split('\n')
+        .filter(l => /^-\s*`pattern`\s*\(string\)/.test(l))
+        .filter(l => !l.includes('](#palettes-and-pattern-fills)')
+          && !PATTERN_TYPES.every(p => l.includes(`\`${p}\``)));
+      expect(thin, `pattern bullets naming no values:\n${thin.join('\n')}`).toEqual([]);
+    });
   });
 });

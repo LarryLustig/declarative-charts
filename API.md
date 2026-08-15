@@ -1497,7 +1497,7 @@ Renders bar, line, or bubble charts depending on child elements.
 - `palette` (string) - Reference to a custom `<dc-palette>` ID or built-in palette name (e.g., "category10", "viridis")
 - `bar-width` (string) - Default width for bars (e.g., "50px", "2rem")
 - `gutter` (number) - Space between bars in pixels (default: 10)
-- `point-shape` (string) - Default shape for points: "circle", "square", "triangle", "diamond", "star", "cross", "plus", or unicode character (default: "circle")
+- `point-shape` (string) - Default marker for points on every line and scatter series: `circle` (default), `square`, `triangle`, `diamond`, `star`, `cross`, `plus`, `none`, or any single character to draw as a glyph — see [Marker shapes](#marker-shapes)
 - `curve-fit` (string) - Default curve fitting for lines and areas: "linear" (default), "smooth", "monotone", "step"
 - `overlapping` (boolean) - When true, multiple areas overlap instead of stacking (default: false)
 - `bar-color` (string) - Fill for every bar that sets no `fill` of its own and matches no palette entry. When omitted, bars are given distinct auto-generated colours instead
@@ -1625,7 +1625,7 @@ Defines a single line in a line chart. Contains multiple `<dc-point>` elements.
 - `label` (string) - Label for the line (for legend)
 - `show-value` (boolean|string) - Whether to display values on points in this line
 - `show-percent` (boolean|string) - Whether to display percentages on points in this line
-- `point-shape` (string) - Default shape for points on this line
+- `point-shape` (string) - Default marker for points on this line; same values as [`<dc-point shape>`](#marker-shapes), including `none`
 - `curve-fit` (string) - Curve fitting method: "linear" (default), "smooth", "monotone", "step"
 - `missing` (string) - How to treat points with no value: "gap" (default), "skip", or "zero". See [Missing Values](#missing-values)
 
@@ -1651,7 +1651,7 @@ Areas are filled regions bounded by data points above and the zero line (or char
 - `missing` (string) - How to treat points with no value: "gap" (default), "skip", or "zero". See [Missing Values](#missing-values)
 - `show-value` (boolean|string) - Whether to display values on points (default: true)
 - `show-percent` (boolean|string) - Whether to display percentages on points
-- `pattern` (string) - Pattern type ("diagonal-lines", "dots", etc.) or ID reference
+- `pattern` (string) - Pattern type — one of the eight in [Palettes and Pattern Fills](#palettes-and-pattern-fills), or the ID of a `<dc-fill>`
 - `pattern-stroke` (string) - Pattern element color
 - `pattern-fill` (string) - Pattern background color
 - `pattern-scale` (number) - Pattern size multiplier (default: 1)
@@ -1711,10 +1711,42 @@ Defines a single point in a line, area, radar series, or scatter series.
 - `label` (string) - Label displayed below the point
 - `show-value` (boolean|string) - Whether to display the value for this point
 - `show-percent` (boolean|string) - Whether to display the percentage for this point
-- `shape` (string) - Shape for this point
+- `shape` (string) - Marker for this point (default: `circle`)
 
 Omitting `value` leaves the point missing rather than zero, so an absent reading
 stays distinguishable from a real zero — see [Missing Values](#missing-values).
+
+#### Marker shapes
+
+`shape` here, and `point-shape` on `<dc-chart>` and `<dc-line>`, take the same
+vocabulary. The named values are:
+
+| Value | Draws |
+|---|---|
+| `circle` | a filled circle — the default |
+| `square` | a filled square |
+| `triangle` | a filled triangle, point up |
+| `diamond` | a filled diamond |
+| `star` | a five-pointed star |
+| `cross` | two stroked diagonals, an ✕ |
+| `plus` | two stroked strokes, a ✚ |
+| `none` | nothing at all |
+
+Names are matched case-insensitively, so `NONE` and `none` are the same value.
+
+**Any single character is drawn as a glyph** instead: `shape="★"`, `shape="♦"`,
+`shape="A"`, `shape="😀"`. Emoji that carry a modifier work too — `"❤️"` and
+`"👍🏽"` are more than one code point each, and are still one character to read.
+
+**Anything else is treated as a mistake.** A value that reads as a word but is
+not one of the names above — `sqaure`, `blob` — draws no marker and reports
+`DC117`, naming the value. Until 0.3.0 it was drawn as text, so `shape="none"`
+printed the word "none" at every point.
+
+**`none` and interaction.** A point with no marker has nothing to hover or
+click, so per-point `<dc-popup>`, `auto-popup`, `href` and `dc-click` have no
+target. The line itself stays interactive, and value labels are unaffected —
+those do not come from the marker. An empty `shape=""` means `none`.
 
 ### `<dc-scatter>`
 
@@ -1729,7 +1761,7 @@ a group needs a name for the legend and a colour of its own.
 - `label` (string) - Series name, used by the legend
 - `fill` (string) - Marker colour
 - `fill-opacity` (number) - Marker opacity (default: 1). Lower it when the cloud is dense and points overlap
-- `shape` (string) - Marker shape: "circle" (default), "square", "triangle", "diamond", "cross", "plus", "star" — the same vocabulary `point-shape` uses
+- `shape` (string) - Marker shape: `circle` (default), `square`, `triangle`, `diamond`, `star`, `cross`, `plus`, `none`, or any single character — see [Marker shapes](#marker-shapes)
 - `size` (number) - Marker radius in viewBox units (default: 4)
 - Plus `pattern`, `stroke`, `value-format`, `auto-popup`, `href`, `target`, `hidden`
 
@@ -2130,7 +2162,7 @@ the same way `<dc-line>` contains the points of a line.
 - `fill-opacity` (number) - Fill opacity (default: 0.25). Translucent by default because two opaque polygons hide each other
 - `stroke` (string) - Outline colour
 - `stroke-width` (number) - Outline width
-- `stroke-dasharray` (string) - Outline dash pattern, named or numeric
+- `stroke-dasharray` (string) - Outline dash pattern: a named pattern (`solid`, `dashed`, `dotted`, `dash-dot`, `long-dash`) or a raw SVG dash list such as `"5 3"`
 - `missing` (string) - How to treat an axis with no value: `"gap"` (default), `"skip"` or `"zero"`
 - Plus `pattern`, `show-value`, `value-format`, `auto-popup`, `href`, `target`, `hidden`
 
@@ -2167,7 +2199,7 @@ line, which is exactly what "acceptable range, target 100" means.
 - `label-position` (string) - `"end"` (default) or `"start"` of the line
 - `stroke` (string) - Line colour (default: `#dc2626`)
 - `stroke-width` (number) - Line width (default: 2)
-- `stroke-dasharray` (string) - Named pattern or dash list (default: `dashed`)
+- `stroke-dasharray` (string) - A named pattern (`solid`, `dashed`, `dotted`, `dash-dot`, `long-dash`) or a raw SVG dash list such as `"5 3"` (default: `dashed`)
 - `fill` (string) - Band fill; falls back to `stroke`, so one colour attribute usually does
 - `fill-opacity` (number) - Band opacity (default: 0.12)
 - Plus the standard HTML `hidden`, which removes the annotation
@@ -2378,9 +2410,9 @@ This is useful for semantic coloring scenarios where multiple data elements shar
 - `label` (string, required) - Legend item label
 - `fill` (string) - Fill color for squares/circles (bars, areas, pie slices)
 - `stroke` (string) - Stroke color for lines
-- `stroke-dasharray` (string) - Dash pattern: "dashed", "dotted", or numeric (e.g., "5 3")
+- `stroke-dasharray` (string) - Dash pattern: a named pattern (`solid`, `dashed`, `dotted`, `dash-dot`, `long-dash`) or a raw SVG dash list such as `"5 3"`
 - `shape` (string) - Shape indicator: "square" (default), "circle", "line"
-- `pattern` (string) - Pattern type for patterned fills
+- `pattern` (string) - Pattern type — one of the eight in [Palettes and Pattern Fills](#palettes-and-pattern-fills)
 - `value` (number) - Value for aggregated legends (enables value/percent display)
 
 **Behavior:**
@@ -2570,12 +2602,12 @@ and an element that sets its own `fill` opts out of palette painting entirely.
 - `stroke` (string) - CSS color for the stroke/border
 - `stroke-width` (number) - Stroke width in pixels
 - `stroke-opacity` (number) - Stroke opacity (0-1)
-- `stroke-dasharray` (string) - Dash pattern: numeric (e.g., "5 3") or named ("solid", "dashed", "dotted", "dash-dot", "long-dash")
+- `stroke-dasharray` (string) - Dash pattern: a named pattern (`solid`, `dashed`, `dotted`, `dash-dot`, `long-dash`) or a raw SVG dash list such as `"5 3"`
 - `stroke-dashoffset` (number) - Dash pattern offset
 - `stroke-linecap` (string) - Line cap style: "butt", "round", "square"
 - `stroke-linejoin` (string) - Line join style: "miter", "round", "bevel"
 - `stroke-miterlimit` (number) - Miter limit for stroke-linejoin="miter"
-- `pattern` (string) - Pattern type
+- `pattern` (string) - Pattern type — one of the eight in [Palettes and Pattern Fills](#palettes-and-pattern-fills)
 - `pattern-scale` (number) - Pattern scale multiplier (default: 1). Same name and meaning as `pattern-scale` on shapes
 - `value` (number) - Exact value to match. Shorthand for setting `min-value` and `max-value` to the same number
 - `min-value` (number) - Minimum value for range matching (inclusive)
