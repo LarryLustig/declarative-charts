@@ -15,6 +15,7 @@ Complete documentation for all elements and attributes in the Declarative Chart 
 - [Controlling Labels, Values, and Percentages](#controlling-labels-values-and-percentages)
 - [Label Positioning](#label-positioning)
 - [Empty and Loading States](#empty-and-loading-states)
+- [When JavaScript Does Not Run](#when-javascript-does-not-run)
 - [Missing Values](#missing-values)
 - [Negative Values](#negative-values)
 - [Number Formatting](#number-formatting)
@@ -1156,6 +1157,110 @@ placeholder is showing, since there is nothing to navigate.
 | `::part(empty)` | The empty message |
 | `::part(skeleton)` | The skeleton group |
 | `::part(skeleton-bar)` | An individual skeleton bar |
+
+## When JavaScript Does Not Run
+
+These charts are custom elements. If the module never runs, `<dc-chart>` is an
+unknown tag with no text of its own, and the page shows **nothing** where the
+chart should be — not a degraded chart, not the numbers, nothing.
+
+That is worth stating plainly because it is the one thing a pure-CSS library like
+[Charts.css](https://chartscss.org) does better: its markup *is* a table, so it
+survives with no scripting at all. This library renders SVG at runtime and cannot
+match that. What it can do is let you supply the fallback yourself, and both
+patterns below are ordinary HTML — neither needs an attribute or an API.
+
+Pick between them on **which failure you want covered**:
+
+| | `<noscript>` | Fallback inside the chart |
+|---|---|---|
+| Scripting disabled | covered | covered |
+| Script blocked, 404, CSP, or upgrade failure | **not covered** | covered |
+| Flash before the chart appears | none | one paint |
+
+You cannot have both. `<noscript>` avoids the flash precisely *because* the
+browser resolves it at parse time and never renders the content when scripting is
+on. Covering a bundle that was requested and failed means rendering the fallback
+optimistically and retracting it, which is a paint by construction.
+
+### `<noscript>` — simplest, and enough for most pages
+
+```html
+<noscript>
+  <table>
+    <caption>Sales by quarter</caption>
+    <tr><th>Q1</th><td>95</td></tr>
+    <tr><th>Q2</th><td>80</td></tr>
+  </table>
+</noscript>
+
+<dc-chart width="500" height="350">
+  <dc-bar value="95" label="Q1"></dc-bar>
+  <dc-bar value="80" label="Q2"></dc-bar>
+</dc-chart>
+```
+
+Nothing inside `<noscript>` is parsed as markup when scripting is enabled, so
+there is no cost and no flash. Use this unless you specifically want the second
+failure mode covered.
+
+### Fallback inside the chart — also covers a bundle that fails to load
+
+Put the table inside the element and hide it once the element upgrades:
+
+```html
+<style>
+  dc-chart:not(:defined) { display: block; }      /* reserve space, avoid a jump */
+  dc-chart:defined .dc-fallback { display: none; }
+</style>
+
+<dc-chart width="500" height="350">
+  <table class="dc-fallback">
+    <caption>Sales by quarter</caption>
+    <tr><th>Q1</th><td>95</td></tr>
+    <tr><th>Q2</th><td>80</td></tr>
+  </table>
+
+  <dc-bar value="95" label="Q1"></dc-bar>
+  <dc-bar value="80" label="Q2"></dc-bar>
+</dc-chart>
+```
+
+`:defined` matches only once `customElements.define()` has run for that tag, so
+the table is visible whenever the library did not arrive — scripting off, a
+blocked or 404'd bundle, a CSP rejection, an unsupported browser — and hidden the
+moment it did.
+
+**The stylesheet rule is required, not decorative.** `<dc-chart>` renders a
+catch-all `<slot>`, so every light-DOM child is projected; the data elements are
+invisible only because they render nothing themselves. A `<table>` has no such
+courtesy and will paint below the chart forever if you do not hide it.
+
+Four things the chart guarantees about a foreign child, all covered by
+`test/component/fallback-content.test.ts`:
+
+- it is **not counted as data**, and does not shift the indices of the data around it
+- it raises **no diagnostic** of its own
+- it is **left alone** — never adopted, restyled, or removed
+- it **cannot stand in for data**. A chart holding only a fallback still draws
+  "No data" and still reports `DC001`, so the fallback cannot mask an empty chart
+
+### Limits worth knowing
+
+**Keep the fallback to plain HTML.** A chart reads its data from its *direct*
+children, so a `dc-*` element buried inside the fallback is not drawn, does not
+appear in the legend, and cannot move an axis. Writing one there still says
+something you do not mean, though — the fallback is a table for a reader without
+a chart, not a second copy of the chart.
+
+**The numbers are yours, unformatted.** The fallback is markup you wrote, so
+`value-format`, the percent convention (`0.38` → `"38%"`) and every other
+formatting rule in this document apply to the chart and not to it. Write the
+table the way you want it read.
+
+**It is duplicated data, and it can drift.** Both patterns state each value
+twice. If a server template emits the chart, emit the table from the same loop so
+there is one source; a hand-maintained fallback will go stale.
 
 ## Missing Values
 

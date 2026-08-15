@@ -109,4 +109,56 @@ test.describe('example pages', () => {
     expect(pages.length, 'no example pages were found to check').toBeGreaterThan(20);
     expect(failures, `broken example pages:\n${failures.join('\n')}`).toEqual([]);
   });
+
+  /**
+   * The no-JavaScript fallback documented in API.md ("When JavaScript Does Not
+   * Run") and demonstrated on `empty-loading.html`.
+   *
+   * This is the only thing in the repo that exercises the library with
+   * scripting off, and it needs a real browser twice over: happy-dom evaluates
+   * `:defined` as false even for a registered element, so the component tests
+   * cannot check the hiding rule, and nothing else can check that the table is
+   * what a reader gets when the module never runs.
+   *
+   * Both halves matter. A fallback that stays visible is a table printed under
+   * every chart; a fallback that hides without JavaScript is worse than none,
+   * because the page then shows nothing at all and looks intentional.
+   */
+  test('the no-JavaScript fallback hides on upgrade and survives without it', async ({
+    page,
+    browser
+  }) => {
+    await page.goto('/examples/empty-loading.html', { waitUntil: 'networkidle' });
+
+    const upgraded = await page.evaluate(() => {
+      const table = document.querySelector('dc-chart table.dc-fallback') as HTMLElement | null;
+      // The chart that owns the fallback, not the first on the page - the
+      // demos above it are deliberately empty.
+      const chart = table?.closest('dc-chart') as HTMLElement | null;
+      return {
+        present: !!table,
+        display: table ? getComputedStyle(table).display : null,
+        stillReadable: (table?.textContent ?? '').includes('95'),
+        chartDrew: !!chart?.shadowRoot?.querySelector('[data-shape-index]')
+      };
+    });
+
+    expect(upgraded.present, 'the fallback table is no longer on the page').toBe(true);
+    expect(upgraded.stillReadable, 'the fallback lost its data').toBe(true);
+    expect(upgraded.display, 'the fallback is painting under the chart').toBe('none');
+    expect(upgraded.chartDrew, 'the chart drew nothing beside its fallback').toBe(true);
+
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    try {
+      const bare = await context.newPage();
+      await bare.goto('/examples/empty-loading.html', { waitUntil: 'domcontentloaded' });
+      const table = bare.locator('dc-chart table.dc-fallback');
+      await expect(table, 'nothing is shown when the module never runs').toBeVisible();
+      const text = (await table.innerText()).replace(/\s+/g, ' ').trim();
+      expect(text).toContain('Q1 95');
+      expect(text).toContain('Q4 105');
+    } finally {
+      await context.close();
+    }
+  });
 });

@@ -143,6 +143,13 @@ it** — axes, scales, legends, text fitting, interaction, accessibility — and
 `value="40000"` is the actual number, un-normalised, so your template does not
 need to know the series maximum before it can emit a row.
 
+The engine is the trade. Charts.css needs no JavaScript and this does, so with
+scripting off a `<dc-chart>` shows nothing at all. If that matters for your page,
+supply a fallback table — either in `<noscript>`, or inside the chart where a
+`dc-chart:defined` rule hides it once the library arrives, which also covers a
+bundle that was blocked or failed to load. Both are plain HTML and neither needs
+an API: [When JavaScript Does Not Run](API.md#when-javascript-does-not-run).
+
 ### More than bars
 
 <img src="https://larrylustig.github.io/declarative-charts/img/scatter.svg" width="600"

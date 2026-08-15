@@ -29,6 +29,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   chart is neither drawn nor able to reach the axis. Mutation-tested: restoring the flat search
   puts the buried point back on the scale
 
+### Added
+
+- **Two documented patterns for pages where JavaScript does not run.** A `<dc-chart>` whose module
+  never loads is an unknown tag with no text of its own, so the page shows nothing — the one thing
+  a pure-CSS library like Charts.css does better, and previously unanswered anywhere in the docs.
+  Neither pattern needs an attribute or an API; both are plain HTML
+
+  `<noscript>` covers scripting being disabled and never flashes, because the browser resolves it
+  at parse time. A fallback table placed *inside* the chart and hidden with
+  `dc-chart:defined .dc-fallback { display: none }` also covers a bundle that was blocked, 404'd or
+  rejected by CSP, at the cost of one paint before the swap. The two cannot be combined: covering a
+  request that failed means rendering optimistically and retracting, which is a paint by
+  construction
+
+  The stylesheet rule turns out to be required rather than decorative, which is the opposite of
+  what the first design assumed. `BaseChart.render()` ends with an unconditional catch-all `<slot>`,
+  so **every** light-DOM child is projected and painted; the data elements are invisible only
+  because they render nothing themselves. A `<table>` is assigned to that slot and drawn below the
+  chart until the author hides it
+
+- **A browser check for the fallback, in `examples.spec.ts`** — the only thing in the repo that
+  exercises the library with scripting off. It needs a real browser twice over: happy-dom evaluates
+  `:defined` as false even for a registered element, so no component test can check the hiding rule,
+  and nothing else can check what a reader gets when the module never runs. Asserts both halves,
+  because each failure is bad in a different way — a fallback that stays visible prints a table
+  under every chart, and one that hides without JavaScript leaves a blank page that looks
+  deliberate. Mutation-tested by inverting the `display` rule
+
 ### Changed
 
 - **Visual baselines now allow 100 differing pixels, absolute, instead of 1% of the image.** A

@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Empty &amp; Loading States - Declarative Chart Library</title>
     <link rel="stylesheet" href="examples.css">
+    <style>
+        dc-chart:not(:defined) { display: block; }
+        dc-chart:defined .dc-fallback { display: none; }
+    </style>
 </head>
 <body>
     <h1>Empty &amp; Loading States</h1>
@@ -145,6 +149,64 @@
                 <p><button id="load-toggle">Toggle loading</button></p>
             </div>
         </div>
+    </div>
+
+    <div class="example">
+        <h2>When JavaScript Does Not Run</h2>
+        <p>The states above are drawn <em>by</em> the library. This one is what happens when the library never arrives: <code>&lt;dc-chart&gt;</code> is a custom element, so with scripting off it is an unknown tag with no text of its own and the page shows nothing at all. The fallback has to come from your markup.</p>
+        <p>The simplest version is <code>&lt;noscript&gt;</code>, which costs nothing and never flashes, because the browser resolves it at parse time. It only covers scripting being <em>disabled</em>, though &mdash; not a bundle that was requested and blocked, 404'd, or rejected by CSP. To cover those, put the fallback inside the chart and hide it once the element upgrades:</p>
+        <pre><code>dc-chart:not(:defined) { display: block; }      /* reserve space, avoid a jump */
+dc-chart:defined .dc-fallback { display: none; }</code></pre>
+        <p><code>:defined</code> matches only once the library has registered the tag, so the table shows whenever it did not arrive and disappears the moment it did. The rule is required rather than decorative: the chart renders a catch-all <code>&lt;slot&gt;</code>, so a <code>&lt;table&gt;</code> left inside it is projected and painted below the chart forever. The trade against <code>&lt;noscript&gt;</code> is one paint of the table before the swap.</p>
+
+        <div class="grid">
+            <div>
+                <h3>Fallback Inside the Chart</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;table class="dc-fallback"&gt;
+    &lt;caption&gt;Sales by quarter&lt;/caption&gt;
+    &lt;tr&gt;&lt;th&gt;Q1&lt;/th&gt;&lt;td&gt;95&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;th&gt;Q2&lt;/th&gt;&lt;td&gt;80&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;th&gt;Q3&lt;/th&gt;&lt;td&gt;120&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;th&gt;Q4&lt;/th&gt;&lt;td&gt;105&lt;/td&gt;&lt;/tr&gt;
+  &lt;/table&gt;
+
+  &lt;dc-bar value="95" label="Q1"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="80" label="Q2"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="120" label="Q3"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="105" label="Q4"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <table class="dc-fallback">
+                        <caption>Sales by quarter</caption>
+                        <tr><th>Q1</th><td>95</td></tr>
+                        <tr><th>Q2</th><td>80</td></tr>
+                        <tr><th>Q3</th><td>120</td></tr>
+                        <tr><th>Q4</th><td>105</td></tr>
+                    </table>
+
+                    <dc-bar value="95" label="Q1"></dc-bar>
+                    <dc-bar value="80" label="Q2"></dc-bar>
+                    <dc-bar value="120" label="Q3"></dc-bar>
+                    <dc-bar value="105" label="Q4"></dc-bar>
+                </dc-chart>
+                <p>The table is in this page's DOM right now, hidden by the rule above. Disable JavaScript and reload to see it instead of the chart.</p>
+            </div>
+
+            <div>
+                <h3>What the Reader Sees Without It</h3>
+                <p>The same markup with scripting off &mdash; the chart is absent entirely, and the table is the whole answer. It stays sortable, selectable, searchable and readable by a screen reader, which the SVG achieves by other means.</p>
+                <table class="example-table">
+                    <caption>Sales by quarter</caption>
+                    <tr><th>Q1</th><td>95</td></tr>
+                    <tr><th>Q2</th><td>80</td></tr>
+                    <tr><th>Q3</th><td>120</td></tr>
+                    <tr><th>Q4</th><td>105</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <p><strong>Keep the fallback to plain HTML.</strong> A chart reads its data from its direct children, so a <code>dc-*</code> element buried in the fallback is not drawn, does not reach the legend, and cannot move an axis &mdash; but writing one there still says something you do not mean. The values in the table are yours and unformatted &mdash; <code>value-format</code> applies to the chart, not to your markup &mdash; and they are stated twice, so emit both from the same template loop if you can.</p>
     </div>
 
     <div class="example">
