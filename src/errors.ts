@@ -189,6 +189,20 @@ export const ErrorCode = {
     message: '{offPlot} of {count} bars are drawn past the right edge of the plot and cannot be seen. At the {minSize}-unit minimum width they need {needed} units but the plot is {available}. Widen the chart, or show fewer bars'
   },
 
+  /**
+   * An unrecognised marker name was given to shape or point-shape.
+   *
+   * Named values are a closed set, but a single character is drawn as a glyph,
+   * so an unknown value cannot simply be an error. This fires only for values
+   * that read as a word - the misspellings - which used to be drawn as text.
+   */
+  POINT_SHAPE_INVALID: {
+    code: 'DC117',
+    level: 'warning',
+    path: 'point.shape',
+    message: 'Unrecognised shape "{value}"; drawing no marker. Use circle, square, triangle, diamond, star, cross, plus, none, or a single character to draw as a glyph'
+  },
+
   // ===========================================================================
   // DC200-DC299: Reference Errors
   // ===========================================================================

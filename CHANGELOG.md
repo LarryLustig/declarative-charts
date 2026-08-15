@@ -7,7 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`shape="none"` and `point-shape="none"` draw no marker.** Reported by a consumer, and there was
+  no way to do it at all before: markers are drawn unconditionally at a hardcoded radius and
+  `<dc-point>` has no `size`, so a line chart always carried a marker per datum. At any density
+  that stops describing the data and starts hiding it
+
+  Works at all three levels of the existing cascade — chart `point-shape`, line `point-shape`,
+  point `shape` — and on `<dc-scatter>`, which shares the vocabulary. Value labels are unaffected,
+  since those do not come from the shape renderer. A point with no marker has nothing to hover or
+  click, so per-point popups, `href` and `dc-click` go with it; the line itself stays interactive
+
+  `shape=""` now means the same thing. It used to fall through and emit an empty `<text>` per
+  point — invisible, but a node with handlers attached — and was the only way to suppress a marker
+  before this existed
+
 ### Fixed
+
+- **A misspelled shape is no longer drawn as a word.** `shape="none"` rendered the literal text
+  "none" at every point, which is how the gap above was reported. Any unrecognised value did:
+  `shape="★"` is a documented feature, so the `default:` branch drew whatever it was given
+
+  The values are now sorted into glyphs and mistakes. A single character is a glyph, and so is
+  anything with no ASCII letters in it — that second test is what keeps `"❤️"` and `"👍🏽"` working,
+  since both carry a modifier and are not one code point. What fails both is a run of letters,
+  which is a misspelling: it draws nothing and reports the new **`DC117`**
+
+  Reported once per render rather than once per point. The logger deduplicates its console echo but
+  not the entries `<dc-log-console>` lists, and a typo on a thousand-point line is one mistake
 
 - **Every chart now reads its data from its direct children.** Only bars did. Lines, areas,
   bubbles, scatter series, references, pie slices, funnel stages, stages, radar axes and radar

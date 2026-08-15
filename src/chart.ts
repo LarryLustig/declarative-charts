@@ -11,7 +11,7 @@ import type { ChartBarSegment } from './chart-bar-segment.js';
 import type { ChartLine, CurveFit } from './chart-line.js';
 import type { ChartPoint } from './chart-point.js';
 import type { ChartScatter } from './chart-scatter.js';
-import { placeLabels, popupHtml, type LabelCandidate, type LabelCollisionMode } from './chart-utils.js';
+import { isMarkerGlyph, placeLabels, popupHtml, type LabelCandidate, type LabelCollisionMode } from './chart-utils.js';
 import { calculateNiceTicks } from './chart-utils.js';
 import type { ChartBubble } from './chart-bubble.js';
 import type { ChartPopup } from './chart-popup.js';
@@ -1734,9 +1734,23 @@ export class Chart extends AxisChart {
       click: (e: MouseEvent) => void;
     }
   ): SVGTemplateResult {
-    const lowerShape = shape.toLowerCase();
+    const trimmed = shape.trim();
+    const lowerShape = trimmed.toLowerCase();
+
+    // An explicitly empty shape means the same as `none`. It used to fall to
+    // the glyph branch and emit an empty <text> per point - invisible, but a
+    // node with handlers on it - which was the only way to suppress a marker
+    // before `none` existed.
+    if (trimmed === '') return svg``;
 
     switch (lowerShape) {
+      // Draws nothing. Value labels still render, because those do not come
+      // from here - but a point with no marker has nothing to hover or click,
+      // so per-point popups, href and dc-click go with it. The line itself
+      // stays interactive.
+      case 'none':
+        return svg``;
+
       case 'circle':
         return svg`
           <circle
@@ -1827,6 +1841,13 @@ export class Chart extends AxisChart {
         `;
 
       default:
+        // Not a name this draws. `shape="★"` is a documented feature, so an
+        // unknown value cannot simply be an error - it has to be sorted into
+        // "glyph the author meant" and "name the author misspelled".
+        if (!isMarkerGlyph(trimmed)) {
+          this.warnUnknownPointShape(trimmed);
+          return svg``;
+        }
         return svg`
           <text
             x="${x}" y="${y}"
@@ -1837,10 +1858,25 @@ export class Chart extends AxisChart {
             @mouseleave="${handlers.mouseleave}"
             @click="${handlers.click}"
           >
-            ${shape}
+            ${trimmed}
           </text>
         `;
     }
+  }
+
+  /**
+   * Report an unrecognised shape once per render rather than once per point.
+   *
+   * The logger deduplicates what it echoes to the console, but not the entries
+   * `<dc-log-console>` lists, and a misspelled shape on a thousand-point line
+   * is one mistake rather than a thousand. The Set rides on the per-render
+   * cache, so it is dropped when the cache is.
+   */
+  private warnUnknownPointShape(shape: string): void {
+    const warned = this.cachePerRender('badPointShapes', () => new Set<string>());
+    if (warned.has(shape)) return;
+    warned.add(shape);
+    this.logError(ErrorCode.POINT_SHAPE_INVALID, { value: shape });
   }
 
   // ============================================================================

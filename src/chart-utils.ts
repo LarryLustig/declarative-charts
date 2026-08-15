@@ -215,6 +215,37 @@ export function calculateLabelInterval(
  * and Alpine's `x-on:click` carry a prefix, and `data-action` is a `data-`
  * attribute.
  */
+/**
+ * The marker names `shape` and `point-shape` draw as geometry.
+ *
+ * `none` is in the set and draws nothing. Anything outside it is either a glyph
+ * to draw as text or a misspelling - see `isMarkerGlyph`.
+ */
+export const MARKER_SHAPES = [
+  'circle', 'square', 'triangle', 'diamond', 'star', 'cross', 'plus', 'none'
+] as const;
+
+/**
+ * Whether an unrecognised `shape` value is a glyph the author meant to draw,
+ * rather than a shape name they misspelled.
+ *
+ * `shape="★"` is a documented feature, so the set of legal values is not
+ * closed and an unknown value cannot simply be rejected. Two tests, either of
+ * which is enough:
+ *
+ * - **One character.** Keeps `"A"` and `"★"` working.
+ * - **No ASCII letters.** Keeps multi-code-point emoji working. `"❤️"` is
+ *   U+2764 plus a variation selector and `"👍🏽"` carries a skin-tone modifier,
+ *   so neither is one code point, and counting alone would read them as words.
+ *
+ * What fails both is a run of letters — `sqaure`, `none ` typed as `nonw`,
+ * `blob` — which is a mistake, and drawing the word across the chart (what
+ * this library did until now) is the worst available answer.
+ */
+export function isMarkerGlyph(shape: string): boolean {
+  return Array.from(shape).length === 1 || !/[a-z]/i.test(shape);
+}
+
 export function isEventHandlerAttribute(name: string, target: Element): boolean {
   const lower = name.toLowerCase();
   return lower.startsWith('on') && lower in target;

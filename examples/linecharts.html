@@ -181,6 +181,44 @@
                     </dc-line>
                 </dc-chart>
             </div>
+
+            <div>
+                <h3>No Markers</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Daily Readings&lt;/dc-title&gt;
+  &lt;dc-line stroke="#0891b2" label="Sensor" point-shape="none"&gt;
+    &lt;dc-point value="12" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;!-- 20 more points, all unmarked --&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Daily Readings</dc-title>
+                    <dc-line stroke="#0891b2" label="Sensor" point-shape="none">
+                        <dc-point value="12" label="Mon"></dc-point>
+                        <dc-point value="19" label="Tue"></dc-point>
+                        <dc-point value="15" label="Wed"></dc-point>
+                        <dc-point value="24" label="Thu"></dc-point>
+                        <dc-point value="21" label="Fri"></dc-point>
+                        <dc-point value="28" label="Sat"></dc-point>
+                        <dc-point value="26" label="Sun"></dc-point>
+                        <dc-point value="33" label="Mon"></dc-point>
+                        <dc-point value="30" label="Tue"></dc-point>
+                        <dc-point value="37" label="Wed"></dc-point>
+                        <dc-point value="34" label="Thu"></dc-point>
+                        <dc-point value="41" label="Fri"></dc-point>
+                        <dc-point value="38" label="Sat"></dc-point>
+                        <dc-point value="44" label="Sun"></dc-point>
+                        <dc-point value="40" label="Mon"></dc-point>
+                        <dc-point value="47" label="Tue"></dc-point>
+                        <dc-point value="43" label="Wed"></dc-point>
+                        <dc-point value="50" label="Thu"></dc-point>
+                        <dc-point value="46" label="Fri"></dc-point>
+                        <dc-point value="53" label="Sat"></dc-point>
+                        <dc-point value="49" label="Sun"></dc-point>
+                    </dc-line>
+                </dc-chart>
+                <p><code>point-shape="none"</code> draws the line and nothing else. At any density the markers stop describing the data and start hiding it &mdash; and with none drawn, there is nothing per point to hover or click, so the popup and <code>href</code> move to the line.</p>
+            </div>
         </div>
     </div>
 
