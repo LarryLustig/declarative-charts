@@ -41,6 +41,7 @@ npm run bench          # Render-performance harness (needs `npm run dev` running
 - **API.md** — complete API reference
 - **CHANGELOG.md** — version history, Keep a Changelog format
 - **ROADMAP.md** — planned work and explicitly declined work
+- **CONTRIBUTING.md** — local setup, and the release process
 - **examples/** — live HTML examples
 
 When adding a feature: update **API.md**, add an **examples/** case, and update

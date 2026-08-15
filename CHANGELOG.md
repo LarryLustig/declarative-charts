@@ -49,6 +49,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   because they render nothing themselves. A `<table>` is assigned to that slot and drawn below the
   chart until the author hides it
 
+- **The release process, written down in CONTRIBUTING.md.** It existed only as habit, which is how
+  a tag and a tarball drift apart. Records the sequence, why `npm version` rather than a
+  hand-edited `package.json` (it makes the commit and tag together, and npm's `gitHead` lets the
+  two be checked — for 0.2.0 both are `1479a6e`), and why publishing cannot move to CI: the
+  screenshot baselines are `-chromium-win32`, so the `prepublishOnly` gate only runs on a
+  maintainer's machine, and releases therefore carry no provenance attestation
+
+  Also records the two things easiest to forget — that the npm README and `description` are
+  snapshots taken at publish time rather than mirrors of the repository, and that a version number
+  is burned permanently once used
+
 - **A browser check for the fallback, in `examples.spec.ts`** — the only thing in the repo that
   exercises the library with scripting off. It needs a real browser twice over: happy-dom evaluates
   `:defined` as false even for a registered element, so no component test can check the hiding rule,
