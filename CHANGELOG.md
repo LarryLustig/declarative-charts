@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`<dc-stage-chart>` ran three index bases over the same stages.** `data-shape-index` and the mouse
+  handlers count over *all* stages, because they index `cachedLayout.stages`; the legend, the
+  focusables and the keyboard popup counted over the *visible* ones. Under `zero-hidden` with a zero
+  stage in the middle those bases diverge, and the results were plainly wrong: the legend labelled
+  "Completed" and painted it in the colour of "Blocked", the stage that is not drawn, while arrowing
+  to a stage announced one label and popped up another's content
+
+  All three now read one `getVisibleStages()` accessor, which pairs each visible stage with the index
+  the DOM and the mouse handlers use. The stamps are translated rather than renumbered, so the mouse
+  path and the rendered output are untouched — no baseline moved
+
+  The fixture is the test: with the zero stage *last*, all three bases coincide and every assertion
+  passes against the unfixed code. It has to be in the middle, and the suite keeps a last-position
+  control alongside so that stays true
+
+
 - **A pie or radar legend named the wrong colour under `high-contrast`.** Two colour resolvers exist:
   `resolveFillsWithPatterns()` branches on high contrast, and `resolveFillColorsWithPalette()` is that
   branch's else-clause alone. `<dc-chart>`, `<dc-funnel-chart>` and `<dc-stage-chart>` used the

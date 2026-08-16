@@ -1487,11 +1487,43 @@ export class StageChart extends BaseChart {
   /**
    * Get legend items for dimension calculation.
    */
+  /**
+   * The stages a reader can actually see, each paired with the index the DOM
+   * and the mouse handlers use.
+   *
+   * Three consumers used to apply this filter themselves and then disagree
+   * about what the resulting index meant. `data-shape-index` and the mouse
+   * handlers count over ALL stages, because they index `cachedLayout.stages`;
+   * the legend, the focusables and the keyboard popup count over the VISIBLE
+   * ones. With a zero stage in the middle under `zero-hidden` those two bases
+   * diverge, and the legend painted "Completed" in the colour of the stage that
+   * was not drawn.
+   *
+   * Both numbers now come from here: the array order is the visible order the
+   * keyboard walks, and `sourceIndex` is what addresses the DOM.
+   */
+  private getVisibleStages() {
+    const zeroSettings = this.resolveZeroSettings();
+    return this.getStages()
+      .map((stage, sourceIndex) => ({ stage, sourceIndex }))
+      .filter(({ stage }) => !(stage.value === 0 && zeroSettings.hidden));
+  }
+
+  /**
+   * Focus indices count over the visible stages; `data-shape-index` counts over
+   * all of them. Translate before asking the base class for the shape, or the
+   * ring lands on an undrawn slot.
+   */
+  protected override getShapeBounds(index: number) {
+    const visible = this.getVisibleStages();
+    if (index < 0 || index >= visible.length) return null;
+    return super.getShapeBounds(visible[index].sourceIndex);
+  }
+
   protected override getLegendItems(): LegendItem[] {
     const stagesData = this.getStages();
     if (stagesData.length === 0) return [];
 
-    const zeroSettings = this.resolveZeroSettings();
 
     let baseColors: string[];
     const paletteColors = this.getPaletteColors(stagesData.length, 'fill');
@@ -1510,11 +1542,10 @@ export class StageChart extends BaseChart {
 
     const resolvedFills = this.resolveFillsWithPatterns(elementsForResolution);
 
-    return stagesData
-      .filter(stage => !(stage.value === 0 && zeroSettings.hidden))
-      .map((stage, index) => ({
+    return this.getVisibleStages()
+      .map(({ stage, sourceIndex }) => ({
         label: stage.label,
-        color: resolvedFills[index].originalFill,
+        color: resolvedFills[sourceIndex].originalFill,
         value: stage.value,
         shape: 'square' as const,
         href: stage.legendHref,
@@ -1563,11 +1594,9 @@ export class StageChart extends BaseChart {
   protected override getFocusableElements(): FocusableElement[] {
     const stages = this.getStages();
     const total = stages.reduce((sum, s) => sum + s.value, 0);
-    const zeroSettings = this.resolveZeroSettings();
 
-    return stages
-      .filter(stage => !(stage.value === 0 && zeroSettings.hidden))
-      .map((stage, index) => {
+    return this.getVisibleStages()
+      .map(({ stage }, index) => {
         const hasAction = !!(stage.popup || this.shouldShowAutoPopup(stage.autoPopup));
         const percentage = total > 0 ? (stage.value / total) * 100 : 0;
         return {
@@ -1583,11 +1612,14 @@ export class StageChart extends BaseChart {
 
 
   protected override showPopupForFocusedElement(index: number): void {
-    const stages = this.getStages();
-    if (index < 0 || index >= stages.length) return;
+    // The focus order is the visible order, so this must be too - reading
+    // getStages() directly returned the hidden zero stage for every index past
+    // it.
+    const visible = this.getVisibleStages();
+    if (index < 0 || index >= visible.length) return;
 
-    const stage = stages[index];
-    const total = stages.reduce((sum, s) => sum + s.value, 0);
+    const stage = visible[index].stage;
+    const total = this.getStages().reduce((sum, s) => sum + s.value, 0);
     let content: string | null = null;
 
     if (stage.popup) {
