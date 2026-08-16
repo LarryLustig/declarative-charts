@@ -5056,10 +5056,12 @@ export class Chart extends AxisChart {
       return bar.popup.content;
     }
     if (this.shouldShowAutoPopup(bar.autoPopup)) {
+      // The same builder the hover path uses. Hand-rolling it here meant a
+      // keyboard user got the raw number - no value-format, no locale - and no
+      // group label on a grouped bar.
       const bars = this.getFlattenedBars();
       const total = bars.reduce((sum, b) => sum + b.value, 0);
-      const percent = total > 0 ? ((bar.value / total) * 100).toFixed(1) : '0';
-      return popupHtml`<strong>${bar.label}</strong><br>Value: ${bar.value}<br>Percent: ${percent}%`;
+      return this.generateBarPopupContent(bar, total);
     }
     return null;
   }

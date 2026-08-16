@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A keyboard user saw a different, unformatted chart.** Every chart has a `generate*PopupContent()`
+  builder and every mouse-enter handler used it; every `showPopupForFocusedElement()` hand-rolled the
+  string inline instead. The inline copies interpolated the raw value — no `formatValue`, no
+  per-element `value-format`, no locale — and hand-rolled the percent as `.toFixed(1)` rather than
+  through `formatPercent`. The same slice read `Value: $50.00` on hover and `Value: 50` on keyboard
+  focus
+
+  Both paths now share one builder on pie, funnel, stage and bars. Because the inline copies had
+  drifted in both directions, the text moves both ways: the invented `Percent: ` and `Conversion: `
+  prefixes disappear, and a grouped bar gains the group line the keyboard copy dropped. `<dc-stage>`
+  also stopped hand-rolling its percent inside the builder itself, so `percent-format` now reaches it
+
+  Guarded by parity rather than by literals — `test/component/keyboard-popup-parity.test.ts` asserts
+  the two entry points emit the same string, which stays true whichever way a future builder changes.
+  All six cases failed before the change. That `chart.ts` already routed *scatter* through its shared
+  builder while bars a few lines away did not is what marked this as bypass rather than intent
+
+
 - **`hidden` was ignored on `<dc-pie-slice>` and `<dc-funnel-stage>`.** The last two data walks
   without the filter — every other one has it, and `<dc-stage>` was fixed for the same reason
   earlier. The chart contradicted itself: `countHiddenDataElements()` counted the hidden elements,

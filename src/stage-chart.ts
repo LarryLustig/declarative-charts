@@ -1403,8 +1403,10 @@ export class StageChart extends BaseChart {
       content += popupHtml`<br>Value: ${formattedValue}`;
     }
     if (showPercent) {
-      const percentage = totalValue > 0 ? ((stage.value / totalValue) * 100).toFixed(1) : '0.0';
-      content += popupHtml`<br>${percentage}%`;
+      // shareOf() returns a decimal and formatPercent() expects one - the
+      // library's percent convention. Hand-rolling toFixed(1) here ignored
+      // percent-format and locale, which every other popup builder honours.
+      content += popupHtml`<br>${this.formatPercent(this.shareOf(stage.value, totalValue) ?? 0)}`;
     }
     return content;
   }
@@ -1591,8 +1593,14 @@ export class StageChart extends BaseChart {
     if (stage.popup) {
       content = stage.popup.content;
     } else if (this.shouldShowAutoPopup(stage.autoPopup)) {
-      const percentage = total > 0 ? ((stage.value / total) * 100).toFixed(1) : '0';
-      content = popupHtml`<strong>${stage.label}</strong><br>Value: ${stage.value}<br>${percentage}%`;
+      // Evaluate the show conditions exactly as handleStageMouseEnter() does, or
+      // a stage with show-percent="none" grows a percent line only when it is
+      // reached from the keyboard. `total` above is the same sum
+      // calculateStageLayout() stores as layout.total.
+      const percent = total > 0 ? (stage.value / total) * 100 : 0;
+      const showValue = this.evaluateShowCondition(stage.showValue, stage.value, percent);
+      const showPercent = this.evaluateShowCondition(stage.showPercent, stage.value, percent);
+      content = this.generateStagePopupContent(stage, total, showValue, showPercent);
     }
 
     if (content) {

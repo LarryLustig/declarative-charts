@@ -760,9 +760,12 @@ export class PieChart extends BaseChart {
     if (slice.popup) {
       content = slice.popup.content;
     } else if (this.shouldShowAutoPopup(slice.autoPopup)) {
+      // One builder for both entry points. The hover path passes
+      // layout.totalValue, which calculateSliceLayout() derives as exactly this
+      // sum over the same getSlices() array - so recomputing it here is the
+      // same number without reaching into the layout from an event handler.
       const total = slices.reduce((sum, s) => sum + s.value, 0);
-      const percent = total > 0 ? ((slice.value / total) * 100).toFixed(1) : '0';
-      content = popupHtml`<strong>${slice.label}</strong><br>Value: ${slice.value}<br>Percent: ${percent}%`;
+      content = this.generateSlicePopupContent(slice, total);
     }
 
     if (content) {

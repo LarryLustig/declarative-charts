@@ -1055,9 +1055,10 @@ export class FunnelChart extends BaseChart {
     if (stage.popup) {
       content = stage.popup.content;
     } else if (this.shouldShowAutoPopup(stage.autoPopup)) {
-      const firstValue = stages.length > 0 ? stages[0].value : 0;
-      const conversionRate = firstValue > 0 ? ((stage.value / firstValue) * 100).toFixed(1) : '0';
-      content = popupHtml`<strong>${stage.label}</strong><br>Value: ${stage.value}<br>Conversion: ${conversionRate}%`;
+      // Funnel share is measured against the first (widest) stage - the same
+      // total handleStageMouseEnter() passes to the same builder.
+      const totalValue = stages.length > 0 ? stages[0].value : 0;
+      content = this.generateStagePopupContent(stage, totalValue);
     }
 
     if (content) {
