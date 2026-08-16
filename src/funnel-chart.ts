@@ -105,9 +105,14 @@ export class FunnelChart extends BaseChart {
     legendHref?: string;
     legendTarget?: string;
   }> {
+    // `hidden` is honoured on every other data element and the empty-state path
+    // already counts hidden stages; the filter was simply missing, so the count
+    // and the picture disagreed. Note what this means for a funnel: conversion
+    // is measured against `stages[0]`, so hiding the first stage rebases every
+    // percentage on the first *visible* one.
     const stageElements = Array.from(
       this.querySelectorAll(':scope > dc-funnel-stage')
-    ) as ChartFunnelStage[];
+    ).filter(el => !el.hasAttribute('hidden')) as ChartFunnelStage[];
 
     // Known attributes that are handled by the component (base attrs handled by BaseShape)
     const knownAttrs = new Set(['value', 'show-value', 'show-label', 'show-percent']);

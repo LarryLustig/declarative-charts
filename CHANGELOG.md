@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`hidden` was ignored on `<dc-pie-slice>` and `<dc-funnel-stage>`.** The last two data walks
+  without the filter — every other one has it, and `<dc-stage>` was fixed for the same reason
+  earlier. The chart contradicted itself: `countHiddenDataElements()` counted the hidden elements,
+  so `hasHiddenDataElements()` reported them, while the extractor handed them to the layout and drew
+  them anyway. `DC002` was unreachable on both chart types as a result
+
+  **This changes what an existing chart draws, wherever a slice or stage carries `hidden`.** A hidden
+  element now leaves the total as well as the picture, so the remainder renormalise: two equal
+  slices with one hidden go from a 50% half-pie to a 100% full circle, and a funnel's shares
+  recompute over the visible stages. Default palette colours shift with the index, the legend loses
+  the entry, and the keyboard order shrinks to match. Hide them all and the chart now says "All
+  series are hidden" and logs `DC002` instead of drawing
+
+  No screenshot baseline moved — no visual fixture uses `hidden` on a slice or a stage, and with none
+  present the filter is a no-op. API.md's list of supporting elements was stale in both directions:
+  it omitted `<dc-scatter>`, `<dc-radar-series>` and `<dc-radar-axis>`, which already honoured it
+
+
 ### Added
 
 - **A legend entry can be a link.** Reported by a consumer; the legend rendered no interactive

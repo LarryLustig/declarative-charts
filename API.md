@@ -2830,7 +2830,19 @@ await chart.updateComplete;
 
 ### Hiding and Showing Elements
 
-Use the standard HTML `hidden` attribute to dynamically show or hide chart elements. Supported on `<dc-line>`, `<dc-area>`, `<dc-bar>`, `<dc-bar-group>`, `<dc-bubble>`, and `<dc-stage>`.
+Use the standard HTML `hidden` attribute to dynamically show or hide chart elements.
+Supported on every data element: `<dc-bar>`, `<dc-bar-group>`, `<dc-line>`, `<dc-area>`,
+`<dc-bubble>`, `<dc-scatter>`, `<dc-pie-slice>`, `<dc-funnel-stage>`, `<dc-stage>`,
+`<dc-radar-series>` and `<dc-radar-axis>`.
+
+**A hidden element leaves the data, not just the picture.** It is not drawn, it gets no legend
+entry, it is not keyboard reachable, and it is excluded from every derived total — so pie
+percentages, funnel conversion rates, default palette colours and the axis domain all recompute
+over what remains. Hide every data element and the chart shows **"All series are hidden"** and
+logs `DC002`, rather than drawing.
+
+It is **not** supported on `<dc-point>` or `<dc-bar-segment>`. Hide the `<dc-line>`, `<dc-area>`,
+`<dc-scatter>` or `<dc-bar>` that owns them instead.
 
 ```html
 <dc-chart id="my-chart" width="600" height="400">

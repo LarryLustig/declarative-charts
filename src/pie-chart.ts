@@ -93,9 +93,14 @@ export class PieChart extends BaseChart {
     labelOffsetR?: number;
     labelFill?: string;
   }> {
+    // `hidden` is honoured on every other data element and the empty-state path
+    // already counts hidden slices; the filter was simply missing, so the count
+    // and the picture disagreed. A hidden slice leaves the total too - the
+    // remaining slices renormalise to 100%, which is what a filter UI means by
+    // hiding one.
     const sliceElements = Array.from(
       this.querySelectorAll(':scope > dc-pie-slice')
-    ) as ChartPieSlice[];
+    ).filter(el => !el.hasAttribute('hidden')) as ChartPieSlice[];
 
     return sliceElements.map(slice => {
       // Extract passthrough attributes (base attrs are handled by BaseShape)
