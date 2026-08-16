@@ -19,10 +19,15 @@ import { Chart } from '../../src/chart';
  *   points, bubbles and scatter points, which `getShapeBounds()` then resolves
  *   against those per-type stamps.
  *
- * Assertions below are marked DEFECT or CORRECT. The DEFECT ones pin behaviour
- * that is wrong and will be inverted by the fix; they exist so the change is
- * visible in the diff rather than asserted from memory. The CORRECT ones are
- * regression cover and must not move.
+ * Both are fixed. Every shape now carries `data-shape-kind` beside its index,
+ * so each type is addressed inside its own namespace, and `locateFocus()`
+ * translates a focus index into (kind, offset) - generalising the compensation
+ * `locateScatterFocus()` already made for scatter alone.
+ *
+ * Assertions still marked CORRECT are the ones that were already right before
+ * the fix; they are regression cover and must not move. The rest were written
+ * against the defects and inverted in the commit that fixed them, so the change
+ * is visible in the diff rather than asserted from memory.
  *
  * Verified against 0f710e7 in a worktree: every one of these predates the
  * current session.
@@ -47,34 +52,33 @@ describe('combo chart shape addressing (characterization)', () => {
 
   describe('passthrough attributes', () => {
     /**
-     * DEFECT. Every type's passthrough lands on the bar, because every one of
-     * the five calls asks for `[data-shape-index="0"]` and the bar's `<rect>`
-     * is first in document order. After the fix each should land on its own
-     * mark: line -> path.line-path, area -> path.area-path, bubble -> circle,
-     * scatter -> its marker.
+     * Every type's passthrough used to land on the bar: all five calls asked
+     * for `[data-shape-index="0"]` and the bar's `<rect>` is first in document
+     * order, so each overwrote the last. Now each is addressed within its own
+     * `data-shape-kind` namespace and reaches its own mark.
      */
-    it('DEFECT: a line-s passthrough lands on the bar', async () => {
+    it('a line-s passthrough lands on the line', async () => {
       const c = await combo();
       await elementUpdated(c);
-      expect(carriers(c, 'data-l')).toEqual(['rect']);
+      expect(carriers(c, 'data-l')).toEqual(['path']);
     });
 
-    it('DEFECT: an area-s passthrough lands on the bar', async () => {
+    it('an area-s passthrough lands on the area', async () => {
       const c = await combo();
       await elementUpdated(c);
-      expect(carriers(c, 'data-a')).toEqual(['rect']);
+      expect(carriers(c, 'data-a')).toEqual(['path']);
     });
 
-    it('DEFECT: a bubble-s passthrough lands on the bar', async () => {
+    it('a bubble-s passthrough lands on the bubble', async () => {
       const c = await combo();
       await elementUpdated(c);
-      expect(carriers(c, 'data-u')).toEqual(['rect']);
+      expect(carriers(c, 'data-u')).toEqual(['circle']);
     });
 
-    it('DEFECT: a scatter-s passthrough lands on the bar', async () => {
+    it('a scatter-s passthrough lands on the scatter marker', async () => {
       const c = await combo();
       await elementUpdated(c);
-      expect(carriers(c, 'data-s')).toEqual(['rect']);
+      expect(carriers(c, 'data-s')).toEqual(['g']);
     });
 
     it('CORRECT: the bar-s own passthrough lands on the bar', async () => {
@@ -116,22 +120,26 @@ describe('combo chart shape addressing (characterization)', () => {
     });
 
     /**
-     * DEFECT. Focus indices 1-3 are line points and the bubble, but the only
-     * stamps are the per-type ones, so `[data-shape-index="1"]` and up do not
-     * exist. No focus ring can be placed and the previous popup stays on
-     * screen while the screen reader announces the new element.
+     * Focus indices 1-3 are line points and the bubble. Against per-type stamps
+     * `[data-shape-index="1"]` and up simply did not exist, so no focus ring
+     * could be placed and the previous popup stayed on screen while the screen
+     * reader announced the new element. `locateFocus()` now translates the
+     * running focus index into (kind, offset) before the lookup.
+     *
+     * Line markers also carried no stamp at all, so this needed one added -
+     * numbered across every line and skipping gaps, to match the focus order.
      */
-    it('DEFECT: line points resolve to no shape', async () => {
+    it('line points resolve to a shape', async () => {
       const c = await combo();
       await elementUpdated(c);
-      expect(bounds(c, 1)).toBeNull();
-      expect(bounds(c, 2)).toBeNull();
+      expect(bounds(c, 1)).not.toBeNull();
+      expect(bounds(c, 2)).not.toBeNull();
     });
 
-    it('DEFECT: the bubble resolves to no shape', async () => {
+    it('the bubble resolves to a shape', async () => {
       const c = await combo();
       await elementUpdated(c);
-      expect(bounds(c, 3)).toBeNull();
+      expect(bounds(c, 3)).not.toBeNull();
     });
 
     /**
@@ -152,6 +160,42 @@ describe('combo chart shape addressing (characterization)', () => {
       await elementUpdated(c);
       expect(bounds(c, 0)).not.toBeNull();
       expect(bounds(c, 1)).not.toBeNull();
+    });
+  });
+
+  /**
+   * `paint` carries the SVG attributes a matched `<dc-fill>` contributes.
+   * `LineData` declared the field and `getLines()` never populated it, so a
+   * palette entry's `stroke-dasharray` reached bars, areas, bubbles, scatter,
+   * slices, stages and radar series - every type except lines. Optional field,
+   * silent spread of `undefined`, nothing logged.
+   *
+   * It stayed unfixed longer than the one-line change suggests: routing paint
+   * through the old shared index would have applied a line's palette attributes
+   * to a bar in any combo chart. It is only safe now that each type is
+   * addressed within its own namespace.
+   */
+  describe('palette paint reaches every element type', () => {
+    const PALETTE =
+      '<dc-palette id="p">' +
+      '<dc-fill label="LineL" fill="#123456" stroke-dasharray="dashed"></dc-fill>' +
+      '</dc-palette>';
+
+    it('reaches a line, and lands on the line rather than the bar', async () => {
+      const c = await fixture<Chart>('dc-chart',
+        { width: '600', height: '400', palette: 'p', 'console-log': 'none' },
+        PALETTE +
+        '<dc-bar value="30" label="BarA"></dc-bar>' +
+        '<dc-line label="LineL"><dc-point value="10"></dc-point>' +
+        '<dc-point value="20"></dc-point></dc-line>');
+      await elementUpdated(c);
+      const line = c.shadowRoot!.querySelector('path.line-path');
+      expect(line?.getAttribute('stroke-dasharray'), 'the line did not inherit palette paint')
+        .toBe('5 5');
+      expect(
+        c.shadowRoot!.querySelector('rect[data-shape-kind="bar"]')?.getAttribute('stroke-dasharray'),
+        'the bar picked up the line-s palette paint'
+      ).toBeFalsy();
     });
   });
 

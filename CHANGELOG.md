@@ -9,6 +9,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **In a combo chart, every element type applied its passthrough attributes to the bar.**
+  `data-shape-index` counts from 0 *within a type*, but `applyPassthroughAttributes()` ran five
+  times — bars, lines, areas, bubbles, scatter — each iterating its own array from 0 and taking the
+  first `[data-shape-index="…"]` in the document. So `hx-get` on a `<dc-line>` beside a `<dc-bar>`
+  was applied to the bar, and each of the five calls overwrote the last. Charts drawing a single type
+  were always fine, which is why it survived
+
+  Every shape now carries `data-shape-kind` beside its index, and each type is addressed inside its
+  own namespace. Single-type charts pass no kind and are untouched
+
+- **Keyboard focus resolved to nothing past the first type.** `getFocusableElements()` numbers bars,
+  then line points, then bubbles, then scatter in one running sequence, which `getShapeBounds()`
+  resolved against those per-type stamps — so `[data-shape-index="1"]` and up did not exist. A
+  focused line point or bubble got no focus ring, and the previously shown popup stayed on screen
+  while the screen reader announced the new element
+
+  `locateFocus()` now translates a focus index into (kind, offset), generalising the compensation
+  `locateScatterFocus()` already made for scatter alone. Line markers also carried no stamp at all,
+  so they gained one — numbered across every line and skipping gaps, to match the focus order
+
+- **`LineData.paint` was declared and never populated**, so a `<dc-fill>`'s `stroke-dasharray` or
+  `stroke-width` reached every element type except lines. Optional field, silent spread of
+  `undefined`, nothing logged. The one-line fix was held back until the addressing above was
+  corrected: routing paint through the shared index would have applied a line's palette attributes
+  to a bar in any combo chart
+
+  Characterized before the change and inverted after, in two commits. No baseline moved — the fix
+  only adds attributes
+
+
 - **A legend was always measured in `sans-serif`, however the page was drawn.** `<dc-legend>` and
   `<dc-title>` each carried a byte-identical private copy of `measureText()` that fell back to
   `sans-serif` — and every legend call site passed only two arguments, so the family was never

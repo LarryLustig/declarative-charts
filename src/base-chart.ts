@@ -3032,9 +3032,18 @@ export abstract class BaseChart extends LitElement {
     return Object.keys(own).length > 0 ? own : undefined;
   }
 
+  /**
+   * @param kind Restricts the lookup to shapes of one type.
+   *
+   * `data-shape-index` counts from 0 *within a type*, so a chart drawing more
+   * than one type has several shapes stamped 0 and `querySelector` returns
+   * whichever is first in the document. Every type in a combo chart therefore
+   * landed its attributes on the bar. Charts that draw a single type have no
+   * ambiguity and pass nothing.
+   */
   protected applyPassthroughAttributes<
     T extends { passthroughAttrs?: Record<string, string>; paint?: Record<string, string> }
-  >(shapes: T[]): void {
+  >(shapes: T[], kind?: string): void {
     const svg = this.shadowRoot?.querySelector('svg');
     if (!svg) return;
 
@@ -3046,7 +3055,10 @@ export abstract class BaseChart extends LitElement {
       const attrs = { ...shape.paint, ...shape.passthroughAttrs };
       if (Object.keys(attrs).length === 0) return;
 
-      const element = svg.querySelector(`[data-shape-index="${index}"]`);
+      const selector = kind
+        ? `[data-shape-kind="${kind}"][data-shape-index="${index}"]`
+        : `[data-shape-index="${index}"]`;
+      const element = svg.querySelector(selector);
       if (!element) return;
       Object.entries(attrs).forEach(([key, value]) => {
         // Passthrough exists so that `hx-*`, `data-*`, Alpine's `x-on:` and

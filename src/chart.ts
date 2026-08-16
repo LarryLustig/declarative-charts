@@ -1212,6 +1212,7 @@ export class Chart extends AxisChart {
         label: line.label,
         missing: linePolicy,
         curveFit: lineCurveFit,
+        paint: this.getPalettePaint(line),
         href: line.href || undefined,
         legendHref: line.legendHref || undefined,
         legendTarget: line.legendTarget || undefined,
@@ -1744,9 +1745,17 @@ export class Chart extends AxisChart {
       mouseenter: (e: MouseEvent) => void;
       mouseleave: () => void;
       click: (e: MouseEvent) => void;
-    }
+    },
+    shapeKind?: string,
+    shapeIndex?: number
   ): SVGTemplateResult {
-    return svg`<g class="point-marker">${
+    // Line markers carried no address at all, so a focused line point could
+    // never be resolved to a shape however the index was numbered.
+    return svg`<g
+      class="point-marker"
+      data-shape-kind="${shapeKind ?? ''}"
+      data-shape-index="${shapeIndex ?? ''}"
+    >${
       this.renderPointShapeGeometry(shape, x, y, size, color, cursor, handlers)
     }</g>`;
   }
@@ -1939,6 +1948,7 @@ export class Chart extends AxisChart {
         stroke="${bar.stroke || 'none'}"
         stroke-width="${bar.strokeWidth || 0}"
         style="cursor: ${hasPopup ? 'pointer' : 'default'}"
+        data-shape-kind="bar"
         data-shape-index="${index}"
         @mouseenter="${(e: MouseEvent) => this.handleBarMouseEnter(e, index)}"
         @mouseleave="${() => this.handleBarMouseLeave(index)}"
@@ -1988,6 +1998,7 @@ export class Chart extends AxisChart {
               stroke="${segStroke}"
               stroke-width="${segStrokeWidth}"
               style="cursor: ${hasSegmentPopup ? 'pointer' : 'default'}"
+              data-shape-kind="bar"
               data-shape-index="${index}"
               data-segment-index="${segIndex}"
               @mouseenter="${(e: MouseEvent) => this.handleSegmentMouseEnter(e, index, segIndex)}"
@@ -2040,6 +2051,7 @@ export class Chart extends AxisChart {
               stroke="${segStroke}"
               stroke-width="${segStrokeWidth}"
               style="cursor: ${hasSegmentPopup ? 'pointer' : 'default'}"
+              data-shape-kind="bar"
               data-shape-index="${index}"
               data-segment-index="${segIndex}"
               @mouseenter="${(e: MouseEvent) => this.handleSegmentMouseEnter(e, index, segIndex)}"
@@ -2091,11 +2103,14 @@ export class Chart extends AxisChart {
   protected updated(changedProperties: Map<string, unknown>): void {
     super.updated(changedProperties);
     // Apply passthrough attributes for all element types
-    this.applyPassthroughAttributes(this.getFlattenedBars());
-    this.applyPassthroughAttributes(this.getLines());
-    this.applyPassthroughAttributes(this.getAreas());
-    this.applyPassthroughAttributes(this.getBubbles());
-    this.applyPassthroughAttributes(this.getScatterSeries());
+    // Each type is addressed within its own stamp namespace. Without the kind
+    // every one of these five asked for `[data-shape-index="0"]` and got the
+    // bar, so a line's hx-* attributes were applied to a bar instead.
+    this.applyPassthroughAttributes(this.getFlattenedBars(), 'bar');
+    this.applyPassthroughAttributes(this.getLines(), 'line');
+    this.applyPassthroughAttributes(this.getAreas(), 'area');
+    this.applyPassthroughAttributes(this.getBubbles(), 'bubble');
+    this.applyPassthroughAttributes(this.getScatterSeries(), 'scatter');
   }
 
   protected renderChart(): SVGTemplateResult {
@@ -3181,6 +3196,7 @@ export class Chart extends AxisChart {
             stroke-width="3"
             fill="none"
             style="cursor: ${lineHasPopup ? 'pointer' : 'default'}"
+            data-shape-kind="line"
             data-shape-index="${lineIndex}"
             @mouseenter="${(e: MouseEvent) => this.handleLineMouseEnter(e, lineIndex)}"
             @mouseleave="${() => this.handleLineMouseLeave(lineIndex)}"
@@ -3194,6 +3210,13 @@ export class Chart extends AxisChart {
             // No marker and no label where there is no data - drawing either
             // would assert a value, and the y coordinate is not meaningful.
             if (pos.missing) return '';
+
+            // The focus order counts drawn points across every line, so the
+            // stamp has to as well, or the ring lands on the wrong marker.
+            const pointOrdinal =
+              lines.slice(0, lineIndex).reduce(
+                (sum, l) => sum + l.points.filter(pt => !pt.missing).length, 0)
+              + pointPositions.slice(0, pointIndex).filter(pt => !pt.missing).length;
 
             const pointHasPopup = pos.href || pos.popup || this.shouldShowAutoPopup(pos.autoPopup, line.autoPopup);
             const pointColor = pos.fill || line.stroke;
@@ -3209,7 +3232,9 @@ export class Chart extends AxisChart {
                 mouseenter: (e: MouseEvent) => this.handlePointMouseEnter(e, lineIndex, pointIndex),
                 mouseleave: () => this.handlePointMouseLeave(lineIndex, pointIndex),
                 click: (e: MouseEvent) => this.handlePointClick(e, lineIndex, pointIndex)
-              }
+              },
+              'line-point',
+              pointOrdinal
             );
 
             const percent = total > 0 ? (pos.value / total) * 100 : 0;
@@ -3486,6 +3511,7 @@ export class Chart extends AxisChart {
             fill="${area.fill}"
             fill-opacity="${area.fillOpacity}"
             stroke="none"
+            data-shape-kind="area"
             data-shape-index="${areaIndex}"
             data-area="true"
           />
@@ -3495,6 +3521,7 @@ export class Chart extends AxisChart {
             fill="none"
             stroke="${area.stroke}"
             stroke-width="${area.strokeWidth}"
+            data-shape-kind="area"
             data-shape-index="${areaIndex}"
             data-area-stroke="true"
           />
@@ -3511,6 +3538,7 @@ export class Chart extends AxisChart {
                 fill="${pointFill}"
                 stroke="white"
                 stroke-width="1"
+                data-shape-kind="area"
                 data-shape-index="${areaIndex}"
                 data-point-index="${pointIndex}"
               />
@@ -3585,6 +3613,7 @@ export class Chart extends AxisChart {
             fill="${area.fill}"
             fill-opacity="${area.fillOpacity}"
             stroke="none"
+            data-shape-kind="area"
             data-shape-index="${areaIndex}"
             data-area="true"
           />
@@ -3594,6 +3623,7 @@ export class Chart extends AxisChart {
             fill="none"
             stroke="${area.stroke}"
             stroke-width="${area.strokeWidth}"
+            data-shape-kind="area"
             data-shape-index="${areaIndex}"
             data-area-stroke="true"
           />
@@ -3610,6 +3640,7 @@ export class Chart extends AxisChart {
                 fill="${pointFill}"
                 stroke="white"
                 stroke-width="1"
+                data-shape-kind="area"
                 data-shape-index="${areaIndex}"
                 data-point-index="${pointIndex}"
               />
@@ -3655,6 +3686,7 @@ export class Chart extends AxisChart {
             stroke="${bubble.stroke || 'none'}"
             stroke-width="${bubble.stroke ? 2 : 0}"
             opacity="0.7"
+            data-shape-kind="bubble"
             data-shape-index="${index}"
             style="cursor: ${bubbleHasPopup ? 'pointer' : 'default'}"
             @mouseenter="${(e: MouseEvent) => this.handleBubbleMouseEnter(e, index)}"
@@ -3740,6 +3772,7 @@ export class Chart extends AxisChart {
             const marker = svg`
               <g
                 class="scatter-marker"
+                data-shape-kind="scatter"
                 data-shape-index="${seriesIndex}"
                 opacity="${s.fillOpacity}"
               >
@@ -4938,6 +4971,43 @@ export class Chart extends AxisChart {
   }
 
   /** Resolve a focus index that falls past the bars, line points and bubbles. */
+  /**
+   * Which mark a focus index refers to.
+   *
+   * `getFocusableElements()` numbers bars, then line points, then bubbles, then
+   * scatter points in one running sequence, but `data-shape-index` restarts at
+   * 0 for each type. Resolving a focus index straight against the DOM therefore
+   * found the bar with that number, or nothing at all - so a line point or a
+   * bubble got no focus ring, and the previously shown popup stayed on screen
+   * while the screen reader announced the new element.
+   *
+   * `locateScatterFocus()` below already did this arithmetic for scatter alone,
+   * which is the same compensation generalised.
+   */
+  private locateFocus(index: number): { kind: string; offset: number } | null {
+    if (index < 0) return null;
+    let rest = index;
+
+    const bars = this.getFlattenedBars().length;
+    if (rest < bars) return { kind: 'bar', offset: rest };
+    rest -= bars;
+
+    const points = this.getLines()
+      .reduce((sum, l) => sum + l.points.filter(p => !p.missing).length, 0);
+    if (rest < points) return { kind: 'line-point', offset: rest };
+    rest -= points;
+
+    const bubbles = this.getBubbles().length;
+    if (rest < bubbles) return { kind: 'bubble', offset: rest };
+    rest -= bubbles;
+
+    const scatter = this.getScatterSeries()
+      .reduce((sum, sr) => sum + sr.points.length, 0);
+    if (rest < scatter) return { kind: 'scatter', offset: rest };
+
+    return null;
+  }
+
   private locateScatterFocus(index: number): { seriesIndex: number; pointIndex: number } | null {
     let remaining = index
       - this.getFlattenedBars().length
@@ -4964,16 +5034,29 @@ export class Chart extends AxisChart {
       return this.getScatterMarkerBounds(scatterFocus.seriesIndex, scatterFocus.pointIndex);
     }
 
-    // First try the parent's implementation
-    const parentBounds = super.getShapeBounds(index);
-    if (parentBounds) return parentBounds;
-
-    // For line points, we need special handling since they may be circles or other shapes
+    // Everything else resolves inside its own type's stamp namespace. Asking
+    // the DOM for the bare focus index found the bar with that number, or
+    // nothing.
+    const located = this.locateFocus(index);
     const svgEl = this.shadowRoot?.querySelector('svg');
-    if (!svgEl) return null;
+    if (!located || !svgEl) return null;
 
-    // Try finding a circle (for line points)
-    const circle = svgEl.querySelector(`circle[data-shape-index="${index}"]`) as SVGCircleElement | null;
+    const shape = svgEl.querySelector(
+      `[data-shape-kind="${located.kind}"][data-shape-index="${located.offset}"]`
+    ) as SVGGraphicsElement | null;
+    if (shape && typeof shape.getBBox === 'function') {
+      try {
+        const bbox = shape.getBBox();
+        return { x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height };
+      } catch {
+        // Fall through: an unrendered element cannot be measured.
+      }
+    }
+
+    // A marker whose geometry is readable without layout.
+    const circle = svgEl.querySelector(
+      `circle[data-shape-kind="${located.kind}"][data-shape-index="${located.offset}"]`
+    ) as SVGCircleElement | null;
     if (circle) {
       const cx = parseFloat(circle.getAttribute('cx') || '0');
       const cy = parseFloat(circle.getAttribute('cy') || '0');
