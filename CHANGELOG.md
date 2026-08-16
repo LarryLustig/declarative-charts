@@ -9,6 +9,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A legend was always measured in `sans-serif`, however the page was drawn.** `<dc-legend>` and
+  `<dc-title>` each carried a byte-identical private copy of `measureText()` that fell back to
+  `sans-serif` — and every legend call site passed only two arguments, so the family was never
+  forwarded at all. `TextMeasurer`'s own header records the hazard the copies fell into: the default
+  font comes from `getComputedStyle()` **on the chart host**, so measuring anything else still
+  returns a font, just the wrong one. The copies also created a fresh `<canvas>` per call, inside
+  loops, in a `getDimensions()` that `getChartPadding()` runs every render, with none of
+  `cachePerRender`'s memoisation
+
+  The chart now injects its own measurer into both, the way it already injects `fontScale` and
+  `resolvePattern` — at all four sites, because the legend is sized once to reserve padding and again
+  to draw, and wiring only the second would measure the reserved space in a different font from the
+  box that lands in it. Constructing a `TextMeasurer` inside the legend was the wrong fix and is
+  explicitly not what happened: they are light-DOM children, so `this` would become the legend and
+  `getComputedStyle` would read the wrong element. The local fallback stays, so a `<dc-legend>` with
+  no chart around it still measures rather than throwing
+
+  **Thirteen screenshot baselines were updated, and the change is visible.** Legend boxes are now
+  sized for the font they are drawn in — narrower here, since `sans-serif` is wider than the page
+  font — so the plot gains the space and everything shifts a few pixels. Large pixel counts (up to
+  13,290) from a small uniform geometric shift. Reviewed against the before/after images rather than
+  accepted on the count
+
+  **Not fixed, and worth knowing:** `--dc-font-family` still reaches no measurement. `TextMeasurer`
+  resolves the default from `getComputedStyle(host).fontFamily`, which a custom property does not
+  change, so a chart themed that way is measured in the page's font and drawn in the variable's.
+  Measured: `--dc-font-family` gives 86.4 where `font-family` gives 345.6. That is a pre-existing gap
+  in the measurer affecting every label, not only the legend
+
+
 - **`<dc-stage-chart>` ran three index bases over the same stages.** `data-shape-index` and the mouse
   handlers count over *all* stages, because they index `cachedLayout.stages`; the legend, the
   focusables and the keyboard popup counted over the *visible* ones. Under `zero-hidden` with a zero

@@ -402,11 +402,28 @@ export class ChartLegend extends LitElement {
    * @param fontFamily Optional font family
    * @returns Width in pixels
    */
+  /**
+   * Text measurement, supplied by the chart before each pass.
+   *
+   * Injected rather than constructed here, the way `fontScale` and
+   * `resolvePattern` already are. This is a light-DOM child, not a `BaseChart`,
+   * so building a `TextMeasurer` locally would resolve the default font from
+   * `getComputedStyle()` on *this element* instead of on the chart - the
+   * receiver form of the extraction hazard, which is what the private copy
+   * below got wrong.
+   */
+  measure?: (text: string, fontSize: number, fontFamily?: string) => number;
+
   private measureText(text: string, fontSize: number, fontFamily?: string): number {
+    // The chart's measurer knows the inherited font and memoizes per render.
+    if (this.measure) return this.measure(text, fontSize, fontFamily);
+
+    // Standing alone, with no chart to wire this up: measure locally rather
+    // than throw. The 'sans-serif' default is the reason this must not be the
+    // path a chart takes - it is a guess about the page's font.
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (!ctx) {
-      // Fallback estimation
       return text.length * fontSize * 0.6;
     }
     ctx.font = `${fontSize}px ${fontFamily || 'sans-serif'}`;

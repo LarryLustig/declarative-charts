@@ -2017,6 +2017,7 @@ export abstract class BaseChart extends LitElement {
     if (!titleEl || !titleEl.text) return svg``;
     // Supply the scale before anything measures or draws the title.
     titleEl.fontScale = this.fontScale;
+    titleEl.measure = (text, fontSize, fontFamily) => this.measureText(text, fontSize, fontFamily);
 
     // Log any style warnings
     const warnings = titleEl.getStyleWarnings();
@@ -2606,6 +2607,7 @@ export abstract class BaseChart extends LitElement {
     if (!titleEl || !titleEl.text) return null;
 
     titleEl.fontScale = this.fontScale;
+    titleEl.measure = (text, fontSize, fontFamily) => this.measureText(text, fontSize, fontFamily);
     const dims = titleEl.getDimensions();
     if (dims.width === 0 && dims.height === 0) return null;
 
@@ -2779,6 +2781,9 @@ export abstract class BaseChart extends LitElement {
     const showValue = this.showValue;
     const showPercent = this.showPercent;
     legend.fontScale = this.fontScale;
+    // Both passes, or the space reserved for the legend is measured in a
+    // different font from the box that lands in it.
+    legend.measure = (text, fontSize, fontFamily) => this.measureText(text, fontSize, fontFamily);
     const dims = legend.getDimensions(
       items, this.width, showValue, showPercent,
       this.valueFormat, this.percentFormat, this.locale
@@ -2830,6 +2835,9 @@ export abstract class BaseChart extends LitElement {
     const showValue = this.showValue;
     const showPercent = this.showPercent;
     legend.fontScale = this.fontScale;
+    // Both passes, or the space reserved for the legend is measured in a
+    // different font from the box that lands in it.
+    legend.measure = (text, fontSize, fontFamily) => this.measureText(text, fontSize, fontFamily);
 
     // A custom legend item may name a pattern. Patterns live in the chart's
     // <defs> and are registered during fill resolution, which never sees these
