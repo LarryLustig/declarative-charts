@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A pie or radar legend named the wrong colour under `high-contrast`.** Two colour resolvers exist:
+  `resolveFillsWithPatterns()` branches on high contrast, and `resolveFillColorsWithPalette()` is that
+  branch's else-clause alone. `<dc-chart>`, `<dc-funnel-chart>` and `<dc-stage-chart>` used the
+  branching one on both their render and legend paths; pie and radar rendered with it and built their
+  legend with the other. So the marks repainted to the high-contrast ramp and the swatches kept the
+  palette ramp
+
+  Both now use the resolver the other three already did. No screenshot baseline moved, and the
+  concern that this would start registering patterns during the padding pass did not materialise
+
+  Guarded as parity between a mark and its own swatch rather than against a literal ramp, so the test
+  survives any change to the high-contrast palette. Pie needs a different formulation from radar: a
+  slice takes a *pattern* under high contrast, so its mark is a `url(#…)` while the swatch is
+  correctly solid — there the contract is that turning high contrast on must repaint the swatches,
+  because it repaints the marks
+
+
 - **A keyboard user saw a different, unformatted chart.** Every chart has a `generate*PopupContent()`
   builder and every mouse-enter handler used it; every `showPopupForFocusedElement()` hand-rolled the
   string inline instead. The inline copies interpolated the raw value — no `formatValue`, no

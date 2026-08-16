@@ -629,9 +629,12 @@ export class RadarChart extends BaseChart {
     const seriesElements = this.getSeriesElements();
     if (seriesElements.length === 0) return [];
 
-    const colors = this.resolveFillColorsWithPalette(
+    // The same resolver the render path uses. resolveFillColorsWithPalette() is
+    // only its non-high-contrast branch, so the swatches kept the palette ramp
+    // while the rings repainted to the high-contrast one.
+    const colors = this.resolveFillsWithPatterns(
       seriesElements.map(el => ({ fill: el.fill || undefined, label: el.label }))
-    );
+    ).map(r => r.originalFill);
 
     return seriesElements.map((el, i) => ({
       label: el.label,

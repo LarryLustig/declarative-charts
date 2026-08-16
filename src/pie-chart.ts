@@ -658,14 +658,23 @@ export class PieChart extends BaseChart {
     const sliceData = this.getSlices();
     if (sliceData.length === 0) return [];
 
-    // Resolve colors with palette support without calling calculateSliceLayout
-    // Pass sliceColor as default for backwards compatibility
+    // The same resolver the render path uses, so the swatch cannot disagree
+    // with the slice. resolveFillColorsWithPalette() is only the non-high-
+    // contrast branch of it, so the legend used to keep the palette ramp while
+    // the slices repainted to the high-contrast one. Still no call into
+    // calculateSliceLayout(), which is what would recurse through
+    // getChartPadding().
     const elements = sliceData.map(s => ({
       fill: s.fill,
       label: s.label,
-      value: s.value
+      value: s.value,
+      pattern: s.pattern,
+      patternStroke: s.patternStroke,
+      patternFill: s.patternFill,
+      patternScale: s.patternScale
     }));
-    const fillColors = this.resolveFillColorsWithPalette(elements, this.sliceColor);
+    const fillColors = this.resolveFillsWithPatterns(elements, this.sliceColor)
+      .map(r => r.originalFill);
 
     return sliceData.map((slice, index) => ({
       label: slice.label,
