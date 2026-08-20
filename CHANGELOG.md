@@ -207,6 +207,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A chart themed with `--dc-font-family` was drawn in one font and measured in another.** The SVG
+  sets `font-family: var(--dc-font-family, inherit)`, but `TextMeasurer` resolved its default from
+  `getComputedStyle(host).fontFamily` — which a custom property does not change. Every label was
+  fitted to the width of a font that was never on screen, so axis label intervals, legend boxes,
+  title padding and collision handling all worked from the wrong number
+
+  This was the *themed* path rather than an edge case: inheriting through the shadow boundary is the
+  whole point of the token, and it is how `examples/colors.html` themes its charts. Measured:
+  `--dc-font-family` gave 86.4 where a direct `font-family` gave 345.6 for the same string
+
+  Measurement now mirrors the stylesheet's own precedence — the token when set, the inherited font
+  otherwise. An unthemed chart measures exactly as before, and no baseline moved
+
 - **A hidden element left its passthrough attributes on whatever replaced it.**
   `applyPassthroughAttributes()` only ever *set* attributes, and Lit reuses its DOM nodes
   positionally — so hiding the first bar slid the second into its place still carrying the first

@@ -57,9 +57,20 @@ export class TextMeasurer {
     });
   }
 
-  /** The font the chart inherits from the page. */
+  /**
+   * The font the chart will actually draw in.
+   *
+   * Mirrors the stylesheet, which sets the SVG's
+   * `font-family: var(--dc-font-family, inherit)` - so the token wins when it
+   * is set and the inherited font supplies the default. Reading only
+   * `fontFamily` measured the page's font while the chart drew in the token's:
+   * the themed path, since inheriting through the shadow boundary is the whole
+   * point of the token.
+   */
   private inheritedFontFamily(): string {
-    return window.getComputedStyle(this.host.hostElement).fontFamily || 'sans-serif';
+    const style = window.getComputedStyle(this.host.hostElement);
+    const token = style.getPropertyValue('--dc-font-family').trim();
+    return token || style.fontFamily || 'sans-serif';
   }
 
   /** Get or create the measuring context. */
