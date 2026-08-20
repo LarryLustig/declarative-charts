@@ -19,7 +19,7 @@ body:
     attributes:
       label: Version
       description: From `npm ls declarative-charts`, or the CDN URL you loaded.
-      placeholder: "0.2.0"
+      placeholder: "0.3.0"
     validations:
       required: true
 

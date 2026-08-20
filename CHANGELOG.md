@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-20
+
+**Correctness release.** Eight defects that a chart could not report on itself, most of them found
+by auditing for one shape of duplication and following it: a designated hook that some callers
+bypassed with a parallel implementation. Every one failed silently — the markup looked right, the
+picture looked right, and the wrong thing happened anyway.
+
 ### Added
 
 - **A legend entry can be a link.** Reported by a consumer; the legend rendered no interactive

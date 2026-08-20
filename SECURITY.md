@@ -7,8 +7,8 @@ npm receives fixes; there are no maintenance branches.
 
 | Version | Supported |
 | ------- | --------- |
-| 0.2.x   | ✅ |
-| < 0.2   | ❌ (never published) |
+| 0.3.x   | ✅ |
+| < 0.3   | ❌ |
 
 ## Reporting a vulnerability
 
