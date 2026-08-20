@@ -7,137 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-
-- **In a combo chart, every element type applied its passthrough attributes to the bar.**
-  `data-shape-index` counts from 0 *within a type*, but `applyPassthroughAttributes()` ran five
-  times — bars, lines, areas, bubbles, scatter — each iterating its own array from 0 and taking the
-  first `[data-shape-index="…"]` in the document. So `hx-get` on a `<dc-line>` beside a `<dc-bar>`
-  was applied to the bar, and each of the five calls overwrote the last. Charts drawing a single type
-  were always fine, which is why it survived
-
-  Every shape now carries `data-shape-kind` beside its index, and each type is addressed inside its
-  own namespace. Single-type charts pass no kind and are untouched
-
-- **Keyboard focus resolved to nothing past the first type.** `getFocusableElements()` numbers bars,
-  then line points, then bubbles, then scatter in one running sequence, which `getShapeBounds()`
-  resolved against those per-type stamps — so `[data-shape-index="1"]` and up did not exist. A
-  focused line point or bubble got no focus ring, and the previously shown popup stayed on screen
-  while the screen reader announced the new element
-
-  `locateFocus()` now translates a focus index into (kind, offset), generalising the compensation
-  `locateScatterFocus()` already made for scatter alone. Line markers also carried no stamp at all,
-  so they gained one — numbered across every line and skipping gaps, to match the focus order
-
-- **`LineData.paint` was declared and never populated**, so a `<dc-fill>`'s `stroke-dasharray` or
-  `stroke-width` reached every element type except lines. Optional field, silent spread of
-  `undefined`, nothing logged. The one-line fix was held back until the addressing above was
-  corrected: routing paint through the shared index would have applied a line's palette attributes
-  to a bar in any combo chart
-
-  Characterized before the change and inverted after, in two commits. No baseline moved — the fix
-  only adds attributes
-
-
-- **A legend was always measured in `sans-serif`, however the page was drawn.** `<dc-legend>` and
-  `<dc-title>` each carried a byte-identical private copy of `measureText()` that fell back to
-  `sans-serif` — and every legend call site passed only two arguments, so the family was never
-  forwarded at all. `TextMeasurer`'s own header records the hazard the copies fell into: the default
-  font comes from `getComputedStyle()` **on the chart host**, so measuring anything else still
-  returns a font, just the wrong one. The copies also created a fresh `<canvas>` per call, inside
-  loops, in a `getDimensions()` that `getChartPadding()` runs every render, with none of
-  `cachePerRender`'s memoisation
-
-  The chart now injects its own measurer into both, the way it already injects `fontScale` and
-  `resolvePattern` — at all four sites, because the legend is sized once to reserve padding and again
-  to draw, and wiring only the second would measure the reserved space in a different font from the
-  box that lands in it. Constructing a `TextMeasurer` inside the legend was the wrong fix and is
-  explicitly not what happened: they are light-DOM children, so `this` would become the legend and
-  `getComputedStyle` would read the wrong element. The local fallback stays, so a `<dc-legend>` with
-  no chart around it still measures rather than throwing
-
-  **Thirteen screenshot baselines were updated, and the change is visible.** Legend boxes are now
-  sized for the font they are drawn in — narrower here, since `sans-serif` is wider than the page
-  font — so the plot gains the space and everything shifts a few pixels. Large pixel counts (up to
-  13,290) from a small uniform geometric shift. Reviewed against the before/after images rather than
-  accepted on the count
-
-  **Not fixed, and worth knowing:** `--dc-font-family` still reaches no measurement. `TextMeasurer`
-  resolves the default from `getComputedStyle(host).fontFamily`, which a custom property does not
-  change, so a chart themed that way is measured in the page's font and drawn in the variable's.
-  Measured: `--dc-font-family` gives 86.4 where `font-family` gives 345.6. That is a pre-existing gap
-  in the measurer affecting every label, not only the legend
-
-
-- **`<dc-stage-chart>` ran three index bases over the same stages.** `data-shape-index` and the mouse
-  handlers count over *all* stages, because they index `cachedLayout.stages`; the legend, the
-  focusables and the keyboard popup counted over the *visible* ones. Under `zero-hidden` with a zero
-  stage in the middle those bases diverge, and the results were plainly wrong: the legend labelled
-  "Completed" and painted it in the colour of "Blocked", the stage that is not drawn, while arrowing
-  to a stage announced one label and popped up another's content
-
-  All three now read one `getVisibleStages()` accessor, which pairs each visible stage with the index
-  the DOM and the mouse handlers use. The stamps are translated rather than renumbered, so the mouse
-  path and the rendered output are untouched — no baseline moved
-
-  The fixture is the test: with the zero stage *last*, all three bases coincide and every assertion
-  passes against the unfixed code. It has to be in the middle, and the suite keeps a last-position
-  control alongside so that stays true
-
-
-- **A pie or radar legend named the wrong colour under `high-contrast`.** Two colour resolvers exist:
-  `resolveFillsWithPatterns()` branches on high contrast, and `resolveFillColorsWithPalette()` is that
-  branch's else-clause alone. `<dc-chart>`, `<dc-funnel-chart>` and `<dc-stage-chart>` used the
-  branching one on both their render and legend paths; pie and radar rendered with it and built their
-  legend with the other. So the marks repainted to the high-contrast ramp and the swatches kept the
-  palette ramp
-
-  Both now use the resolver the other three already did. No screenshot baseline moved, and the
-  concern that this would start registering patterns during the padding pass did not materialise
-
-  Guarded as parity between a mark and its own swatch rather than against a literal ramp, so the test
-  survives any change to the high-contrast palette. Pie needs a different formulation from radar: a
-  slice takes a *pattern* under high contrast, so its mark is a `url(#…)` while the swatch is
-  correctly solid — there the contract is that turning high contrast on must repaint the swatches,
-  because it repaints the marks
-
-
-- **A keyboard user saw a different, unformatted chart.** Every chart has a `generate*PopupContent()`
-  builder and every mouse-enter handler used it; every `showPopupForFocusedElement()` hand-rolled the
-  string inline instead. The inline copies interpolated the raw value — no `formatValue`, no
-  per-element `value-format`, no locale — and hand-rolled the percent as `.toFixed(1)` rather than
-  through `formatPercent`. The same slice read `Value: $50.00` on hover and `Value: 50` on keyboard
-  focus
-
-  Both paths now share one builder on pie, funnel, stage and bars. Because the inline copies had
-  drifted in both directions, the text moves both ways: the invented `Percent: ` and `Conversion: `
-  prefixes disappear, and a grouped bar gains the group line the keyboard copy dropped. `<dc-stage>`
-  also stopped hand-rolling its percent inside the builder itself, so `percent-format` now reaches it
-
-  Guarded by parity rather than by literals — `test/component/keyboard-popup-parity.test.ts` asserts
-  the two entry points emit the same string, which stays true whichever way a future builder changes.
-  All six cases failed before the change. That `chart.ts` already routed *scatter* through its shared
-  builder while bars a few lines away did not is what marked this as bypass rather than intent
-
-
-- **`hidden` was ignored on `<dc-pie-slice>` and `<dc-funnel-stage>`.** The last two data walks
-  without the filter — every other one has it, and `<dc-stage>` was fixed for the same reason
-  earlier. The chart contradicted itself: `countHiddenDataElements()` counted the hidden elements,
-  so `hasHiddenDataElements()` reported them, while the extractor handed them to the layout and drew
-  them anyway. `DC002` was unreachable on both chart types as a result
-
-  **This changes what an existing chart draws, wherever a slice or stage carries `hidden`.** A hidden
-  element now leaves the total as well as the picture, so the remainder renormalise: two equal
-  slices with one hidden go from a 50% half-pie to a 100% full circle, and a funnel's shares
-  recompute over the visible stages. Default palette colours shift with the index, the legend loses
-  the entry, and the keyboard order shrinks to match. Hide them all and the chart now says "All
-  series are hidden" and logs `DC002` instead of drawing
-
-  No screenshot baseline moved — no visual fixture uses `hidden` on a slice or a stage, and with none
-  present the filter is a no-op. API.md's list of supporting elements was stale in both directions:
-  it omitted `<dc-scatter>`, `<dc-radar-series>` and `<dc-radar-axis>`, which already honoured it
-
-
 ### Added
 
 - **A legend entry can be a link.** Reported by a consumer; the legend rendered no interactive
@@ -171,25 +40,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Reported once per render. `getLegendItems()` runs more than once in a cycle — the padding pass
   sizes the legend before the render draws it — and an uncached warning fired three times for one
   mistake
-
-
-### Changed
-
-- **Every chart now renders its legend from `getLegendItems()`.** `<dc-chart>` and `<dc-radar-chart>`
-  did; pie, funnel and stage built a second list inline in `render()` and used `getLegendItems()`
-  only to size the padding. Two constructions of the same list, from different data, with nothing
-  holding them together
-
-  The duplication was latent rather than active - all 30 screenshot baselines pass unchanged, so
-  the two paths did agree today. What it cost was the next change: anything added to
-  `getLegendItems()` reached the padding pass and never the picture
-
-  `getLegendItems()` still must not call the layout, which is what created the split - the legend is
-  sized inside `getChartPadding()`, so calling `calculateSliceLayout()` from it recurses. Rendering
-  *from* it is fine, and is what the other two charts already did
-
-
-### Added
 
 - **`shape="none"` and `point-shape="none"` draw no marker.** Reported by a consumer, and there was
   no way to do it at all before: markers are drawn unconditionally at a hardcoded radius and
@@ -226,7 +76,259 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `<dc-chart>` and `<dc-line>` and the `shape` bullet on `<dc-scatter>` now point at it instead of
   each carrying a different, partial list — one of them omitted `star`
 
+- **Two documented patterns for pages where JavaScript does not run.** A `<dc-chart>` whose module
+  never loads is an unknown tag with no text of its own, so the page shows nothing — the one thing
+  a pure-CSS library like Charts.css does better, and previously unanswered anywhere in the docs.
+  Neither pattern needs an attribute or an API; both are plain HTML
+
+  `<noscript>` covers scripting being disabled and never flashes, because the browser resolves it
+  at parse time. A fallback table placed *inside* the chart and hidden with
+  `dc-chart:defined .dc-fallback { display: none }` also covers a bundle that was blocked, 404'd or
+  rejected by CSP, at the cost of one paint before the swap. The two cannot be combined: covering a
+  request that failed means rendering optimistically and retracting, which is a paint by
+  construction
+
+  The stylesheet rule turns out to be required rather than decorative, which is the opposite of
+  what the first design assumed. `BaseChart.render()` ends with an unconditional catch-all `<slot>`,
+  so **every** light-DOM child is projected and painted; the data elements are invisible only
+  because they render nothing themselves. A `<table>` is assigned to that slot and drawn below the
+  chart until the author hides it
+
+- **The release process, written down in CONTRIBUTING.md.** It existed only as habit, which is how
+  a tag and a tarball drift apart. Records the sequence, why `npm version` rather than a
+  hand-edited `package.json` (it makes the commit and tag together, and npm's `gitHead` lets the
+  two be checked — for 0.2.0 both are `1479a6e`), and why publishing cannot move to CI: the
+  screenshot baselines are `-chromium-win32`, so the `prepublishOnly` gate only runs on a
+  maintainer's machine, and releases therefore carry no provenance attestation
+
+  Also records the two things easiest to forget — that the npm README and `description` are
+  snapshots taken at publish time rather than mirrors of the repository, and that a version number
+  is burned permanently once used
+
+- **A browser check for the fallback, in `examples.spec.ts`** — the only thing in the repo that
+  exercises the library with scripting off. It needs a real browser twice over: happy-dom evaluates
+  `:defined` as false even for a registered element, so no component test can check the hiding rule,
+  and nothing else can check what a reader gets when the module never runs. Asserts both halves,
+  because each failure is bad in a different way — a fallback that stays visible prints a table
+  under every chart, and one that hides without JavaScript leaves a blank page that looks
+  deliberate. Mutation-tested by inverting the `display` rule
+
+- **`DC116`** — bars that do not fit the plot are no longer silent. Bar width has a floor of one
+  unit, so past roughly 800 bars in a 900-unit plot the surplus is drawn beyond the right edge
+  where it cannot be seen. `DC107` already reported the gutter compression, but it fires from a
+  hundred bars upward where nothing is wrong, so it could not carry this meaning too
+
+  The count is exact — walked, not estimated from a ratio, because the message states a number
+  and a ratio was off by three or four
+
+- **A scrolling recipe on the large-datasets page.** Giving a chart the width its data needs and
+  wrapping it in `overflow-x: auto` needs nothing from the library: the `<svg>` is already
+  `width: 100%` of its host, so a host wider than the page overflows and the wrapper scrolls it.
+  Verified at 1,000 bars in a 4,000-unit chart with none off-plot
+
+  Documented with its limitation: the value axis scrolls away with everything else, and SVG has
+  no sticky-header equivalent, so freezing it means a second element pinned over the scroller
+
+- **`examples/large-datasets.html`** — renders 100 / 1,000 / 5,000 / 10,000 points on demand and
+  times it on *your* device, which is the only number that answers "is this fast enough for me".
+  Instrumented with `dc-render`, so it doubles as a worked example of that event
+
+  Measured on one laptop, painted: bars 67 ms / 233 ms / 882 ms / 1,562 ms; lines 132 ms / 166 ms
+  / 581 ms / 1,166 ms. Element cost per datapoint is 1 for a bar, 2 for a line, 3 for a scatter —
+  so ten thousand scatter points is thirty thousand SVG elements
+
+- **The README shows charts, not just markup.** A chart library whose front page never shows its
+  output asks the reader to take the picture on faith, and the picture is the product. Two
+  rendered SVGs now sit beside the markup that produces them
+
+  GitHub strips inline `<svg>` from Markdown, so the only route is an `<img>` at a committed
+  file. They are referenced by absolute URL and served from Pages, because npmjs.com does not
+  resolve relative image paths and that page is where people decide whether to install
+
+  `npm run build:images` generates them through the library's **own** `prepareSvgForExport()` —
+  the call `downloadSvg()` makes — rather than a parallel serializer, so a break in that
+  documented feature breaks the images too
+
+- **`test/visual/readme-images.spec.ts`** re-renders and compares, so the images cannot go stale
+  the way the CLAUDE.md coverage table did. It also checks they are self-contained: an
+  `<img>`-loaded SVG gets no external CSS, no script and no network, so a missing `font-family`
+  would silently render every label in the viewer's default serif. Local-only alongside the
+  screenshots, for the same reason — text positions come from `measureText`, which is
+  font-dependent — and bound into `prepublishOnly`
+
+### Changed
+
+- **Every chart now renders its legend from `getLegendItems()`.** `<dc-chart>` and `<dc-radar-chart>`
+  did; pie, funnel and stage built a second list inline in `render()` and used `getLegendItems()`
+  only to size the padding. Two constructions of the same list, from different data, with nothing
+  holding them together
+
+  The duplication was latent rather than active - all 30 screenshot baselines pass unchanged, so
+  the two paths did agree today. What it cost was the next change: anything added to
+  `getLegendItems()` reached the padding pass and never the picture
+
+  `getLegendItems()` still must not call the layout, which is what created the split - the legend is
+  sized inside `getChartPadding()`, so calling `calculateSliceLayout()` from it recurses. Rendering
+  *from* it is fine, and is what the other two charts already did
+
+- **Visual baselines now allow 100 differing pixels, absolute, instead of 1% of the image.** A
+  ratio sounds small and is not: 1% of a 1240x923 baseline is 11,445 pixels — a whole axis label
+  or a moved legend. It hid real changes three times, including one where every y-axis tick
+  drifted from 12/24/36/48 to 10/20/30/40/50 at 0.986% of pixels, just under the threshold
+
+  Chosen by measurement rather than instinct. Against a deliberate 2-unit nudge to every category
+  label, which changed nine charts by 339 to 10,505 pixels: the old `0.01` caught none of them,
+  `0.001` caught two, and 100 absolute pixels caught all nine. A ratio is the wrong shape —
+  it gives the largest images the largest blind spot, and those are the charts with the most to
+  get wrong. Four consecutive runs pass on unchanged code
+
+- **The README's performance claim is corrected and no longer the main point.** It quoted
+  `npm run bench` figures (620 ms for 1,000 bars) beside a page that measures 233 ms for what
+  looks like the same thing; the harness loads markup as a fresh HTML document and counts the
+  parse, while the page updates an open one. Both are now labelled
+
+  More importantly, **for bar charts the binding limit is geometric, not speed**. Bar width floors
+  at one unit, so a 900-unit chart runs out of room at about 800 bars and draws the surplus off
+  its own right edge: at 2,000 bars 1,190 are off the plot, at 5,000 bars 4,190 are. That ceiling
+  arrives long before any timing becomes uncomfortable, and the README now leads with it
+
+- **README: a Jinja2 example, and updates shown without a framework.** Jinja2 leads the template
+  examples; the Django one now uses a Django filter rather than repeating a byte-identical loop
+
+  The dynamic-update section led with an htmx swap, which made a general mechanism look like an
+  integration. It now shows plain `fetch` + `innerHTML`, plus three one-line partial updates —
+  append a bar, revise a value, and hide a series (which drops it from the legend too). All four
+  were verified in a browser before being written down, including that the redraw is
+  asynchronous: the first draft claimed the chart "has already redrawn" after the assignment, and
+  it has not — the `MutationObserver` fires a tick later
+
+- `engines.node` is `>=20.19.0`; Vite 8 requires `^20.19.0 || >=22.12.0` and is now the binding
+  constraint. CI and the Pages workflow pin 20.19 to match
+
 ### Fixed
+
+- **In a combo chart, every element type applied its passthrough attributes to the bar.**
+  `data-shape-index` counts from 0 *within a type*, but `applyPassthroughAttributes()` ran five
+  times — bars, lines, areas, bubbles, scatter — each iterating its own array from 0 and taking the
+  first `[data-shape-index="…"]` in the document. So `hx-get` on a `<dc-line>` beside a `<dc-bar>`
+  was applied to the bar, and each of the five calls overwrote the last. Charts drawing a single type
+  were always fine, which is why it survived
+
+  Every shape now carries `data-shape-kind` beside its index, and each type is addressed inside its
+  own namespace. Single-type charts pass no kind and are untouched
+
+- **Keyboard focus resolved to nothing past the first type.** `getFocusableElements()` numbers bars,
+  then line points, then bubbles, then scatter in one running sequence, which `getShapeBounds()`
+  resolved against those per-type stamps — so `[data-shape-index="1"]` and up did not exist. A
+  focused line point or bubble got no focus ring, and the previously shown popup stayed on screen
+  while the screen reader announced the new element
+
+  `locateFocus()` now translates a focus index into (kind, offset), generalising the compensation
+  `locateScatterFocus()` already made for scatter alone. Line markers also carried no stamp at all,
+  so they gained one — numbered across every line and skipping gaps, to match the focus order
+
+- **`LineData.paint` was declared and never populated**, so a `<dc-fill>`'s `stroke-dasharray` or
+  `stroke-width` reached every element type except lines. Optional field, silent spread of
+  `undefined`, nothing logged. The one-line fix was held back until the addressing above was
+  corrected: routing paint through the shared index would have applied a line's palette attributes
+  to a bar in any combo chart
+
+  Characterized before the change and inverted after, in two commits. No baseline moved — the fix
+  only adds attributes
+
+- **A legend was always measured in `sans-serif`, however the page was drawn.** `<dc-legend>` and
+  `<dc-title>` each carried a byte-identical private copy of `measureText()` that fell back to
+  `sans-serif` — and every legend call site passed only two arguments, so the family was never
+  forwarded at all. `TextMeasurer`'s own header records the hazard the copies fell into: the default
+  font comes from `getComputedStyle()` **on the chart host**, so measuring anything else still
+  returns a font, just the wrong one. The copies also created a fresh `<canvas>` per call, inside
+  loops, in a `getDimensions()` that `getChartPadding()` runs every render, with none of
+  `cachePerRender`'s memoisation
+
+  The chart now injects its own measurer into both, the way it already injects `fontScale` and
+  `resolvePattern` — at all four sites, because the legend is sized once to reserve padding and again
+  to draw, and wiring only the second would measure the reserved space in a different font from the
+  box that lands in it. Constructing a `TextMeasurer` inside the legend was the wrong fix and is
+  explicitly not what happened: they are light-DOM children, so `this` would become the legend and
+  `getComputedStyle` would read the wrong element. The local fallback stays, so a `<dc-legend>` with
+  no chart around it still measures rather than throwing
+
+  **Thirteen screenshot baselines were updated, and the change is visible.** Legend boxes are now
+  sized for the font they are drawn in — narrower here, since `sans-serif` is wider than the page
+  font — so the plot gains the space and everything shifts a few pixels. Large pixel counts (up to
+  13,290) from a small uniform geometric shift. Reviewed against the before/after images rather than
+  accepted on the count
+
+  **Not fixed, and worth knowing:** `--dc-font-family` still reaches no measurement. `TextMeasurer`
+  resolves the default from `getComputedStyle(host).fontFamily`, which a custom property does not
+  change, so a chart themed that way is measured in the page's font and drawn in the variable's.
+  Measured: `--dc-font-family` gives 86.4 where `font-family` gives 345.6. That is a pre-existing gap
+  in the measurer affecting every label, not only the legend
+
+- **`<dc-stage-chart>` ran three index bases over the same stages.** `data-shape-index` and the mouse
+  handlers count over *all* stages, because they index `cachedLayout.stages`; the legend, the
+  focusables and the keyboard popup counted over the *visible* ones. Under `zero-hidden` with a zero
+  stage in the middle those bases diverge, and the results were plainly wrong: the legend labelled
+  "Completed" and painted it in the colour of "Blocked", the stage that is not drawn, while arrowing
+  to a stage announced one label and popped up another's content
+
+  All three now read one `getVisibleStages()` accessor, which pairs each visible stage with the index
+  the DOM and the mouse handlers use. The stamps are translated rather than renumbered, so the mouse
+  path and the rendered output are untouched — no baseline moved
+
+  The fixture is the test: with the zero stage *last*, all three bases coincide and every assertion
+  passes against the unfixed code. It has to be in the middle, and the suite keeps a last-position
+  control alongside so that stays true
+
+- **A pie or radar legend named the wrong colour under `high-contrast`.** Two colour resolvers exist:
+  `resolveFillsWithPatterns()` branches on high contrast, and `resolveFillColorsWithPalette()` is that
+  branch's else-clause alone. `<dc-chart>`, `<dc-funnel-chart>` and `<dc-stage-chart>` used the
+  branching one on both their render and legend paths; pie and radar rendered with it and built their
+  legend with the other. So the marks repainted to the high-contrast ramp and the swatches kept the
+  palette ramp
+
+  Both now use the resolver the other three already did. No screenshot baseline moved, and the
+  concern that this would start registering patterns during the padding pass did not materialise
+
+  Guarded as parity between a mark and its own swatch rather than against a literal ramp, so the test
+  survives any change to the high-contrast palette. Pie needs a different formulation from radar: a
+  slice takes a *pattern* under high contrast, so its mark is a `url(#…)` while the swatch is
+  correctly solid — there the contract is that turning high contrast on must repaint the swatches,
+  because it repaints the marks
+
+- **A keyboard user saw a different, unformatted chart.** Every chart has a `generate*PopupContent()`
+  builder and every mouse-enter handler used it; every `showPopupForFocusedElement()` hand-rolled the
+  string inline instead. The inline copies interpolated the raw value — no `formatValue`, no
+  per-element `value-format`, no locale — and hand-rolled the percent as `.toFixed(1)` rather than
+  through `formatPercent`. The same slice read `Value: $50.00` on hover and `Value: 50` on keyboard
+  focus
+
+  Both paths now share one builder on pie, funnel, stage and bars. Because the inline copies had
+  drifted in both directions, the text moves both ways: the invented `Percent: ` and `Conversion: `
+  prefixes disappear, and a grouped bar gains the group line the keyboard copy dropped. `<dc-stage>`
+  also stopped hand-rolling its percent inside the builder itself, so `percent-format` now reaches it
+
+  Guarded by parity rather than by literals — `test/component/keyboard-popup-parity.test.ts` asserts
+  the two entry points emit the same string, which stays true whichever way a future builder changes.
+  All six cases failed before the change. That `chart.ts` already routed *scatter* through its shared
+  builder while bars a few lines away did not is what marked this as bypass rather than intent
+
+- **`hidden` was ignored on `<dc-pie-slice>` and `<dc-funnel-stage>`.** The last two data walks
+  without the filter — every other one has it, and `<dc-stage>` was fixed for the same reason
+  earlier. The chart contradicted itself: `countHiddenDataElements()` counted the hidden elements,
+  so `hasHiddenDataElements()` reported them, while the extractor handed them to the layout and drew
+  them anyway. `DC002` was unreachable on both chart types as a result
+
+  **This changes what an existing chart draws, wherever a slice or stage carries `hidden`.** A hidden
+  element now leaves the total as well as the picture, so the remainder renormalise: two equal
+  slices with one hidden go from a 50% half-pie to a 100% full circle, and a funnel's shares
+  recompute over the visible stages. Default palette colours shift with the index, the legend loses
+  the entry, and the keyboard order shrinks to match. Hide them all and the chart now says "All
+  series are hidden" and logs `DC002` instead of drawing
+
+  No screenshot baseline moved — no visual fixture uses `hidden` on a slice or a stage, and with none
+  present the filter is a no-op. API.md's list of supporting elements was stale in both directions:
+  it omitted `<dc-scatter>`, `<dc-radar-series>` and `<dc-radar-axis>`, which already honoured it
 
 - **Enumerated attributes that never named their values.** An attribute taking a closed set is only
   usable if the set is written down, and three had drifted: `<dc-legend-item stroke-dasharray>`
@@ -271,112 +373,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   chart is neither drawn nor able to reach the axis. Mutation-tested: restoring the flat search
   puts the buried point back on the scale
 
-### Added
-
-- **Two documented patterns for pages where JavaScript does not run.** A `<dc-chart>` whose module
-  never loads is an unknown tag with no text of its own, so the page shows nothing — the one thing
-  a pure-CSS library like Charts.css does better, and previously unanswered anywhere in the docs.
-  Neither pattern needs an attribute or an API; both are plain HTML
-
-  `<noscript>` covers scripting being disabled and never flashes, because the browser resolves it
-  at parse time. A fallback table placed *inside* the chart and hidden with
-  `dc-chart:defined .dc-fallback { display: none }` also covers a bundle that was blocked, 404'd or
-  rejected by CSP, at the cost of one paint before the swap. The two cannot be combined: covering a
-  request that failed means rendering optimistically and retracting, which is a paint by
-  construction
-
-  The stylesheet rule turns out to be required rather than decorative, which is the opposite of
-  what the first design assumed. `BaseChart.render()` ends with an unconditional catch-all `<slot>`,
-  so **every** light-DOM child is projected and painted; the data elements are invisible only
-  because they render nothing themselves. A `<table>` is assigned to that slot and drawn below the
-  chart until the author hides it
-
-- **The release process, written down in CONTRIBUTING.md.** It existed only as habit, which is how
-  a tag and a tarball drift apart. Records the sequence, why `npm version` rather than a
-  hand-edited `package.json` (it makes the commit and tag together, and npm's `gitHead` lets the
-  two be checked — for 0.2.0 both are `1479a6e`), and why publishing cannot move to CI: the
-  screenshot baselines are `-chromium-win32`, so the `prepublishOnly` gate only runs on a
-  maintainer's machine, and releases therefore carry no provenance attestation
-
-  Also records the two things easiest to forget — that the npm README and `description` are
-  snapshots taken at publish time rather than mirrors of the repository, and that a version number
-  is burned permanently once used
-
-- **A browser check for the fallback, in `examples.spec.ts`** — the only thing in the repo that
-  exercises the library with scripting off. It needs a real browser twice over: happy-dom evaluates
-  `:defined` as false even for a registered element, so no component test can check the hiding rule,
-  and nothing else can check what a reader gets when the module never runs. Asserts both halves,
-  because each failure is bad in a different way — a fallback that stays visible prints a table
-  under every chart, and one that hides without JavaScript leaves a blank page that looks
-  deliberate. Mutation-tested by inverting the `display` rule
-
-### Changed
-
-- **Visual baselines now allow 100 differing pixels, absolute, instead of 1% of the image.** A
-  ratio sounds small and is not: 1% of a 1240x923 baseline is 11,445 pixels — a whole axis label
-  or a moved legend. It hid real changes three times, including one where every y-axis tick
-  drifted from 12/24/36/48 to 10/20/30/40/50 at 0.986% of pixels, just under the threshold
-
-  Chosen by measurement rather than instinct. Against a deliberate 2-unit nudge to every category
-  label, which changed nine charts by 339 to 10,505 pixels: the old `0.01` caught none of them,
-  `0.001` caught two, and 100 absolute pixels caught all nine. A ratio is the wrong shape —
-  it gives the largest images the largest blind spot, and those are the charts with the most to
-  get wrong. Four consecutive runs pass on unchanged code
-
-### Added
-
-- **`DC116`** — bars that do not fit the plot are no longer silent. Bar width has a floor of one
-  unit, so past roughly 800 bars in a 900-unit plot the surplus is drawn beyond the right edge
-  where it cannot be seen. `DC107` already reported the gutter compression, but it fires from a
-  hundred bars upward where nothing is wrong, so it could not carry this meaning too
-
-  The count is exact — walked, not estimated from a ratio, because the message states a number
-  and a ratio was off by three or four
-
-- **A scrolling recipe on the large-datasets page.** Giving a chart the width its data needs and
-  wrapping it in `overflow-x: auto` needs nothing from the library: the `<svg>` is already
-  `width: 100%` of its host, so a host wider than the page overflows and the wrapper scrolls it.
-  Verified at 1,000 bars in a 4,000-unit chart with none off-plot
-
-  Documented with its limitation: the value axis scrolls away with everything else, and SVG has
-  no sticky-header equivalent, so freezing it means a second element pinned over the scroller
-
-### Added
-
-- **`examples/large-datasets.html`** — renders 100 / 1,000 / 5,000 / 10,000 points on demand and
-  times it on *your* device, which is the only number that answers "is this fast enough for me".
-  Instrumented with `dc-render`, so it doubles as a worked example of that event
-
-  Measured on one laptop, painted: bars 67 ms / 233 ms / 882 ms / 1,562 ms; lines 132 ms / 166 ms
-  / 581 ms / 1,166 ms. Element cost per datapoint is 1 for a bar, 2 for a line, 3 for a scatter —
-  so ten thousand scatter points is thirty thousand SVG elements
-
-### Changed
-
-- **The README's performance claim is corrected and no longer the main point.** It quoted
-  `npm run bench` figures (620 ms for 1,000 bars) beside a page that measures 233 ms for what
-  looks like the same thing; the harness loads markup as a fresh HTML document and counts the
-  parse, while the page updates an open one. Both are now labelled
-
-  More importantly, **for bar charts the binding limit is geometric, not speed**. Bar width floors
-  at one unit, so a 900-unit chart runs out of room at about 800 bars and draws the surplus off
-  its own right edge: at 2,000 bars 1,190 are off the plot, at 5,000 bars 4,190 are. That ceiling
-  arrives long before any timing becomes uncomfortable, and the README now leads with it
-
-### Changed
-
-- **README: a Jinja2 example, and updates shown without a framework.** Jinja2 leads the template
-  examples; the Django one now uses a Django filter rather than repeating a byte-identical loop
-
-  The dynamic-update section led with an htmx swap, which made a general mechanism look like an
-  integration. It now shows plain `fetch` + `innerHTML`, plus three one-line partial updates —
-  append a bar, revise a value, and hide a series (which drops it from the legend too). All four
-  were verified in a browser before being written down, including that the redraw is
-  asynchronous: the first draft claimed the chart "has already redrawn" after the assignment, and
-  it has not — the `MutationObserver` fires a tick later
-
-### Fixed
-
 - **The example pages did not fit a phone.** `.grid` used
   `repeat(auto-fit, minmax(500px, 1fr))` — a hard 500px minimum column — and the stylesheet had
   no media queries at all, so on a 390px screen the layout could not shrink and the browser
@@ -393,39 +389,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Verified across all 37 browsable pages in both orientations: every one now lays out at device
   width with no horizontal overflow
 
-### Added
-
-- **The README shows charts, not just markup.** A chart library whose front page never shows its
-  output asks the reader to take the picture on faith, and the picture is the product. Two
-  rendered SVGs now sit beside the markup that produces them
-
-  GitHub strips inline `<svg>` from Markdown, so the only route is an `<img>` at a committed
-  file. They are referenced by absolute URL and served from Pages, because npmjs.com does not
-  resolve relative image paths and that page is where people decide whether to install
-
-  `npm run build:images` generates them through the library's **own** `prepareSvgForExport()` —
-  the call `downloadSvg()` makes — rather than a parallel serializer, so a break in that
-  documented feature breaks the images too
-
-- **`test/visual/readme-images.spec.ts`** re-renders and compares, so the images cannot go stale
-  the way the CLAUDE.md coverage table did. It also checks they are self-contained: an
-  `<img>`-loaded SVG gets no external CSS, no script and no network, so a missing `font-family`
-  would silently render every label in the viewer's default serif. Local-only alongside the
-  screenshots, for the same reason — text positions come from `measureText`, which is
-  font-dependent — and bound into `prepublishOnly`
-
-### Security
-
-- **Upgraded Vite 5 → 8 and esbuild 0.21 → 0.28**, clearing three advisories that `npm audit`
-  reported against the dev toolchain. Two are Windows-specific and this project is maintained on
-  Windows: an NTLMv2 hash disclosure via UNC path handling in `launch-editor`, and a
-  `server.fs.deny` bypass via alternate paths. The third is path traversal in optimised-deps
-  `.map` handling, plus the transitive esbuild dev-server request leakage. All are development
-  only — no published artifact was affected — but "dev only" is not "nobody" when the dev is you.
-  `npm audit` now reports zero
-
-### Fixed
-
 - **Lit's licence headers were being stripped from the shipped bundles.** Vite 8 minifies ES
   library output itself and removes legal comments doing it, so the upgrade silently dropped all
   ten BSD-3-Clause notices from both self-contained artifacts. Lit is *inlined* into those, so
@@ -439,8 +402,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   nothing is "dropped" between zero and zero. It now asserts the property rather than the delta,
   and the package smoke test checks both artifacts by name
 
-### Fixed
-
 - **`npm ci` failed on Linux from a Windows-generated lockfile**, three CI runs in a row.
   `@oxc-resolver` — pulled in by the custom-elements manifest generator — ships nineteen
   platform-specific optional bindings, and its wasm fallback shares `@emnapi` packages with
@@ -451,10 +412,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `overrides` now pins one version of each, which resolves identically everywhere. None of it is
   used at runtime — the whole tree exists to generate `custom-elements.json`
 
-### Changed
+### Security
 
-- `engines.node` is `>=20.19.0`; Vite 8 requires `^20.19.0 || >=22.12.0` and is now the binding
-  constraint. CI and the Pages workflow pin 20.19 to match
+- **Upgraded Vite 5 → 8 and esbuild 0.21 → 0.28**, clearing three advisories that `npm audit`
+  reported against the dev toolchain. Two are Windows-specific and this project is maintained on
+  Windows: an NTLMv2 hash disclosure via UNC path handling in `launch-editor`, and a
+  `server.fs.deny` bypass via alternate paths. The third is path traversal in optimised-deps
+  `.map` handling, plus the transitive esbuild dev-server request leakage. All are development
+  only — no published artifact was affected — but "dev only" is not "nobody" when the dev is you.
+  `npm audit` now reports zero
 
 ## [0.2.0] - 2026-08-11
 

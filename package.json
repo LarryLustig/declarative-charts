@@ -1,7 +1,7 @@
 {
   "name": "declarative-charts",
   "version": "0.2.0",
-  "description": "Create beautiful charts using declarative HTML elements. Bar, line, pie, funnel charts with accessibility, palettes, and responsive design.",
+  "description": "Charts written as HTML elements, one element per datapoint. Bar, line, area, bubble, scatter, pie, funnel, stage and radar, with axes, legends, patterns and accessibility.",
   "type": "module",
   "//engines": "Vite 8 requires ^20.19.0 || >=22.12.0 and is the binding constraint; vitest needs ^20 || ^22 || >=24 and happy-dom >=20. Consumers need far less - the artifacts are ES2020 with no Node APIs - but Node 18 reached end of life in April 2025, so there is nothing below this worth promising support for.",
   "engines": {
