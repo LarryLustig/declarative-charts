@@ -375,6 +375,38 @@ rediscovered:
   constraint, not features. That remains true and is the strongest argument for
   keeping this list short.
 
+  Measured on the registry rather than assumed: `declarative-charts` is *in* the
+  npm search index — `?text=maintainer:larrylustig` returns it — but scores
+  **0.0** and therefore sorts last on every query. On `keywords:html-first`, 27
+  packages match and it ranks 27th; a search for its own exact name returns
+  22,155 results without it in the first 750. npm ranking is dominated by
+  popularity, so this does not resolve itself with time: downloads need
+  discovery and discovery needs downloads. GitHub is unaffected — repo search
+  ranks it first of two for `declarative-charts in:name`.
+
+- **`<dc-swatch shape>` does not accept `none`,** and has its own renderer with a
+  wider vocabulary (`rect`, `line`) than the marker family. An unrecognised value
+  there still falls back to a circle rather than reporting `DC117`. Unifying the
+  two is a deliberate open question, not an oversight.
+
+- **`dist/vite.svg` ships in the published package.** It is the Vite scaffold's
+  default logo, sitting in `public/`, which Vite copies into the build output. 1.5
+  kB of the tarball since 0.2.0. Harmless, but it is the Vite logo in someone
+  else's `node_modules`.
+
+- **A year-less date format silently anchors to the current year.**
+  `date-utils.ts` defaults the year to `new Date().getFullYear()` when parsing a
+  format with no year token, so the same markup means different things in
+  different years. Every fixture carries an explicit year, which is why nothing
+  has caught it.
+
+- **The publish gate is where latent test-timing assumptions surface.** Two
+  pre-existing flakes each aborted a 0.3.0 release attempt: `bar-overflow` timing
+  out on 800-bar renders, and the examples smoke test measuring pages before
+  their custom elements had upgraded. Both only appear under the parallel load
+  `prepublishOnly` creates, and both are fixed — but that suite is the heaviest
+  thing the repo runs, so it is the first place a new one will show.
+
 ---
 
 ## Non-goals

@@ -94,6 +94,20 @@ observable behaviour takes the minor, and a fix that changes nothing a caller
 could see takes the patch. Ship anything unproven as `npm publish --tag next`,
 so `latest` keeps pointing at a version that has been used.
 
+**If the gate fails, re-run it once before investigating.** `prepublishOnly` runs
+the whole visual suite, which is the heaviest thing in the repo, and a flake
+under that load looks exactly like a real regression in the output. Two aborted
+the 0.3.0 release before being found and fixed. If the second run is clean,
+treat the first as a flake and say so in the commit that fixes it; if both fail
+the same way, it is real.
+
+**`npm version` makes an annotated tag, and `--follow-tags` only pushes those.**
+Re-pointing a tag with `git tag -f` replaces it with a lightweight one, which
+that push then skips silently. Use `git tag -a -f` if a tag ever has to move,
+and check `git ls-remote --tags origin` afterwards rather than trusting the
+push. The tag is what makes a release reproducible: npm records the commit as
+`gitHead`, and for 0.3.0 both are `4f7d93b`.
+
 **What cannot be undone.** A published version number is burned permanently,
 even if the version is later removed. `npm unpublish` is available for 72 hours
 and only narrowly after that; past it the remedy is `npm deprecate` plus a new
