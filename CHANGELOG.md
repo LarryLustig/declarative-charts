@@ -207,6 +207,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **The OS `prefers-contrast: high` setting never reached colour resolution.** `isHighContrastActive()`
+  documents three states — the attribute set true, set false, or absent, in which case the OS
+  decides — but the `ColorResolver` host adapter read `chart.highContrast ?? false`, collapsing the
+  absent case, and the resolver returns early on `=== false`. The `matchMedia` branch beneath it was
+  dead code
+
+  So a reader who had asked their operating system for high contrast got the ordinary palette, with
+  nothing to say why, and only the explicit attribute ever worked. The adapter now passes the absent
+  case through, and the host interface types it tri-state so a future coercion is a type error rather
+  than a silent regression. The attribute still outranks the OS in both directions
+
 - **A chart themed with `--dc-font-family` was drawn in one font and measured in another.** The SVG
   sets `font-family: var(--dc-font-family, inherit)`, but `TextMeasurer` resolved its default from
   `getComputedStyle(host).fontFamily` — which a custom property does not change. Every label was

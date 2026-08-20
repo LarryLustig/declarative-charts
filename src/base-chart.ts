@@ -1030,7 +1030,11 @@ export abstract class BaseChart extends LitElement {
       const chart = this;
       this._colors = new ColorResolver({
         get paletteId() { return chart.paletteId; },
-        get highContrast() { return chart.highContrast ?? false; },
+        // Passed through undefined rather than coerced. `isHighContrastActive()`
+        // treats absent as "ask the OS", and `?? false` made that branch
+        // unreachable - so `prefers-contrast: high` was dead code and only the
+        // explicit attribute ever worked.
+        get highContrast() { return chart.highContrast; },
         get stroke() { return chart.stroke ?? ''; },
         get strokeWidth() { return chart.strokeWidth; },
         get chartInstanceId() { return chart.chartInstanceId; },

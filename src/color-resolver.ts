@@ -20,7 +20,12 @@ export interface ColorHost {
   /** Value of the `palette` attribute - a `<dc-palette>` id or a built-in name. */
   readonly paletteId?: string;
   /** Whether high-contrast rendering was requested. */
-  readonly highContrast: boolean;
+  /**
+   * Tri-state on purpose: true and false are the author's explicit answer, and
+   * `undefined` means "no attribute, ask the OS". A host that coerces the third
+   * case away makes the `prefers-contrast` branch unreachable.
+   */
+  readonly highContrast: boolean | undefined;
   /** The `stroke` shorthand, e.g. "2 #333". */
   readonly stroke: string;
   /** Explicit `stroke-width`, if set. */
