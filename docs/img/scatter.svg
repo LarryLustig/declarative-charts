@@ -3,9 +3,9 @@
         
         <desc id="dc-desc-2">2 scatter series with 11 points, x from 0 to 50. Control: 6 points, y from 12 to 52, strong positive correlation; Treated: 5 points, y from 28 to 66, strong positive correlation</desc>
         
-      <g transform="translate(228.84765625, 10)">
+      <g transform="translate(232.8857421875, 10)">
         
-        <text part="title" x="71.15234375" y="16" text-anchor="middle" font-size="20" font-weight="bold" fill="#333" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif" font-style="" text-decoration="" letter-spacing="" opacity="">Dose Response</text>
+        <text part="title" x="67.1142578125" y="16" text-anchor="middle" font-size="20" font-weight="bold" fill="#333" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif" font-style="" text-decoration="" letter-spacing="" opacity="">Dose Response</text>
       
       </g>
     
@@ -44,32 +44,32 @@
       
         <g part="scatter-series">
           
-              <g class="scatter-marker" data-shape-index="0" opacity="1">
+              <g class="scatter-marker" data-shape-kind="scatter" data-shape-index="0" opacity="1">
                 <g class="point-marker" part="point">
           <circle cx="105.29343750000001" cy="266.57" r="4" fill="#2563eb" style="cursor: default"/>
         </g>
               </g>
-              <g class="scatter-marker" data-shape-index="0" opacity="1">
+              <g class="scatter-marker" data-shape-kind="scatter" data-shape-index="0" opacity="1">
                 <g class="point-marker" part="point">
           <circle cx="177.581125" cy="245.2025" r="4" fill="#2563eb" style="cursor: default"/>
         </g>
               </g>
-              <g class="scatter-marker" data-shape-index="0" opacity="1">
+              <g class="scatter-marker" data-shape-kind="scatter" data-shape-index="0" opacity="1">
                 <g class="point-marker" part="point">
           <circle cx="239.54200000000003" cy="208.5725" r="4" fill="#2563eb" style="cursor: default"/>
         </g>
               </g>
-              <g class="scatter-marker" data-shape-index="0" opacity="1">
+              <g class="scatter-marker" data-shape-kind="scatter" data-shape-index="0" opacity="1">
                 <g class="point-marker" part="point">
           <circle cx="322.15650000000005" cy="217.73000000000002" r="4" fill="#2563eb" style="cursor: default"/>
         </g>
               </g>
-              <g class="scatter-marker" data-shape-index="0" opacity="1">
+              <g class="scatter-marker" data-shape-kind="scatter" data-shape-index="0" opacity="1">
                 <g class="point-marker" part="point">
           <circle cx="404.7710000000001" cy="162.785" r="4" fill="#2563eb" style="cursor: default"/>
         </g>
               </g>
-              <g class="scatter-marker" data-shape-index="0" opacity="1">
+              <g class="scatter-marker" data-shape-kind="scatter" data-shape-index="0" opacity="1">
                 <g class="point-marker" part="point">
           <circle cx="477.0586875" cy="144.47" r="4" fill="#2563eb" style="cursor: default"/>
         </g>
@@ -77,27 +77,27 @@
         </g>
         <g part="scatter-series">
           
-              <g class="scatter-marker" data-shape-index="1" opacity="1">
+              <g class="scatter-marker" data-shape-kind="scatter" data-shape-index="1" opacity="1">
                 <g class="point-marker" part="point">
           <polygon points="115.62025,209.23000000000002 110.62025,222.73000000000002 120.62025,222.73000000000002" fill="#dc2626" style="cursor: default"/>
         </g>
               </g>
-              <g class="scatter-marker" data-shape-index="1" opacity="1">
+              <g class="scatter-marker" data-shape-kind="scatter" data-shape-index="1" opacity="1">
                 <g class="point-marker" part="point">
           <polygon points="208.56156249999998,181.7575 203.56156249999998,195.2575 213.56156249999998,195.2575" fill="#dc2626" style="cursor: default"/>
         </g>
               </g>
-              <g class="scatter-marker" data-shape-index="1" opacity="1">
+              <g class="scatter-marker" data-shape-kind="scatter" data-shape-index="1" opacity="1">
                 <g class="point-marker" part="point">
           <polygon points="291.1760625,145.1275 286.1760625,158.6275 296.1760625,158.6275" fill="#dc2626" style="cursor: default"/>
         </g>
               </g>
-              <g class="scatter-marker" data-shape-index="1" opacity="1">
+              <g class="scatter-marker" data-shape-kind="scatter" data-shape-index="1" opacity="1">
                 <g class="point-marker" part="point">
           <polygon points="373.7905625,126.8125 368.7905625,140.3125 378.7905625,140.3125" fill="#dc2626" style="cursor: default"/>
         </g>
               </g>
-              <g class="scatter-marker" data-shape-index="1" opacity="1">
+              <g class="scatter-marker" data-shape-kind="scatter" data-shape-index="1" opacity="1">
                 <g class="point-marker" part="point">
           <polygon points="456.40506250000004,93.23500000000001 451.40506250000004,106.73500000000001 461.40506250000004,106.73500000000001" fill="#dc2626" style="cursor: default"/>
         </g>
@@ -197,10 +197,10 @@
 
       
       
-      <g transform="translate(220.01035156250003, 365)">
+      <g transform="translate(221.61630859375003, 365)">
         
         
-        <rect part="legend-background" x="0" y="0" fill="white" stroke="#ddd" stroke-width="1" rx="4" width="183.638671875" height="45"/>
+        <rect part="legend-background" x="0" y="0" fill="white" stroke="#ddd" stroke-width="1" rx="4" width="180.4267578125" height="45"/>
 
         
 
@@ -223,7 +223,7 @@
             
           
             
-            <g part="legend-swatch" transform="translate(99.3193359375, 10)">
+            <g part="legend-swatch" transform="translate(97.71337890625, 10)">
               
           <circle cx="9" cy="9" r="8" fill="#dc2626" stroke="white" stroke-width="1"/>
         
@@ -231,7 +231,7 @@
 
             
               
-              <text part="legend-label" fill="#333" x="124.3193359375" y="23" font-size="13" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif">
+              <text part="legend-label" fill="#333" x="122.71337890625" y="23" font-size="13" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif">
                 Treated
               </text>
             

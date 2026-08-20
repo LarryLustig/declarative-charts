@@ -1,5 +1,5 @@
 import { customElement, property } from 'lit/decorators.js';
-import { svg, SVGTemplateResult } from 'lit';
+import { svg, nothing, SVGTemplateResult } from 'lit';
 import { AxisChart, type ValueRange } from './axis-chart.js';
 import { type ShowCondition, type FocusableElement, type AnimatableChartType } from './base-chart.js';
 import { ErrorCode } from './errors.js';
@@ -1751,10 +1751,13 @@ export class Chart extends AxisChart {
   ): SVGTemplateResult {
     // Line markers carried no address at all, so a focused line point could
     // never be resolved to a shape however the index was numbered.
+    // `nothing` rather than '' - an empty attribute would land on every scatter
+    // and radar marker, which do not need addressing, and would ship in every
+    // exported SVG.
     return svg`<g
       class="point-marker"
-      data-shape-kind="${shapeKind ?? ''}"
-      data-shape-index="${shapeIndex ?? ''}"
+      data-shape-kind="${shapeKind ?? nothing}"
+      data-shape-index="${shapeIndex ?? nothing}"
     >${
       this.renderPointShapeGeometry(shape, x, y, size, color, cursor, handlers)
     }</g>`;

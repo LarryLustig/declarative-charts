@@ -3,9 +3,9 @@
         
         <desc id="dc-desc-1">3 bars, values from 3,800.00 to 5,100.00. East highest at 5,100.00; South lowest at 3,800.00</desc>
         
-      <g transform="translate(212.1630859375, 10)">
+      <g transform="translate(215.5712890625, 10)">
         
-        <text part="title" x="87.8369140625" y="16" text-anchor="middle" font-size="20" font-weight="bold" fill="#333" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif" font-style="" text-decoration="" letter-spacing="" opacity="">Revenue by Region</text>
+        <text part="title" x="84.4287109375" y="16" text-anchor="middle" font-size="20" font-weight="bold" fill="#333" font-family="&quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif" font-style="" text-decoration="" letter-spacing="" opacity="">Revenue by Region</text>
       
       </g>
     
@@ -39,19 +39,19 @@
       
           
       
-      <rect x="60.34765625" y="153.8" width="161.55078125" height="221.2" fill="hsl(258.4922359499622, 70%, 55%)" stroke="none" stroke-width="0" style="cursor: default" data-shape-index="0" part="bar"/>
+      <rect data-shape-kind="bar" x="60.34765625" y="153.8" width="161.55078125" height="221.2" fill="hsl(258.4922359499622, 70%, 55%)" stroke="none" stroke-width="0" style="cursor: default" data-shape-index="0" part="bar"/>
     
     
         
           
       
-      <rect x="231.8984375" y="174.86666666666667" width="161.55078125" height="200.13333333333333" fill="hsl(120.98447189992436, 70%, 55%)" stroke="none" stroke-width="0" style="cursor: default" data-shape-index="1" part="bar"/>
+      <rect data-shape-kind="bar" x="231.8984375" y="174.86666666666667" width="161.55078125" height="200.13333333333333" fill="hsl(120.98447189992436, 70%, 55%)" stroke="none" stroke-width="0" style="cursor: default" data-shape-index="1" part="bar"/>
     
     
         
           
       
-      <rect x="403.44921875" y="106.40000000000003" width="161.55078125" height="268.59999999999997" fill="hsl(343.47670784988657, 70%, 55%)" stroke="none" stroke-width="0" style="cursor: default" data-shape-index="2" part="bar"/>
+      <rect data-shape-kind="bar" x="403.44921875" y="106.40000000000003" width="161.55078125" height="268.59999999999997" fill="hsl(343.47670784988657, 70%, 55%)" stroke="none" stroke-width="0" style="cursor: default" data-shape-index="2" part="bar"/>
     
     
         
