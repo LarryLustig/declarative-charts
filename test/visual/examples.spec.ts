@@ -65,6 +65,27 @@ test.describe('example pages', () => {
 
       await page.goto(`/examples/${file}`, { waitUntil: 'networkidle' });
 
+      // Definition first. `networkidle` can fire before the module graph has
+      // finished evaluating, and an element that has not upgraded has no
+      // `updateComplete` - which the `?? true` below reads as "settled", so the
+      // loop breaks immediately and the page is measured before it has drawn.
+      // That produced intermittent "N charts rendered no shapes" failures under
+      // parallel load, including one that aborted a release.
+      // Only the tags this page actually uses - a page drawing no radar chart
+      // never registers `dc-radar-chart`, and waiting for all five times out.
+      // An unregistered element is still found by querySelector, so the list is
+      // correct before the module has evaluated.
+      await page.waitForFunction(
+        () => {
+          const tags = ['dc-chart', 'dc-pie-chart', 'dc-funnel-chart', 'dc-stage-chart', 'dc-radar-chart'];
+          return tags
+            .filter(n => document.querySelector(n))
+            .every(n => customElements.get(n) !== undefined);
+        },
+        undefined,
+        { timeout: 30_000 }
+      );
+
       // Settle on conditions, never on a sleep - see charts.spec.ts.
       await page.evaluate(async () => {
         const charts = Array.from(
