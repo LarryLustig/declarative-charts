@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { fixture } from './setup';
 import '../../src/index';
 import { Chart } from '../../src/chart';
@@ -28,6 +28,20 @@ const chart = (n: number, attrs: Record<string, string> = {}) =>
  */
 const narrow = (n: number) =>
   fixture<Chart>('dc-chart', { width: '300', height: '200', 'show-value': 'false' }, barsMarkup(n));
+
+/**
+ * Every case here renders hundreds of bars, and three of them sit within a
+ * second or two of the 5s default when the file runs alone. In a full run they
+ * compete for the machine and tip over intermittently - observed failing 4, 3
+ * and 1 of the same assertions across consecutive runs, always as timeouts and
+ * never as wrong answers.
+ *
+ * The fixtures were already narrowed once for this reason, so that this suite
+ * measures the library rather than the runner. Raising the ceiling finishes
+ * that job: the alternative is a flaky gate on `prepublishOnly`, which is the
+ * one place a spurious red blocks a release.
+ */
+vi.setConfig({ testTimeout: 30_000 });
 
 const overflow = (c: Chart) => c.getLogEntries().find(e => e.path === 'bars.overflow');
 
