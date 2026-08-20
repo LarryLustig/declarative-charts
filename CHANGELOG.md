@@ -207,6 +207,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A hidden element left its passthrough attributes on whatever replaced it.**
+  `applyPassthroughAttributes()` only ever *set* attributes, and Lit reuses its DOM nodes
+  positionally — so hiding the first bar slid the second into its place still carrying the first
+  one's `hx-get`, pointing a live request at the wrong record. Nothing warned, and the chart looked
+  right. The same held for an attribute the author simply removed: it stayed on the shape
+
+  The chart now records what it stamped on each node and takes back anything the new datum does not
+  earn. Only keys it wrote are candidates, so an attribute the library draws with is never touched.
+  Kept in a `WeakMap` keyed by the node, which is what makes the correspondence survive Lit's reuse
+
+  Charts that never use passthrough — the common case, and the one that renders a thousand bars —
+  keep the old fast path of not looking up a node at all, so the fix costs them nothing
+
 - **In a combo chart, every element type applied its passthrough attributes to the bar.**
   `data-shape-index` counts from 0 *within a type*, but `applyPassthroughAttributes()` ran five
   times — bars, lines, areas, bubbles, scatter — each iterating its own array from 0 and taking the

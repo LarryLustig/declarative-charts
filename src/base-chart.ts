@@ -3041,6 +3041,27 @@ export abstract class BaseChart extends LitElement {
    * landed its attributes on the bar. Charts that draw a single type have no
    * ambiguity and pass nothing.
    */
+  /**
+   * What this chart last stamped on each shape node, so it can be taken back
+   * off when the data behind that node changes.
+   *
+   * Lit reuses its nodes positionally, so a node outlives the datum that wrote
+   * to it: hide the first bar and the second slides into its place still
+   * carrying the first one's `hx-get`, pointing a live request at the wrong
+   * record. Only keys recorded here are ever removed, so an attribute the chart
+   * itself draws with is never touched.
+   *
+   * Weak, because the value is keyed by the node and must not keep it alive.
+   */
+  private readonly stampedPassthrough = new WeakMap<Element, string[]>();
+
+  /**
+   * Whether anything has ever been stamped. Charts that never use passthrough -
+   * the common case, and the one that renders a thousand bars - keep the old
+   * fast path of not looking up a node at all.
+   */
+  private hasStampedPassthrough = false;
+
   protected applyPassthroughAttributes<
     T extends { passthroughAttrs?: Record<string, string>; paint?: Record<string, string> }
   >(shapes: T[], kind?: string): void {
@@ -3053,13 +3074,24 @@ export abstract class BaseChart extends LitElement {
       // `paint` first, so an author's own passthrough attribute still wins over
       // one inherited from a palette entry.
       const attrs = { ...shape.paint, ...shape.passthroughAttrs };
-      if (Object.keys(attrs).length === 0) return;
+      // An empty set still has to reach the node, or nothing is ever removed
+      // from it - which is the whole defect. Skipped only while this chart has
+      // stamped nothing at all, so there is by definition nothing to clear.
+      if (Object.keys(attrs).length === 0 && !this.hasStampedPassthrough) return;
 
       const selector = kind
         ? `[data-shape-kind="${kind}"][data-shape-index="${index}"]`
         : `[data-shape-index="${index}"]`;
       const element = svg.querySelector(selector);
       if (!element) return;
+
+      // Take back what this node carried from a previous render and no longer
+      // earns. Only keys this chart wrote are candidates.
+      for (const key of this.stampedPassthrough.get(element) ?? []) {
+        if (!(key in attrs)) element.removeAttribute(key);
+      }
+
+      const applied: string[] = [];
       Object.entries(attrs).forEach(([key, value]) => {
         // Passthrough exists so that `hx-*`, `data-*`, Alpine's `x-on:` and
         // Stimulus's `data-action` reach the shape. An inline `on*` handler
@@ -3076,7 +3108,11 @@ export abstract class BaseChart extends LitElement {
           return;
         }
         element.setAttribute(key, value);
+        applied.push(key);
       });
+
+      this.stampedPassthrough.set(element, applied);
+      if (applied.length > 0) this.hasStampedPassthrough = true;
     });
 
     if (blocked.length > 0) {
