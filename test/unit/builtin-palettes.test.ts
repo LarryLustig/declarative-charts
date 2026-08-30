@@ -18,7 +18,7 @@ describe('builtin-palettes', () => {
 
   describe('BUILTIN_PALETTES', () => {
     it('contains expected categorical palettes', () => {
-      expect(BUILTIN_PALETTES['default']).toBeDefined();
+      expect(BUILTIN_PALETTES['tableau']).toBeDefined();
       expect(BUILTIN_PALETTES['category10']).toBeDefined();
       expect(BUILTIN_PALETTES['pastel']).toBeDefined();
       expect(BUILTIN_PALETTES['vivid']).toBeDefined();
@@ -85,7 +85,7 @@ describe('builtin-palettes', () => {
 
   describe('isBuiltinPalette', () => {
     it('returns true for valid names', () => {
-      expect(isBuiltinPalette('default')).toBe(true);
+      expect(isBuiltinPalette('tableau')).toBe(true);
       expect(isBuiltinPalette('category10')).toBe(true);
       expect(isBuiltinPalette('cool-to-warm')).toBe(true);
     });
@@ -97,7 +97,7 @@ describe('builtin-palettes', () => {
     });
 
     it('is case-insensitive', () => {
-      expect(isBuiltinPalette('DEFAULT')).toBe(true);
+      expect(isBuiltinPalette('TABLEAU')).toBe(true);
       expect(isBuiltinPalette('Category10')).toBe(true);
     });
   });
@@ -107,7 +107,7 @@ describe('builtin-palettes', () => {
       const names = getBuiltinPaletteNames();
       expect(Array.isArray(names)).toBe(true);
       expect(names.length).toBeGreaterThan(0);
-      expect(names).toContain('default');
+      expect(names).toContain('tableau');
       expect(names).toContain('category10');
       expect(names).toContain('cool-to-warm');
     });

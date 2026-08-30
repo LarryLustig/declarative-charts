@@ -401,7 +401,7 @@ Reference a custom `<dc-palette>` or a built-in palette name using the `palette`
 
 | Name | Colours | |
 |------|---------|---|
-| `default` | 10 | Balanced, professional colours suitable for most charts |
+| `tableau` | 10 | Balanced, professional colours suitable for most charts (the Tableau 10 set) |
 | `category10` | 10 | Classic D3 categorical palette |
 | `pastel` | 10 | Soft, muted colours for gentle visualizations |
 | `vivid` | 10 | High saturation for maximum visual impact |

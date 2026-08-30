@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **BREAKING: the built-in palette `default` is now called `tableau`.** It is the Tableau 10 set,
+  and the old name promised something the library does not do: the actual default — what a chart
+  draws with when no `palette` is named — has always been the generated fallback in
+  `ColorResolver`, never this palette. Nothing in the library ever read the registry entry called
+  `default`, so the name described a role it did not hold. `palette="default"` now reports `DC201`
+  (palette not found) rather than resolving, which is the existing behaviour for any unknown name
+
 ### Fixed
 
 - **A high-contrast test was not discriminating anything.** `os-high-contrast.test.ts` decided

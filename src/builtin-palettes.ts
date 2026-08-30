@@ -75,12 +75,17 @@ export type BuiltinPalette = CategoricalPalette | SequentialPalette | DivergingP
 // ============================================================================
 
 /**
- * Default categorical palette - balanced, professional colors.
+ * The Tableau 10 categorical palette - balanced, professional colors.
  * Good general-purpose palette for most chart types.
+ *
+ * Named for what it is rather than for its former role. It was registered as
+ * `default` while the actual default - what a chart draws with when no palette
+ * is named - has always been the generated fallback in `ColorResolver`, so the
+ * name promised something the library did not do.
  */
-const DEFAULT: CategoricalPalette = {
+const TABLEAU: CategoricalPalette = {
   type: 'categorical',
-  name: 'Default',
+  name: 'Tableau 10',
   description: 'Balanced, professional colors suitable for most charts',
   colors: [
     '#4e79a7',  // Steel blue
@@ -412,7 +417,7 @@ const PURPLE_ORANGE: DivergingPalette = {
  */
 export const BUILTIN_PALETTES: Record<string, BuiltinPalette> = {
   // Categorical
-  'default': DEFAULT,
+  'tableau': TABLEAU,
   'category10': CATEGORY10,
   'pastel': PASTEL,
   'vivid': VIVID,
