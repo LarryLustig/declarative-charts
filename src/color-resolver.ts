@@ -44,6 +44,70 @@ export interface ColorHost {
 }
 
 /**
+ * Parameters of the generated fallback palette.
+ *
+ * Lightness and chroma are held constant so that every generated colour has the
+ * same contrast against the chart background; only the hue moves. The pair is
+ * chosen to keep as much of the hue circle inside sRGB as possible - `oklchToHex`
+ * reduces chroma for the hues that still fall outside it, mostly the deep blues.
+ *
+ * The start hue is a blue, so a chart with a single series is blue rather than
+ * an arbitrary colour.
+ */
+const GENERATED_LIGHTNESS = 0.62;
+const GENERATED_CHROMA = 0.15;
+const GENERATED_START_HUE = 262;
+const GOLDEN_ANGLE = 137.50776405003785;
+
+/**
+ * Convert OKLCH to an `#rrggbb` string, reducing chroma until the colour fits
+ * in sRGB.
+ *
+ * The walk matters: roughly a third of the hue circle is out of gamut at the
+ * chroma above, and clamping the channels instead would distort the hue - which
+ * is the one thing this generator needs to keep evenly spaced. Stepping chroma
+ * down preserves hue and lightness, which is what carries both the separation
+ * and the contrast guarantee.
+ */
+function oklchToHex(L: number, C: number, hueDegrees: number): string {
+  const hue = (hueDegrees * Math.PI) / 180;
+
+  for (let c = C; c > 0; c -= 0.002) {
+    const a = c * Math.cos(hue);
+    const b = c * Math.sin(hue);
+
+    // OKLab to LMS, cubed back to linear cone responses.
+    const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+    const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+    const s = (L - 0.0894841775 * a - 1.2914855480 * b) ** 3;
+
+    const rgb = [
+      4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+      -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+      -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s,
+    ];
+
+    // A hair of tolerance: the matrices are rounded, so an in-gamut colour can
+    // land a fraction outside and spend needless iterations walking back in.
+    if (rgb.every(v => v >= -0.0005 && v <= 1.0005)) {
+      return '#' + rgb.map(toChannel).join('');
+    }
+  }
+
+  // Unreachable for any L in the usable band, since chroma 0 is a grey.
+  return '#000000';
+}
+
+/** Linear-light component to a two-digit sRGB hex channel. */
+function toChannel(value: number): string {
+  const clamped = Math.min(1, Math.max(0, value));
+  const encoded = clamped <= 0.0031308
+    ? 12.92 * clamped
+    : 1.055 * Math.pow(clamped, 1 / 2.4) - 0.055;
+  return Math.round(255 * encoded).toString(16).padStart(2, '0');
+}
+
+/**
  * Resolves the colours a chart draws with: palettes, contrast, and the priority
  * between an element's own colour, a matched palette entry, a positional palette
  * colour, and a generated fallback.
@@ -280,28 +344,44 @@ export class ColorResolver {
   }
 
   /**
-   * Generate a palette of colors using the golden ratio conjugate.
-   * This produces visually distinct, non-repeating colors.
+   * Generate the fallback palette: golden-angle hue rotation, in OKLCH.
+   *
+   * The idea is the one this shipped with - step the hue by the golden angle so
+   * that any number of series spread themselves evenly around the circle, with
+   * no palette to run out of and no repeat. What changed is the colour space,
+   * and that was a correctness fix rather than a matter of taste.
+   *
+   * **HSL lightness is not perceptual.** Held at a fixed 55%, blue lands near
+   * 0.45 perceptual lightness and yellow-green near 0.85, so contrast against a
+   * white chart swung by more than 4x across the hue circle and some generated
+   * colours were effectively invisible: `hsl(120.98, 70%, 55%)` - the second
+   * colour this ever produced, and the middle bar of the README's hero image -
+   * sits at 1.8:1. OKLCH is perceptually uniform, so holding L fixed holds
+   * *contrast* fixed, and every colour clears the 3:1 WCAG non-text minimum by
+   * construction rather than by luck of the hue.
+   *
+   * `test/unit/generated-colors.test.ts` guards the properties, not the
+   * colours: legibility, a stable prefix, and no repeats.
+   *
+   * Colour alone stops separating series somewhere around eight however they
+   * are chosen - past that, red-green pairs collapse under the common colour
+   * vision deficiencies whatever the spacing. Nothing here caps the count,
+   * because the resolver cannot know whether the author is also using patterns
+   * or direct labels, but that is this fallback's honest limit.
    *
    * @param count Number of colors to generate
-   * @param seed Optional seed for starting hue (0-1). If not provided, uses a fixed seed for consistency.
-   * @returns Array of color strings in HSL format
+   * @param seed Optional starting hue as a fraction of the circle (0-1)
+   * @returns Array of `#rrggbb` color strings
    */
   generatePaletteColors(count: number, seed?: number): string[] {
-    const colors: string[] = [];
-    const goldenRatioConjugate = 0.618033988749895;
-    let hue = seed ?? 0.1; // Use fixed seed for consistent colors across renders
-
-    for (let i = 0; i < count; i++) {
-      hue += goldenRatioConjugate;
-      hue %= 1;
-
-      // Convert to degrees and use high saturation and medium lightness
-      const hueDegrees = hue * 360;
-      colors.push(`hsl(${hueDegrees}, 70%, 55%)`);
-    }
-
-    return colors;
+    const start = seed === undefined ? GENERATED_START_HUE : seed * 360;
+    return Array.from({ length: count }, (_, i) =>
+      oklchToHex(
+        GENERATED_LIGHTNESS,
+        GENERATED_CHROMA,
+        (start + i * GOLDEN_ANGLE) % 360
+      )
+    );
   }
 
   /**

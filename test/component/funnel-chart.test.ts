@@ -490,13 +490,18 @@ describe('FunnelChart component', () => {
   // ============================================================================
 
   describe('color options', () => {
-    it('uses cool-to-warm colors by default', async () => {
+    // Named for what it actually asserts: with no `palette`, stages fall to
+    // the generated fallback. It was called "cool-to-warm", which is a
+    // different, real palette that this does not exercise.
+    it('uses the generated fallback palette by default', async () => {
       chart = await fixture<FunnelChart>('dc-funnel-chart', {}, `
         <dc-funnel-stage value="100" label="A"></dc-funnel-stage>
         <dc-funnel-stage value="50" label="B"></dc-funnel-stage>
       `);
       const polygons = chart.shadowRoot?.querySelectorAll('polygon[data-shape-index]');
-      expect(polygons?.[0]?.getAttribute('fill')).toMatch(/hsl/);
+      expect(polygons?.[0]?.getAttribute('fill')).toMatch(/^#[0-9a-f]{6}$/);
+      expect(polygons?.[0]?.getAttribute('fill'))
+        .not.toBe(polygons?.[1]?.getAttribute('fill'));
     });
 
     it('uses palette colors when palette attribute is set', async () => {

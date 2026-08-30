@@ -1163,13 +1163,13 @@ describe('BaseChart component', () => {
       expect(colors).toHaveLength(5);
     });
 
-    it('generates colors in HSL format', async () => {
+    it('generates colors as sRGB hex', async () => {
       chart = await fixture<PieChart>('dc-pie-chart', {}, `
         <dc-pie-slice value="100" label="A"></dc-pie-slice>
       `);
       const colors = (chart as any).generatePaletteColors(3);
       colors.forEach((color: string) => {
-        expect(color).toMatch(/^hsl\(\d+(\.\d+)?, \d+%, \d+%\)$/);
+        expect(color).toMatch(/^#[0-9a-f]{6}$/);
       });
     });
 

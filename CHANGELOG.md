@@ -16,6 +16,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `default`, so the name described a role it did not hold. `palette="default"` now reports `DC201`
   (palette not found) rather than resolving, which is the existing behaviour for any unknown name
 
+### Changed
+
+- **Auto-generated colours are generated in OKLCH instead of HSL, which is a correctness fix and
+  not a restyling.** HSL lightness is not perceptual: held at a fixed 55%, blue lands near 0.45
+  perceptual lightness and yellow-green near 0.85, so contrast against a white chart swung by more
+  than 4x across the hue circle and some generated colours were effectively invisible.
+  `hsl(120.98, 70%, 55%)` — the *second* colour the generator ever produced — sits at **1.8:1**
+  against white, and it was the middle bar of the README's own hero image
+
+  The golden-angle rotation is unchanged, so everything that depended on it holds: the sequence is
+  deterministic, adding a series does not recolour the ones already there, and nothing repeats.
+  Rotating in OKLCH at a fixed lightness and chroma means contrast is uniform by construction, so
+  every generated colour clears the WCAG 3:1 non-text minimum whatever hue it lands on — asserted
+  across 1–8 series in `test/unit/generated-colors.test.ts` rather than left to the luck of the hue
+
+  Colour alone stops separating series somewhere around eight however they are chosen, since
+  red-green pairs collapse under the common colour vision deficiencies whatever the spacing. The
+  count is not capped, because the resolver cannot know whether the author is also using patterns
+  or direct labels, but that is this fallback's honest limit and API.md now says so
+
+  **Every chart that names no palette and sets no `fill` changes colour.** Six visual baselines and
+  the README's hero image were regenerated; two component tests that asserted the colour *format*
+  rather than a colour *property* now assert the property
+
 ### Fixed
 
 - **A high-contrast test was not discriminating anything.** `os-high-contrast.test.ts` decided

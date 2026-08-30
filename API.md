@@ -440,7 +440,17 @@ See [Palettes and Pattern Fills](#palettes-and-pattern-fills) for more details.
 
 ### Auto-Generated Colors
 
-When no colors are specified, charts automatically generate distinct colors using a golden ratio algorithm:
+When no colors are specified, charts automatically generate distinct colors by
+stepping the hue by the golden angle, in the perceptually uniform OKLCH color
+space at a fixed lightness and chroma. Holding lightness fixed there holds
+*contrast* fixed, so every generated color clears the WCAG 3:1 non-text minimum
+against a white chart whatever hue it lands on, and no palette runs out:
+
+
+Color alone stops separating series somewhere around eight, however the colors
+are chosen — beyond that, red-green pairs collapse under the common color vision
+deficiencies whatever the spacing between them. Past that point, reach for
+`pattern` fills, direct labels, or a deliberate `palette`.
 
 ```html
 <!-- Auto-generated colors for each slice -->
