@@ -356,6 +356,94 @@
     </div>
 
     <div class="example">
+        <h2>Live Data</h2>
+        <p>
+            Neither chart below is redrawn by hand. One appends a
+            <code>&lt;dc-point&gt;</code> every five seconds, the other re-sets the
+            <code>value</code> attribute on bars that are already there — and because a chart
+            observes its own children, both re-render on their own. There is no
+            <code>redraw()</code>, no <code>setData()</code>, and no
+            <code>requestUpdate()</code> in either script.
+        </p>
+
+        <div class="grid">
+            <div>
+                <h3>Streaming Line Chart</h3>
+                <pre><code>&lt;dc-chart id="live-line" width="500" height="350"&gt;
+  &lt;dc-title&gt;Requests per second&lt;/dc-title&gt;
+  &lt;dc-line stroke="#2196F3" label="web-01"&gt;
+    &lt;dc-point value="46" label="1"&gt;&lt;/dc-point&gt;
+    &lt;!-- five more seed points, then the script appends --&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;
+
+&lt;script&gt;
+  const line = document.querySelector('#live-line dc-line');
+  let sample = 6;
+
+  setInterval(() =&gt; {
+    const point = document.createElement('dc-point');
+    point.setAttribute('value', String(30 + Math.round(Math.random() * 50)));
+    point.setAttribute('label', String(++sample));
+    line.appendChild(point);
+
+    // A window, so the chart stays readable however long you leave it open.
+    while (line.children.length &gt; 12) line.firstElementChild.remove();
+  }, 5000);
+&lt;/script&gt;</code></pre>
+                <dc-chart id="live-line" width="500" height="350">
+                    <dc-title>Requests per second</dc-title>
+                    <dc-line stroke="#2196F3" label="web-01">
+                        <dc-point value="46" label="1"></dc-point>
+                        <dc-point value="58" label="2"></dc-point>
+                        <dc-point value="41" label="3"></dc-point>
+                        <dc-point value="67" label="4"></dc-point>
+                        <dc-point value="52" label="5"></dc-point>
+                        <dc-point value="60" label="6"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Live Bar Chart</h3>
+                <pre><code>&lt;dc-chart id="live-bars" width="500" height="350"&gt;
+  &lt;dc-title&gt;Requests by region&lt;/dc-title&gt;
+  &lt;dc-bar value="48" label="North"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="35" label="South"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="62" label="East"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="41" label="West"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;
+
+&lt;script&gt;
+  const bars = document.querySelectorAll('#live-bars dc-bar');
+
+  // The bars never move; only their values change. Setting the attribute
+  // is the whole update - the axis rescales itself from the new maximum.
+  setInterval(() =&gt; {
+    bars.forEach(bar =&gt;
+      bar.setAttribute('value', String(20 + Math.round(Math.random() * 60))));
+  }, 5000);
+&lt;/script&gt;</code></pre>
+                <dc-chart id="live-bars" width="500" height="350">
+                    <dc-title>Requests by region</dc-title>
+                    <dc-bar value="48" label="North"></dc-bar>
+                    <dc-bar value="35" label="South"></dc-bar>
+                    <dc-bar value="62" label="East"></dc-bar>
+                    <dc-bar value="41" label="West"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
+
+        <p>
+            The same two moves cover most live-data cases. Appending is for a series that grows —
+            a metric arriving over time, where the window keeps the chart readable. Re-setting
+            <code>value</code> is for a fixed set of things whose numbers change, and it is the
+            cheaper of the two: no element is created or destroyed, so nothing but the geometry
+            moves.
+        </p>
+    </div>
+
+    <div class="example">
         <h2>Interaction Events</h2>
         <p>
             Charts emit <code>dc-click</code>, <code>dc-mouseenter</code>, <code>dc-mouseleave</code>
@@ -459,6 +547,39 @@
         eventsChart.addEventListener('dc-render', (event) => {
             logEvent('dc-render', { label: '(chart)', value: event.detail.count, percent: null });
         });
+
+        // Live Data - the two shapes a self-updating chart takes.
+        //
+        // Both are plain DOM writes. Neither calls back into the library,
+        // because a chart observes its own children: appending a `<dc-point>`
+        // and re-setting a `value` attribute are each picked up by the same
+        // MutationObserver that watches for an author editing the markup.
+
+        // 1. A series that grows. Appending is the update.
+        const liveLine = document.querySelector('#live-line dc-line');
+        let sample = 6;
+
+        setInterval(() => {
+            const point = document.createElement('dc-point');
+            point.setAttribute('value', String(30 + Math.round(Math.random() * 50)));
+            point.setAttribute('label', String(++sample));
+            liveLine.appendChild(point);
+
+            // A sliding window, so the page stays readable if it is left open.
+            // Without it this grows by 720 points an hour and the labels
+            // collide long before that.
+            while (liveLine.children.length > 12) liveLine.firstElementChild.remove();
+        }, 5000);
+
+        // 2. A fixed set whose numbers change. Re-setting the attribute is the
+        //    update, and it is the cheaper of the two - no element is created
+        //    or destroyed, so only the geometry moves.
+        const liveBars = document.querySelectorAll('#live-bars dc-bar');
+
+        setInterval(() => {
+            liveBars.forEach(bar =>
+                bar.setAttribute('value', String(20 + Math.round(Math.random() * 60))));
+        }, 5000);
 
     </script>
 </body>

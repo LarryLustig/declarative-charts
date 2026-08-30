@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **A "Live Data" section on the interactive examples page**, covering the two shapes a
+  self-updating chart takes: a line chart that appends a `<dc-point>` every five seconds, and a bar
+  chart whose fixed bars have their `value` re-set on the same timer. Neither script calls back
+  into the library — the point is that appending a child and re-setting an attribute are both
+  picked up by the MutationObserver a chart already runs over its own children, so there is no
+  `redraw()`, `setData()` or `requestUpdate()` in either
+
+  The streaming series keeps a sliding window of twelve points. Unbounded it would add 720 an hour
+  and the labels collide long before that, so a page left open would end up demonstrating the
+  opposite of what it is for
+
 - **A social preview card generator, `npm run build:card`.** Renders `docs/img/social-card.png`
   (1200x630, for `og:image`) and `docs/img/social-card-github.png` (1280x640, for the repository's
   social preview), which is the thumbnail every shared link shows. PNG rather than SVG because most
