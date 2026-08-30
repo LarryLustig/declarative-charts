@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **A high-contrast test was not discriminating anything.** `os-high-contrast.test.ts` decided
+  "is this chart on the ordinary palette?" by asking whether every bar fill started with `hsl(`.
+  Under high contrast the fills are `url(#...)` pattern references and not colours at all, so the
+  check returned the right answers for the wrong reason: it would have passed just as happily
+  against an implementation that returned the ordinary colours in any other notation. It now asks
+  whether the fill is a pattern reference, which is the actual signal, and no longer depends on how
+  a colour happens to be spelled
+
 ## [0.3.0] - 2026-08-20
 
 **Correctness release.** Eight defects that a chart could not report on itself, most of them found

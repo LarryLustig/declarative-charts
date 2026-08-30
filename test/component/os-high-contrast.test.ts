@@ -38,8 +38,19 @@ describe('OS high contrast', () => {
     fixture<Chart>('dc-chart', { width: '600', height: '400', 'console-log': 'none', ...attrs },
       '<dc-bar value="30" label="A"></dc-bar><dc-bar value="70" label="B"></dc-bar>');
 
-  /** The generated palette is hsl(); the high-contrast ramp is flat hex. */
-  const generated = (fills: string[]) => fills.every(f => f.startsWith('hsl('));
+  /**
+   * High contrast does not merely swap the colours: it also puts pattern fills
+   * on the shapes, so under it `fill` is a `url(#...)` reference and not a
+   * colour at all. That reference is the signal.
+   *
+   * This used to ask whether every fill started with `hsl(`. It gave the right
+   * answers for the wrong reason - the high-contrast fills are not `hsl()`
+   * because they are not colours, not because they are a different palette - so
+   * it would have passed against an implementation that returned the ordinary
+   * colours in any other notation. Asked directly, it does not care what
+   * notation the generated palette uses.
+   */
+  const generated = (fills: string[]) => fills.every(f => !!f && !f.startsWith('url('));
 
   it('is honoured when no attribute is present', async () => {
     osPrefersContrast(true);
