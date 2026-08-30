@@ -28,6 +28,11 @@ playwright-report/
 # for "this machine only"; a shared .claude/settings.json would be committed.
 .claude/settings.local.json
 
+# The launch/outreach plan. Deliberately untracked: it is a plan about the
+# project's audience rather than its code, and publishing an objection-handling
+# script in the repo you are about to post about is its own kind of own-goal.
+docs/launch.md
+
 # Editor directories
 .vscode/*
 !.vscode/extensions.json
