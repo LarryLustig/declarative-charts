@@ -42,6 +42,7 @@
     "preview": "vite preview",
     "build:site": "vite build --config vite.config.site.ts",
     "build:images": "node build/render-readme-images.mjs",
+    "build:card": "node build/render-social-card.mjs",
     "preview:site": "vite preview --outDir site",
     "test": "vitest",
     "test:run": "vitest run",

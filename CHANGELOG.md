@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **A social preview card generator, `npm run build:card`.** Renders `docs/img/social-card.png`
+  (1200x630, for `og:image`) and `docs/img/social-card-github.png` (1280x640, for the repository's
+  social preview), which is the thumbnail every shared link shows. PNG rather than SVG because most
+  link crawlers will not rasterise SVG, so it screenshots a composed card instead of going through
+  `prepareSvgForExport()` the way the README images do
+
+  The code panel and the chart beside it are rendered from one markup string, so the card cannot
+  show a snippet that disagrees with its own picture, and it carries the same NaN guard the README
+  images do — a bad card would be cached by every social platform at once
+
 ### Changed
 
 - **BREAKING: the built-in palette `default` is now called `tableau`.** It is the Tableau 10 set,
