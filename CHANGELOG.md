@@ -16,9 +16,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   picked up by the MutationObserver a chart already runs over its own children, so there is no
   `redraw()`, `setData()` or `requestUpdate()` in either
 
-  The streaming series keeps a sliding window of twelve points. Unbounded it would add 720 an hour
-  and the labels collide long before that, so a page left open would end up demonstrating the
-  opposite of what it is for
+  The streaming series accumulates rather than scrolling: the points pack tighter as it runs, which
+  is the behaviour the example is for. The axis thins its own tick labels once they collide, and
+  `show-value="false"` keeps a number off every point, which at that density is unreadable
+
+  The bar chart is smoothed with a CSS transition on `::part(bar)`. That works because Lit reuses
+  the same `<rect>` across a re-render, so the geometry properties have something to animate from.
+  The streaming line deliberately is not smoothed: appending a point changes the path's command
+  count and `d` will not interpolate across that, and a point's positioned `<circle>` sits inside
+  the `<g part="point">` where `::part` cannot reach it. Value labels are off on the bar chart for
+  the same class of reason — `<text>` has no CSS `y`, so a number would snap while its bar was
+  still moving
+
+- **The interactive examples page is grouped and paired.** Its examples were one-per-section, and a
+  grid with a single cell fills the row, so most of the page was full-width charts. They are now
+  four groups — Pop-Ups, Links, Dynamic Updates, Live Data — each with at least two cells, so
+  everything sits two-to-a-line on a desktop. Charts sharing a grid were resized to a common
+  500x350, per the examples convention
 
 - **A social preview card generator, `npm run build:card`.** Renders `docs/img/social-card.png`
   (1200x630, for `og:image`) and `docs/img/social-card-github.png` (1280x640, for the repository's
@@ -64,6 +78,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   rather than a colour *property* now assert the property
 
 ### Fixed
+
+- **"Randomize Colors" on the interactive examples page did nothing.** It set the `color`
+  attribute, which was the pre-1.0 spelling and was removed in 0.3.0, so the button wrote an
+  attribute nothing reads and the chart correctly ignored it. `addBar()` had the same bug, which is
+  why added bars never took the colour they were given. Both now set `fill`
+
+- **A snippet on that page disagreed with the chart beside it** — a different `<dc-title>` and a
+  missing line of popup text. `example-code.spec.ts` compares tags, attributes and child counts but
+  not text, so this class of drift is invisible to it
 
 - **A high-contrast test was not discriminating anything.** `os-high-contrast.test.ts` decided
   "is this chart on the ordinary palette?" by asking whether every bar fill started with `hsl(`.

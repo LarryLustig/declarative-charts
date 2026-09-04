@@ -5,21 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Examples - Declarative Chart Library</title>
     <link rel="stylesheet" href="examples.css">
+    <style>
+        /*
+         * Smooths the live bar chart. `part="bar"` is a public contract, and
+         * Lit reuses the same <rect> across re-renders, so a transition on the
+         * SVG geometry properties survives the update.
+         */
+        #live-bars::part(bar) {
+            transition: y 900ms cubic-bezier(0.4, 0, 0.2, 1),
+                        height 900ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
 </head>
 <body>
     <h1>Interactive Examples</h1>
-    <p>Popups, links, and dynamic chart manipulation</p>
+    <p>Popups, links, and charts that update themselves</p>
 
     <nav></nav>
 
     <div class="example">
-        <h2>Hover Popups</h2>
-        <p>Hover over bars to see detailed information:</p>
+        <h2>Pop-Ups</h2>
+        <p>
+            A <code>&lt;dc-popup&gt;</code> inside a data element turns that element into its own
+            trigger. <code>trigger="hover"</code> opens on pointer, <code>trigger="click"</code> on
+            click — and because the popup body is markup you wrote, it can hold anything, including
+            a link.
+        </p>
 
         <div class="grid">
             <div>
                 <h3>Bar Chart with Hover Popups</h3>
-                <pre><code>&lt;dc-chart width="700" height="400"&gt;
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
   &lt;dc-title&gt;Quarterly Revenue (in thousands)&lt;/dc-title&gt;
   &lt;dc-bar value="150" fill="#FF6B6B" label="Q1"&gt;
     &lt;dc-popup trigger="hover"&gt;
@@ -50,7 +66,7 @@
     &lt;/dc-popup&gt;
   &lt;/dc-bar&gt;
 &lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="700" height="400">
+                <dc-chart width="500" height="350">
                     <dc-title>Quarterly Revenue (in thousands)</dc-title>
                     <dc-bar value="150" fill="#FF6B6B" label="Q1">
                         <dc-popup trigger="hover">
@@ -82,122 +98,9 @@
                     </dc-bar>
                 </dc-chart>
             </div>
-        </div>
-    </div>
-
-    <div class="example">
-        <h2>Clickable Lines with Links</h2>
-        <p>Two ways to make lines clickable:</p>
-        <ul>
-            <li><strong>New York:</strong> Uses a popup with a link inside (click to show popup)</li>
-            <li><strong>San Francisco:</strong> Direct navigation using <code>href</code> attribute (click to navigate)</li>
-        </ul>
-
-        <div class="grid">
-            <div>
-                <h3>Line Chart with Click Actions</h3>
-                <pre><code>&lt;dc-chart width="700" height="400"&gt;
-  &lt;dc-title&gt;City Temperature Comparison&lt;/dc-title&gt;
-  &lt;dc-line stroke="#2196F3" label="New York"&gt;
-    &lt;dc-popup trigger="click"&gt;
-      &lt;strong&gt;New York City&lt;/strong&gt;&lt;br&gt;
-      &lt;a href="https://en.wikipedia.org/wiki/New_York_City" target="_blank"&gt;
-        View on Wikipedia
-      &lt;/a&gt;
-    &lt;/dc-popup&gt;
-    &lt;dc-point value="15" label="Mon"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="18" label="Tue"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="22" label="Wed"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="20" label="Thu"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="25" label="Fri"&gt;&lt;/dc-point&gt;
-  &lt;/dc-line&gt;
-  &lt;dc-line stroke="#FF5722" label="San Francisco"
-           href="https://en.wikipedia.org/wiki/San_Francisco"
-           target="_blank"&gt;
-    &lt;dc-point value="12" label="Mon"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="16" label="Tue"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="19" label="Wed"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="23" label="Thu"&gt;&lt;/dc-point&gt;
-    &lt;dc-point value="21" label="Fri"&gt;&lt;/dc-point&gt;
-  &lt;/dc-line&gt;
-&lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="700" height="400">
-                    <dc-title>City Temperature Comparison - Click a Line!</dc-title>
-                    <dc-line stroke="#2196F3" label="New York">
-                        <dc-popup trigger="click">
-                            <strong>New York City</strong><br>
-                            Population: 8.3 million<br>
-                            <a href="https://en.wikipedia.org/wiki/New_York_City" target="_blank" style="color: #64B5F6; text-decoration: underline;">
-                                View on Wikipedia
-                            </a>
-                        </dc-popup>
-                        <dc-point value="15" label="Mon"></dc-point>
-                        <dc-point value="18" label="Tue"></dc-point>
-                        <dc-point value="22" label="Wed"></dc-point>
-                        <dc-point value="20" label="Thu"></dc-point>
-                        <dc-point value="25" label="Fri"></dc-point>
-                    </dc-line>
-                    <dc-line stroke="#FF5722" label="San Francisco" href="https://en.wikipedia.org/wiki/San_Francisco" target="_blank">
-                        <dc-point value="12" label="Mon"></dc-point>
-                        <dc-point value="16" label="Tue"></dc-point>
-                        <dc-point value="19" label="Wed"></dc-point>
-                        <dc-point value="23" label="Thu"></dc-point>
-                        <dc-point value="21" label="Fri"></dc-point>
-                    </dc-line>
-                </dc-chart>
-            </div>
-        </div>
-    </div>
-
-    <div class="example">
-        <h2>Clickable Bars with href Attribute</h2>
-        <p>Any chart element (bars, lines, points) can be made clickable using the <code>href</code> and <code>target</code> attributes:</p>
-
-        <div class="grid">
-            <div>
-                <h3>Bar Chart with Links</h3>
-                <pre><code>&lt;dc-chart width="600" height="350"&gt;
-  &lt;dc-title&gt;Top Programming Languages - Click to Learn More&lt;/dc-title&gt;
-  &lt;dc-bar value="45" fill="#f1e05a" label="JavaScript"
-          href="https://en.wikipedia.org/wiki/JavaScript"
-          target="_blank"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="38" fill="#3572A5" label="Python"
-          href="https://en.wikipedia.org/wiki/Python_(programming_language)"
-          target="_blank"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="28" fill="#b07219" label="Java"
-          href="https://en.wikipedia.org/wiki/Java_(programming_language)"
-          target="_blank"&gt;&lt;/dc-bar&gt;
-  &lt;dc-bar value="22" fill="#e34c26" label="TypeScript"
-          href="https://en.wikipedia.org/wiki/TypeScript"
-          target="_blank"&gt;&lt;/dc-bar&gt;
-&lt;/dc-chart&gt;</code></pre>
-                <dc-chart width="600" height="350">
-                    <dc-title>Top Programming Languages - Click to Learn More</dc-title>
-                    <dc-bar value="45" fill="#f1e05a" label="JavaScript"
-                            href="https://en.wikipedia.org/wiki/JavaScript"
-                            target="_blank"></dc-bar>
-                    <dc-bar value="38" fill="#3572A5" label="Python"
-                            href="https://en.wikipedia.org/wiki/Python_(programming_language)"
-                            target="_blank"></dc-bar>
-                    <dc-bar value="28" fill="#b07219" label="Java"
-                            href="https://en.wikipedia.org/wiki/Java_(programming_language)"
-                            target="_blank"></dc-bar>
-                    <dc-bar value="22" fill="#e34c26" label="TypeScript"
-                            href="https://en.wikipedia.org/wiki/TypeScript"
-                            target="_blank"></dc-bar>
-                </dc-chart>
-            </div>
-        </div>
-    </div>
-
-    <div class="example">
-        <h2>Pie Chart Popups</h2>
-        <p>Hover over slices to see detailed information:</p>
-
-        <div class="grid">
             <div>
                 <h3>Traffic Sources</h3>
-                <pre><code>&lt;dc-pie-chart width="500" height="400"&gt;
+                <pre><code>&lt;dc-pie-chart width="500" height="350"&gt;
   &lt;dc-title&gt;Traffic Sources&lt;/dc-title&gt;
   &lt;dc-pie-slice value="30" fill="#FF6B6B" label="Desktop"&gt;
     &lt;dc-popup trigger="hover"&gt;
@@ -228,7 +131,7 @@
     &lt;/dc-popup&gt;
   &lt;/dc-pie-slice&gt;
 &lt;/dc-pie-chart&gt;</code></pre>
-                <dc-pie-chart width="500" height="400">
+                <dc-pie-chart width="500" height="350">
                     <dc-title>Traffic Sources</dc-title>
                     <dc-pie-slice value="30" fill="#FF6B6B" label="Desktop">
                         <dc-popup trigger="hover">
@@ -260,17 +163,9 @@
                     </dc-pie-slice>
                 </dc-pie-chart>
             </div>
-        </div>
-    </div>
-
-    <div class="example">
-        <h2>Funnel Chart Popups</h2>
-        <p>Click on stages to see conversion details:</p>
-
-        <div class="grid">
             <div>
                 <h3>Sales Funnel with Click Popups</h3>
-                <pre><code>&lt;dc-funnel-chart width="500" height="400" palette="blues"&gt;
+                <pre><code>&lt;dc-funnel-chart width="500" height="350" palette="blues"&gt;
   &lt;dc-title&gt;Sales Funnel - Click a Stage!&lt;/dc-title&gt;
   &lt;dc-funnel-stage value="1000" label="Visitors"&gt;
     &lt;dc-popup trigger="click"&gt;
@@ -301,7 +196,7 @@
     &lt;/dc-popup&gt;
   &lt;/dc-funnel-stage&gt;
 &lt;/dc-funnel-chart&gt;</code></pre>
-                <dc-funnel-chart width="500" height="400" palette="blues">
+                <dc-funnel-chart width="500" height="350" palette="blues">
                     <dc-title>Sales Funnel - Click a Stage!</dc-title>
                     <dc-funnel-stage value="1000" label="Visitors">
                         <dc-popup trigger="click">
@@ -337,39 +232,198 @@
     </div>
 
     <div class="example">
-        <h2>Dynamic Updates</h2>
-        <p>Charts update automatically when you modify the DOM:</p>
+        <h2>Links</h2>
+        <p>
+            Any data element can carry <code>href</code> and <code>target</code>, which makes the
+            shape itself a link. The line chart below shows the two approaches side by side: New York
+            opens a popup containing a link, San Francisco navigates directly.
+        </p>
 
-        <div class="controls">
-            <button onclick="addBar()">Add Bar</button>
-            <button onclick="removeBar()">Remove Bar</button>
-            <button onclick="updateBar()">Update First Bar</button>
-            <button onclick="changeColors()">Randomize Colors</button>
+        <div class="grid">
+            <div>
+                <h3>Line Chart with Click Actions</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;City Temperature Comparison - Click a Line!&lt;/dc-title&gt;
+  &lt;dc-line stroke="#2196F3" label="New York"&gt;
+    &lt;dc-popup trigger="click"&gt;
+      &lt;strong&gt;New York City&lt;/strong&gt;&lt;br&gt;
+      Population: 8.3 million&lt;br&gt;
+      &lt;a href="https://en.wikipedia.org/wiki/New_York_City" target="_blank"
+         style="color: #64B5F6; text-decoration: underline;"&gt;
+        View on Wikipedia
+      &lt;/a&gt;
+    &lt;/dc-popup&gt;
+    &lt;dc-point value="15" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="18" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="22" label="Wed"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="20" label="Thu"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="25" label="Fri"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+  &lt;dc-line stroke="#FF5722" label="San Francisco"
+           href="https://en.wikipedia.org/wiki/San_Francisco"
+           target="_blank"&gt;
+    &lt;dc-point value="12" label="Mon"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="16" label="Tue"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="19" label="Wed"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="23" label="Thu"&gt;&lt;/dc-point&gt;
+    &lt;dc-point value="21" label="Fri"&gt;&lt;/dc-point&gt;
+  &lt;/dc-line&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>City Temperature Comparison - Click a Line!</dc-title>
+                    <dc-line stroke="#2196F3" label="New York">
+                        <dc-popup trigger="click">
+                            <strong>New York City</strong><br>
+                            Population: 8.3 million<br>
+                            <a href="https://en.wikipedia.org/wiki/New_York_City" target="_blank" style="color: #64B5F6; text-decoration: underline;">
+                                View on Wikipedia
+                            </a>
+                        </dc-popup>
+                        <dc-point value="15" label="Mon"></dc-point>
+                        <dc-point value="18" label="Tue"></dc-point>
+                        <dc-point value="22" label="Wed"></dc-point>
+                        <dc-point value="20" label="Thu"></dc-point>
+                        <dc-point value="25" label="Fri"></dc-point>
+                    </dc-line>
+                    <dc-line stroke="#FF5722" label="San Francisco" href="https://en.wikipedia.org/wiki/San_Francisco" target="_blank">
+                        <dc-point value="12" label="Mon"></dc-point>
+                        <dc-point value="16" label="Tue"></dc-point>
+                        <dc-point value="19" label="Wed"></dc-point>
+                        <dc-point value="23" label="Thu"></dc-point>
+                        <dc-point value="21" label="Fri"></dc-point>
+                    </dc-line>
+                </dc-chart>
+            </div>
+            <div>
+                <h3>Bar Chart with Links</h3>
+                <pre><code>&lt;dc-chart width="500" height="350"&gt;
+  &lt;dc-title&gt;Top Programming Languages - Click to Learn More&lt;/dc-title&gt;
+  &lt;dc-bar value="45" fill="#f1e05a" label="JavaScript"
+          href="https://en.wikipedia.org/wiki/JavaScript"
+          target="_blank"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="38" fill="#3572A5" label="Python"
+          href="https://en.wikipedia.org/wiki/Python_(programming_language)"
+          target="_blank"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="28" fill="#b07219" label="Java"
+          href="https://en.wikipedia.org/wiki/Java_(programming_language)"
+          target="_blank"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="22" fill="#e34c26" label="TypeScript"
+          href="https://en.wikipedia.org/wiki/TypeScript"
+          target="_blank"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;</code></pre>
+                <dc-chart width="500" height="350">
+                    <dc-title>Top Programming Languages - Click to Learn More</dc-title>
+                    <dc-bar value="45" fill="#f1e05a" label="JavaScript"
+                            href="https://en.wikipedia.org/wiki/JavaScript"
+                            target="_blank"></dc-bar>
+                    <dc-bar value="38" fill="#3572A5" label="Python"
+                            href="https://en.wikipedia.org/wiki/Python_(programming_language)"
+                            target="_blank"></dc-bar>
+                    <dc-bar value="28" fill="#b07219" label="Java"
+                            href="https://en.wikipedia.org/wiki/Java_(programming_language)"
+                            target="_blank"></dc-bar>
+                    <dc-bar value="22" fill="#e34c26" label="TypeScript"
+                            href="https://en.wikipedia.org/wiki/TypeScript"
+                            target="_blank"></dc-bar>
+                </dc-chart>
+            </div>
         </div>
+    </div>
 
-        <dc-chart id="dynamic" width="600" height="400">
-            <dc-title>Dynamic Chart</dc-title>
-            <dc-bar value="25" fill="#FF5722" label="A"></dc-bar>
-            <dc-bar value="35" fill="#FFC107" label="B"></dc-bar>
-            <dc-bar value="45" fill="#4CAF50" label="C"></dc-bar>
-        </dc-chart>
+    <div class="example">
+        <h2>Dynamic Updates</h2>
+        <p>
+            Charts re-render when you change their markup, so the update <em>is</em> the DOM
+            operation. Adding or removing an element changes the chart's structure; setting an
+            attribute changes what an existing element says.
+        </p>
+
+        <div class="grid">
+            <div>
+                <h3>Adding and Removing Bars</h3>
+                <pre><code>&lt;dc-chart id="dynamic-structure" width="500" height="350"&gt;
+  &lt;dc-title&gt;Structure&lt;/dc-title&gt;
+  &lt;dc-bar value="25" fill="#FF5722" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="35" fill="#FFC107" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="45" fill="#4CAF50" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;
+
+&lt;script&gt;
+  function addBar() {
+    const bar = document.createElement('dc-bar');
+    bar.setAttribute('value', Math.floor(Math.random() * 50) + 20);
+    bar.setAttribute('fill', colors[Math.floor(Math.random() * colors.length)]);
+    bar.setAttribute('label', labels[labelIndex++ % labels.length]);
+    document.getElementById('dynamic-structure').appendChild(bar);
+  }
+
+  function removeBar() {
+    const bars = document.querySelectorAll('#dynamic-structure dc-bar');
+    if (bars.length) bars[bars.length - 1].remove();
+  }
+&lt;/script&gt;</code></pre>
+                <div class="controls">
+                    <button onclick="addBar()">Add Bar</button>
+                    <button onclick="removeBar()">Remove Bar</button>
+                </div>
+                <dc-chart id="dynamic-structure" width="500" height="350">
+                    <dc-title>Structure</dc-title>
+                    <dc-bar value="25" fill="#FF5722" label="A"></dc-bar>
+                    <dc-bar value="35" fill="#FFC107" label="B"></dc-bar>
+                    <dc-bar value="45" fill="#4CAF50" label="C"></dc-bar>
+                </dc-chart>
+            </div>
+
+            <div>
+                <h3>Changing Values and Colours</h3>
+                <pre><code>&lt;dc-chart id="dynamic-values" width="500" height="350"&gt;
+  &lt;dc-title&gt;Values&lt;/dc-title&gt;
+  &lt;dc-bar value="25" fill="#FF5722" label="A"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="35" fill="#FFC107" label="B"&gt;&lt;/dc-bar&gt;
+  &lt;dc-bar value="45" fill="#4CAF50" label="C"&gt;&lt;/dc-bar&gt;
+&lt;/dc-chart&gt;
+
+&lt;script&gt;
+  function updateBar() {
+    document.querySelector('#dynamic-values dc-bar')
+      .setAttribute('value', Math.floor(Math.random() * 60) + 10);
+  }
+
+  // `fill`, not `color`. The `color` spelling was removed in 0.3.0, and
+  // setting it now does nothing at all - silently.
+  function changeColors() {
+    document.querySelectorAll('#dynamic-values dc-bar').forEach(bar =&gt;
+      bar.setAttribute('fill', colors[Math.floor(Math.random() * colors.length)]));
+  }
+&lt;/script&gt;</code></pre>
+                <div class="controls">
+                    <button onclick="updateBar()">Update First Bar</button>
+                    <button onclick="changeColors()">Randomize Colours</button>
+                </div>
+                <dc-chart id="dynamic-values" width="500" height="350">
+                    <dc-title>Values</dc-title>
+                    <dc-bar value="25" fill="#FF5722" label="A"></dc-bar>
+                    <dc-bar value="35" fill="#FFC107" label="B"></dc-bar>
+                    <dc-bar value="45" fill="#4CAF50" label="C"></dc-bar>
+                </dc-chart>
+            </div>
+        </div>
     </div>
 
     <div class="example">
         <h2>Live Data</h2>
         <p>
-            Neither chart below is redrawn by hand. One appends a
-            <code>&lt;dc-point&gt;</code> every five seconds, the other re-sets the
-            <code>value</code> attribute on bars that are already there — and because a chart
-            observes its own children, both re-render on their own. There is no
-            <code>redraw()</code>, no <code>setData()</code>, and no
+            Neither chart below is redrawn by hand. One appends a <code>&lt;dc-point&gt;</code> every
+            five seconds, the other re-sets the <code>value</code> attribute on bars that are already
+            there &mdash; and because a chart observes its own children, both re-render on their own.
+            There is no <code>redraw()</code>, no <code>setData()</code> and no
             <code>requestUpdate()</code> in either script.
         </p>
 
         <div class="grid">
             <div>
                 <h3>Streaming Line Chart</h3>
-                <pre><code>&lt;dc-chart id="live-line" width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart id="live-line" width="500" height="350" show-value="false"&gt;
   &lt;dc-title&gt;Requests per second&lt;/dc-title&gt;
   &lt;dc-line stroke="#2196F3" label="web-01"&gt;
     &lt;dc-point value="46" label="1"&gt;&lt;/dc-point&gt;
@@ -386,12 +440,9 @@
     point.setAttribute('value', String(30 + Math.round(Math.random() * 50)));
     point.setAttribute('label', String(++sample));
     line.appendChild(point);
-
-    // A window, so the chart stays readable however long you leave it open.
-    while (line.children.length &gt; 12) line.firstElementChild.remove();
   }, 5000);
 &lt;/script&gt;</code></pre>
-                <dc-chart id="live-line" width="500" height="350">
+                <dc-chart id="live-line" width="500" height="350" show-value="false">
                     <dc-title>Requests per second</dc-title>
                     <dc-line stroke="#2196F3" label="web-01">
                         <dc-point value="46" label="1"></dc-point>
@@ -402,11 +453,16 @@
                         <dc-point value="60" label="6"></dc-point>
                     </dc-line>
                 </dc-chart>
+                <p>
+                    The series only grows, so the points pack tighter as it runs. The axis thins its
+                    own labels once they start to collide, and <code>show-value="false"</code> keeps a
+                    number off every point &mdash; at this density they are unreadable anyway.
+                </p>
             </div>
 
             <div>
                 <h3>Live Bar Chart</h3>
-                <pre><code>&lt;dc-chart id="live-bars" width="500" height="350"&gt;
+                <pre><code>&lt;dc-chart id="live-bars" width="500" height="350" show-value="false"&gt;
   &lt;dc-title&gt;Requests by region&lt;/dc-title&gt;
   &lt;dc-bar value="48" label="North"&gt;&lt;/dc-bar&gt;
   &lt;dc-bar value="35" label="South"&gt;&lt;/dc-bar&gt;
@@ -414,46 +470,64 @@
   &lt;dc-bar value="41" label="West"&gt;&lt;/dc-bar&gt;
 &lt;/dc-chart&gt;
 
+&lt;style&gt;
+  /* `part="bar"` is a public contract, and the same &lt;rect&gt; survives a
+     re-render, so an ordinary CSS transition smooths the change. */
+  #live-bars::part(bar) {
+    transition: y 900ms cubic-bezier(0.4, 0, 0.2, 1),
+                height 900ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+&lt;/style&gt;
+
 &lt;script&gt;
   const bars = document.querySelectorAll('#live-bars dc-bar');
 
-  // The bars never move; only their values change. Setting the attribute
-  // is the whole update - the axis rescales itself from the new maximum.
   setInterval(() =&gt; {
     bars.forEach(bar =&gt;
       bar.setAttribute('value', String(20 + Math.round(Math.random() * 60))));
   }, 5000);
 &lt;/script&gt;</code></pre>
-                <dc-chart id="live-bars" width="500" height="350">
+                <dc-chart id="live-bars" width="500" height="350" show-value="false">
                     <dc-title>Requests by region</dc-title>
                     <dc-bar value="48" label="North"></dc-bar>
                     <dc-bar value="35" label="South"></dc-bar>
                     <dc-bar value="62" label="East"></dc-bar>
                     <dc-bar value="41" label="West"></dc-bar>
                 </dc-chart>
+                <p>
+                    The bars glide because the library reuses the same <code>&lt;rect&gt;</code>
+                    elements and exposes them as <code>part="bar"</code>. Value labels are off here
+                    for a reason: <code>&lt;text&gt;</code> has no CSS <code>y</code>, so a number
+                    would snap to its new position while the bar beneath it was still moving.
+                </p>
             </div>
         </div>
 
         <p>
-            The same two moves cover most live-data cases. Appending is for a series that grows —
-            a metric arriving over time, where the window keeps the chart readable. Re-setting
-            <code>value</code> is for a fixed set of things whose numbers change, and it is the
-            cheaper of the two: no element is created or destroyed, so nothing but the geometry
-            moves.
+            The same two moves cover most live-data cases. Appending is for a series that grows;
+            re-setting <code>value</code> is for a fixed set of things whose numbers change, and it is
+            the cheaper of the two &mdash; no element is created or destroyed, so nothing but the
+            geometry moves. Only the second can be smoothed this way, for exactly that reason: a
+            transition needs an element that persists across the update.
         </p>
     </div>
 
     <div class="example">
         <h2>Interaction Events</h2>
         <p>
-            Charts emit <code>dc-click</code>, <code>dc-mouseenter</code>, <code>dc-mouseleave</code>
-            and <code>dc-render</code>. Events are dispatched from the element in your markup
-            (the <code>&lt;dc-bar&gt;</code>) and bubble up, so you can listen on the element, the
-            chart, or the document. Click and hover the bars below.
+            Charts emit <code>dc-click</code>, <code>dc-mouseenter</code>,
+            <code>dc-mouseleave</code> and <code>dc-render</code>. Events are dispatched from the
+            element in your markup &mdash; the <code>&lt;dc-bar&gt;</code> &mdash; and bubble, so you
+            can listen on the element, the chart, or the document. Click and hover the bars.
         </p>
 
-        <pre><code>&lt;dc-chart id="events-demo"&gt;
-  &lt;dc-bar value="120" label="Jan"&gt;&lt;/dc-bar&gt;
+        <div class="grid">
+            <div>
+                <h3>Listening for Events</h3>
+                <pre><code>&lt;dc-chart id="events-demo" width="500" height="350"&gt;
+  &lt;dc-title&gt;Monthly Sales&lt;/dc-title&gt;
+  &lt;dc-bar value="120" fill="#4CAF50" label="Jan"&gt;&lt;/dc-bar&gt;
+  &lt;!-- three more months --&gt;
 &lt;/dc-chart&gt;
 
 &lt;script&gt;
@@ -464,60 +538,60 @@
       showDetail(label, value, percent);
     });
 &lt;/script&gt;</code></pre>
+                <dc-chart id="events-demo" width="500" height="350">
+                    <dc-title>Monthly Sales</dc-title>
+                    <dc-bar value="120" fill="#4CAF50" label="Jan"></dc-bar>
+                    <dc-bar value="180" fill="#2196F3" label="Feb"></dc-bar>
+                    <dc-bar value="95" fill="#FF9800" label="Mar"></dc-bar>
+                    <dc-bar value="210" fill="#9C27B0" label="Apr"></dc-bar>
+                </dc-chart>
+            </div>
 
-        <dc-chart id="events-demo" width="600" height="400">
-            <dc-title>Monthly Sales</dc-title>
-            <dc-bar value="120" fill="#4CAF50" label="Jan"></dc-bar>
-            <dc-bar value="180" fill="#2196F3" label="Feb"></dc-bar>
-            <dc-bar value="95" fill="#FF9800" label="Mar"></dc-bar>
-            <dc-bar value="210" fill="#9C27B0" label="Apr"></dc-bar>
-        </dc-chart>
-
-        <p><strong>Selected:</strong> <span id="events-selected">nothing yet - click a bar</span></p>
-        <p><strong>Event log</strong> (most recent first):</p>
-        <pre id="events-log" style="max-height: 180px; overflow-y: auto;">waiting for events...</pre>
+            <div>
+                <h3>What Arrives</h3>
+                <p><strong>Selected:</strong> <span id="events-selected">nothing yet - click a bar</span></p>
+                <p><strong>Event log</strong> (most recent first):</p>
+                <pre id="events-log" style="max-height: 300px; overflow-y: auto;">waiting for events...</pre>
+            </div>
+        </div>
     </div>
 
     <script type="module" src="../src/index.ts"></script>
     <script src="examples.js"></script>
 
     <script>
-        // Dynamic manipulation examples
+        // ------------------------------------------------------------------
+        // Dynamic updates - driven by the buttons
+        // ------------------------------------------------------------------
         const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFA07A', '#98D8C8'];
         const labels = ['D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'];
         let labelIndex = 0;
 
         function addBar() {
-            const chart = document.getElementById('dynamic');
             const bar = document.createElement('dc-bar');
             bar.setAttribute('value', Math.floor(Math.random() * 50) + 20);
-            bar.setAttribute('color', colors[Math.floor(Math.random() * colors.length)]);
+            bar.setAttribute('fill', colors[Math.floor(Math.random() * colors.length)]);
             bar.setAttribute('label', labels[labelIndex++ % labels.length]);
-            chart.appendChild(bar);
+            document.getElementById('dynamic-structure').appendChild(bar);
         }
 
         function removeBar() {
-            const chart = document.getElementById('dynamic');
-            const bars = chart.querySelectorAll('dc-bar');
-            if (bars.length > 0) {
-                chart.removeChild(bars[bars.length - 1]);
-            }
+            const bars = document.querySelectorAll('#dynamic-structure dc-bar');
+            if (bars.length) bars[bars.length - 1].remove();
         }
 
         function updateBar() {
-            const chart = document.getElementById('dynamic');
-            const firstBar = chart.querySelector('dc-bar');
-            if (firstBar) {
-                firstBar.setAttribute('value', Math.floor(Math.random() * 60) + 10);
-            }
+            document.querySelector('#dynamic-values dc-bar')
+                .setAttribute('value', Math.floor(Math.random() * 60) + 10);
         }
 
+        // `fill`, not `color`. `color` was the pre-1.0 spelling and was removed
+        // in 0.3.0, so this button set an attribute nothing reads and therefore
+        // did nothing at all - silently, which is the failure mode the
+        // library's error codes exist to prevent.
         function changeColors() {
-            const chart = document.getElementById('dynamic');
-            const bars = chart.querySelectorAll('dc-bar');
-            bars.forEach(bar => {
-                bar.setAttribute('color', colors[Math.floor(Math.random() * colors.length)]);
-            });
+            document.querySelectorAll('#dynamic-values dc-bar').forEach(bar =>
+                bar.setAttribute('fill', colors[Math.floor(Math.random() * colors.length)]));
         }
 
         // ------------------------------------------------------------------
@@ -548,14 +622,16 @@
             logEvent('dc-render', { label: '(chart)', value: event.detail.count, percent: null });
         });
 
-        // Live Data - the two shapes a self-updating chart takes.
-        //
-        // Both are plain DOM writes. Neither calls back into the library,
-        // because a chart observes its own children: appending a `<dc-point>`
-        // and re-setting a `value` attribute are each picked up by the same
-        // MutationObserver that watches for an author editing the markup.
+        // ------------------------------------------------------------------
+        // Live data - the two shapes a self-updating chart takes
+        // ------------------------------------------------------------------
+        // Both are plain DOM writes. Neither calls back into the library: a
+        // chart observes its own children, so appending a `<dc-point>` and
+        // re-setting a `value` are picked up by the same MutationObserver that
+        // watches for an author editing the markup.
 
-        // 1. A series that grows. Appending is the update.
+        // 1. A series that grows. Appending is the update, and the points pack
+        //    tighter as they accumulate rather than scrolling out of view.
         const liveLine = document.querySelector('#live-line dc-line');
         let sample = 6;
 
@@ -564,16 +640,16 @@
             point.setAttribute('value', String(30 + Math.round(Math.random() * 50)));
             point.setAttribute('label', String(++sample));
             liveLine.appendChild(point);
-
-            // A sliding window, so the page stays readable if it is left open.
-            // Without it this grows by 720 points an hour and the labels
-            // collide long before that.
-            while (liveLine.children.length > 12) liveLine.firstElementChild.remove();
         }, 5000);
 
         // 2. A fixed set whose numbers change. Re-setting the attribute is the
         //    update, and it is the cheaper of the two - no element is created
         //    or destroyed, so only the geometry moves.
+        //
+        //    That is also why this one can be smoothed with a CSS transition on
+        //    ::part(bar) and the streaming line cannot: the <rect> persists
+        //    across the re-render, while an appended point changes the path's
+        //    command count, and `d` will not interpolate across that.
         const liveBars = document.querySelectorAll('#live-bars dc-bar');
 
         setInterval(() => {
