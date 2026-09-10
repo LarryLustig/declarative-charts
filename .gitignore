@@ -33,6 +33,9 @@ playwright-report/
 # script in the repo you are about to post about is its own kind of own-goal.
 docs/launch.md
 
+# Session handoff notes. Working state for resuming, not repo content.
+docs/handoff.md
+
 # Editor directories
 .vscode/*
 !.vscode/extensions.json
